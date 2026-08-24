@@ -62,7 +62,7 @@ print("Columns:", df.columns.tolist())
 
 
 # ============================================================
-# 3. 检查所需字段
+# 3. 检查字段
 # ============================================================
 
 required_columns = [
@@ -80,15 +80,16 @@ missing_columns = [
 
 if missing_columns:
     raise ValueError(
-        "缺少以下字段："
-        f"{missing_columns}\n"
+        f"缺少字段：{missing_columns}\n"
         f"当前字段：{df.columns.tolist()}"
     )
 
 
 # ============================================================
-# 4. 基础清洗
+# 4. 清洗
 # ============================================================
+
+before_clean = len(df)
 
 df = df.dropna(
     subset=required_columns
@@ -110,20 +111,18 @@ df = df[
 
 df = df.reset_index(drop=True)
 
-print("\n有效样本数:", len(df))
+print("\n原始样本数:", before_clean)
+print("有效样本数:", len(df))
+print("被过滤数量:", before_clean - len(df))
 
 if len(df) < NUM_GROUPS:
     raise ValueError(
-        "有效样本太少，无法分成 5 组。"
+        "样本数量不足，无法进行五组稳定性分析。"
     )
 
 
 # ============================================================
-# 5. 固定随机种子重新打乱
-#
-# 原因：
-# 避免原 CSV 中的数据排序影响 Group1~Group5 的结果。
-# random_state 固定以后，实验可复现。
+# 5. 固定随机种子打乱
 # ============================================================
 
 shuffled_df = (
@@ -134,10 +133,9 @@ shuffled_df = (
     .reset_index(drop=True)
 )
 
-# 保存本次稳定性实验实际使用的数据顺序
 shuffled_file = (
     OUTPUT_DIR
-    / "tatoeba_500_stability_order.csv"
+    / "stability_order.csv"
 )
 
 shuffled_df.to_csv(
@@ -148,39 +146,42 @@ shuffled_df.to_csv(
 
 
 # ============================================================
-# 6. 分成 5 组
+# 6. 分成五组
 #
-# np.array_split 可以保证即使不是严格500条，
-# 也会尽量均匀分组。
+# 关键修复：
+# 先切分行号，再 iloc，
+# 保证 group_df 始终是 pandas DataFrame。
 # ============================================================
 
-groups = np.array_split(
-    shuffled_df,
+index_groups = np.array_split(
+    np.arange(len(shuffled_df)),
     NUM_GROUPS,
 )
 
+groups = [
+    shuffled_df.iloc[index_group].copy()
+    for index_group in index_groups
+]
+
 print("\n分组情况:")
 
-for i, group in enumerate(
+for i, group_df in enumerate(
     groups,
     start=1,
 ):
     print(
-        f"Group {i}: {len(group)} samples"
+        f"Group {i}: {len(group_df)} samples"
     )
 
 
 # ============================================================
-# 7. 单方向指标计算函数
+# 7. 指标函数
 # ============================================================
 
 def calculate_metrics(
     predictions,
     references,
 ):
-    """
-    计算 corpus-level BLEU 和 chrF++。
-    """
 
     predictions = [
         str(x).strip()
@@ -210,7 +211,7 @@ def calculate_metrics(
 
 
 # ============================================================
-# 8. 计算 5 组 UZ -> EN 和 EN -> UZ
+# 8. 五组计算
 # ============================================================
 
 group_results = []
@@ -225,10 +226,7 @@ for group_id, group_df in enumerate(
     start=1,
 ):
 
-    # --------------------------------------------------------
     # UZ -> EN
-    # --------------------------------------------------------
-
     uz_en_metrics = calculate_metrics(
         predictions=group_df[
             "uz_en_prediction"
@@ -239,12 +237,7 @@ for group_id, group_df in enumerate(
         ].tolist(),
     )
 
-    # --------------------------------------------------------
     # EN -> UZ
-    # 注意：
-    # 使用 Latin 转写后的 prediction
-    # --------------------------------------------------------
-
     en_uz_metrics = calculate_metrics(
         predictions=group_df[
             "en_uz_prediction_latin"
@@ -276,25 +269,25 @@ for group_id, group_df in enumerate(
 
     print()
     print(f"Group {group_id}")
-    print("-" * 40)
+    print("-" * 50)
 
     print(
-        "UZ -> EN BLEU :",
+        f"UZ -> EN BLEU : "
         f"{row['uz_en_bleu']:.4f}"
     )
 
     print(
-        "UZ -> EN chrF++:",
+        f"UZ -> EN chrF++: "
         f"{row['uz_en_chrf++']:.4f}"
     )
 
     print(
-        "EN -> UZ BLEU :",
+        f"EN -> UZ BLEU : "
         f"{row['en_uz_bleu']:.4f}"
     )
 
     print(
-        "EN -> UZ chrF++:",
+        f"EN -> UZ chrF++: "
         f"{row['en_uz_chrf++']:.4f}"
     )
 
@@ -305,7 +298,7 @@ group_results_df = pd.DataFrame(
 
 
 # ============================================================
-# 9. 保存每组结果
+# 9. 保存五组指标
 # ============================================================
 
 group_result_file = (
@@ -321,7 +314,7 @@ group_results_df.to_csv(
 
 
 # ============================================================
-# 10. 统计 mean / std / min / max / range / CV
+# 10. 汇总统计
 # ============================================================
 
 metric_columns = [
@@ -338,15 +331,13 @@ for metric in metric_columns:
     values = (
         group_results_df[metric]
         .astype(float)
-        .values
+        .to_numpy()
     )
 
     mean_value = float(
         np.mean(values)
     )
 
-    # ddof=1:
-    # 使用样本标准差，与 pandas .std() 一致
     std_value = float(
         np.std(
             values,
@@ -363,16 +354,15 @@ for metric in metric_columns:
     )
 
     range_value = (
-        max_value - min_value
+        max_value
+        - min_value
     )
 
     if mean_value != 0:
         cv = (
             std_value
-            /
-            mean_value
-            *
-            100
+            / mean_value
+            * 100
         )
     else:
         cv = np.nan
@@ -394,14 +384,7 @@ summary_df = pd.DataFrame(
 
 
 # ============================================================
-# 11. 稳定性判断
-#
-# 主要根据 chrF++ 的 5组标准差判断。
-#
-# < 2   非常稳定
-# 2~3   稳定
-# 3~5   一般，需要检查
-# > 5   不稳定
+# 11. 稳定性等级
 # ============================================================
 
 def stability_level(std_value):
@@ -409,14 +392,13 @@ def stability_level(std_value):
     if std_value < 2:
         return "VERY_STABLE"
 
-    elif std_value < 3:
+    if std_value < 3:
         return "STABLE"
 
-    elif std_value < 5:
+    if std_value < 5:
         return "MODERATE"
 
-    else:
-        return "UNSTABLE"
+    return "UNSTABLE"
 
 
 summary_df["stability"] = (
@@ -426,7 +408,7 @@ summary_df["stability"] = (
 
 
 # ============================================================
-# 12. 输出 Summary
+# 12. 输出完整 Summary
 # ============================================================
 
 print("\n")
@@ -438,50 +420,50 @@ for _, row in summary_df.iterrows():
 
     print()
     print(row["metric"])
-    print("-" * 40)
+    print("-" * 50)
 
     print(
-        f"Mean       : {row['mean']:.4f}"
+        f"Mean      : {row['mean']:.4f}"
     )
 
     print(
-        f"Std        : {row['std']:.4f}"
+        f"Std       : {row['std']:.4f}"
     )
 
     print(
-        f"Min        : {row['min']:.4f}"
+        f"Min       : {row['min']:.4f}"
     )
 
     print(
-        f"Max        : {row['max']:.4f}"
+        f"Max       : {row['max']:.4f}"
     )
 
     print(
-        f"Range      : {row['range']:.4f}"
+        f"Range     : {row['range']:.4f}"
     )
 
     print(
-        f"CV         : "
+        f"CV        : "
         f"{row['cv_percent']:.2f}%"
     )
 
     print(
-        "Stability  :",
-        row["stability"]
+        f"Stability : "
+        f"{row['stability']}"
     )
 
 
 # ============================================================
-# 13. 专门输出两个方向 chrF++ 判断
+# 13. 两个方向最终判断
 # ============================================================
 
-uz_en_chrf_row = summary_df[
+uz_en_row = summary_df[
     summary_df["metric"]
     ==
     "uz_en_chrf++"
 ].iloc[0]
 
-en_uz_chrf_row = summary_df[
+en_uz_row = summary_df[
     summary_df["metric"]
     ==
     "en_uz_chrf++"
@@ -496,46 +478,57 @@ print("=" * 80)
 print()
 
 print("UZ -> EN")
+print("-" * 30)
+
 print(
-    "chrF++ mean:",
-    f"{uz_en_chrf_row['mean']:.4f}"
+    f"chrF++ mean : "
+    f"{uz_en_row['mean']:.4f}"
 )
 
 print(
-    "chrF++ std :",
-    f"{uz_en_chrf_row['std']:.4f}"
+    f"chrF++ std  : "
+    f"{uz_en_row['std']:.4f}"
 )
 
 print(
-    "判断:",
-    uz_en_chrf_row[
-        "stability"
-    ]
+    f"chrF++ range: "
+    f"{uz_en_row['range']:.4f}"
 )
+
+print(
+    f"Stability   : "
+    f"{uz_en_row['stability']}"
+)
+
 
 print()
 
 print("EN -> UZ")
+print("-" * 30)
+
 print(
-    "chrF++ mean:",
-    f"{en_uz_chrf_row['mean']:.4f}"
+    f"chrF++ mean : "
+    f"{en_uz_row['mean']:.4f}"
 )
 
 print(
-    "chrF++ std :",
-    f"{en_uz_chrf_row['std']:.4f}"
+    f"chrF++ std  : "
+    f"{en_uz_row['std']:.4f}"
 )
 
 print(
-    "判断:",
-    en_uz_chrf_row[
-        "stability"
-    ]
+    f"chrF++ range: "
+    f"{en_uz_row['range']:.4f}"
+)
+
+print(
+    f"Stability   : "
+    f"{en_uz_row['stability']}"
 )
 
 
 # ============================================================
-# 14. 保存 summary CSV
+# 14. 保存 Summary
 # ============================================================
 
 summary_file = (
@@ -551,12 +544,12 @@ summary_df.to_csv(
 
 
 # ============================================================
-# 15. 保存 JSON Summary
+# 15. JSON
 # ============================================================
 
 final_summary = {
     "experiment":
-        "MADLAD-400-3B Tatoeba 500 Stability",
+        "MADLAD-400-3B Tatoeba Stability",
 
     "seed":
         SEED,
@@ -567,76 +560,53 @@ final_summary = {
     "num_groups":
         NUM_GROUPS,
 
+    "group_sizes":
+        [
+            len(group)
+            for group in groups
+        ],
+
     "uz_en": {
         "chrf_mean":
-            float(
-                uz_en_chrf_row[
-                    "mean"
-                ]
-            ),
+            float(uz_en_row["mean"]),
 
         "chrf_std":
-            float(
-                uz_en_chrf_row[
-                    "std"
-                ]
-            ),
+            float(uz_en_row["std"]),
 
         "chrf_min":
-            float(
-                uz_en_chrf_row[
-                    "min"
-                ]
-            ),
+            float(uz_en_row["min"]),
 
         "chrf_max":
-            float(
-                uz_en_chrf_row[
-                    "max"
-                ]
-            ),
+            float(uz_en_row["max"]),
+
+        "chrf_range":
+            float(uz_en_row["range"]),
 
         "stability":
-            uz_en_chrf_row[
-                "stability"
-            ],
+            uz_en_row["stability"],
     },
 
     "en_uz": {
         "chrf_mean":
-            float(
-                en_uz_chrf_row[
-                    "mean"
-                ]
-            ),
+            float(en_uz_row["mean"]),
 
         "chrf_std":
-            float(
-                en_uz_chrf_row[
-                    "std"
-                ]
-            ),
+            float(en_uz_row["std"]),
 
         "chrf_min":
-            float(
-                en_uz_chrf_row[
-                    "min"
-                ]
-            ),
+            float(en_uz_row["min"]),
 
         "chrf_max":
-            float(
-                en_uz_chrf_row[
-                    "max"
-                ]
-            ),
+            float(en_uz_row["max"]),
+
+        "chrf_range":
+            float(en_uz_row["range"]),
 
         "stability":
-            en_uz_chrf_row[
-                "stability"
-            ],
+            en_uz_row["stability"],
     },
 }
+
 
 json_file = (
     OUTPUT_DIR
@@ -657,33 +627,13 @@ with open(
     )
 
 
-# ============================================================
-# 16. 完成
-# ============================================================
-
 print("\n")
 print("=" * 80)
 print("FILES SAVED")
 print("=" * 80)
 
-print(
-    "Group metrics:",
-    group_result_file
-)
-
-print(
-    "Summary:",
-    summary_file
-)
-
-print(
-    "JSON:",
-    json_file
-)
-
-print(
-    "Shuffled benchmark:",
-    shuffled_file
-)
+print("Groups :", group_result_file)
+print("Summary:", summary_file)
+print("JSON   :", json_file)
 
 print("\nDone.")

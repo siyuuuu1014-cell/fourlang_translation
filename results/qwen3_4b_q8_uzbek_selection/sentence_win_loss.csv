@@ -1,0 +1,13 @@
+﻿direction,comparison,mean_sentence_chrf2_delta,qwen_wins,ties,qwen_losses
+en-uz,qwen3_4b_q8_minus_m2m100_418m,-0.640035826948087,21,0,29
+en-uz,qwen3_4b_q8_minus_m2m100_1_2b,1.0069707412068345,22,0,28
+ru-uz,qwen3_4b_q8_minus_m2m100_418m,7.699574585828442,38,2,10
+ru-uz,qwen3_4b_q8_minus_m2m100_1_2b,11.522377714076468,42,1,7
+uz-en,qwen3_4b_q8_minus_m2m100_418m,20.90084070227369,46,0,4
+uz-en,qwen3_4b_q8_minus_m2m100_1_2b,21.94328358736681,45,1,4
+uz-ru,qwen3_4b_q8_minus_m2m100_418m,17.376254023463037,48,0,2
+uz-ru,qwen3_4b_q8_minus_m2m100_1_2b,18.06908223597876,48,0,2
+uz-zh,qwen3_4b_q8_minus_m2m100_418m,13.766363800390693,44,0,6
+uz-zh,qwen3_4b_q8_minus_m2m100_1_2b,13.798492042205929,43,0,7
+zh-uz,qwen3_4b_q8_minus_m2m100_418m,9.968386135595326,45,1,4
+zh-uz,qwen3_4b_q8_minus_m2m100_1_2b,13.250656684004975,47,0,3

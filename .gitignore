@@ -1,0 +1,63 @@
+# Python / uv
+.venv/
+.uv-cache/
+.hf_compat/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+.jupyter-runtime/
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+
+# Model weights and training checkpoints (GitHub rejects files over 100 MB)
+models/
+checkpoints/
+checkpoint-*/
+*.bin
+*.safetensors
+*.gguf
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.h5
+
+# Hugging Face / ML caches
+.cache/
+huggingface/
+wandb/
+mlruns/
+
+# Downloaded llama.cpp binaries
+tools/llama.cpp/downloads/
+tools/llama.cpp/runtime_*/
+
+# Large downloaded archives and generated logs
+*.zip
+*.7z
+*.tar
+*.tar.gz
+*.log
+
+# Temporary files
+tmp/
+temp/
+*.tmp

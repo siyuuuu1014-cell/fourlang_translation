@@ -1,0 +1,1001 @@
+﻿pair_id,v2_label,v2_confidence,v2_reason
+0c6142a1c8af58d79bb0,correct,1.0,
+7f314e778a82e5e5c63c,correct,1.0,
+289a372961358053210d,correct,1.0,
+31f028489a479d2fba5c,correct,1.0,
+fd06ebeaf8e6fda0260b,correct,1.0,
+c16174058d34309f96e1,correct,1.0,
+e342866ff93db5682e8e,correct,1.0,
+9bbcda72ce17b067ce8a,correct,1.0,
+24e49622c4d572e8c16c,correct,1.0,
+53dc825848922cca46da,correct,1.0,
+132c341dbf323bf7c796,correct,1.0,
+a79b6909f9f547e8ec3f,correct,1.0,
+34af39ff5fdb07e9953f,correct,1.0,
+c3049c42e8b6a66b37a9,correct,1.0,
+15ecde7555110fad4501,correct,1.0,
+8e5e5d1f67a6d74cbab8,correct,1.0,
+fadfb7d7e92172b6e5ab,wrong,0.9,Grammar error: 'Siz mening tushunayapsizmi?' should be 'Siz meni tushunyapsizmi?' or 'Menga tushunyapsizmi?'.
+a618a1c443600aacf5d2,correct,1.0,
+971309fec8ce92cd0301,correct,1.0,
+e29572804069e17dbd34,correct,1.0,
+5f109f96178f674ec27c,correct,1.0,
+577b1361f682b0e8e2c7,correct,1.0,
+2755be5b5fe56fa0633a,correct,1.0,
+c599738d15e9edb63f0b,correct,1.0,
+69e39c55fbba96ecaaea,correct,1.0,
+d4348d8d34185e9159d8,correct,1.0,
+3c6adbae2e6fd3a765ff,correct,1.0,
+0cc79c14e50736c04152,correct,1.0,
+1218ff845da1826bfcc7,correct,1.0,
+0b4de9ad2d4005a48680,correct,1.0,
+5f3ec1d518303b80a97c,correct,1.0,
+aeaa9f0f192d1ba458a4,correct,1.0,
+757dbd0355ac6c8bd119,correct,1.0,
+8f6d93063be166f83063,correct,1.0,
+1ebca1817c34560370ec,correct,1.0,
+a64c453cbf4cc4789cde,correct,1.0,
+08bb2bbd7fdf07a173b5,correct,1.0,
+fd33b20a38c867b0552c,minor,0.9,Spelling: 'to'ldirip' should be 'to'ldirib'
+2ecce7432a65762e666a,correct,1.0,
+cadd7d04b1aa2cdb6b73,correct,1.0,
+0bc0603261765f9dc902,correct,1.0,
+a5f4cd5c501027aaa77a,correct,1.0,
+f4ad1ccad951858db92e,correct,1.0,
+7ba77584104da12b77be,correct,1.0,
+ead888092bd1500c8633,correct,1.0,
+3377bbbf833f1402173f,correct,1.0,
+288bada7ac6c8927bbd4,correct,1.0,
+29f0dd5b8bc00dcb4c87,correct,1.0,
+02507bcfdb84f545f908,wrong,0.9,Unnatural/archaic phrasing: 'ila o'lmaq istayiram' instead of 'bilan o'lmoqchiman'
+73cb745dd97aeb9ef041,correct,1.0,
+c638eefaa6629519ce60,correct,1.0,
+0ebc34878348d1f238b9,correct,1.0,
+6b4b8dbe424a3204d133,correct,1.0,
+d7084c8468a4b5428ded,correct,1.0,
+4c0d263fc2db84d4aaf6,correct,1.0,
+bc33adcbf9fbce9dd005,correct,1.0,
+354caa32513db9507970,correct,1.0,
+e9755683b2567066a713,correct,1.0,
+315336c4c977e80ce7e1,correct,1.0,
+377b7213b0ac93dee6e8,wrong,0.9,'tushungani yo'q' is grammatically incorrect; should be 'tushunmadi'
+c94fafeaab4be67148dc,correct,1.0,
+cf176d3541b833724c19,correct,1.0,
+0957b792762bb17febde,correct,1.0,
+85671e932419a6afe0f1,correct,1.0,
+49b675b2512df51d06a3,correct,1.0,
+57f8406c24f4933df10d,correct,1.0,
+3449e9d1124abb4033fe,correct,1.0,
+bfc98833c82aa12d8343,correct,1.0,
+01898f869ba4fd208f97,correct,1.0,
+3207fd0728a0679b4a2b,correct,1.0,
+516ff8ca7936a0abd3f0,correct,1.0,
+fe0a00662b0b39f2cd79,correct,1.0,
+37baf8ddd15c9022a719,correct,1.0,
+bbb1e2d1bffaf80fbfb7,correct,1.0,
+c51bf73dfa3f74693cef,correct,1.0,
+c402bcdf3108e4f567f0,correct,1.0,
+8445e8b33925a93d262d,correct,1.0,
+290654dba9b451cd2066,correct,1.0,
+f1ae8aedd8c6c9f6b443,correct,1.0,
+2df2625431afcf7917bf,correct,1.0,
+62a72e530c8708c58a12,correct,1.0,
+226a9d2b1cbbba075d8c,correct,1.0,
+0b40e051dec8aed53526,correct,1.0,
+e693a4933262b881eb09,correct,1.0,
+0afc286db5f646187e24,correct,1.0,
+51c6c9ebc1377aaca495,correct,1.0,
+b94c83c9de6e5262f887,correct,1.0,
+26762f0387350b14363b,minor,0.8,Tense mismatch: 'eat' (simple) vs 'yeyapsiz' (present continuous)
+2e39d8bb6e25e91374f0,correct,1.0,
+93b0701f20be79dd557d,correct,1.0,
+66b842fb90d00ba18cc9,correct,1.0,
+15a1f30c25bcb6d4ba6b,correct,1.0,
+be8cc920a1934b8e8fee,correct,1.0,
+067768f410649988574f,correct,1.0,
+a8fe1043d612d467c0bd,correct,1.0,
+8854bb8d8dfa27d1c84a,correct,1.0,
+9f5597208f9aab5539d3,correct,1.0,
+7b1f78f794b4dfb05233,correct,1.0,
+e3440d4b1407e5e9f1bc,correct,1.0,
+d45c6ad03a018c07fc8c,correct,1.0,
+7b8e256db49775d2d6b5,correct,1.0,
+22e0489f29203d8f7f06,correct,1.0,
+d8d12a0d622f900dbf5d,correct,1.0,
+8beea02a5c4c1a983b49,correct,1.0,
+228a8d75ebc689115152,correct,1.0,
+8836b6b438591fce07aa,wrong,0.9,Pronoun mismatch: 'it' translated as 'U' (he/she/it) instead of 'bu' (this/it)
+5b4f7bafcdfcd8182696,correct,1.0,
+b8d5abd34931ce5c2ca4,correct,1.0,
+4cd0b0c6b276a557a981,correct,1.0,
+5e9a5f0fc5b414d1dc54,correct,1.0,
+ff06aed462638bda4125,wrong,0.9,'Successor' mistranslated as 'davomchi' (continuer) instead of 'voris' or 'o'rinbosar'
+4eb2db3f5012ad9cab72,correct,1.0,
+61f2087640aabb229a2d,correct,1.0,
+376bafd6bd9adcee9d20,correct,1.0,
+3318007e18ef6ee31a90,correct,1.0,
+9347194cca27d5573cbc,correct,1.0,
+b40d826c73ac351b9e4b,wrong,0.9,Missing negation: 'haven't found' translated as 'topmadilar' (didn't find) instead of 'topa olmadilar' or 'topishmadi'
+3075edf6e6703496e0a6,correct,1.0,
+961934e141ff78692a1c,wrong,0.9,'Painting' mistranslated as 'bo'yash' (painting walls) instead of 'rassomchilik' or 'tasviriy san'at'
+e37e4a743c2f6d1f3818,correct,1.0,
+53df9ae8f389d0e2f186,correct,1.0,
+358c77de95bd2cf70298,correct,1.0,
+5dcc2cbe4cd0773e3b3f,correct,1.0,
+a3d0655314bfcb27ca22,correct,1.0,
+61bdda3d1503b4712108,correct,1.0,
+91e86d88d23164f6402c,correct,1.0,
+ef7b1dbc4169e6f8a398,correct,1.0,
+30a07208c8e43eabf8ff,minor,0.9,Missing preposition 'ga' after 'maktab' (should be 'maktabga yaqinida')
+9d24954641d35de68c53,correct,1.0,
+d089bf9c66e6d2178650,correct,1.0,
+5d2c88eae53be4218b8c,correct,1.0,
+f105b3a49405b91f9c24,correct,1.0,
+f820dd08a636f08cd012,correct,1.0,
+5123144a60c7518a03ea,correct,1.0,
+5601e89e6cfd48a34526,correct,1.0,
+3121f0067fb3704fa620,correct,1.0,
+4057c4a084f430361c49,correct,1.0,
+72ae19fa083d266ec558,correct,1.0,
+5ddfefa6f72ae74eae05,correct,1.0,
+e8d94e6ab2e0271bb04b,correct,1.0,
+870db8b6777c73d66c68,correct,1.0,
+13f8ce7e65a60786f4bc,correct,1.0,
+e3cacc0b6ad261c56327,wrong,0.9,'Pragvada' is incorrect; should be 'Pragada' or 'Pragada'
+b301b121daf75b81de2b,correct,1.0,
+c9ecfd9679b11462cea2,wrong,0.9,'bo'ldi' implies 'became'; should be 'edi' for 'was'
+25c7f18db13d570cb03b,correct,1.0,
+3ac9f9230751d2550ac4,correct,1.0,
+1073b8a38ecb1fcc7c8c,correct,1.0,
+aa1525fa0d37bf233a87,correct,1.0,
+8125da7e4deb13778c22,correct,1.0,
+e8a94b373f9ce1822dff,correct,1.0,
+5e9ba9a4f304b6c38aee,correct,1.0,
+e1648d6588fcfc3b5fe8,correct,1.0,
+5f2ccffc317afeb771cc,correct,1.0,
+3069a7f40a4bec860f55,correct,1.0,
+751dc7142b7786d5c546,correct,1.0,
+b0af7a87d789c7a5d4c2,correct,1.0,
+bd55c2c86ff34dee3776,correct,1.0,
+8c0b096336ae4d722ca1,correct,1.0,
+033efbd49b6fa4592706,correct,1.0,
+46bacd6e1630ec40feef,correct,1.0,
+9db6a451a2eda48df2c7,correct,1.0,
+0d6b22f056e6208fda7c,correct,1.0,
+11d51e4f9a48c52500f2,correct,1.0,
+979c7958b68d87226dfe,correct,1.0,
+6c9820df498c2415c241,correct,1.0,
+c978d6ff566d3afc3784,correct,1.0,
+09b5fd76c3188bb861c1,correct,1.0,
+839bff3e7d5d3a6946a2,correct,1.0,
+7821040aeb851156b6c6,correct,1.0,
+7337ddccd01b3e88dc65,correct,1.0,
+72fdd10ac5e114925dbc,correct,1.0,
+8d2911b6b7f1080bfbab,correct,1.0,
+844cf3211ba8afab3f6a,correct,1.0,
+205d2995b26180f2d6fa,correct,1.0,
+49b1602a74a7b64a920c,correct,1.0,
+3795617489acd4d9e70f,correct,1.0,
+1c3532a712e2de8a6116,correct,1.0,
+c4e0371e6e23e7719f57,correct,1.0,
+73bf5f2ec09094bc7c9f,correct,1.0,
+e855dd277fdca1ddc0e4,correct,1.0,
+498d2e8d89c29e261f06,correct,1.0,
+76de6f7252bcf6d540ef,correct,1.0,
+583a4d07501fcf0b7efd,correct,1.0,
+57e776523b400e2af9d4,correct,1.0,
+d013d26f68e97cd004e4,correct,1.0,
+440a46da64429c7600d8,correct,1.0,
+65ec62a268032006ffa8,correct,1.0,
+84ae7e911813630d0bba,correct,1.0,
+962de3fc294f61230fb3,wrong,0.9,"typo: 'Kelilar' should be 'Keling', 'gapalshamiz' should be 'gaplashamiz'"
+ddde1ba0b898595bd9cb,correct,1.0,
+449c08fb3073cce1f2b6,correct,1.0,
+38d0d34bdd9fb96165c4,correct,1.0,
+82b4901a40b974f6fb06,correct,1.0,
+c0f3c1ffbd0becea9c58,correct,1.0,
+87b9b371577e31176536,correct,1.0,
+44324a1913fb5392fa9d,correct,1.0,
+67e3c5088d10a441b404,correct,1.0,
+9dc8e9009e52342a7091,correct,1.0,
+25f3f45e039d82e90f12,correct,1.0,
+f52492b9dfd9866343f1,correct,1.0,
+7a807f88bba793035258,correct,1.0,
+e824d697841edd6378b4,correct,1.0,
+db58c4f36d5221727651,correct,1.0,
+ba064d47e5d47a4b3c6c,correct,1.0,
+6a2d933f01de7ffe31f2,correct,1.0,
+17278438533e571da6e3,correct,1.0,
+42b9974840b6f609e47c,correct,1.0,
+72a95ed00ed7f0e07907,correct,1.0,
+13769c43b85c5bb0e7cb,correct,1.0,
+1dbbb6e600396c644a98,correct,1.0,
+a5049a9458b478db1f24,correct,1.0,
+c9caadc42df8217a5634,correct,1.0,
+796af2822bbc4f3d3a8c,correct,1.0,
+09f4f8ed7e81e392c3e9,correct,1.0,
+ca21cb5b4cfb007a4df8,correct,1.0,
+ac66ae4a586fbf4d2085,correct,1.0,
+03f3c8aeec2167aefba0,wrong,0.9,否定含义丢失，'kelmayman'应为'kelolmayman'
+3f8acf95749e4d849a86,correct,1.0,
+500ea2c855a4cd81f10e,correct,1.0,
+d7c00c3ebbaadcbfcaf8,correct,1.0,
+7161a76a360ac8a0f624,correct,1.0,
+88ecef282563c5661c89,correct,1.0,
+1dcf53f2ebb9e29d5d2c,minor,0.9,句末缺少标点符号
+be7fc1d81a1fbc92a582,wrong,0.9,'Pul yeyilmas'为被动/状态描述，未准确表达'You can't eat money'
+558d9e2702b83eb4531a,correct,1.0,
+a207b1ef136cbe17307e,correct,1.0,
+c351c8c8ef79c8cd6c18,correct,1.0,
+4d9aa931bfd90e7c979e,correct,1.0,
+37c95524036f86fc5d46,correct,1.0,
+a6d996165427d615d08d,wrong,0.9,'holam nikida' is incorrect; should be 'xolamnikida' (aunt's house)
+3cb989772266f1ab40a8,correct,1.0,
+a991a1f591d8c03af5ba,correct,1.0,
+beeec637123169793da9,correct,1.0,
+a054f708ed2a86ccb9d2,correct,1.0,
+9629eb0aad1dd364a89e,correct,1.0,
+435eb2adb3fc84c88c59,correct,1.0,
+2e5f88195eb5cafa4abb,wrong,0.9,"'Biz oz kutamiz' is unnatural; should be 'Keling, bir oz kutamiz!' or 'Biroz kutaylik!'"
+db6dc9727dcde062e750,correct,1.0,
+9a4c7ed79a8bcac72a06,wrong,0.9,Missing verb 'bor edi' or 'bor'; sentence is incomplete and grammatically incorrect
+9484766f840d505bc5d6,correct,1.0,
+1e36531eb11b5d2abf05,wrong,0.9,'qoya' means cliff/rock formation; should be 'tosh' (small stone/pebble)
+87ce2d34cc2a7f209fc5,correct,1.0,
+20d84aba2d3a3bd3b9a6,wrong,0.9,'hohlayman' is misspelled; should be 'xohlayman'
+066ec678991deb1e0d80,correct,1.0,
+0bbd1a441ed4a9824d4d,minor,0.8,Missing comma after 'Iltimos'; otherwise correct
+a9faf7871322bda548e1,correct,1.0,
+779c8bfe25877094c829,correct,1.0,
+b0028d1da9ae1b88a5d6,correct,1.0,
+cc3d0af5eb60683e95a6,correct,1.0,
+370284a0bf6aa3ce2227,correct,1.0,
+aa6fb5fc0a5bda1aa88e,correct,1.0,
+c6475ba78782388ee628,correct,1.0,
+110ab2903b9435c302fd,correct,1.0,
+3e1b4c6ff713c5ae5f4b,correct,1.0,
+60befcc91539a3bd75c0,correct,1.0,
+dc647d3b67f26792bdec,correct,1.0,
+86c7eaebd00acadb030c,wrong,0.9,Missing translation of 'You may not! Don't!'
+10bd2eff697d3a57abfd,correct,1.0,
+99b6c1fe987075ff16dc,minor,0.8,'always an acceptable' simplified to 'yaxshi'
+ba329add7e430c61fb27,correct,1.0,
+02aab06eda9cb2bdbbb6,correct,1.0,
+ada10a2958bbf04c2237,correct,1.0,
+070aa05d8724775356bd,correct,1.0,
+5c83aaddefa9911d33a4,correct,1.0,
+3a0e95aff9e4a42cbddb,correct,1.0,
+bb47ccef9983c1161c52,correct,1.0,
+ec3680367173e296ebdd,correct,1.0,
+eafa2ea5ea99dc0cd67a,correct,1.0,
+d5cf3671618ce3b74604,correct,1.0,
+1f4139e85ad5af9d9340,wrong,0.9,'dancer' mistranslated as 'o'yinchi' (player)
+affd40c0f5ab2925db36,wrong,0.9,'light brown' mistranslated as 'oq-go'los' (blond)
+b64a1e1fa1e28caedaf9,correct,1.0,
+b88a9b86a647d6e4bfcf,correct,1.0,
+7ada61b9ab45c4ee7bb1,correct,1.0,
+a8fd1d0c19dc826ceac9,wrong,0.95,Missing translation for 'of' and command flags; incomplete sentence.
+1bb4396df6066d83c049,correct,0.98,
+8b8d6f0fa8711d7034b1,wrong,0.95,Missing translation for 'of' and command flags; incomplete sentence.
+b646a23c23d077fffb6c,wrong,0.95,Missing translation for 'of' and command flags; incomplete sentence.
+cbc229fadf1cb46eaba6,wrong,0.95,Missing translation for 'of' and command flags; incomplete sentence.
+2cfdc7f9e5f219bd5052,wrong,0.95,Missing translation for 'of' and command flags; incomplete sentence.
+6511178fbee7e7854a11,wrong,0.95,Missing translation for 'of' and command flags; incomplete sentence.
+87d99b347bd4841f6d5f,wrong,0.95,Missing translation for 'of' and command flags; incomplete sentence.
+89cebdece8ce07beb106,wrong,0.95,Missing translation for 'of' and command flags; incomplete sentence.
+379961b72672833f19bd,wrong,0.95,Missing translation for 'of' and command flags; incomplete sentence.
+7b84af5d477b739c7672,wrong,0.95,Missing translation for 'of' and command flags; incomplete sentence.
+8c624f56b51a51ea5e27,wrong,0.95,Missing translation for 'of' and command flags; incomplete sentence.
+c7947f54efc8c0523472,wrong,0.95,Missing translation for 'of' and command flags; incomplete sentence.
+f40cad86f3629f6cd445,wrong,0.95,Missing translation for 'of' and command flags; incomplete sentence.
+48baec7e823dda5f06eb,wrong,0.95,Missing translation for 'of' and command flags; incomplete sentence.
+3b13ef4854440374b23e,wrong,0.95,Missing translation for 'of' and command flags; incomplete sentence.
+7edc34ad37e7e0cafbbc,wrong,0.95,Missing translation for 'of' and command flags; incomplete sentence.
+45bdc794a84e10fb814a,wrong,0.95,Missing translation for 'of' and command flags; incomplete sentence.
+58efdd5014ef29dfda67,wrong,0.95,Missing translation for 'of' and command flags; incomplete sentence.
+df45bb5e7574c43a2996,wrong,0.95,Missing translation for 'of' and command flags; incomplete sentence.
+243fb55a5c62afe69f61,wrong,0.95,Missing translation for 'of' and command flags; incomplete sentence.
+c08af61fbf272621a720,wrong,0.95,Missing translation for 'of' and command flags; incomplete sentence.
+5e88495a356cee471ca2,wrong,0.95,Missing translation for 'of' and command flags; incomplete sentence.
+fe3e807b6e613d33a34e,wrong,0.95,Missing translation for 'of' and command flags; incomplete sentence.
+0cb62a8580963a00bf62,wrong,0.95,Missing translation for 'of' and command flags; incomplete sentence.
+3d5a32566b4c958a10e2,wrong,0.95,Missing 'of' equivalent; unnatural phrasing.
+f8e6f3d7e86513aaa064,wrong,0.95,Missing 'of' equivalent; unnatural phrasing.
+9c25e1c489efb1b461fa,wrong,0.95,Missing 'of' equivalent; unnatural phrasing.
+4a79b11f54c1be39489d,wrong,0.95,Missing 'of' equivalent; unnatural phrasing.
+671f913745bcf180aaee,wrong,0.95,Missing 'of' equivalent; unnatural phrasing.
+fcc6a745db6647809f40,wrong,0.95,Missing 'of' equivalent; unnatural phrasing.
+7ef772cd428f7bc42987,wrong,0.95,Missing 'of' equivalent; unnatural phrasing.
+1e4b1a9f8567e3b7120a,wrong,0.95,Missing 'of' equivalent; unnatural phrasing.
+d55271939261cdfaae91,wrong,0.95,Missing 'of' equivalent; unnatural phrasing.
+d96fa8de4d63b3ded27c,wrong,0.95,Missing 'of' equivalent; unnatural phrasing.
+1f27e3c48b1a075a65ff,wrong,0.95,Missing 'of' equivalent; unnatural phrasing.
+131ec66fe29888d383f5,wrong,0.95,Missing 'of' equivalent; unnatural phrasing.
+5e96fcfcac2e127ba8aa,wrong,0.95,Missing 'of' equivalent; unnatural phrasing.
+554a1362ea6a4705c59d,wrong,0.95,Missing 'of' equivalent; unnatural phrasing.
+bd568277171172daaf6d,wrong,0.95,Missing 'of' equivalent; unnatural phrasing.
+e6133f5346d71823ef37,wrong,0.95,Missing 'of' equivalent; unnatural phrasing.
+def85e900f721ee1a136,wrong,0.95,Missing 'of' equivalent; unnatural phrasing.
+d00532f509c91bb7c696,wrong,0.95,Missing 'of' equivalent; unnatural phrasing.
+8e4c29cee42c7e39b38e,wrong,0.95,Missing 'of' equivalent; unnatural phrasing.
+2d0bf5c34103d83ffa79,wrong,0.95,Missing 'of' equivalent; unnatural phrasing.
+5b88b3dd8e887a622ae4,wrong,0.95,Missing 'of' equivalent; unnatural phrasing.
+09687d3f00b05340e8f9,wrong,0.95,Missing 'of' equivalent; unnatural phrasing.
+4ba9936e6744de5effba,wrong,0.95,Missing 'of' equivalent; unnatural phrasing.
+b6edc7883c6a3fd481ff,wrong,0.95,Missing 'of' equivalent; unnatural phrasing.
+21694adc1c0a0f686ece,wrong,0.95,Missing 'of' equivalent; unnatural phrasing.
+88485ce1e6c7bd7e4b1f,wrong,0.95,Missing 'of' translation; unnatural phrasing.
+6bd0215adb213a940d19,wrong,0.95,Missing 'of' translation; unnatural phrasing.
+3629fe316afee0318c05,wrong,0.95,Missing 'of' translation; unnatural phrasing.
+f3314c0e40f2618fe80c,wrong,0.95,Missing 'of' translation; unnatural phrasing.
+e808936c24901a79d4e8,wrong,0.95,Missing 'of' translation; unnatural phrasing.
+ce85c4591beccb2f5853,wrong,0.95,Missing 'of' translation; unnatural phrasing.
+22ab50048f98beb6025e,wrong,0.95,Missing 'of' translation; unnatural phrasing.
+f1b0981346fc244a3cd4,wrong,0.95,Missing 'of' translation; unnatural phrasing.
+3cb61bb636cfe8f818e0,wrong,0.95,Missing 'of' translation; unnatural phrasing.
+b59243da6f2fb3abcda2,wrong,0.95,Missing 'of' translation; unnatural phrasing.
+6863937c80693c6f7783,wrong,0.95,Missing 'of' translation; unnatural phrasing.
+158f1d3db0d78b8afb1e,wrong,0.95,Missing 'of' translation; unnatural phrasing.
+e6c541beff50b01b1783,wrong,0.95,Missing 'of' translation; unnatural phrasing.
+b7a52d3f6c89321493ee,wrong,0.95,Missing 'of' translation; unnatural phrasing.
+9916767f730639ed00d5,wrong,0.95,Missing 'of' translation; unnatural phrasing.
+2ec00351ce8b6b377a3d,wrong,0.95,Missing 'of' translation; unnatural phrasing.
+1b72bf260cc75dd8dde8,wrong,0.95,Missing 'of' translation; unnatural phrasing.
+ecbad7de39e1c6446112,wrong,0.95,Missing 'of' translation; unnatural phrasing.
+18076bea28989a3bff20,wrong,0.95,Missing 'of' translation; unnatural phrasing.
+7831fd4ac73f68aeb0b4,wrong,0.95,Missing 'of' translation; unnatural phrasing.
+763b4a2f05cf0e236948,wrong,0.95,Missing 'of' translation; unnatural phrasing.
+80951df96250fe6d8890,wrong,0.95,Missing 'of' translation; unnatural phrasing.
+93f2c63540c02588df19,wrong,0.95,Missing 'of' translation; unnatural phrasing.
+8b58b687c35b150b6334,wrong,0.95,Missing 'of' translation; unnatural phrasing.
+358d7c3a53356262810b,wrong,0.95,Missing 'of' translation; unnatural phrasing.
+b8fc54c9191021657dee,wrong,0.95,"Uzbek sentence incomplete, missing 'hisoblanadi' or 'uchun' to express 'is an alias of'."
+1184e8659e2d59e09e0b,wrong,0.95,"Uzbek sentence incomplete, missing 'hisoblanadi' or 'uchun' to express 'is an alias of'."
+d511c4db5f5ec64e57fa,wrong,0.95,"Uzbek sentence incomplete, missing 'hisoblanadi' or 'uchun' to express 'is an alias of'."
+a9d3ae8607b186b1ce64,wrong,0.95,"Uzbek sentence incomplete, missing 'hisoblanadi' or 'uchun' to express 'is an alias of'."
+4ee11be02379929502cc,wrong,0.95,"Uzbek sentence incomplete, missing 'hisoblanadi' or 'uchun' to express 'is an alias of'."
+3940db282fa684cb7199,wrong,0.95,"Uzbek sentence incomplete, missing 'hisoblanadi' or 'uchun' to express 'is an alias of'."
+a535c847a9f5d2004567,wrong,0.95,"Uzbek sentence incomplete, missing 'hisoblanadi' or 'uchun' to express 'is an alias of'."
+19b030d43d822a16d5b3,wrong,0.95,"Uzbek sentence incomplete, missing 'hisoblanadi' or 'uchun' to express 'is an alias of'."
+8dfc5835d33f5a104a64,wrong,0.95,"Uzbek sentence incomplete, missing 'hisoblanadi' or 'uchun' to express 'is an alias of'."
+5c41650b9059fd86cdec,wrong,0.95,"Uzbek sentence incomplete, missing 'hisoblanadi' or 'uchun' to express 'is an alias of'."
+ff946c72913cb886cada,wrong,0.95,"Uzbek sentence incomplete, missing 'hisoblanadi' or 'uchun' to express 'is an alias of'."
+e9de29a8bb7dc75a863e,wrong,0.95,"Uzbek sentence incomplete, missing 'hisoblanadi' or 'uchun' to express 'is an alias of'."
+bdd84435fb95186cd386,wrong,0.95,"Uzbek sentence incomplete, missing 'hisoblanadi' or 'uchun' to express 'is an alias of'."
+5ab74c5230e5d425ce9d,wrong,0.95,"Uzbek sentence incomplete, missing 'hisoblanadi' or 'uchun' to express 'is an alias of'."
+bc04c3a87f78999c2b21,wrong,0.95,"Uzbek sentence incomplete, missing 'hisoblanadi' or 'uchun' to express 'is an alias of'."
+2f94a26edb81bd441019,wrong,0.95,"Uzbek sentence incomplete, missing 'hisoblanadi' or 'uchun' to express 'is an alias of'."
+9cf29b9343dbd3607423,wrong,0.95,"Uzbek sentence incomplete, missing 'hisoblanadi' or 'uchun' to express 'is an alias of'."
+3a6555a740b81408b5d1,wrong,0.95,"Uzbek sentence incomplete, missing 'hisoblanadi' or 'uchun' to express 'is an alias of'."
+943636187800e1554ea9,wrong,0.95,"Uzbek sentence incomplete, missing 'hisoblanadi' or 'uchun' to express 'is an alias of'."
+6e32a07e6e6a12fb5f85,wrong,0.95,"Uzbek sentence incomplete, missing 'hisoblanadi' or 'uchun' to express 'is an alias of'."
+bc48f05c31718b542e6b,wrong,0.95,"Uzbek sentence incomplete, missing 'hisoblanadi' or 'uchun' to express 'is an alias of'."
+b32827c18a8c1ab53435,wrong,0.95,"Uzbek sentence incomplete, missing 'hisoblanadi' or 'uchun' to express 'is an alias of'."
+4f7e460844177a367c11,wrong,0.95,"Uzbek sentence incomplete, missing 'hisoblanadi' or 'uchun' to express 'is an alias of'."
+7681aa10aa588e01eaf2,wrong,0.95,"Uzbek sentence incomplete, missing 'hisoblanadi' or 'uchun' to express 'is an alias of'."
+681ae15f583ef9c0a197,wrong,0.95,"Uzbek sentence incomplete, missing 'hisoblanadi' or 'uchun' to express 'is an alias of'."
+e2a6ece0a6d589a0b54e,wrong,0.95,Missing verb 'hisoblanadi' or 'uchun'; unnatural phrasing.
+7ab2eafcb035086fb8a4,wrong,0.95,Missing verb 'hisoblanadi' or 'uchun'; unnatural phrasing.
+172ab1832b2dd9b5d2e3,wrong,0.95,Missing verb 'hisoblanadi' or 'uchun'; unnatural phrasing.
+135a27f17be1547781ae,wrong,0.95,Missing verb 'hisoblanadi' or 'uchun'; unnatural phrasing.
+e89c7f9b51d58fe4bf73,wrong,0.95,Missing verb 'hisoblanadi' or 'uchun'; unnatural phrasing.
+66c6c6f82998a7afdb3b,wrong,0.95,Missing verb 'hisoblanadi' or 'uchun'; unnatural phrasing.
+f32c4519b01a018918e7,wrong,0.95,Missing verb 'hisoblanadi' or 'uchun'; unnatural phrasing.
+be16a9c4ce20ac9725d9,wrong,0.95,Missing verb 'hisoblanadi' or 'uchun'; unnatural phrasing.
+b0c9a802ef1876ba7ae1,wrong,0.95,Missing verb 'hisoblanadi' or 'uchun'; unnatural phrasing.
+efbbcb8addb1dfcf4ae5,wrong,0.95,Missing verb 'hisoblanadi' or 'uchun'; unnatural phrasing.
+f4554bc9d4f3cbf3cb50,wrong,0.95,Missing verb 'hisoblanadi' or 'uchun'; unnatural phrasing.
+c352907144c3be20d502,wrong,0.95,Missing verb 'hisoblanadi' or 'uchun'; unnatural phrasing.
+7bbcd499ea03ca770442,wrong,0.95,Missing verb 'hisoblanadi' or 'uchun'; unnatural phrasing.
+f039b3da40dd547c9afd,wrong,0.95,Missing verb 'hisoblanadi' or 'uchun'; unnatural phrasing.
+5b05ffe38aa8803a3577,wrong,0.95,Missing verb 'hisoblanadi' or 'uchun'; unnatural phrasing.
+4d449c9b43bbfa29fb2c,wrong,0.95,Missing verb 'hisoblanadi' or 'uchun'; unnatural phrasing.
+187a42099d1d00724308,wrong,0.95,Missing verb 'hisoblanadi' or 'uchun'; unnatural phrasing.
+1c6f7ab224ea1b5d8a09,wrong,0.95,Missing verb 'hisoblanadi' or 'uchun'; unnatural phrasing.
+cd17ff73dcb7c9fb8abc,wrong,0.95,Missing verb 'hisoblanadi' or 'uchun'; unnatural phrasing.
+edd0ffb9db3f73808791,wrong,0.95,Missing verb 'hisoblanadi' or 'uchun'; unnatural phrasing.
+4ad8749b707ee40d8276,wrong,0.95,Missing verb 'hisoblanadi' or 'uchun'; unnatural phrasing.
+36d77b5be0cbf3a4cdba,wrong,0.95,Missing verb 'hisoblanadi' or 'uchun'; unnatural phrasing.
+f1731dd21b4c7b3bb018,wrong,0.95,Missing verb 'hisoblanadi' or 'uchun'; unnatural phrasing.
+9cd1cdd62c3b1e76f211,wrong,0.95,Missing verb 'hisoblanadi' or 'uchun'; unnatural phrasing.
+651b49c15a77357bf41d,wrong,0.95,Missing verb 'hisoblanadi' or 'uchun'; unnatural phrasing.
+c93484107bce961cacc7,wrong,0.95,Missing copula 'hisoblanadi' or 'uchun' for natural syntax
+da9c30a7740c0e9229ce,wrong,0.95,Missing copula 'hisoblanadi' or 'uchun' for natural syntax
+2f5397f24afb51f8c18f,wrong,0.95,Missing copula 'hisoblanadi' or 'uchun' for natural syntax
+5176a606928ef888f2a8,wrong,0.95,Missing copula 'hisoblanadi' or 'uchun' for natural syntax
+d64ccd8cb1d408cac53d,wrong,0.95,Missing copula 'hisoblanadi' or 'uchun' for natural syntax
+c431ac6e2561ee347fbb,wrong,0.95,Missing copula 'hisoblanadi' or 'uchun' for natural syntax
+5d0c35c876a86e86b7f7,wrong,0.95,Missing copula 'hisoblanadi' or 'uchun' for natural syntax
+16d77e317c70b4848f63,wrong,0.95,Missing copula 'hisoblanadi' or 'uchun' for natural syntax
+94d94b1584fc292ee8ef,wrong,0.95,Missing copula 'hisoblanadi' or 'uchun' for natural syntax
+b0a25bfde2b560ebe884,wrong,0.95,Missing copula 'hisoblanadi' or 'uchun' for natural syntax
+0eb22fcfca0b0acb6306,wrong,0.95,Missing copula 'hisoblanadi' or 'uchun' for natural syntax
+3c1d0c0b4aa7c0130d89,wrong,0.95,Missing copula 'hisoblanadi' or 'uchun' for natural syntax
+a26fc6291ff49a21fc07,wrong,0.95,Missing copula 'hisoblanadi' or 'uchun' for natural syntax
+80449fed651111aad141,wrong,0.95,Missing copula 'hisoblanadi' or 'uchun' for natural syntax
+367550b88f9c961349a6,wrong,0.95,Missing copula 'hisoblanadi' or 'uchun' for natural syntax
+be5f454f06e239939261,wrong,0.95,Missing copula 'hisoblanadi' or 'uchun' for natural syntax
+9bfe9633fcca3ae5e2b9,wrong,0.95,Missing copula 'hisoblanadi' or 'uchun' for natural syntax
+46c57494da48e52c9e1b,wrong,0.95,Missing copula 'hisoblanadi' or 'uchun' for natural syntax
+b4d79262b14150e8c1e7,wrong,0.95,Missing copula 'hisoblanadi' or 'uchun' for natural syntax
+1e1bc29b4aa3ea7a6a41,wrong,0.95,Missing copula 'hisoblanadi' or 'uchun' for natural syntax
+ba14848f8b84970a782f,wrong,0.95,Missing copula 'hisoblanadi' or 'uchun' for natural syntax
+4cc6ff35f42bdf2468cf,wrong,0.95,Missing copula 'hisoblanadi' or 'uchun' for natural syntax
+62b6eefe114e897ef2ab,wrong,0.95,Missing copula 'hisoblanadi' or 'uchun' for natural syntax
+111bf263b77534674a14,wrong,0.95,Missing copula 'hisoblanadi' or 'uchun' for natural syntax
+476c3f79e7186be5c24b,wrong,0.95,Missing copula 'hisoblanadi' or 'uchun' for natural syntax
+065cc46739a56d11427d,wrong,0.95,Missing 'of' translation; unnatural phrasing
+67d57ee10cb8d91fae78,wrong,0.95,Missing 'of' translation; unnatural phrasing
+3d282659a196b43bd1b6,wrong,0.95,Missing 'of' translation; unnatural phrasing
+3156034966c2f31ede85,wrong,0.95,Missing 'of' translation; unnatural phrasing
+5d9443141290b86a792a,wrong,0.95,Missing 'of' translation; unnatural phrasing
+dee40a7f511a5278f1e0,wrong,0.95,Missing 'of' translation; unnatural phrasing
+7eaf917ee03a4da120fc,wrong,0.95,Missing 'of' translation; unnatural phrasing
+7539d3e7de49f22062fe,wrong,0.95,Missing 'of' translation; unnatural phrasing
+37710090fc1810108c2a,wrong,0.95,Missing 'of' translation; unnatural phrasing
+25fdb5ccefec5a33ff04,wrong,0.95,Missing 'of' translation; unnatural phrasing
+5f676d3950b7784c47e2,wrong,0.95,Missing 'of' translation; unnatural phrasing
+2cd6ff728fbdbd6a8ed2,wrong,0.95,Missing 'of' translation; unnatural phrasing
+1b1debcf8b13619fc726,wrong,0.95,Missing 'of' translation; unnatural phrasing
+04c39c9fb948aee434a2,wrong,0.95,Missing 'of' translation; unnatural phrasing
+81456a7daf43e616d012,wrong,0.95,Missing 'of' translation; unnatural phrasing
+a61331c8bf8366125455,wrong,0.95,Missing 'of' translation; unnatural phrasing
+9346cf0ee9775aae1832,wrong,0.95,Missing 'of' translation; unnatural phrasing
+9c3ac2c1b5b7f9b9bf82,wrong,0.95,Missing 'of' translation; unnatural phrasing
+bf224bc25f35846b2e61,wrong,0.95,Missing 'of' translation; unnatural phrasing
+be07a3aec96d497b4e61,wrong,0.95,Missing 'of' translation; unnatural phrasing
+9e557d3f2f9a1312d7d9,wrong,0.95,Missing 'of' translation; unnatural phrasing
+497a4c4268981e541c8a,wrong,0.95,Missing 'of' translation; unnatural phrasing
+5de3b9c751ff55ed1dc3,wrong,0.95,Missing 'of' translation; unnatural phrasing
+05dd5777c5045bcb6fbc,correct,0.9,
+92a5245b5d927b68c3d0,wrong,0.95,Missing 'of' translation; unnatural phrasing
+0457e0e83559a6271bf9,wrong,0.95,Missing copula 'hisoblanadi' or 'uchun'; unnatural phrasing.
+698d66e990c1d6d22091,wrong,0.95,Missing copula; unnatural phrasing.
+d081d602ac41da1209f3,wrong,0.95,Missing copula; unnatural phrasing.
+755d45db7ba856dc8b54,wrong,0.95,Missing copula; unnatural phrasing.
+e2517390a7042daf6654,wrong,0.95,Missing copula; unnatural phrasing.
+bb19f2b812ae00822b22,wrong,0.95,Missing copula; unnatural phrasing.
+fb0d67b16403f19b2d0e,wrong,0.95,Missing copula; unnatural phrasing.
+35333edeead47a5ac07b,wrong,0.95,Missing copula; unnatural phrasing.
+2abdfd58e587d91a54ec,wrong,0.95,Missing copula; unnatural phrasing.
+12cadb1b356465b6e7a7,wrong,0.95,Missing copula; unnatural phrasing.
+00766c965664c76c2ffa,wrong,0.95,Missing copula; unnatural phrasing.
+6bdcb71c010ae7fd6036,wrong,0.95,Missing copula; unnatural phrasing.
+99871f2f70e415774d52,wrong,0.95,Missing copula; unnatural phrasing.
+b3afad6d22d38eb93787,wrong,0.95,Missing copula; unnatural phrasing.
+8b2fc7968b50335de160,wrong,0.95,Missing copula; unnatural phrasing.
+a54ae54cce064b7dbc5d,wrong,0.95,Missing copula; unnatural phrasing.
+2681ab02f8bcc54e0c49,wrong,0.95,Missing copula; unnatural phrasing.
+cdbd903e5173da859b05,wrong,0.95,'faoliyat boshqaruvi' is unnatural; should be 'Activity Manager' or 'faoliyat menejeri'.
+a1baa1ed20609c7e1881,wrong,0.95,Missing copula; unnatural phrasing.
+3c1632f284863e9ee810,wrong,0.95,Missing copula; unnatural phrasing.
+55f73c53b5610496bce0,wrong,0.95,Missing copula; unnatural phrasing.
+74f14f02e81cdcb83541,wrong,0.95,Missing copula; unnatural phrasing.
+f497b27f9f2b1a4b4762,wrong,0.95,Missing copula; unnatural phrasing.
+127897cf8ef96777793f,wrong,0.95,Missing copula; unnatural phrasing.
+30b5f8624f24caed2e59,wrong,0.95,Missing copula; unnatural phrasing.
+11f62b429fed31e75d3d,wrong,0.95,Missing copula 'hisoblanadi' or 'bo'lib'; unnatural phrasing.
+bf8cff79cc47fccdea36,wrong,0.95,Missing copula; unnatural phrasing.
+41c4b309fe1ef45cef5e,wrong,0.95,Missing copula; unnatural phrasing.
+9785542d0883e1ac54ff,wrong,0.95,Missing copula; unnatural phrasing.
+0544d4eb784bf8f5f60b,wrong,0.95,Missing copula; unnatural phrasing.
+b1c1475fd8cce55dd287,wrong,0.95,Missing copula; unnatural phrasing.
+79c07846c9a696e2aff9,wrong,0.95,Missing copula; unnatural phrasing.
+24c4362641a5e6a6a80e,wrong,0.95,Missing copula; unnatural phrasing.
+6f6493a3f3e21e4f5cfd,wrong,0.95,Missing copula; unnatural phrasing.
+9d3137dfba4f1e8a20c9,wrong,0.95,Missing copula; unnatural phrasing.
+47bead8e4ec3cb73031c,wrong,0.95,Missing copula; unnatural phrasing.
+0cd5caa37ffb47be94a5,wrong,0.95,Missing copula; unnatural phrasing.
+9b8063c3b441f73fff35,wrong,0.95,Missing copula; unnatural phrasing.
+2a2ee26068c132166e42,wrong,0.95,Missing copula; unnatural phrasing.
+d5b71d0d0c8dc06b17bf,wrong,0.95,Missing copula; unnatural phrasing.
+13f3c6f979a74c7bad2d,wrong,0.95,Missing copula; unnatural phrasing.
+6c3371a6d54bc497a76f,wrong,0.95,Missing copula; unnatural phrasing.
+3fb516a422f11440dbc2,wrong,0.95,Missing copula; unnatural phrasing.
+eff886e888fa2cfcd83d,wrong,0.95,"'malumot' missing apostrophe; 'berish' is infinitive, not finite verb; unnatural phrasing."
+fb110c2e5687b176ed35,wrong,0.95,Missing copula; unnatural phrasing.
+5c8ec9b4cda5cd15ba7f,wrong,0.95,Missing copula; unnatural phrasing.
+74d1c3dcd2351f2a0f5c,wrong,0.95,Missing copula; unnatural phrasing.
+271966ac70fd6192f645,wrong,0.95,Missing copula; unnatural phrasing.
+c76040eb554e591f5d60,wrong,0.95,Missing copula; unnatural phrasing.
+7be7b2e995fa09f3f907,wrong,0.95,Missing copula; unnatural phrasing.
+22eb99043c5ff01fb404,wrong,0.95,Missing 'of' equivalent; unnatural phrasing
+3160c06d5b6b53696782,wrong,0.95,Missing 'of' equivalent; unnatural phrasing
+ee6aa30b43784c7823de,correct,0.9,
+075ee14bb06384b98fd4,wrong,0.95,Missing 'of' equivalent; unnatural phrasing
+1ea0783174084becdf5a,wrong,0.95,Missing 'of' equivalent; unnatural phrasing
+05064acd9177a41f16f7,wrong,0.95,Missing 'of' equivalent; unnatural phrasing
+65124e186fa0842ba97d,wrong,0.95,Missing 'of' equivalent; unnatural phrasing
+6e339fce60ed7304b6d2,wrong,0.95,Missing 'of' equivalent; unnatural phrasing
+d2a614b7b9b0db4ef238,wrong,0.95,Missing 'of' equivalent; unnatural phrasing
+0507ad80fa1f55e9dad5,wrong,0.95,Missing 'of' equivalent; unnatural phrasing
+4f74561f8c8e56b975d2,wrong,0.95,Missing 'of' equivalent; unnatural phrasing
+dc4f2a64f606e2a45311,wrong,0.95,Missing 'of' equivalent; unnatural phrasing
+10a0b72ebb24cc2a3647,wrong,0.95,Missing 'of' equivalent; unnatural phrasing
+fad350007339e9d0aa3a,wrong,0.95,Missing 'of' equivalent; unnatural phrasing
+03e2e60a48ba7c66e25f,wrong,0.95,Missing 'of' equivalent; unnatural phrasing
+c58004451903d8e1c478,wrong,0.95,Missing 'of' equivalent; unnatural phrasing
+23679a7c37f0cf63cf3d,wrong,0.95,Missing 'of' equivalent; unnatural phrasing
+bb4f74203bb2882d31a9,wrong,0.95,Missing 'of' equivalent; unnatural phrasing
+6da938a116d82f4668db,wrong,0.95,Missing 'of' equivalent; unnatural phrasing
+36371eccbaa212189bcd,wrong,0.95,Missing 'of' equivalent; unnatural phrasing
+43cf0413ad76ed0c319f,wrong,0.95,Missing 'of' equivalent; unnatural phrasing
+ea0f5cce7a9acb7d44f8,wrong,0.95,Missing 'of' equivalent; unnatural phrasing
+edd43d0096b2dd8ca1e8,wrong,0.95,Missing 'of' equivalent; unnatural phrasing
+2dc5569aa38c9e0924c0,wrong,0.95,Missing 'of' equivalent; unnatural phrasing
+180e55e2420e9afc90c1,wrong,0.95,Missing 'of' equivalent; unnatural phrasing
+d01eb1011d5aa07fd9bd,wrong,0.95,Missing copula 'hisoblanadi' or 'bo'lib' for natural phrasing.
+ce4ded97737d90997176,wrong,0.95,Missing copula 'hisoblanadi' or 'bo'lib' for natural phrasing.
+d2f5310f77b82a01ae3e,wrong,0.95,Missing copula 'hisoblanadi' or 'bo'lib' for natural phrasing.
+3f4512adb66ced0a7d44,wrong,0.95,Missing copula 'hisoblanadi' or 'bo'lib' for natural phrasing.
+43bf213e42fdd682d419,wrong,0.95,Missing copula 'hisoblanadi' or 'bo'lib' for natural phrasing.
+34ee47191d8bf46df86f,wrong,0.95,Missing copula 'hisoblanadi' or 'bo'lib' for natural phrasing.
+964116c6211269dcec33,wrong,0.95,Missing copula 'hisoblanadi' or 'bo'lib' for natural phrasing.
+665295182e951dbc1242,wrong,0.95,Missing copula 'hisoblanadi' or 'bo'lib' for natural phrasing.
+2f63ce7a648cb589741b,wrong,0.95,Missing copula 'hisoblanadi' or 'bo'lib' for natural phrasing.
+08d5f096b12c06efccc2,wrong,0.95,Missing copula 'hisoblanadi' or 'bo'lib' for natural phrasing.
+9d11bf8e9017bb1aa989,wrong,0.95,Missing copula 'hisoblanadi' or 'bo'lib' for natural phrasing.
+0964cb7fef9bfe857df8,wrong,0.95,'Biron' is incorrect; should be 'Ma'lum bir' or 'Aniq'.
+dc8541119e300d11f656,wrong,0.95,'progresini' is incorrect; should be 'jarayonini' or 'holatini'.
+f16e37da55f15b18d323,wrong,0.95,Missing copula 'hisoblanadi' or 'bo'lib' for natural phrasing.
+add7de89bccdc388ed5e,wrong,0.95,Missing verb 'Yaratish' (Generate); 'xisoboti' spelling error.
+108359d1ecbc932c1634,wrong,0.95,Missing copula 'hisoblanadi' or 'bo'lib' for natural phrasing.
+c83e2b081c0a46e06819,wrong,0.95,Missing copula 'hisoblanadi' or 'bo'lib' for natural phrasing.
+5df31661fca98d38f1a4,wrong,0.95,Missing copula 'hisoblanadi' or 'bo'lib' for natural phrasing.
+7dffa5256e516ca7f114,wrong,0.95,Missing 'Eslatma:' (Note); 'xisobotini' spelling error.
+5d686a10901755e9c00d,wrong,0.95,Missing copula 'hisoblanadi' or 'bo'lib' for natural phrasing.
+b4a4add37513e2372e84,wrong,0.95,Missing copula 'hisoblanadi' or 'bo'lib' for natural phrasing.
+576ccdec09eb0823a4af,wrong,0.95,Missing copula 'hisoblanadi' or 'bo'lib' for natural phrasing.
+c1cc3f1007fdb8f48870,wrong,0.95,Missing copula 'hisoblanadi' or 'bo'lib' for natural phrasing.
+e653d1fe928519aeea3f,wrong,0.95,Missing copula 'hisoblanadi' or 'bo'lib' for natural phrasing.
+c4692908dcccfdd484b0,wrong,0.95,Missing copula 'hisoblanadi' or 'bo'lib' for natural phrasing.
+1e8005e4ecc35c0d8999,wrong,0.95,Missing 'of' equivalent; unnatural phrasing
+51d96c8ca2977e96edc9,wrong,0.95,Missing 'of' equivalent; unnatural phrasing
+88e8d2ce1e32ff27f971,wrong,0.95,Missing 'of' equivalent; unnatural phrasing
+a683e464c096175b9dfe,wrong,0.95,Missing 'of' equivalent; unnatural phrasing
+c804117e66221445317e,wrong,0.9,Missing 'specific' meaning; incomplete translation
+7b59d15c16a8531c5c5b,wrong,0.95,Missing 'of' equivalent; unnatural phrasing
+1a36c6a97db1c295b856,wrong,0.95,Missing 'of' equivalent; unnatural phrasing
+63930f03919c00b6b6de,wrong,0.95,Missing 'of' equivalent; unnatural phrasing
+a60ec3a1ad6d8d263fec,wrong,0.95,Missing 'of' equivalent; unnatural phrasing
+0be6c375b5861916e799,wrong,0.9,'View' mistranslated as 'show' instead of 'view/look at'
+f934f69004f7e5242c5a,wrong,0.9,'zipped' mistranslated as 'archived'; spelling errors
+27e46d48c8369457207f,wrong,0.95,Missing 'of' equivalent; unnatural phrasing
+7cc2786e0854b820ef7b,wrong,0.95,Missing 'of' equivalent; unnatural phrasing
+94ab711895e1557e6701,wrong,0.9,'Display help' mistranslated as 'Provide help'
+a93b5551a0b9e4d79d8b,wrong,0.95,Missing first sentence entirely; only alias note translated
+0f0c17f5c799219081d8,wrong,0.95,Missing 'of' equivalent; unnatural phrasing
+26797d273b678a3655d0,wrong,0.95,Missing 'of' equivalent; unnatural phrasing
+15038af387fb307c078a,wrong,0.9,'action' mistranslated as 'harakat' (movement) instead of 'action/command'
+bd2725debe3d223449e4,wrong,0.95,Missing 'of' equivalent; unnatural phrasing
+e9680bebb190e8397589,wrong,0.95,Missing 'of' equivalent; unnatural phrasing
+0464b80cb0fa4df5deba,wrong,0.9,'list' mistranslated as 'show'; missing bracket notation context
+634e9c25981320a82f13,wrong,0.95,Missing 'of' equivalent; unnatural phrasing
+f8363c3b0dfeaeff7bfd,wrong,0.95,Syntax broken; 'dumpsys' misplaced; meaning distorted
+35b427d98d237e4cce21,wrong,0.9,Missing 'defaults to 10s'; incomplete translation
+59a30cf73575dae27f8a,wrong,0.9,Missing 'output'; spelling error 'malumot'
+b231f43d4c2326453bf1,correct,1.0,
+67e81174362c9e08496c,junk,1.0,Match table/navigation fragment
+c70eca210eaaab647474,correct,1.0,
+ca0d83ab331c886364d9,correct,1.0,
+0289d4ebc81f55802367,correct,1.0,
+f610b89921c650849ff7,minor,0.9,Added 'voqea joyida' not in source
+d42de753ac3b4c0cad22,correct,1.0,
+376d13bb09e2329dd726,junk,1.0,Section header fragment
+c02eaadc898014237dff,junk,1.0,Match table/navigation fragment
+c27bf1b2eaabec91056c,correct,1.0,
+32adcc57954d54baa54d,correct,1.0,
+ae0484d3839d6fa038b1,correct,1.0,
+6ef4bc0a87c954cdacb2,wrong,0.9,"Unnatural phrasing, broken sentence structure"
+6b1e78890fc8d57b2585,correct,1.0,
+8aece26b986557aa8beb,correct,1.0,
+c3245fde47ba97ad735f,junk,1.0,Citation/fragment
+96540a9db8d3989d6e3d,correct,1.0,
+3f59af592745d8550ad6,correct,1.0,
+a7a6c330a09cca31bacf,correct,1.0,
+6786a7f8349e0df814d0,correct,1.0,
+9c0442c7634169e7ebe5,correct,1.0,
+5d0ef66c5fa34fdbbfc2,correct,1.0,
+4be1126505a6df32ab59,junk,1.0,Section header fragment
+d4869e59ef31f5374687,correct,1.0,
+3fa0af56998d7a2ab1c6,correct,1.0,
+d33dff95a69489cd85eb,wrong,0.95,"'grand tour' tarjima xatosi: 'gastrol' emas, 'katta sayohat' bo'lishi kerak."
+d5b36e0f0091572a5faf,junk,0.99,"Faqat ism va yil, to'liq gap emas."
+0ebda9cc75dae64b08d5,correct,0.98,
+d0e06f743a4b9981b43e,junk,0.99,"Bibliografik ma'lumot, to'liq gap emas."
+a5b459d9d0b6e1b6592d,correct,0.97,
+c3583cac1fe94cb495f8,correct,0.98,
+bc00ca47f5af7447b01f,correct,0.98,
+4446252e255e3d1f1ed3,wrong,0.95,"IPA talaffuz belgilari saqlanib qolgan, 'bo'lim' so'zi kontekstga mos emas."
+46caea6b5ff11b98c2a7,wrong,0.95,"'minibüsler' turkcha so'z, o'zbekcha 'minibuslar' bo'lishi kerak."
+6fb05d0536981e0c469a,correct,0.97,
+282c05620f09b3cbfdc0,correct,0.96,
+8c977d2b42ae2c8db46e,correct,0.97,
+29b051f23dee7b6aac52,correct,0.97,
+c19e62685a9577b78839,junk,0.99,"Rasm sarlavhasi, to'liq gap emas."
+39b8a1b57a82dcd99552,correct,0.97,
+d34ba594158cb2a01308,junk,0.99,"Tanga nomi va yillar ro'yxati, to'liq gap emas."
+24a357b055e2348af786,junk,0.99,"Jadval/ro'yxat parchasi, to'liq gap emas."
+4c6776acb0552345585e,correct,0.98,
+03e4e5b3d453bd436c2f,correct,0.98,
+2721fa7fc6b9b37c3127,wrong,0.95,"'BarrymoreAdam' birlashib ketgan, tarjima xatosi."
+2cb85d4be6221c5c6ca8,correct,0.98,
+e0498d4404271e5b94cc,wrong,0.95,"Kitob nomi ingliz tilida qoldirilgan, 'Asker' xato tarjima."
+3154c0c38030fc4cf9aa,wrong,0.95,"Arabcha matn olib tashlangan, 'Amirlik' noto'g'ri tarjima."
+5ede181e9714a32affdc,junk,0.99,"Rasm sarlavhasi, to'liq gap emas."
+3c436bffba8d4f969729,correct,0.98,
+d59514240436050a0e72,correct,1.0,
+11a64f6a969a70604842,correct,1.0,
+c800c6608353f46201cf,correct,1.0,
+4993eddd55b2c0d5f948,correct,1.0,
+d933eb208e397267e978,correct,1.0,
+1c86b2897292df642a7a,correct,1.0,
+e12415e5ef3552f4fd2a,correct,1.0,
+0f64765502669411b787,correct,1.0,
+96d8a0cf52a5b8501077,correct,1.0,
+5e4c16bee095eb5d9920,correct,1.0,
+e2bf783684a5d568ceef,minor,0.9,"'xarakteri' so'zi 'personaji' bo'lishi kerak, lekin ma'no tushunarli."
+23979b84fa5cff2b87bc,correct,1.0,
+59ecf453d55ee8500be7,correct,1.0,
+482cad36a467305f0a0f,correct,1.0,
+2da5f6c927e41bcbfd4b,correct,1.0,
+b2ddf5b2eaeb868c1487,wrong,0.95,"'vodiyesiyaqinidagi' so'zi noto'g'ri yozilgan va ma'no buzilgan, 'viloyatida' bo'lishi kerak."
+6f3562fd0c2ca46bad9c,correct,1.0,
+add1624bf946b9370af4,junk,1.0,"Ma'lumotlar ro'yxati, to'liq gap emas."
+6e1a0f3e3f02ed5ccb47,correct,1.0,
+f917760b8443abb3e218,correct,1.0,
+1bf5e99d4ae50b543938,correct,1.0,
+b14ccd64f22815a2acff,correct,1.0,
+a3542957a63e5a40d3ef,correct,1.0,
+918e99db280b12eb8ef8,correct,1.0,
+cb25af70d132b156ffb6,correct,1.0,
+89605a68330614c2b841,correct,1.0,
+ec99614c86b6c52e4e13,correct,1.0,
+ab65793a61cb6f08b6f3,correct,1.0,
+1cebe7663bb037211e59,correct,1.0,
+6a31267fc049d4a04bb2,correct,1.0,
+54a556d0d22f23be0c0c,correct,1.0,
+1aa3c68d6dc91db28b85,correct,1.0,
+c99ab0e3ba6ddbdee7a2,wrong,0.9,'ishtimoiy tarmog'iga' typo; 'mavzulariga' mistranslation of 'themes' (should be 'soundtracks/musical themes')
+eee605e7d4bd514d4827,correct,1.0,
+8969af542c6f2c74fa69,junk,0.95,"Fragment/title only, not a complete sentence"
+b91e47e8ffb4562e97a1,correct,1.0,
+6f2615fc6b77c671eadd,correct,1.0,
+fa267243cdb3ab626d09,correct,1.0,
+1496eaedac0870aa1f90,correct,1.0,
+0f775e0a6a04e8dca028,correct,1.0,
+ff784a28a096e54bef86,wrong,0.9,Broken syntax: '67 ga mm (2 5/8 in.) keng' is ungrammatical and incomplete
+b5b95cd364f61ccd55b1,correct,1.0,
+eb18af1783cd13f7fb6d,correct,1.0,
+d70693a322ae19b4bd15,correct,1.0,
+f2f56ef006600c8e4761,correct,1.0,
+55c0de901a5a68095083,junk,0.95,"Proper noun/fragment only, not a sentence"
+4bae1e608d146aed9e76,correct,1.0,
+79c890e53b7253173a98,correct,1.0,
+588ed5022a94de1ff8dd,correct,1.0,
+67620fbdc7261fe36631,correct,1.0,
+60e82e172d2604eab3c5,correct,1.0,
+4924d5521cfd32215842,wrong,0.9,'newspapers' incorrectly translated as 'bosmaxonalarda' (printing houses); sentence split awkwardly.
+84326618f00d9b13ee3c,correct,1.0,
+4d447149958fc132c6ae,correct,1.0,
+e7f1533529d6057dd309,correct,1.0,
+5643a4d4e781e138b2d1,correct,1.0,
+36008acf4118c8305b88,wrong,0.9,Retains English pronunciation guide '/ˈ ɛər d r i / AIR -dree'; 'okrug' and 'viloyat' swapped for Alberta/Calgary.
+dfd73b119396da5d314f,correct,1.0,
+78e81ba82d4c4fec852e,correct,1.0,
+8d619c340d9c00d9ba62,correct,1.0,
+af2b33d8da4f1881a837,junk,1.0,Navigation fragment/list of route numbers.
+321a8d45dfc0c14bb3cf,correct,1.0,
+c6cb7e642756876cd7c2,correct,1.0,
+761122bdecf779bbceff,correct,1.0,
+8c8ae5be623cae094d9e,junk,1.0,Image caption fragment.
+a568bcb47c0d9c22e852,correct,1.0,
+47eadf3905608ef9216d,wrong,0.9,Subject-verb agreement error: 'Boston shahar kengashi... deb nomlandi' (council was named instead of named the day).
+28251b1baedcd42bcaa4,junk,1.0,Image caption fragment.
+a6dca6f73f3c303109d1,correct,1.0,
+92a01475f950252b1d13,correct,1.0,
+128f7355169eb7caf019,junk,1.0,Infobox data fragment.
+f7f6e3c3ecb82ad8cf4a,wrong,0.9,Unit mistranslation: '120.14 in' became '120.14 yilda' (in the year).
+9a1cdcf0cce41116d78a,correct,1.0,
+df5947d6d615fecf196c,correct,1.0,
+70cdae41f07ca8bb6cd9,correct,1.0,
+0e61dd5bace394df6432,correct,1.0,
+8375461d7ddf61fb0dc5,correct,1.0,
+fd649fc5377917e90290,correct,1.0,
+6bbaa4d25b161dff14e5,correct,1.0,
+6f4ce5051c6c9aa793cd,correct,1.0,
+cac0e77aa6b6c8fb1d60,correct,1.0,
+1397df5392e19b5616c6,correct,1.0,
+bc0dd740a0e63b112b33,correct,1.0,
+5d6f958398ed1d98ca34,correct,1.0,
+7fd04edd999da6283c20,correct,1.0,
+e137ba1b85e345ee548a,correct,1.0,
+ad7de0482af02e90fa54,correct,1.0,
+04f1a4b9d71928cd8dc3,correct,1.0,
+01a6d9fc53d43de3cab1,correct,1.0,
+16f237a7aefac3ec2a0e,correct,1.0,
+480ab0d0e6caec65d06e,junk,1.0,Citation fragment
+31c475fa072bec34b827,correct,1.0,
+5357c5a2ff5d3335da8b,junk,1.0,Table header and row fragment
+10cc89e04e247dc6ce6b,wrong,1.0,English word 'Russian' retained in text
+a2ffa333d48d5ac8fe74,correct,1.0,
+25ca2b48649b2ca1d28d,correct,1.0,
+9d39be5253f54a84d7cd,junk,1.0,Match table fragment
+ffc9c93a5a04f1357003,correct,1.0,
+f02e6156954e6cdd4574,correct,1.0,
+52dbd0da62a9f1edecca,correct,1.0,
+aee8d33749f81f565a5f,correct,1.0,
+2f5b899c00e403909dd4,wrong,0.9,Maharvis not translated; should be maharviylar
+b8ee3e5b7bb54b1127bb,correct,1.0,
+f0c4e47ebbeb1555b7de,correct,1.0,
+2f4e3993dd267a04178e,wrong,0.9,"Meaning reversed: 'chipped away' means took market share, not lost it"
+09dbfd84d7ae7337d6c0,wrong,0.9,'shahridagi' repeated; missing 'after Putra Mosque' meaning
+e98ce4563645352ba0de,correct,1.0,
+818ff9dc1fa37cc94c50,correct,1.0,
+8c8dfba378352647ca34,wrong,0.9,"'ukasi' means brother; Adele is female, should be 'singlisi'"
+4bf8a457b97a51e73e41,correct,1.0,
+0527c4228c574370a7c3,wrong,0.9,Pronunciation omitted; 'Rasmiy OMRI' awkward; missing closing parenthesis
+5a01773d4edcc9d2b436,correct,1.0,
+ec6d73c661630754bdb2,correct,1.0,
+c2f874348371755b80bd,wrong,0.9,'bosh yozuvchi' unnatural for head writer; 'rejissyori bo'lib ishlagan' awkward
+20e471813468c8581b5f,correct,1.0,
+87d46b6ae398895c6328,correct,1.0,
+d3f5af62fecbbbe6b0b7,wrong,0.9,"'uchinchi o'rinda' means third place, not third board"
+c94d86348226599480e9,correct,1.0,
+5857aa58e553f70a69f3,correct,1.0,
+0a589ff9ccf3b52cd2b1,correct,1.0,
+5be13a08b35c4d9141ec,correct,1.0,
+19664b7deee2cec03ef9,wrong,0.9,English pronunciation text left untranslated; awkward phrasing
+b0e8249dafd2d5c1478e,correct,1.0,
+36607f24515c0e7c508e,correct,1.0,
+d8705727cd19220eb704,correct,1.0,
+5b2911a2e8601fa2181f,correct,1.0,
+9a7815e0aa19fc98b2d2,correct,1.0,
+4d2581640a12bb6d6110,correct,1.0,
+8dcf6f587fef7d6d46a4,correct,1.0,
+c7b7e81b676e9ab3762a,correct,1.0,
+1f30df40203daad904b1,correct,1.0,
+1dbdca1c5e026da3c030,correct,1.0,
+43b1d0d929b707abcf98,correct,1.0,
+7ddf6396144703856c65,correct,1.0,
+97c4971efdc274e07604,correct,1.0,
+a7c6b4bf7e642229aa0f,wrong,0.9,'basketbol o'yinidan ancha o'tib ketdi' is unnatural; should be 'basketbol o'ynashdagi eng yaxshi yillaridan o'tib ketgan edi'.
+0f2b533719508e8baf15,correct,1.0,
+6882f49e84c2434a8932,correct,1.0,
+51161ac6481ff27dcffd,wrong,0.95,'disposals' mistranslated as 'gol uradi'; 'booting 9 goals' mistranslated as '9 ta gol kiritib beradi' (redundant/incorrect).
+cc93f5b6e4ffa849e2d9,correct,1.0,
+7ea55a75876588ccdd9c,correct,1.0,
+077e2d79bb5e6c874f84,wrong,0.9,Punctuation and formatting errors; Arabic script and quotes misplaced; unnatural phrasing.
+e0632588857846355a87,correct,1.0,
+b2c1bee88b606504425c,correct,1.0,
+0df74b9ded401d11da6a,correct,1.0,
+2a78fd396cd70c22c583,correct,1.0,
+6365e91e6921a214481b,wrong,0.9,'split' mistranslated as 'bo'linishi'; should be '400 metrlik masofani bosib o'tish vaqti'.
+6ecffda8630a59fd0ea7,correct,1.0,
+f2f83a870a1bc63e6836,correct,1.0,
+40f64a4a1b29a628fa73,correct,1.0,
+a836611ccf9ba9b42d81,correct,1.0,
+26b1e59a28c6d4be4f64,correct,1.0,
+8d662be9071ebc8327b0,correct,1.0,
+07c08512ed245fbf9c22,correct,1.0,
+237a5041fcc7e204033f,correct,1.0,
+541726bd8d55e6d7d392,minor,0.9,Valenciaada -> Valenciada (typo)
+c48fabc971bfe4df4d81,minor,0.9,Missing 'municipality' (munitsipalitet)
+cfc7e718af38a8848e92,correct,1.0,
+c1218bbb45e13fc68da7,correct,1.0,
+f1cb3903f35038991669,correct,1.0,
+02b28a43919c78a0e9bd,correct,1.0,
+cd436867bae1d9dc5b31,correct,1.0,
+56358a64321090773c60,minor,0.9,Missing 'top' (eng yaxshi) and 'accounting for' (hisobga olinsa)
+c54972007c532b4831d4,correct,1.0,
+670626fbf9fce9f97ab8,correct,1.0,
+b23394768b020b629921,correct,1.0,
+fa89eff61d4040f6006e,correct,1.0,
+86848cf27502acacc99e,correct,1.0,
+6bda61bab56ffa0becad,correct,1.0,
+6f1b48fdad67f5cd6254,correct,1.0,
+8c4262685e81cb1524c4,correct,1.0,
+e6f339fd7237e527f5aa,correct,1.0,
+57001dff11fbe99fc296,correct,1.0,
+d3dd4b767931c1866e8d,correct,1.0,
+917c39dd5340af1c4fb0,correct,1.0,
+db9a030ee2ffe7a12415,correct,1.0,
+fd7474891c9ca6822200,correct,1.0,
+fb4462b6a2d46c82bd5e,wrong,0.9,"""6–10 hisobida"" noto'g'ri tarjima; ""class 6–10"" sport toifasini anglatadi, hisob emas."
+48c2841a1ae514194504,correct,1.0,
+34a938f886979011f252,correct,1.0,
+826dcdc8b995ef8d02ba,correct,1.0,
+37bf5a80f499472535fd,correct,1.0,
+3a13db9f9e537ca78b27,wrong,0.95,"""Persian"" so'zi tarjima qilinmagan, qavs ichida inglizcha qolgan."
+24c0bfe853100661369a,correct,1.0,
+d5a0d29c87d042ddd9c0,correct,1.0,
+32a12fe90ea1f66f751a,wrong,0.9,"""Russian"" tarjima qilinmagan; ""Smelovsky Selsoviet"" noto'g'ri tarjima qilingan."
+849e4046d878b89cda89,correct,1.0,
+e94419b5a25cdbaa562c,correct,1.0,
+095285d6cf9f462ba6ee,correct,1.0,
+e3e3137ab833814374de,wrong,0.95,"""rangli odamlar"" noto'g'ri tarjima; ""people of color"" kontekstda ""ozchilik vakillari"" yoki ""qora tanlilar"" bo'lishi kerak."
+fc7c35136e254de966cc,correct,1.0,
+176e1bb2a96fa156c8b8,wrong,0.9,"""Lincoln Mayor"" tarjima qilinmagan; ""53% dan 47% gacha"" noto'g'ri, ""53% ga 47%"" bo'lishi kerak."
+9efedc7a9568d128ccc9,correct,1.0,
+b77ee463ab116e9e8326,wrong,0.95,"So'z tartibi noto'g'ri: ""faqat xizmat ko'rsatadi KA09..."" o'rniga ""faqat KA09... xizmat ko'rsatadi"" bo'lishi kerak."
+dc361567ad084be0a5cb,correct,1.0,
+d026c66a7a03cf90dece,correct,1.0,
+426fd7154498ba67320f,correct,1.0,
+bdd426b63f8ec8dee9bf,correct,1.0,
+a00989694e5085ca63c0,wrong,0.95,"""kalxatchi"" noto'g'ri tarjima; ""rookie"" sportda ""yangi o'yinchi"" yoki ""debyutant"" bo'lishi kerak."
+f53e4c3fa0b955e9905b,correct,1.0,
+15c372d4173d3eebc8fb,correct,1.0,
+8f3e292d380e2a3b213d,correct,1.0,
+766b9296667e180116db,correct,1.0,
+62a7b4dbab248ac33f25,correct,1.0,
+4f16378a5c6ea9105adf,correct,1.0,
+d8311de34d729d1845d3,correct,1.0,
+4d3c9621da2e914fc1d4,correct,1.0,
+5f0e51954b33421a0ab1,junk,1.0,"List/navigation fragment, not a complete sentence"
+f28f37c67bf41dacf463,correct,1.0,
+9b7e8bfe671874571771,correct,1.0,
+a37773bd9d706769cf05,correct,1.0,
+94562623c85916b55ad3,correct,1.0,
+ce6d6288bd82885a1df2,correct,1.0,
+1eb69a9cf5d13d53f38f,correct,1.0,
+5aafb8d1a89dd7433d53,correct,1.0,
+2af3a1810f913e0bf263,correct,1.0,
+00e478c607c2f8179e8f,junk,1.0,"Fragment, not a complete sentence"
+50ef1f8885c1b6084b30,correct,1.0,
+14682540a4910922c9ca,correct,1.0,
+e89a7fcd8cde3061a1c3,junk,1.0,"Citation fragment, not a complete sentence"
+e9a81ce02a1ccec282ba,correct,1.0,
+2fe529aaccf31b5d9f59,correct,1.0,
+f7d1743f91a03e62010b,correct,1.0,
+add2f8c8869de3fc04a2,junk,1.0,"Image caption fragment, not a complete sentence"
+29b42723786aa070dbb0,correct,1.0,
+155a0b53af52e7647d5e,correct,1.0,
+ba1560cf15ea6fefd067,correct,1.0,
+326798c65ab3e0232e18,correct,1.0,
+95715ffbf90758584539,correct,1.0,
+711bc0a41fb4a2c31f8b,correct,1.0,
+d6cc1099716f1ebd350d,correct,1.0,
+0949c7fcb32d7e6c2ed5,correct,1.0,
+ce59e56b8261b7a602c9,correct,1.0,
+ff4bd9c81a5cd4d97b62,correct,1.0,
+f74ac539ec097597587c,wrong,0.9,"Sentence incomplete, ends abruptly with '1.'"
+e53d5e60acf7a5337bd8,correct,1.0,
+a733bbaf3a615b6a4c51,wrong,0.9,"'ÝU' is a typo for 'U' (She), unnatural phrasing."
+7de7c74d75739504d20f,correct,1.0,
+19399df54148bd1f87ef,correct,1.0,
+db56a427fddabed1d5b6,correct,1.0,
+7ae0678578feb798b18e,correct,1.0,
+138dfa961acefd9497d2,correct,1.0,
+a22d3be9ba1aee968961,correct,1.0,
+f5b97587450beca3af78,correct,1.0,
+d86cef4fb1ea7d00ac3a,junk,1.0,"Website title/navigation fragment, not a sentence."
+a063d65b99b47e549360,correct,1.0,
+1dc8982767264afdebfe,correct,1.0,
+62fa7738476a14b6f50a,correct,1.0,
+40cc11a4a0155211395d,correct,1.0,
+22b7e33aa7367a7ebfdf,correct,1.0,
+55a719bd6ec3be75c972,minor,0.9,"'morga' o'rniga 'morg' yoki 'gektar' ishlatilishi kerak, 'qishloq xo'jaligi' o'rniga 'ekin maydoni' bo'lishi lozim."
+11d9df62b3773e668ec1,minor,0.9,"'The Absentee Landlord' nomi tarjima qilinmagan, lekin asl nomni qoldirish qabul qilinadi."
+84763bcb0794d506aae8,correct,1.0,
+5486b031b57cb1f9dbbe,wrong,0.9,"'Prince' nomi 'Shahzoda' deb tarjima qilingan, bu noto'g'ri; 'Donny' o'rniga 'Donni' ishlatilgan."
+e7f7239ad330ac22605c,correct,1.0,
+853ec90747f2b7c18813,correct,1.0,
+2df0605df993b23caa65,correct,1.0,
+a5e0eb2a9623d9f0299b,correct,1.0,
+168799c7cc7eee3c0bdc,minor,0.9,"'1967 yilda' o'rniga '1967-yilda' bo'lishi kerak, bo'sh joydan oldin nuqta bor."
+8be111935356581c5622,wrong,0.9,"'Parish qo'mitasi' o'rniga 'Mahalliy qo'mita' yoki 'Cherkov qo'mitasi' bo'lishi kerak, 'Parish' inglizcha qoldirilgan."
+055e58584da34a495e60,correct,1.0,
+01b1f3db5bb6c769e53b,correct,1.0,
+b6160c65d149d3f08379,junk,1.0,"Veb-sayt navigatsiyasi va ro'yxat tavsifi, to'liq gap emas."
+70adc88956ca96e00bf5,wrong,0.9,"'chizilgan' o'rniga 'suratga olingan' yoki 'tasvirlangan' bo'lishi kerak, 'pictured' noto'g'ri tarjima qilingan."
+772401dec64861bac821,correct,1.0,
+a4dbbb14d7aa4abf17a7,correct,1.0,
+1e1e4e8e550c58a0451b,correct,1.0,
+0e0f03200bf6e3f56772,correct,1.0,
+ee6df01069983d865c6b,correct,1.0,
+61a0a69cf14f7ff41e11,correct,1.0,
+1869c4800e951b37a153,junk,1.0,"Faqat yo'l nomlari ro'yxati, to'liq gap emas."
+01e49affe23f12692eb4,correct,1.0,
+4903a5aa42b4ac2c9991,correct,1.0,
+b0a612bac52b65e9da08,correct,1.0,
+d841d6b936ffd08a0227,wrong,0.9,"'headLand' nomi tarjima qilinmagan va kichik harf bilan boshlangan, bu noto'g'ri."
+533d62e5068091d7b871,correct,1.0,
+bfbc2f5b5c386a1af988,correct,1.0,
+6065524c27021b82adce,correct,1.0,
+77a1ad1b48e020d52c68,correct,1.0,
+4f4de3e6a87f204ab054,correct,1.0,
+085a8066305815235175,correct,1.0,
+26e53cd7e75ea2f3ca4d,correct,1.0,
+a0c9c2a18893d1881480,correct,1.0,
+d834ca64ee33367ebd16,correct,1.0,
+0e927e496dd6c001870d,correct,1.0,
+cbe4dbd6e1da5f0c113d,correct,1.0,
+689845f3ee0e23c380ec,correct,1.0,
+409ecd7e63057c578de3,correct,1.0,
+4f06fd0a904675eb544c,junk,1.0,"navigatsiya/kurslar ro'yxati, to'liq gap emas"
+dbc0d82f50b02f1330b9,correct,1.0,
+3bdd49c5e07a5d3e7f43,correct,1.0,
+1681fba4d8cdd3a57b7c,correct,1.0,
+1e0948e9deff343e1eb2,correct,1.0,
+dd5838cfef9f3ff6d516,correct,1.0,
+d489fde684225be76013,correct,1.0,
+b74bdb5199f7fe3c574e,correct,1.0,
+2805154d2b204e38ed46,correct,1.0,
+77938f566faeac914aca,correct,1.0,
+fb645a81339d276d77ca,correct,1.0,
+3e57418ce2e1a1047e22,correct,1.0,
+ec5c49c2890b2b09a760,correct,1.0,
+71f664417f30808f0fa2,correct,1.0,
+68876c69cf84cba0bf7e,wrong,0.9,"incomplete sentence, missing verb at the end"
+d4cda98bd6e0b691cbbd,correct,1.0,
+78c6bdd60ebd4ef6099e,correct,1.0,
+8f77b700639f5844be19,junk,1.0,list titles/navigation fragments
+feb13e1cc42c03ddf588,correct,1.0,
+edd60d8dfb593eba5011,correct,1.0,
+2a47edb2bf81522c4f2f,correct,1.0,
+7273e32739a5fd43217e,correct,1.0,
+f35c5f5b360e99acce61,correct,1.0,
+1d8f02ac65ee659c9f3d,correct,1.0,
+8dc17fd77252e52e087d,correct,1.0,
+e8967afd9b9a30c23d57,correct,1.0,
+97c93dda7b6972a8c582,correct,1.0,
+b49415bec12334cb2b73,correct,1.0,
+9b1c61f312ce2633adb2,correct,1.0,
+60485706411a34bcece9,correct,1.0,
+71ee3db862fc687e5a9b,wrong,0.9,"mistranslation: 'St.' left as is, 'shahrida' wrong for village, causal link mistranslated"
+cc56204e803c382f3835,wrong,0.9,'fatally injured' mistranslated as 'og'ir jarohatlangan' (seriously injured)
+0ee099b7c10c6c725228,correct,1.0,
+0e12d3503e74aa9e1504,correct,1.0,
+b9ba34259dd637f48e64,correct,1.0,
+3ccca38f1abf9f4537ac,correct,1.0,
+189b835c2a44b362139f,correct,1.0,
+70e3f47fcb0c9ccb4a62,correct,1.0,
+e32917690b9e72112a44,correct,1.0,
+26af1a50790949c23d2b,correct,1.0,
+d93a3d9103f5e185adb3,correct,1.0,
+3dfe8d85d9e443d737ee,correct,1.0,
+f691125a504f0120d47d,correct,1.0,
+b4979f671aae52ef26fd,correct,1.0,
+eb4e38ab912177fe841e,correct,1.0,
+e65c899d53bded2090b8,correct,1.0,
+9beeb91919d3a3b1dc73,junk,1.0,Match table/navigation fragment
+3255f9b6894177c4f7a5,correct,1.0,
+2a5245e2c455822a3a15,correct,1.0,
+88586c3801dd47967cfa,junk,1.0,Match table/navigation fragment
+04edb9123aefd6ac0e29,correct,1.0,
+4941a5a0e4c971bf92e7,correct,1.0,
+9f2a1acd5291bc5e78fd,correct,1.0,
+b12196b7be40e19ec565,correct,1.0,
+544654dd5e488182bd27,correct,1.0,
+60443c34b6a613792cc5,correct,1.0,
+6bf0bc3122f655c5b911,correct,1.0,
+93731d847ca7967188a1,correct,1.0,
+5be916693463aa60dbfc,correct,1.0,
+234b01ea8a57b827bb7c,correct,1.0,
+34f89d6f7f8da7d4a295,wrong,1.0,Units left in English
+63ac7be1e8d695720277,correct,1.0,
+3b7d992bd9db37a1f612,correct,1.0,
+7e2f725bc960e810c78a,correct,1.0,
+d3aef0daefbb83a0086f,minor,0.9,Sallivan -> Sullivan (transliteration typo)
+90ac390994816464cb7d,correct,1.0,
+d079aa07e63288b19b91,correct,1.0,
+0727bc9af990b1e12142,minor,0.9,teleseriallarida (plural) -> teleserialida (singular)
+f3d45d45b1f3f2f40ecb,correct,1.0,
+79e18a3ee297128ec3b3,minor,0.9,Celsius -> Celzijus (name transliteration mismatch)
+276e0302d59b911cd764,correct,1.0,
+d8a16681b99f86624772,minor,0.9,[ ja ] artifact retained in translation
+83818d3676aa7bdd6652,correct,1.0,
+3e09624b07f804fb323a,minor,0.9,vice-kapitanlikni o'z zimmasiga oldi (tense mismatch: served vs took on)
+efd3f6318cd1a5286618,correct,1.0,
+296f094a6222a03abb8a,correct,1.0,
+5b1b52601a1b94da9c9e,correct,1.0,
+b0afac38acf15984aaae,correct,1.0,
+a2ee1c9ff0dddfcae4b2,minor,0.9,1945-ilda -> 1945-yilda (typo)
+00bad7a0b534c7d5dd1b,correct,1.0,
+bb97df3dabd76cd177fe,correct,1.0,
+9ecad6f16d97af1316bf,correct,1.0,
+c03c4336cbb4b8196584,correct,1.0,
+6997c13aca90303de775,junk,1.0,List of locations/titles without sentence structure
+0e00e4d1070bc488fe91,correct,1.0,
+0314bda688740e8e3a13,minor,0.9,Omitted Greek pronunciation and nationality details
+2e69317abb23b5a00df6,junk,1.0,"Disambiguation list fragments, not a coherent sentence"

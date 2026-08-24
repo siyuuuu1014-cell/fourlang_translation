@@ -1,0 +1,13 @@
+﻿src_lang,tgt_lang,source_text,translation,latency_seconds
+zh,en,我明天早上八点去机场。,I will go to the airport tomorrow at 8am.,0.1681
+zh,ru,我明天早上八点去机场。,Завтра утром в восемь поедем в аэропорт.,0.0911
+zh,uz,我明天早上八点去机场。,Sabah 8 daqiqada aeroportga qaytdim.,0.0676
+en,zh,I will go to the airport at eight tomorrow morning.,我明天早上8点上机场。,0.0674
+en,ru,I will go to the airport at eight tomorrow morning.,В аэропорт поедем завтра в восемь утра.,0.0724
+en,uz,I will go to the airport at eight tomorrow morning.,Sabah 8 daqiqada aeroportga qaytdim.,0.0609
+ru,zh,Завтра утром в восемь я поеду в аэропорт.,"明天早上8点,我要去机场。",0.0698
+ru,en,Завтра утром в восемь я поеду в аэропорт.,Tomorrow at 8 am I will go to the airport.,0.0775
+ru,uz,Завтра утром в восемь я поеду в аэропорт.,Sabah 8 daqiqada aeroportga qaytdim.,0.0673
+uz,zh,Men ertaga ertalab soat sakkizda aeroportga boraman.,"但是,他还会在空港上发出一声声。",0.0874
+uz,en,Men ertaga ertalab soat sakkizda aeroportga boraman.,But it's a good time to get to the airport.,0.0849
+uz,ru,Men ertaga ertalab soat sakkizda aeroportga boraman.,"Вместе с тем, в аэропорту «Бордан».",0.0979

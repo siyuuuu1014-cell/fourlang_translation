@@ -1,0 +1,101 @@
+﻿src_lang,tgt_lang,source,reference,prediction,latency
+uz,en,Xayrli tun.,Good night.,idagi tun.,0.041689157485961914
+uz,en,Laurie qayerda?,Where is Laurie?,idagi Laurie?,0.03955721855163574
+uz,en,Men och edim.,I was hungry.,idagi edim.,0.04442572593688965
+uz,en,Mening soatlarim qani?,Where are my watches?,vlarim qani?,0.051665544509887695
+uz,en,Juda antigigiyenik bo‘lganidan jamoat hojatxonalaridan foydalanishni rad etaman.,"I refuse to use public restrooms, as they are very unhygienic.",idagi juda antikigiyenik bo‘liqidan qo‘yot hojatxonalaridan qo‘ymaydi.,0.17164015769958496
+uz,en,Kitoblar qayerda?,Where are the books?,bilan qaytadi?,0.06668734550476074
+uz,en,Qishloq joyida yashayman.,I live in a rural area.,idagi joyida yashayman.,0.07248044013977051
+uz,en,Pivo ichasizmi?,Do you drink beer?,bilan yoqisizmi?,0.06411147117614746
+uz,en,Mening bir do'stim bor.,I have a friend.,idagi bir do'stim bor.,0.05317044258117676
+uz,en,Kitobingiz stol ustida.,Your book is on the desk.,bilan tavsiya qilmaydi.,0.0440976619720459
+uz,en,Nega itlarni shunchalik yomon ko‘rasan?,Why do you hate dogs so much?,bilan shunchalik yomon ko‘rasan?,0.06722879409790039
+uz,en,Bir xatni o'qidim.,I read a letter.,bilan o‘zim.,0.051190853118896484
+uz,en,Uyingiz bormi?,Do you have a house?,bilan bormi?,0.036016225814819336
+uz,en,"Bugun, men osh pishirishni hohlayman.","Today, I want to cook pilaf.",", men yaxshi pishirishi hohlayman.",0.07606053352355957
+uz,en,Men bultur kasal bo'ldim.,I fell ill last year.,bilan bo‘lmaydi.,0.04644632339477539
+uz,en,Qancha pul istaysan?,How much money do you want?,bilan nima qilasizmi?,0.043775320053100586
+uz,en,Men kitob o‘qishni yaxshi ko‘raman.,I like to read books.,idagi o‘shaq o‘shaq o‘shaq o‘shaq.,0.10658788681030273
+uz,en,Hayirli tong.,Good morning.,idagi Tong.,0.03174304962158203
+uz,en,Qotibqobsanku!,You are drunk!,bilan!,0.0354464054107666
+uz,en,Nimaga ishonasiz?,What do you believe in?,bilan nima?,0.03906655311584473
+uz,en,Bu it emas.,This is not a dog.,bilan emas.,0.03428936004638672
+uz,en,Bungacha men taksi haydovchisi bo'lib ishlaganman.,"Before this, I worked as a cab driver.",idagi taksi haydovlarni bo'lib ishlaganman.,0.0799262523651123
+uz,en,Siz mening qushlarimni ko'rmadingizmi?,Didn't you see my birds?,bilan siz qushlarimni ko'rmadingizmi?,0.08074140548706055
+uz,en,Itim o'zg'ir.,My dog is fast.,bilan o‘z.,0.04184246063232422
+uz,en,Qancha pul xohlaysiz?,How much money do you want?,bilan qaytadi?,0.03488445281982422
+uz,en,Uying bormi?,Do you have a house?,idagi bormi?,0.03578782081604004
+uz,en,Kim bilan gaplashishni xohlaysan?,Who do you want to speak to?,bilan kim bilan gaplashishni xohlaysan?,0.06953620910644531
+uz,en,Men uni imzolashni xohlamayman.,I don't want to sign it.,idagi bir-birini yetkazmayman.,0.06644678115844727
+uz,en,Hush keldingiz!,Welcome.,bilan qilmaydi!,0.039536476135253906
+uz,en,Faqat birinchi tarjimani o‘qidim.,I read only the first translation.,idagi ilk tarjimani o‘qiyim.,0.06894183158874512
+uz,en,Hindistonda yashayman.,I live in India.,idagi indi yashayman.,0.04829216003417969
+uz,en,O'yinni yutdingizmi?,Did you win the match?,bilan o‘zingizmi?,0.05532479286193848
+uz,en,Qirolichani ko'rdim.,I saw the queen.,idagi qirolichani ko'rdim.,0.06119251251220703
+uz,en,Ayollarning basketbol komandasining erkak murabbiyi bor.,The women's basketball team has a male coach.,idagi basketbol komandasi erak murabbiy bor.,0.0713505744934082
+uz,en,Sen ham kelolasan.,"You can come, too.",bilan ham qilmaydi.,0.03984665870666504
+uz,en,Men vrach emasman.,I'm not a doctor.,idagi emasman.,0.038099050521850586
+uz,en,Mahmud bekor yurishni yoqtirmaydi.,Mahmud abhors being idle.,", Mahmud bekor yurishini yoqtirmaydilar.",0.08543276786804199
+uz,en,Tom bolalarning e’tiborini jalb qilishga harakat qildi.,Tom tried to catch the children's attention.,idagi Tom bolligi e’liqini jalb qilishga qo‘ydilar.,0.10110163688659668
+uz,en,Menga kalitlarim kerak.,I need my keys.,bilan nima qilaman.,0.05492234230041504
+uz,en,Dunyoni kim boshqaradi?,Who rules the world?,bilan kim qilmaydi?,0.04004049301147461
+uz,en,Bu suratda qancha qiz bor?,How many girls are in this picture?,bilan bu suratda qarcha qiz bor?,0.06082463264465332
+uz,en,Olmalarni va apelsinlarni qiyoslayapsan.,You are comparing apples and oranges.,vlar va apelsinlari qiyoslayapsan.,0.07700729370117188
+uz,en,Men kecha maktabga bordim.,I went to school yesterday.,bilan borib qoldim.,0.04298663139343262
+uz,en,Ikki mushugim bor.,I have two cats.,idagi mushugim bor.,0.05084848403930664
+uz,en,Bu narsa nima?,What's this?,bilan narsa nima?,0.03880119323730469
+uz,en,Sen o'qituvchi emasmiding?,Didn't you use to be a teacher?,", siz o‘zingizga o‘zingizmi?",0.07908439636230469
+uz,en,Badaviylar choʻlda yashaydi.,Bedouins live in the desert.,vlar choʻlda yashaydi.,0.06264138221740723
+uz,en,Mehmonxona qayerda?,Where is the hotel?,idagi Mehmoniko?,0.0426936149597168
+uz,en,Men buni imzolashni xohlamayman.,I don't want to sign it.,bilan buni qaytmayman.,0.054793596267700195
+uz,en,Bugun maktabda nimani o‘rganding?,What did you learn at school today?,bilan nima o‘rganding?,0.05270648002624512
+uz,en,Seni kutaman.,I'll wait for you.,uni qildim.,0.053862571716308594
+uz,en,Sen yeyapsan.,You are eating.,bilan yoqtiradi.,0.0389246940612793
+uz,en,Nima uchun siz saytingizni yangilamaysiz?,Why don't you update your website?,bilan sizning nima qilamiz?,0.05736064910888672
+uz,en,Ishingizni qiling!,Mind your own business!,bilan ish qiling!,0.03799843788146973
+uz,en,Pochta qo'ng'ir bino.,The post office is the brown building.,idagi qo'ng'ir bo'ladi.,0.05868721008300781
+uz,en,Sizni tushunmayman.,I don't understand you.,bilan sizni qilmaydi.,0.04796314239501953
+uz,en,Xohlagan tilingizda yozishingiz mumkin. Tatoeba saytida barcha tillar tengdir.,"You may write in any language you want. On Tatoeba, all languages are equal.",idagi qo‘yishingizingiz. tatoeba saytida qo‘yishingiz qo‘yishingiz.,0.11541223526000977
+uz,en,Sen mening volidamsin.,You are my mother.,bilan sizni bilasiz.,0.04504847526550293
+uz,en,Tayyorman.,I'm ready.,bilan.,0.03246021270751953
+uz,en,Har bir rangning ma'nosi bor.,Every colour has a meaning.,idagi bir rangning ma'nosi bor.,0.05841064453125
+uz,en,Xavfliman.,I'm dangerous.,vlar.,0.030720949172973633
+uz,en,Mening qushlarimni ko'rmadingmi?,Didn't you see my birds?,bilan qushlarimni ko‘rmadingmi?,0.07119321823120117
+uz,en,Lori stulga o'tqizdi.,Laurie sat on the chair.,bilan o‘tqizdi.,0.05222368240356445
+uz,en,Xonangizga boringiz!,Go to your room!,idagi boringiz!,0.03981924057006836
+uz,en,Ularning mushuki yo‘q edi.,They didn't have a cat.,idagi mushuki yo‘q edi.,0.061949729919433594
+uz,en,Nima bo'ldi?,What's the matter?,nima bo‘lmaydi?,0.04866147041320801
+uz,en,U senga nega yordam bermadi?,Why didn't he help you?,bilan bermadi?,0.0701453685760498
+uz,en,Bolalar hayotimizning gullari.,Children are the flowers of our lives.,bilan so‘ng emas.,0.043303728103637695
+uz,en,U siz uchun yetarli emasmi?,Isn't it enough for you?,bilan sizga yetarli emasmi?,0.05532050132751465
+uz,en,Kofe sovuq.,The coffee is cold.,idagi kafe.,0.041103363037109375
+uz,en,Sen yeyapsan.,You eat.,bilan yoqtiradi.,0.043350934982299805
+uz,en,Uni oʻqishim kerak.,I've got to read it.,uni oʻshim qoʻydim.,0.06024646759033203
+uz,en,Diqqatingiz uchun rahmat.,Thank you for your attention.,bilan rahmat qilmaydi.,0.05414152145385742
+uz,en,Tom yoshligida kosmonavt bo‘lmoqchi ekan.,Tom wanted to be an astronaut when he was young.,idagi Tom yorligida kosmonavt bo'lmoqchi yo'q.,0.09586548805236816
+uz,en,Endi kimga ishonishni bilmayman.,I don't know who to believe anymore.,bilan kimga bilmayman.,0.05617213249206543
+uz,en,Baliqni yaxshi ko‘rmayman.,I don't like fish.,bilan o‘zi qilmaydi.,0.061498403549194336
+uz,en,Nima gap?,What happened?,bilan gap?,0.03848075866699219
+uz,en,Go‘l tikansiz bo‘lmaydi.,There are no roses without thorns.,bilan bo‘lmaydi.,0.05800008773803711
+uz,en,Shakar shirin.,The sugar is sweet.,idagi shakar planlar.,0.043929338455200195
+uz,en,U bu yerda.,She is here.,idagi bu yerda.,0.04467129707336426
+uz,en,O'qituvchi bo'lmoq istayman.,I want to be a teacher.,idagi o‘zlar bilan o‘zlar.,0.08282470703125
+uz,en,Ovqat qayerda?,Where is the food?,bilan qaytaradi?,0.05169534683227539
+uz,en,Bir odam ko'rmayman.,I don't see a man.,idagi odam ko'rmayman.,0.05437970161437988
+uz,en,Ko'rasiz.,You will see.,bilan ko‘rsatadi.,0.04502153396606445
+uz,en,Sensiz hayot barbod.,Life's a ruin without you.,bilan sizga barbod.,0.04624819755554199
+uz,en,U doktor emas.,He is not a doctor.,idagi doktor emas.,0.035303354263305664
+uz,en,"Salam, eski do'stim!","Hello, old friend!",", sizga oldim!",0.04569411277770996
+uz,en,Sen tinglaysan.,You will listen.,bilan qildingiz.,0.038392066955566406
+uz,en,O'tgan hafta harorat noldan yuqori edi.,The temperature was above zero last week.,bilan o'tkazish hafta harorat noldan qo'yadi.,0.09021496772766113
+uz,en,Soatlarim qani?,Where are my clocks?,vlarim qani?,0.06005263328552246
+uz,en,G'ayritabiiy tush ko'rdim.,I dreamt a strange dream.,bilan g‘ayritabiiy q’rdim.,0.08042240142822266
+uz,en,Bu kitobning muallifi kim?,Who is the author of this book?,bilan kimdir?,0.06419920921325684
+uz,en,Matematikani yomon ko'raman.,I hate maths.,idagi matematika yomon ko'raman.,0.05857992172241211
+uz,en,Bugun kim yo'q?,Who is absent today?,bilan kim yo'q?,0.045006752014160156
+uz,en,Bahor keldi.,Spring has come.,idagi keldi.,0.03712105751037598
+uz,en,Tom allaqachon o'z davomchisini tanlab bo'lgan.,Tom has already chosen his successor.,idagi Tom alqachon o'z ishlatishini tanlab bo'ladi.,0.10304546356201172
+uz,en,Bo'yashni o'rganish uchun Frantsiyaga boraman.,I'll go to France to study painting.,idagi bo'yashni o'tkazish uchun Frantsiya boraman.,0.09560418128967285
+uz,en,Men uch yil ofitsiant bo'lib ishladim.,I worked as a waiter for three years.,bilan bo'lib bo'lib ishladim.,0.06146597862243652
+uz,en,Go‘l tikansiz bo‘lmaydi.,Every rose has its thorns.,bilan bo‘lmaydi.,0.05735492706298828
+uz,en,Hayirli kun.,Good afternoon.,idagi kun.,0.03826761245727539

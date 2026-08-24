@@ -1,0 +1,20 @@
+{
+  "dataset_name": "public_en_uz_5k_v2",
+  "actual_pairs": 5000,
+  "train_pairs": 4750,
+  "validation_pairs": 250,
+  "quality_controls": [
+    "basic_filter",
+    "LaBSE",
+    "Qwen audit",
+    "English leakage filter",
+    "citation/list filter"
+  ],
+  "source_counts": {
+    "wikimedia": 4756,
+    "Tatoeba": 240,
+    "tldr-pages": 4
+  },
+  "human_review_required_before_training": true,
+  "warning": "Automated quality filtering and public availability do not constitute legal clearance."
+}

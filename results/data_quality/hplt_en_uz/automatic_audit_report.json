@@ -1,0 +1,29 @@
+{
+  "rows": 10000,
+  "automatic_flag_counts": {
+    "empty": 0,
+    "identical": 0,
+    "length_ratio": 177,
+    "very_short": 243,
+    "number_mismatch": 531,
+    "web_noise": 13,
+    "repeat": 0,
+    "low_aligner": 6064,
+    "low_bicleaner": 1116,
+    "low_bifixer": 187
+  },
+  "automatic_flag_percent": {
+    "empty": 0.0,
+    "identical": 0.0,
+    "length_ratio": 1.77,
+    "very_short": 2.43,
+    "number_mismatch": 5.31,
+    "web_noise": 0.13,
+    "repeat": 0.0,
+    "low_aligner": 60.64,
+    "low_bicleaner": 11.16,
+    "low_bifixer": 1.87
+  },
+  "any_flag_count": 6807,
+  "review_file": "D:\\dev\\projects\\fourlang_translation\\results\\data_quality\\hplt_en_uz\\manual_review_200.csv"
+}

@@ -1,0 +1,45 @@
+{
+  "dataset_name": "public_en_uz_5k_v1",
+  "target_pairs": 5000,
+  "actual_pairs": 5000,
+  "selection": {
+    "cheap_filters": true,
+    "semantic_model": "sentence-transformers/LaBSE",
+    "labse_min": 0.7,
+    "llm_auditor": "qwen-max",
+    "llm_label": "correct",
+    "llm_min_confidence": 0.88,
+    "human_review_required_before_release": true
+  },
+  "splits": {
+    "train_pairs": 4750,
+    "validation_pairs": 250
+  },
+  "sources": [
+    {
+      "source": "Tatoeba",
+      "version": "v2026-07-08",
+      "url": "https://object.pouta.csc.fi/OPUS-Tatoeba/v2026-07-08/moses/en-uz.txt.zip",
+      "license": "CC BY 2.0 FR",
+      "commercial_status": "attribution_required",
+      "homepage": "https://opus.nlpl.eu/datasets/Tatoeba"
+    },
+    {
+      "source": "tldr-pages",
+      "version": "v2026-07-07",
+      "url": "https://object.pouta.csc.fi/OPUS-tldr-pages/v2026-07-07/moses/en-uz.txt.zip",
+      "license": "CC BY 4.0 (upstream pages; verify OPUS package metadata)",
+      "commercial_status": "attribution_and_metadata_review_required",
+      "homepage": "https://github.com/tldr-pages/tldr"
+    },
+    {
+      "source": "wikimedia",
+      "version": "v20260327",
+      "url": "https://object.pouta.csc.fi/OPUS-wikimedia/v20260327/moses/en-uz.txt.zip",
+      "license": "Upstream Wikimedia terms vary; commonly CC BY-SA/GFDL",
+      "commercial_status": "attribution_sharealike_legal_review_required",
+      "homepage": "https://opus.nlpl.eu/datasets/wikimedia"
+    }
+  ],
+  "warning": "Public availability and automated quality acceptance do not constitute commercial legal clearance. Preserve attribution/provenance and obtain license review before release."
+}

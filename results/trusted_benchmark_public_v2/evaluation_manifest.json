@@ -1,0 +1,12 @@
+{
+  "base_model": "C:\\Users\\WingYouther\\.cache\\huggingface\\hub\\models--facebook--m2m100_418M\\snapshots\\55c2e61bbf05dfb8d7abccdc3fae6fc8512fd636",
+  "adapter_path": "D:\\dev\\projects\\fourlang_translation\\models\\lora\\m2m100_en_uz_public_v2\\final_adapter",
+  "benchmark_file": "D:\\dev\\projects\\fourlang_translation\\results\\trusted_benchmark_eval\\benchmark_pairs.csv",
+  "samples": 1200,
+  "decode": {
+    "num_beams": 1,
+    "repetition_penalty": 1.15,
+    "no_repeat_ngram_size": 3,
+    "max_new_tokens": 128
+  }
+}

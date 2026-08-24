@@ -1,0 +1,101 @@
+﻿src_lang,tgt_lang,source,reference,prediction,latency
+en,uz,Good night.,Xayrli tun.,al good night.,0.24909520149230957
+en,uz,Where is Laurie?,Laurie qayerda?,: Where is Laurie?,0.045957326889038086
+en,uz,I was hungry.,Men och edim.,was hungry.,0.06781816482543945
+en,uz,Where are my watches?,Mening soatlarim qani?,: Where are my watches?,0.07774090766906738
+en,uz,"I refuse to use public restrooms, as they are very unhygienic.",Juda antigigiyenik bo‘lganidan jamoat hojatxonalaridan foydalanishni rad etaman.,"to use public restrooms, as they are very unhygienic.",0.12369251251220703
+en,uz,Where are the books?,Kitoblar qayerda?,: Where are the books?,0.04864239692687988
+en,uz,I live in a rural area.,Qishloq joyida yashayman.,al: I live in a rural area.,0.0568242073059082
+en,uz,Do you drink beer?,Pivo ichasizmi?,: Do you drink beer?,0.04745936393737793
+en,uz,I have a friend.,Mening bir do'stim bor.,I have a friend.,0.04500007629394531
+en,uz,Your book is on the desk.,Kitobingiz stol ustida.,is on the desk.,0.04507255554199219
+en,uz,Why do you hate dogs so much?,Nega itlarni shunchalik yomon ko‘rasan?,: Why do you hate dogs so much?,0.06431126594543457
+en,uz,I read a letter.,Bir xatni o'qidim.,I read a letter.,0.03638410568237305
+en,uz,Do you have a house?,Uyingiz bormi?,: Do you have a house?,0.04982566833496094
+en,uz,"Today, I want to cook pilaf.","Bugun, men osh pishirishni hohlayman.",: Today I want to cook pilaf.,0.05884242057800293
+en,uz,I fell ill last year.,Men bultur kasal bo'ldim.,was sick last year.,0.05878257751464844
+en,uz,How much money do you want?,Qancha pul istaysan?,: How much money do you want?,0.05222034454345703
+en,uz,I like to read books.,Men kitob o‘qishni yaxshi ko‘raman.,: I like to read books.,0.04783344268798828
+en,uz,Good morning.,Hayirli tong.,al good morning.,0.03578758239746094
+en,uz,You are drunk!,Qotibqobsanku!,you are drunk!,0.03608846664428711
+en,uz,What do you believe in?,Nimaga ishonasiz?,: What do you believe in?,0.05195498466491699
+en,uz,This is not a dog.,Bu it emas.,is not a dog.,0.04977893829345703
+en,uz,"Before this, I worked as a cab driver.",Bungacha men taksi haydovchisi bo'lib ishlaganman.,", I worked as a cab driver.",0.06534910202026367
+en,uz,Didn't you see my birds?,Siz mening qushlarimni ko'rmadingizmi?,: Did you see my birds?,0.054735660552978516
+en,uz,My dog is fast.,Itim o'zg'ir.,is fast.,0.03667259216308594
+en,uz,How much money do you want?,Qancha pul xohlaysiz?,: How much money do you want?,0.05360007286071777
+en,uz,Do you have a house?,Uying bormi?,: Do you have a house?,0.053630828857421875
+en,uz,Who do you want to speak to?,Kim bilan gaplashishni xohlaysan?,: Who do you want to talk to?,0.05774188041687012
+en,uz,I don't want to sign it.,Men uni imzolashni xohlamayman.,I don’t want to sign it.,0.05809831619262695
+en,uz,Welcome.,Hush keldingiz!,al,0.027155399322509766
+en,uz,I read only the first translation.,Faqat birinchi tarjimani o‘qidim.,I only read the first translation.,0.05781745910644531
+en,uz,I live in India.,Hindistonda yashayman.,I live in India.,0.04262804985046387
+en,uz,Did you win the match?,O'yinni yutdingizmi?,: Did you win the match?,0.04811286926269531
+en,uz,I saw the queen.,Qirolichani ko'rdim.,I saw the queen.,0.040679931640625
+en,uz,The women's basketball team has a male coach.,Ayollarning basketbol komandasining erkak murabbiyi bor.,al basketball team has a male coach.,0.0748593807220459
+en,uz,"You can come, too.",Sen ham kelolasan.,"you can come, too.",0.04658985137939453
+en,uz,I'm not a doctor.,Men vrach emasman.,: I am not a doctor.,0.0489954948425293
+en,uz,Mahmud abhors being idle.,Mahmud bekor yurishni yoqtirmaydi.,al Abdurrahman Abdurrahman Abdurrahman Abdurrahman Abdurrahman Abdurrahman Abdurrahman Abdurrahman Abdurrahman Abdurrahman Abdurrahman Abdurrahman,0.24322056770324707
+en,uz,Tom tried to catch the children's attention.,Tom bolalarning e’tiborini jalb qilishga harakat qildi.,was trying to catch the children’s attention.,0.06517815589904785
+en,uz,I need my keys.,Menga kalitlarim kerak.,I need my keys.,0.05033993721008301
+en,uz,Who rules the world?,Dunyoni kim boshqaradi?,: Who rule the world?,0.044704437255859375
+en,uz,How many girls are in this picture?,Bu suratda qancha qiz bor?,: How many girls are in this picture?,0.059542179107666016
+en,uz,You are comparing apples and oranges.,Olmalarni va apelsinlarni qiyoslayapsan.,is comparing apples and orange.,0.060186147689819336
+en,uz,I went to school yesterday.,Men kecha maktabga bordim.,al: I went to school yesterday.,0.053667545318603516
+en,uz,I have two cats.,Ikki mushugim bor.,I have two cats.,0.04988503456115723
+en,uz,What's this?,Bu narsa nima?,: What is this?,0.04021930694580078
+en,uz,Didn't you use to be a teacher?,Sen o'qituvchi emasmiding?,ed to be a teacher?,0.06274890899658203
+en,uz,Bedouins live in the desert.,Badaviylar choʻlda yashaydi.,ins live in the desert.,0.05298113822937012
+en,uz,Where is the hotel?,Mehmonxona qayerda?,: Where is the hotel?,0.04477214813232422
+en,uz,I don't want to sign it.,Men buni imzolashni xohlamayman.,I don’t want to sign it.,0.05862855911254883
+en,uz,What did you learn at school today?,Bugun maktabda nimani o‘rganding?,: What did you learn at school today?,0.058222055435180664
+en,uz,I'll wait for you.,Seni kutaman.,", I will wait for you.",0.05303645133972168
+en,uz,You are eating.,Sen yeyapsan.,you are eating.,0.03603219985961914
+en,uz,Why don't you update your website?,Nima uchun siz saytingizni yangilamaysiz?,: Why don’t you update your website?,0.058443546295166016
+en,uz,Mind your own business!,Ishingizni qiling!,al your own business!,0.03486347198486328
+en,uz,The post office is the brown building.,Pochta qo'ng'ir bino.,is the brown building.,0.0503537654876709
+en,uz,I don't understand you.,Sizni tushunmayman.,I do not understand you.,0.04968738555908203
+en,uz,"You may write in any language you want. On Tatoeba, all languages are equal.",Xohlagan tilingizda yozishingiz mumkin. Tatoeba saytida barcha tillar tengdir.,"al: You can write in any language you want. On Tatoeba, all languages are equal.",0.1176002025604248
+en,uz,You are my mother.,Sen mening volidamsin.,you are my mother.,0.04075765609741211
+en,uz,I'm ready.,Tayyorman.,", I am ready.",0.03849911689758301
+en,uz,Every colour has a meaning.,Har bir rangning ma'nosi bor.,: Every color has a meaning.,0.04861164093017578
+en,uz,I'm dangerous.,Xavfliman.,is dangerous.,0.041895151138305664
+en,uz,Didn't you see my birds?,Mening qushlarimni ko'rmadingmi?,: Did you see my birds?,0.054701805114746094
+en,uz,Laurie sat on the chair.,Lori stulga o'tqizdi.,was sitting on the chair.,0.04785323143005371
+en,uz,Go to your room!,Xonangizga boringiz!,to your room!,0.03790783882141113
+en,uz,They didn't have a cat.,Ularning mushuki yo‘q edi.,didn’t have a cat.,0.04535102844238281
+en,uz,What's the matter?,Nima bo'ldi?,: What is the matter?,0.04334282875061035
+en,uz,Why didn't he help you?,U senga nega yordam bermadi?,: Why did he not help you?,0.053879737854003906
+en,uz,Children are the flowers of our lives.,Bolalar hayotimizning gullari.,ins are the flowers of our lives.,0.06943988800048828
+en,uz,Isn't it enough for you?,U siz uchun yetarli emasmi?,is not enough for you?,0.05468249320983887
+en,uz,The coffee is cold.,Kofe sovuq.,is cold.,0.04921603202819824
+en,uz,You eat.,Sen yeyapsan.,you eat.,0.03407764434814453
+en,uz,I've got to read it.,Uni oʻqishim kerak.,I have to read it.,0.05264925956726074
+en,uz,Thank you for your attention.,Diqqatingiz uchun rahmat.,y for your attention.,0.0540316104888916
+en,uz,Tom wanted to be an astronaut when he was young.,Tom yoshligida kosmonavt bo‘lmoqchi ekan.,wanted to be an astronaut when he was young.,0.07097244262695312
+en,uz,I don't know who to believe anymore.,Endi kimga ishonishni bilmayman.,I don’t know who to believe anymore.,0.07027006149291992
+en,uz,I don't like fish.,Baliqni yaxshi ko‘rmayman.,I don’t like fish.,0.05062270164489746
+en,uz,What happened?,Nima gap?,: What happened?,0.035045623779296875
+en,uz,There are no roses without thorns.,Go‘l tikansiz bo‘lmaydi.,: There are no roses without thorns.,0.07245802879333496
+en,uz,The sugar is sweet.,Shakar shirin.,is sweet.,0.03650927543640137
+en,uz,She is here.,U bu yerda.,is here.,0.036380767822265625
+en,uz,I want to be a teacher.,O'qituvchi bo'lmoq istayman.,I want to be a teacher.,0.056441545486450195
+en,uz,Where is the food?,Ovqat qayerda?,: Where is the food?,0.04611063003540039
+en,uz,I don't see a man.,Bir odam ko'rmayman.,I don’t see a man.,0.05282473564147949
+en,uz,You will see.,Ko'rasiz.,you will see.,0.0321500301361084
+en,uz,Life's a ruin without you.,Sensiz hayot barbod.,is a ruin without you.,0.0558929443359375
+en,uz,He is not a doctor.,U doktor emas.,is not a doctor.,0.048766374588012695
+en,uz,"Hello, old friend!","Salam, eski do'stim!",y old friend!,0.03628206253051758
+en,uz,You will listen.,Sen tinglaysan.,you will listen.,0.041233062744140625
+en,uz,The temperature was above zero last week.,O'tgan hafta harorat noldan yuqori edi.,was above zero last week.,0.06084871292114258
+en,uz,Where are my clocks?,Soatlarim qani?,: Where are my clocks?,0.06479907035827637
+en,uz,I dreamt a strange dream.,G'ayritabiiy tush ko'rdim.,al a strange dream.,0.04569292068481445
+en,uz,Who is the author of this book?,Bu kitobning muallifi kim?,: Who is the author of this book?,0.05908083915710449
+en,uz,I hate maths.,Matematikani yomon ko'raman.,I hate math.,0.04067730903625488
+en,uz,Who is absent today?,Bugun kim yo'q?,: Who is absent today?,0.051496028900146484
+en,uz,Spring has come.,Bahor keldi.,is coming.,0.03588700294494629
+en,uz,Tom has already chosen his successor.,Tom allaqachon o'z davomchisini tanlab bo'lgan.,has already chosen his successor.,0.05090594291687012
+en,uz,I'll go to France to study painting.,Bo'yashni o'rganish uchun Frantsiyaga boraman.,to France to study painting.,0.07942056655883789
+en,uz,I worked as a waiter for three years.,Men uch yil ofitsiant bo'lib ishladim.,al: I worked as a waiter for three years.,0.08793354034423828
+en,uz,Every rose has its thorns.,Go‘l tikansiz bo‘lmaydi.,", every rose has its thorns.",0.06145310401916504
+en,uz,Good afternoon.,Hayirli kun.,al good afternoon.,0.03854703903198242

@@ -1,0 +1,4 @@
+﻿source,raw,passed_cheap_filter,reservoir_kept,reject_uz_not_latin_script,reject_word_count,reject_number_mismatch,reject_url_or_html,reject_length_ratio,reject_length,reject_identical,reject_en_not_latin,reject_repetition
+Tatoeba,514,351,351,158.0,2.0,3.0,,,,,,
+tldr-pages,1378,1352,1352,,,,22.0,4.0,,,,
+wikimedia,1372671,667482,60000,5791.0,110040.0,393075.0,15210.0,23267.0,140898.0,13980.0,2846.0,82.0

@@ -1,0 +1,28 @@
+{
+  "base_model": "facebook/m2m100_418M",
+  "adapter_path": "D:\\dev\\projects\\fourlang_translation\\models\\lora\\m2m100_en_uz_hplt_smoke\\final_adapter",
+  "max_pairs_per_direction": 200,
+  "decode": {
+    "num_beams": 1,
+    "repetition_penalty": 1.15,
+    "no_repeat_ngram_size": 3,
+    "max_new_tokens": 128
+  },
+  "datasets": {
+    "flores200": {
+      "source": "https://dl.fbaipublicfiles.com/nllb/flores200_dataset.tar.gz",
+      "license": "CC-BY-SA-4.0",
+      "usage": "evaluation_only"
+    },
+    "ntrex128": {
+      "source": "davidstap/NTREX",
+      "license": "CC-BY-SA-4.0",
+      "usage": "evaluation_only"
+    },
+    "tatoeba": {
+      "source": "D:\\dev\\projects\\fourlang_translation\\data\\clean\\en_uz\\tatoeba_en_uz_latin.csv",
+      "license": "CC-BY-2.0",
+      "usage": "diagnostic"
+    }
+  }
+}

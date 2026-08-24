@@ -1,0 +1,8 @@
+{
+  "model_name": "m2m100_1_2b",
+  "hub_id": "facebook/m2m100_1.2B",
+  "license": "MIT",
+  "parameters": 1239470080,
+  "load_seconds": 6.267534599988721,
+  "peak_vram_gb": 2.6208291053771973
+}

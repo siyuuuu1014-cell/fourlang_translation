@@ -1,0 +1,27 @@
+{
+  "created_at": "2026-08-24T14:06:20",
+  "model_repo": "Qwen/Qwen3-4B-GGUF",
+  "model_file": "D:\\dev\\projects\\fourlang_translation\\models\\huggingface\\qwen3-4b-gguf\\Qwen3-4B-Q8_0.gguf",
+  "model_quantization": "Q8_0",
+  "license": "Apache-2.0",
+  "llama_server": "D:\\dev\\projects\\fourlang_translation\\tools\\llama.cpp\\runtime_cuda_13_3\\llama-server.exe",
+  "llama_cuda_version": "13.3",
+  "benchmark_file": "D:\\dev\\projects\\fourlang_translation\\results\\fourlang_base_model_selection\\beam5_accuracy\\flores_fourlang_600.csv",
+  "samples": 300,
+  "directions": [
+    "en-uz",
+    "ru-uz",
+    "uz-en",
+    "uz-ru",
+    "uz-zh",
+    "zh-uz"
+  ],
+  "generation": {
+    "temperature": 0,
+    "top_p": 1,
+    "seed": 42,
+    "max_tokens": 256,
+    "context": 2048
+  },
+  "system_prompt": "You are a professional translation engine. Return only the translated text. Never explain, answer the source, add notes, or repeat the instructions."
+}

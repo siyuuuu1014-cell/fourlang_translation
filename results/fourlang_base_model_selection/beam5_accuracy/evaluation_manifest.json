@@ -1,0 +1,36 @@
+{
+  "benchmark": "FLORES-200 devtest",
+  "benchmark_usage": "evaluation_only",
+  "benchmark_license": "CC-BY-SA-4.0",
+  "languages": {
+    "en": "eng_Latn",
+    "uz": "uzn_Latn",
+    "ru": "rus_Cyrl",
+    "zh": "zho_Hans"
+  },
+  "pairs_per_direction": 50,
+  "total_directions": 12,
+  "models": [
+    {
+      "model_name": "m2m100_418m",
+      "path": "C:\\Users\\WingYouther\\.cache\\huggingface\\hub\\models--facebook--m2m100_418M\\snapshots\\55c2e61bbf05dfb8d7abccdc3fae6fc8512fd636",
+      "license": "MIT",
+      "hub_id": "facebook/m2m100_418M"
+    },
+    {
+      "model_name": "m2m100_1_2b",
+      "path": "D:\\dev\\projects\\fourlang_translation\\models\\huggingface\\m2m100_1.2B",
+      "license": "MIT",
+      "hub_id": "facebook/m2m100_1.2B"
+    }
+  ],
+  "decode": {
+    "num_beams": 5,
+    "early_stopping": true,
+    "length_penalty": 1.0,
+    "repetition_penalty": 1.1,
+    "no_repeat_ngram_size": 3,
+    "max_source_length": 192,
+    "max_new_tokens": 160
+  }
+}

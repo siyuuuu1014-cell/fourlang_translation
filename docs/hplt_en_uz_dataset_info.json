@@ -1,0 +1,10 @@
+{
+  "resource": "HPLT/DocHPLT",
+  "subset": "en-uz",
+  "revision": "1c94ae042138c768caccb3cbc27f5d974a66ea0f",
+  "type": "parallel_translation",
+  "dataset_card_license": "CC0-1.0",
+  "commercial_status": "candidate_requires_internal_review",
+  "usage": "M2M100 en-uz fine-tuning experiment",
+  "pairs_extracted": 10000
+}

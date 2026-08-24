@@ -1,0 +1,10 @@
+{
+  "release_tag": "b10516",
+  "release_url": "https://github.com/ggml-org/llama.cpp/releases/tag/b10516",
+  "cuda_version": "13.3",
+  "assets": [
+    "llama-b10516-bin-win-cuda-13.3-x64.zip",
+    "cudart-llama-bin-win-cuda-13.3-x64.zip"
+  ],
+  "downloaded_at": "2026-08-24T13:49:55"
+}

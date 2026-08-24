@@ -1,0 +1,24 @@
+{
+  "dataset": "HPLT/DocHPLT",
+  "config": "en-uz",
+  "revision": "1c94ae042138c768caccb3cbc27f5d974a66ea0f",
+  "target_pairs": 10000,
+  "final_pairs": 10000,
+  "directional_samples": 20000,
+  "aligner_min": 0.5,
+  "bicleaner_min": 0.8,
+  "max_chars": 300,
+  "train_pairs": 8980,
+  "validation_pairs": 528,
+  "test_pairs": 492,
+  "extraction_stats": {
+    "documents_scanned": 5437,
+    "alignments_scanned": 112891,
+    "reject_aligner_score": 48547,
+    "reject_bicleaner_score": 28961,
+    "reject_not_1to1": 19943,
+    "accepted": 10000,
+    "reject_basic_text": 512,
+    "reject_duplicate": 4928
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "train": {
+    "samples": 10000,
+    "empty": 0,
+    "identical": 0,
+    "exact_duplicates": 0,
+    "uz_scripts": {
+      "latin": 10000
+    }
+  },
+  "validation": {
+    "samples": 1000,
+    "empty": 0,
+    "identical": 0,
+    "exact_duplicates": 0,
+    "uz_scripts": {
+      "latin": 1000
+    }
+  },
+  "test": {
+    "samples": 400,
+    "empty": 0,
+    "identical": 0,
+    "exact_duplicates": 0,
+    "uz_scripts": {
+      "latin": 400
+    }
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "files": [
+    {
+      "path": "D:\\dev\\projects\\fourlang_translation\\data\\clean\\en_uz\\hplt\\directional\\train.jsonl",
+      "samples": 17960,
+      "directions": {
+        "en-uz": 8980,
+        "uz-en": 8980
+      },
+      "source_scripts": {
+        "latin": 17959,
+        "other": 1
+      },
+      "target_scripts": {
+        "latin": 17959,
+        "other": 1
+      },
+      "empty_pairs": 0,
+      "identical_pairs": 0,
+      "exact_duplicate_pairs": 0,
+      "invalid_json_lines": 0,
+      "average_source_chars": 98.20812917594655,
+      "average_target_chars": 98.20812917594655
+    },
+    {
+      "path": "D:\\dev\\projects\\fourlang_translation\\data\\clean\\en_uz\\hplt\\directional\\validation.jsonl",
+      "samples": 1056,
+      "directions": {
+        "en-uz": 528,
+        "uz-en": 528
+      },
+      "source_scripts": {
+        "latin": 1056
+      },
+      "target_scripts": {
+        "latin": 1056
+      },
+      "empty_pairs": 0,
+      "identical_pairs": 0,
+      "exact_duplicate_pairs": 0,
+      "invalid_json_lines": 0,
+      "average_source_chars": 107.51893939393939,
+      "average_target_chars": 107.51893939393939
+    },
+    {
+      "path": "D:\\dev\\projects\\fourlang_translation\\data\\clean\\en_uz\\hplt\\directional\\test.jsonl",
+      "samples": 984,
+      "directions": {
+        "en-uz": 492,
+        "uz-en": 492
+      },
+      "source_scripts": {
+        "latin": 984
+      },
+      "target_scripts": {
+        "latin": 984
+      },
+      "empty_pairs": 0,
+      "identical_pairs": 0,
+      "exact_duplicate_pairs": 0,
+      "invalid_json_lines": 0,
+      "average_source_chars": 99.66463414634147,
+      "average_target_chars": 99.66463414634147
+    }
+  ]
+}

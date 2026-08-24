@@ -1,0 +1,35 @@
+[project]
+name = "fourlang-translation"
+version = "0.1.0"
+description = "Reproducible environment for the translation experiment notebooks"
+requires-python = ">=3.11,<3.12"
+dependencies = [
+    "accelerate==1.1.1",
+    "datasets==3.1.0",
+    "huggingface-hub==0.36.2",
+    "ipykernel==7.3.0",
+    "numpy==2.4.6",
+    "pandas==3.0.5",
+    "peft==0.13.2",
+    "pip==24.3.1",
+    "sacrebleu==2.6.0",
+    "sentencepiece==0.2.2",
+    "setuptools==78.1.0",
+    "torch==2.13.0+cu132",
+    "torchvision==0.28.0+cu132",
+    "tqdm==4.70.0",
+    "transformers==4.46.3",
+]
+
+[tool.uv]
+cache-dir = ".uv-cache"
+package = false
+
+[[tool.uv.index]]
+name = "pytorch-cu132"
+url = "https://download.pytorch.org/whl/cu132"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu132" }
+torchvision = { index = "pytorch-cu132" }

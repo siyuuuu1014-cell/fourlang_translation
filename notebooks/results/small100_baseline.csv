@@ -1,0 +1,7 @@
+﻿src_lang,tgt_lang,source,translation,latency
+zh,en,我明天早上八点去机场。,明天早上8点去机场。,0.16716694831848145
+en,zh,I will go to the airport tomorrow morning.,le to the airport tomorrow morning.,0.06574583053588867
+ru,en,Я завтра утром поеду в аэропорт.,жусь завтра утром в аэропорт.,0.08510613441467285
+en,ru,I will go to the airport tomorrow morning.,ing to the airport tomorrow morning.,0.07715749740600586
+uz,en,Men ertaga ertalab aeroportga boraman.,idagi aeroportda boraman.,0.07181453704833984
+en,uz,I will go to the airport tomorrow morning.,to the airport tomorrow morning.,0.0806732177734375

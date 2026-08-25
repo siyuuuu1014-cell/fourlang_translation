@@ -1,14 +1,18 @@
 {
   "pipeline": "en_uz",
-  "step": "04_rule_quality_check",
+  "step": "04_rule_quality_check_v2",
   "input_rows": 65897,
   "route_counts": {
-    "NEEDS_QWEN": 65888,
-    "AUTO_ACCEPT": 9
+    "AUTO_ACCEPT": 62318,
+    "NEEDS_QWEN": 3579
+  },
+  "route_rates_percent": {
+    "AUTO_ACCEPT": 94.56879675857778,
+    "NEEDS_QWEN": 5.431203241422219
   },
   "risk_flags": {
-    "NEGATION_MISMATCH": 9379,
-    "NUMBER_MISMATCH": 566,
+    "NUMBER_MISMATCH": 564,
+    "NEGATION_MISMATCH": 2792,
     "TIME_MISMATCH": 75,
     "EMAIL_MISMATCH": 1,
     "DATE_MISMATCH": 21,
@@ -17,14 +21,26 @@
     "URL_MISMATCH": 7,
     "SOURCE_TARGET_SAME": 2
   },
+  "risk_count_distribution": {
+    "0": 62318,
+    "1": 3518,
+    "2": 53,
+    "3": 8
+  },
   "source_family_distribution": {
     "1": 65888,
     "2": 9
   },
   "quality_score": {
-    "mean": 79.39029090853909,
-    "median": 82.0,
+    "mean": 79.19014522664158,
+    "std": 3.449508061810044,
     "min": 30.0,
-    "max": 90.0
-  }
+    "25_percent": 80.0,
+    "median": 80.0,
+    "75_percent": 80.0,
+    "max": 88.0
+  },
+  "auto_accept_rows": 62318,
+  "needs_qwen_rows": 3579,
+  "hard_reject_rows": 0
 }

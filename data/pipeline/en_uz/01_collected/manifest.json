@@ -1,0 +1,29 @@
+{
+  "pipeline": "en_uz",
+  "step": "01_collect_parallel",
+  "input_directory": "data\\clean\\en_uz",
+  "input_files": 21,
+  "rows_before_empty_filter": 211388,
+  "removed_empty": 0,
+  "rows_after_collection": 211388,
+  "unique_pair_ids": 66803,
+  "duplicate_pair_ids": 144585,
+  "sources": [
+    {
+      "data_source": "public_5k_v1",
+      "rows": 129926
+    },
+    {
+      "data_source": "public_5k_v2",
+      "rows": 70823
+    },
+    {
+      "data_source": "hplt",
+      "rows": 10050
+    },
+    {
+      "data_source": "tatoeba",
+      "rows": 589
+    }
+  ]
+}

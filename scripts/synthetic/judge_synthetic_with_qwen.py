@@ -357,7 +357,12 @@ def main():
         type=str,
         default=str(INPUT_FILE),
     )
-
+    parser.add_argument(
+        "--limit",
+        type=int,
+        default=1000,
+        help="Maximum number of samples to judge",
+    )
     args = parser.parse_args()
 
     input_file = Path(

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import json
+import math
 import time
 
 import pandas as pd
@@ -48,6 +49,7 @@ OUTPUT_DIR.mkdir(
     exist_ok=True,
 )
 
+# 最终正式文件
 DETAIL_FILE = (
     OUTPUT_DIR
     / "qwen_semantic_judge_details.parquet"
@@ -68,17 +70,34 @@ SUMMARY_JSON = (
     / "qwen_semantic_judge_summary.json"
 )
 
+# 新版高速断点文件
+CHECKPOINT_JSONL = (
+    OUTPUT_DIR
+    / "qwen_semantic_judge_checkpoint.jsonl"
+)
+
 
 # ============================================================
-# 2. Config
+# 2. Performance config
 # ============================================================
 
+# V100 32GB 推荐先从4开始。
+#
+# 如果实际显存很空，可以后面试6/8。
+# OOM时脚本会自动缩小。
+BATCH_SIZE = 4
+
+# 输入本身并不长，1536 足够
 MAX_INPUT_LENGTH = 1536
-MAX_NEW_TOKENS = 220
 
-MAX_RETRIES = 2
+# 我们只需要一个短 JSON
+MAX_NEW_TOKENS = 160
 
-SAVE_EVERY = 10
+# 每多少个 batch 打一次详细进度
+PRINT_EVERY_BATCHES = 5
+
+# parse失败时最多额外修复一次
+ENABLE_JSON_REPAIR = True
 
 
 # ============================================================
@@ -87,35 +106,44 @@ SAVE_EVERY = 10
 
 print("=" * 100)
 print("EN-UZ PIPELINE")
-print("STEP 05B - QWEN3 SEMANTIC JUDGE")
+print("STEP 05B - QWEN3 SEMANTIC JUDGE [BATCH OPTIMIZED]")
 print("=" * 100)
 
-print(
-    "CUDA:",
-    torch.cuda.is_available(),
-)
-
 if not torch.cuda.is_available():
-
     raise RuntimeError(
         "CUDA unavailable."
     )
 
+DEVICE_NAME = torch.cuda.get_device_name(0)
+
+TOTAL_VRAM_GB = (
+    torch.cuda.get_device_properties(0)
+    .total_memory
+    / 1024**3
+)
+
+print("CUDA:", True)
+print("GPU :", DEVICE_NAME)
+print(
+    "VRAM:",
+    f"{TOTAL_VRAM_GB:.2f} GB",
+)
 
 print(
-    "GPU:",
-    torch.cuda.get_device_name(0),
+    "PyTorch:",
+    torch.__version__,
 )
 
 
 # ============================================================
-# 4. Load review input
+# 4. Read review data
 # ============================================================
 
 if not INPUT_FILE.exists():
 
     raise FileNotFoundError(
-        f"找不到：\n{INPUT_FILE}"
+        f"Input file not found:\n"
+        f"{INPUT_FILE}"
     )
 
 
@@ -134,17 +162,18 @@ required_columns = [
 ]
 
 
-missing = [
+missing_columns = [
     column
     for column in required_columns
     if column not in df.columns
 ]
 
 
-if missing:
+if missing_columns:
 
     raise ValueError(
-        f"缺少字段：{missing}"
+        f"Missing columns: "
+        f"{missing_columns}"
     )
 
 
@@ -152,7 +181,7 @@ df = (
     df
     .drop_duplicates(
         subset=[
-            "review_id",
+            "review_id"
         ]
     )
     .reset_index(
@@ -161,14 +190,19 @@ df = (
 )
 
 
-print(
-    "\nReview rows:",
-    len(df)
+df["review_id"] = (
+    df["review_id"]
+    .astype(str)
 )
 
 
 print(
-    "\nReview type:"
+    "\nTotal review rows:",
+    len(df)
+)
+
+print(
+    "\nReview distribution:"
 )
 
 print(
@@ -176,11 +210,12 @@ print(
         "review_type"
     ]
     .value_counts()
+    .to_string()
 )
 
 
 # ============================================================
-# 5. Load Qwen3-8B
+# 5. Load tokenizer
 # ============================================================
 
 print(
@@ -195,6 +230,22 @@ tokenizer = (
     )
 )
 
+
+# Batch generation for decoder-only models:
+# LEFT padding is important.
+tokenizer.padding_side = "left"
+
+
+if tokenizer.pad_token_id is None:
+
+    tokenizer.pad_token = (
+        tokenizer.eos_token
+    )
+
+
+# ============================================================
+# 6. Load Qwen3-8B
+# ============================================================
 
 print(
     "Loading Qwen3-8B..."
@@ -219,46 +270,56 @@ model.generation_config.do_sample = False
 model.generation_config.temperature = None
 model.generation_config.top_p = None
 model.generation_config.top_k = None
+model.generation_config.use_cache = True
+
+
+MODEL_DEVICE = next(
+    model.parameters()
+).device
 
 
 print(
     "Model loaded."
 )
 
-
 print(
     "GPU allocated:",
-    round(
-        torch.cuda.memory_allocated()
-        / 1024 ** 3,
-        2,
-    ),
-    "GB",
+    f"{torch.cuda.memory_allocated() / 1024**3:.2f} GB",
+)
+
+print(
+    "GPU reserved :",
+    f"{torch.cuda.memory_reserved() / 1024**3:.2f} GB",
 )
 
 
 # ============================================================
-# 6. Prompt
+# 7. Prompt
 # ============================================================
 
 def build_prompt(
     english: str,
     uzbek: str,
     risk_flags: str,
-):
+) -> str:
 
-    risk_flags = (
-        str(risk_flags)
-        if pd.notna(risk_flags)
-        else ""
-    )
+    if (
+        risk_flags is None
+        or
+        pd.isna(risk_flags)
+        or
+        not str(risk_flags).strip()
+    ):
+        risk_flags = "NONE"
+
+    else:
+        risk_flags = str(
+            risk_flags
+        ).strip()
 
 
     return f"""
-You are independently auditing an English-Uzbek parallel corpus.
-
-Determine whether the English sentence and the Uzbek sentence
-express the same meaning.
+Evaluate whether this English-Uzbek pair expresses the same meaning.
 
 ENGLISH:
 {english}
@@ -267,50 +328,33 @@ UZBEK:
 {uzbek}
 
 AUTOMATIC RISK FLAGS:
-{risk_flags if risk_flags else "NONE"}
+{risk_flags}
 
-Important:
+The automatic flags may be wrong. Judge the actual semantics.
 
-1. The automatic risk flags may be wrong.
-2. Judge the actual semantic relationship yourself.
-3. Do not require word-for-word translation.
-4. Natural paraphrases are acceptable.
-5. Minor stylistic differences are acceptable.
-6. Uzbek spelling and apostrophe variants alone are not errors.
-7. Pay special attention to:
-   - negation
-   - numbers
-   - dates
-   - time
-   - locations
-   - people
-   - entities
-   - missing information
-   - added information
-   - contradictions
-
-Choose exactly one quality label:
+Labels:
 
 PASS
-- Both sentences preserve essentially the same meaning.
-- Suitable as a high-quality parallel training pair.
+- Meanings are essentially equivalent.
+- Suitable as a high-quality training pair.
 
 MINOR
 - Core meaning is preserved.
-- There is a small omission, addition, lexical problem,
-  or grammatical issue.
-- Still potentially usable, but lower quality than PASS.
+- Only a small omission, addition, lexical or grammatical issue.
 
 FAIL
 - Important meaning differs.
-- There is a significant mistranslation, mismatch,
-  contradiction, missing content, wrong number,
-  wrong entity, wrong time, or negation error.
+- Significant mistranslation, contradiction, omission,
+  wrong number, entity, time, date or negation.
 
 UNCERTAIN
-- The pair cannot be judged confidently.
+- Cannot confidently judge.
 
-Return ONLY valid JSON:
+Do not require word-for-word translation.
+Natural paraphrases are acceptable.
+Uzbek apostrophe/spelling variants alone are not errors.
+
+Return ONLY this JSON structure:
 
 {{
   "label": "PASS",
@@ -323,23 +367,75 @@ Return ONLY valid JSON:
   "entity_error": false,
   "negation_error": false,
   "confidence": 0.95,
-  "reason": "Short explanation in English."
+  "reason": "Brief reason."
 }}
-
-No Markdown.
-No text outside JSON.
 """.strip()
 
 
 # ============================================================
-# 7. JSON extraction
+# 8. Build chat prompt
+# ============================================================
+
+def build_chat_text(
+    row,
+) -> str:
+
+    prompt = build_prompt(
+
+        english=str(
+            row[
+                "source_text_normalized"
+            ]
+        ),
+
+        uzbek=str(
+            row[
+                "target_text_normalized"
+            ]
+        ),
+
+        risk_flags=row.get(
+            "risk_flags",
+            "",
+        ),
+    )
+
+
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "You are a strict but fair "
+                "English-Uzbek parallel-corpus auditor. "
+                "Return JSON only."
+            ),
+        },
+        {
+            "role": "user",
+            "content": prompt,
+        },
+    ]
+
+
+    return tokenizer.apply_chat_template(
+        messages,
+        tokenize=False,
+        add_generation_prompt=True,
+        enable_thinking=False,
+    )
+
+
+# ============================================================
+# 9. JSON parsing
 # ============================================================
 
 def extract_json(
     text: str,
 ):
 
-    text = str(text).strip()
+    text = str(
+        text
+    ).strip()
 
 
     try:
@@ -349,7 +445,6 @@ def extract_json(
         )
 
     except Exception:
-
         pass
 
 
@@ -363,9 +458,9 @@ def extract_json(
 
 
     if (
-        start == -1
+        start < 0
         or
-        end == -1
+        end < 0
         or
         end <= start
     ):
@@ -373,12 +468,15 @@ def extract_json(
         return None
 
 
+    candidate = text[
+        start:end + 1
+    ]
+
+
     try:
 
         return json.loads(
-            text[
-                start:end + 1
-            ]
+            candidate
         )
 
     except Exception:
@@ -387,7 +485,7 @@ def extract_json(
 
 
 # ============================================================
-# 8. Normalize output
+# 10. Normalize fields
 # ============================================================
 
 VALID_LABELS = {
@@ -398,9 +496,9 @@ VALID_LABELS = {
 }
 
 
-def as_bool(
+def parse_bool(
     value,
-):
+) -> bool:
 
     if isinstance(
         value,
@@ -420,11 +518,11 @@ def as_bool(
 
 
 def normalize_result(
-    result,
+    parsed,
 ):
 
     if not isinstance(
-        result,
+        parsed,
         dict,
     ):
 
@@ -433,7 +531,7 @@ def normalize_result(
 
     label = (
         str(
-            result.get(
+            parsed.get(
                 "label",
                 "",
             )
@@ -451,7 +549,7 @@ def normalize_result(
     try:
 
         confidence = float(
-            result.get(
+            parsed.get(
                 "confidence",
                 0.0,
             )
@@ -477,64 +575,64 @@ def normalize_result(
             label,
 
         "semantic_consistent":
-            as_bool(
-                result.get(
+            parse_bool(
+                parsed.get(
                     "semantic_consistent",
                     False,
                 )
             ),
 
         "judge_omission":
-            as_bool(
-                result.get(
+            parse_bool(
+                parsed.get(
                     "omission",
                     False,
                 )
             ),
 
         "judge_addition":
-            as_bool(
-                result.get(
+            parse_bool(
+                parsed.get(
                     "addition",
                     False,
                 )
             ),
 
         "judge_mistranslation":
-            as_bool(
-                result.get(
+            parse_bool(
+                parsed.get(
                     "mistranslation",
                     False,
                 )
             ),
 
         "judge_number_error":
-            as_bool(
-                result.get(
+            parse_bool(
+                parsed.get(
                     "number_error",
                     False,
                 )
             ),
 
         "judge_time_error":
-            as_bool(
-                result.get(
+            parse_bool(
+                parsed.get(
                     "time_error",
                     False,
                 )
             ),
 
         "judge_entity_error":
-            as_bool(
-                result.get(
+            parse_bool(
+                parsed.get(
                     "entity_error",
                     False,
                 )
             ),
 
         "judge_negation_error":
-            as_bool(
-                result.get(
+            parse_bool(
+                parsed.get(
                     "negation_error",
                     False,
                 )
@@ -545,7 +643,7 @@ def normalize_result(
 
         "judge_reason":
             str(
-                result.get(
+                parsed.get(
                     "reason",
                     "",
                 )
@@ -554,35 +652,149 @@ def normalize_result(
 
 
 # ============================================================
-# 9. Single inference
+# 11. Optimized batch generation
 # ============================================================
 
 @torch.inference_mode()
-def judge_once(
-    english: str,
-    uzbek: str,
-    risk_flags: str,
+def generate_batch(
+    batch_df: pd.DataFrame,
 ):
 
-    prompt = build_prompt(
-        english=english,
-        uzbek=uzbek,
-        risk_flags=risk_flags,
+    prompts = [
+        build_chat_text(
+            row
+        )
+
+        for _, row
+        in batch_df.iterrows()
+    ]
+
+
+    inputs = tokenizer(
+        prompts,
+        return_tensors="pt",
+        padding=True,
+        truncation=True,
+        max_length=MAX_INPUT_LENGTH,
     )
 
 
-    messages = [
+    inputs = {
+        key: value.to(
+            MODEL_DEVICE
+        )
 
+        for key, value
+        in inputs.items()
+    }
+
+
+    # 所有 batch 输入都被 pad 到相同长度
+    prompt_length = (
+        inputs[
+            "input_ids"
+        ].shape[1]
+    )
+
+
+    torch.cuda.synchronize()
+
+    start_time = (
+        time.perf_counter()
+    )
+
+
+    outputs = model.generate(
+
+        **inputs,
+
+        max_new_tokens=
+            MAX_NEW_TOKENS,
+
+        do_sample=False,
+
+        use_cache=True,
+
+        pad_token_id=
+            tokenizer.pad_token_id,
+
+        eos_token_id=
+            tokenizer.eos_token_id,
+    )
+
+
+    torch.cuda.synchronize()
+
+
+    elapsed = (
+        time.perf_counter()
+        -
+        start_time
+    )
+
+
+    generated_tokens = outputs[
+        :,
+        prompt_length:
+    ]
+
+
+    responses = (
+        tokenizer.batch_decode(
+            generated_tokens,
+            skip_special_tokens=True,
+        )
+    )
+
+
+    return (
+        responses,
+        elapsed,
+    )
+
+
+# ============================================================
+# 12. Repair malformed JSON
+# ============================================================
+
+@torch.inference_mode()
+def repair_json(
+    raw_response: str,
+):
+
+    repair_prompt = f"""
+Convert the following output into ONE valid JSON object.
+
+Do not change its intended judgement.
+Do not explain anything.
+Return JSON only.
+
+OUTPUT:
+{raw_response}
+
+Required keys:
+
+label
+semantic_consistent
+omission
+addition
+mistranslation
+number_error
+time_error
+entity_error
+negation_error
+confidence
+reason
+""".strip()
+
+
+    messages = [
         {
             "role":
                 "system",
 
             "content":
-                (
-                    "You are a strict but fair "
-                    "English-Uzbek parallel corpus auditor. "
-                    "Return JSON only."
-                ),
+                "Return valid JSON only.",
         },
 
         {
@@ -590,12 +802,12 @@ def judge_once(
                 "user",
 
             "content":
-                prompt,
+                repair_prompt,
         },
     ]
 
 
-    text = (
+    prompt = (
         tokenizer
         .apply_chat_template(
             messages,
@@ -607,55 +819,50 @@ def judge_once(
 
 
     inputs = tokenizer(
-        text,
+        prompt,
         return_tensors="pt",
         truncation=True,
-        max_length=MAX_INPUT_LENGTH,
+        max_length=1024,
     )
-
-
-    device = next(
-        model.parameters()
-    ).device
 
 
     inputs = {
         key: value.to(
-            device
+            MODEL_DEVICE
         )
+
         for key, value
         in inputs.items()
     }
 
 
-    torch.cuda.synchronize()
-
-
-    start = time.perf_counter()
-
-
-    outputs = model.generate(
-        **inputs,
-        max_new_tokens=MAX_NEW_TOKENS,
-        do_sample=False,
-        pad_token_id=tokenizer.eos_token_id,
+    prompt_length = (
+        inputs[
+            "input_ids"
+        ].shape[1]
     )
 
 
-    torch.cuda.synchronize()
+    outputs = model.generate(
 
+        **inputs,
 
-    latency = (
-        time.perf_counter()
-        -
-        start
+        max_new_tokens=120,
+
+        do_sample=False,
+
+        use_cache=True,
+
+        pad_token_id=
+            tokenizer.pad_token_id,
+
+        eos_token_id=
+            tokenizer.eos_token_id,
     )
 
 
     generated = outputs[0][
-        inputs[
-            "input_ids"
-        ].shape[1]:
+        prompt_length:
     ]
 
 
@@ -665,109 +872,17 @@ def judge_once(
     ).strip()
 
 
-    parsed = extract_json(
-        response
-    )
-
-
-    return (
-        parsed,
-        response,
-        latency,
-    )
+    return response
 
 
 # ============================================================
-# 10. Retry
+# 13. Default uncertain result
 # ============================================================
 
-def judge_pair(
-    row,
+def make_uncertain_result(
+    raw_response: str,
+    latency: float,
 ):
-
-    english = str(
-        row[
-            "source_text_normalized"
-        ]
-    )
-
-
-    uzbek = str(
-        row[
-            "target_text_normalized"
-        ]
-    )
-
-
-    risk_flags = (
-        row.get(
-            "risk_flags",
-            "",
-        )
-    )
-
-
-    last_response = ""
-    last_latency = 0.0
-
-
-    for attempt in range(
-        MAX_RETRIES
-    ):
-
-        (
-            parsed,
-            raw_response,
-            latency,
-        ) = judge_once(
-            english=english,
-            uzbek=uzbek,
-            risk_flags=risk_flags,
-        )
-
-
-        last_response = (
-            raw_response
-        )
-
-        last_latency = (
-            latency
-        )
-
-
-        normalized = (
-            normalize_result(
-                parsed
-            )
-        )
-
-
-        if normalized is not None:
-
-            normalized[
-                "judge_parse_success"
-            ] = True
-
-            normalized[
-                "judge_latency"
-            ] = latency
-
-            normalized[
-                "judge_raw_response"
-            ] = raw_response
-
-            return normalized
-
-
-        print(
-            f"  Parse failed "
-            f"{attempt + 1}/{MAX_RETRIES}"
-        )
-
-
-    # ========================================================
-    # Parsing failure
-    # ========================================================
 
     return {
 
@@ -802,79 +917,201 @@ def judge_pair(
             0.0,
 
         "judge_reason":
-            "Judge output could not be parsed.",
+            (
+                "Judge output could not "
+                "be parsed."
+            ),
 
         "judge_parse_success":
             False,
 
         "judge_latency":
-            last_latency,
+            latency,
 
         "judge_raw_response":
-            last_response,
+            raw_response,
     }
 
 
 # ============================================================
-# 11. Resume
+# 14. Append checkpoint
 # ============================================================
 
-if DETAIL_FILE.exists():
+def append_jsonl(
+    rows: list[dict],
+):
 
-    print(
-        "\nExisting result found."
-    )
+    with open(
+        CHECKPOINT_JSONL,
+        "a",
+        encoding="utf-8",
+    ) as file:
+
+        for row in rows:
+
+            file.write(
+                json.dumps(
+                    row,
+                    ensure_ascii=False,
+                    default=str,
+                )
+            )
+
+            file.write(
+                "\n"
+            )
 
 
-    old_df = pd.read_parquet(
-        DETAIL_FILE
-    )
+# ============================================================
+# 15. Read JSONL checkpoint
+# ============================================================
+
+def read_jsonl_checkpoint():
+
+    rows = []
 
 
-    completed_ids = set(
-        old_df[
-            "review_id"
-        ].astype(str)
-    )
+    if not CHECKPOINT_JSONL.exists():
+
+        return rows
 
 
-    result_rows = (
-        old_df
-        .to_dict(
+    with open(
+        CHECKPOINT_JSONL,
+        "r",
+        encoding="utf-8",
+    ) as file:
+
+        for line in file:
+
+            line = line.strip()
+
+            if not line:
+                continue
+
+
+            try:
+
+                rows.append(
+                    json.loads(
+                        line
+                    )
+                )
+
+            except Exception:
+
+                print(
+                    "[WARNING] Broken "
+                    "checkpoint line skipped."
+                )
+
+
+    return rows
+
+
+# ============================================================
+# 16. Resume compatibility
+#
+# Supports:
+#
+# 1. New JSONL checkpoint
+# 2. Old sequential Parquet result
+# ============================================================
+
+def load_existing_results():
+
+    # --------------------------------------------------------
+    # Prefer new checkpoint
+    # --------------------------------------------------------
+
+    if CHECKPOINT_JSONL.exists():
+
+        rows = (
+            read_jsonl_checkpoint()
+        )
+
+
+        print(
+            "\nCheckpoint detected:"
+        )
+
+        print(
+            "Completed:",
+            len(rows)
+        )
+
+
+        return rows
+
+
+    # --------------------------------------------------------
+    # Migrate old Parquet result
+    # --------------------------------------------------------
+
+    if DETAIL_FILE.exists():
+
+        print(
+            "\nOld Parquet result detected."
+        )
+
+        old_df = pd.read_parquet(
+            DETAIL_FILE
+        )
+
+
+        rows = old_df.to_dict(
             orient="records"
         )
-    )
 
 
-    print(
-        "Resume completed:",
-        len(
-            completed_ids
+        # 转成新的追加式 checkpoint
+        with open(
+            CHECKPOINT_JSONL,
+            "w",
+            encoding="utf-8",
+        ) as file:
+
+            for row in rows:
+
+                file.write(
+                    json.dumps(
+                        row,
+                        ensure_ascii=False,
+                        default=str,
+                    )
+                )
+
+                file.write(
+                    "\n"
+                )
+
+
+        print(
+            "Migrated existing progress:",
+            len(rows)
         )
-    )
 
 
-else:
+        return rows
 
-    completed_ids = set()
 
-    result_rows = []
+    return []
 
 
 # ============================================================
-# 12. Run Judge
+# 17. Load progress
 # ============================================================
 
-print("\n")
-print("=" * 100)
-print("START SEMANTIC JUDGE")
-print("=" * 100)
+result_rows = (
+    load_existing_results()
+)
 
 
-total = len(df)
+# 防止 JSONL 中偶发重复
+result_by_id = {}
 
 
-for index, row in df.iterrows():
+for row in result_rows:
 
     review_id = str(
         row[
@@ -882,112 +1119,523 @@ for index, row in df.iterrows():
         ]
     )
 
-
-    if review_id in completed_ids:
-
-        continue
-
-
-    print(
-        f"\n"
-        f"[{index + 1}/{total}] "
-        f"{row['review_type']} "
-        f"| {row['risk_flags']}"
-    )
-
-
-    judge_result = judge_pair(
-        row
-    )
-
-
-    output_row = {
-
-        **row.to_dict(),
-
-        **judge_result,
-    }
-
-
-    result_rows.append(
-        output_row
-    )
-
-
-    completed_ids.add(
+    result_by_id[
         review_id
+    ] = row
+
+
+result_rows = list(
+    result_by_id.values()
+)
+
+
+completed_ids = set(
+    result_by_id.keys()
+)
+
+
+print(
+    "\nAlready completed:",
+    len(
+        completed_ids
+    )
+)
+
+
+# ============================================================
+# 18. Pending
+# ============================================================
+
+pending_df = df[
+    ~df[
+        "review_id"
+    ].isin(
+        completed_ids
+    )
+].copy()
+
+
+pending_df = (
+    pending_df
+    .reset_index(
+        drop=True
+    )
+)
+
+
+print(
+    "Pending:",
+    len(
+        pending_df
+    )
+)
+
+
+if len(
+    pending_df
+) > 0:
+
+    print(
+        "Initial batch size:",
+        BATCH_SIZE
     )
 
 
-    print(
-        "  Label:",
-        judge_result[
-            "judge_label"
-        ],
+# ============================================================
+# 19. Main batch loop
+# ============================================================
+
+print("\n")
+print("=" * 100)
+print("START BATCH SEMANTIC JUDGE")
+print("=" * 100)
+
+
+current_batch_size = (
+    BATCH_SIZE
+)
+
+processed_this_run = 0
+
+run_start_time = (
+    time.perf_counter()
+)
+
+batch_index = 0
+
+
+while processed_this_run < len(
+    pending_df
+):
+
+    batch_index += 1
+
+
+    start_index = (
+        processed_this_run
     )
 
 
-    print(
-        "  Confidence:",
-        judge_result[
-            "judge_confidence"
-        ],
+    end_index = min(
+        start_index
+        +
+        current_batch_size,
+
+        len(
+            pending_df
+        ),
+    )
+
+
+    batch_df = (
+        pending_df
+        .iloc[
+            start_index:end_index
+        ]
+        .copy()
     )
 
 
     # ========================================================
-    # Incremental save
+    # Generate
     # ========================================================
 
-    completed_count = len(
-        result_rows
-    )
+    try:
 
-
-    if (
-        completed_count % SAVE_EVERY == 0
-        or
-        completed_count == total
-    ):
-
-        temp_df = pd.DataFrame(
-            result_rows
+        (
+            responses,
+            batch_latency,
+        ) = generate_batch(
+            batch_df
         )
 
 
-        temp_df.to_parquet(
-            DETAIL_FILE,
-            index=False,
-        )
+    except torch.cuda.OutOfMemoryError:
+
+        torch.cuda.empty_cache()
 
 
-        temp_df.to_csv(
-            DETAIL_CSV,
-            index=False,
-            encoding="utf-8-sig",
+        if current_batch_size <= 1:
+
+            raise
+
+
+        current_batch_size = max(
+            1,
+            current_batch_size // 2,
         )
 
 
         print(
-            f"  Saved: "
-            f"{completed_count}/{total}"
+            "\n[CUDA OOM]"
+        )
+
+        print(
+            "Reducing batch size to:",
+            current_batch_size
+        )
+
+        continue
+
+
+    # ========================================================
+    # Parse every response
+    # ========================================================
+
+    batch_results = []
+
+
+    per_sample_latency = (
+        batch_latency
+        /
+        len(
+            batch_df
+        )
+    )
+
+
+    for (
+        (_, row),
+        raw_response,
+    ) in zip(
+        batch_df.iterrows(),
+        responses,
+    ):
+
+        parsed = extract_json(
+            raw_response
+        )
+
+
+        normalized = normalize_result(
+            parsed
+        )
+
+
+        # ====================================================
+        # Optional JSON repair
+        # ====================================================
+
+        if (
+            normalized is None
+            and
+            ENABLE_JSON_REPAIR
+        ):
+
+            repaired_response = (
+                repair_json(
+                    raw_response
+                )
+            )
+
+
+            repaired_json = (
+                extract_json(
+                    repaired_response
+                )
+            )
+
+
+            normalized = (
+                normalize_result(
+                    repaired_json
+                )
+            )
+
+
+            if normalized is not None:
+
+                raw_response = (
+                    repaired_response
+                )
+
+
+        # ====================================================
+        # Still failed
+        # ====================================================
+
+        if normalized is None:
+
+            judge_result = (
+                make_uncertain_result(
+                    raw_response=
+                        raw_response,
+
+                    latency=
+                        per_sample_latency,
+                )
+            )
+
+
+        else:
+
+            judge_result = {
+
+                **normalized,
+
+                "judge_parse_success":
+                    True,
+
+                "judge_latency":
+                    per_sample_latency,
+
+                "judge_raw_response":
+                    raw_response,
+            }
+
+
+        output_row = {
+
+            **row.to_dict(),
+
+            **judge_result,
+        }
+
+
+        batch_results.append(
+            output_row
+        )
+
+
+    # ========================================================
+    # Append checkpoint
+    # ========================================================
+
+    append_jsonl(
+        batch_results
+    )
+
+
+    result_rows.extend(
+        batch_results
+    )
+
+
+    processed_this_run += len(
+        batch_df
+    )
+
+
+    # ========================================================
+    # Progress
+    # ========================================================
+
+    total_finished = (
+        len(
+            completed_ids
+        )
+        +
+        processed_this_run
+    )
+
+
+    total_required = len(
+        df
+    )
+
+
+    elapsed_total = (
+        time.perf_counter()
+        -
+        run_start_time
+    )
+
+
+    speed = (
+        processed_this_run
+        /
+        elapsed_total
+
+        if elapsed_total > 0
+
+        else 0.0
+    )
+
+
+    remaining = (
+        len(
+            pending_df
+        )
+        -
+        processed_this_run
+    )
+
+
+    eta_seconds = (
+        remaining
+        /
+        speed
+
+        if speed > 0
+
+        else 0.0
+    )
+
+
+    if (
+        batch_index
+        %
+        PRINT_EVERY_BATCHES
+        ==
+        0
+        or
+        processed_this_run
+        ==
+        len(
+            pending_df
+        )
+    ):
+
+        print()
+
+        print(
+            f"[{total_finished}/"
+            f"{total_required}]"
+        )
+
+        print(
+            "Batch size:",
+            len(
+                batch_df
+            )
+        )
+
+        print(
+            "Batch time:",
+            f"{batch_latency:.2f}s"
+        )
+
+        print(
+            "Effective avg:",
+            f"{per_sample_latency:.2f}s/sample"
+        )
+
+        print(
+            "Throughput:",
+            f"{speed:.3f} samples/s"
+        )
+
+        print(
+            "ETA:",
+            f"{eta_seconds / 3600:.2f} hours"
+        )
+
+        print(
+            "GPU allocated:",
+            f"{torch.cuda.memory_allocated() / 1024**3:.2f} GB"
+        )
+
+        print(
+            "Last labels:",
+            [
+                row[
+                    "judge_label"
+                ]
+
+                for row in batch_results
+            ],
         )
 
 
 # ============================================================
-# 13. Final result
+# 20. Reload checkpoint as source of truth
 # ============================================================
 
-result_df = pd.DataFrame(
-    result_rows
+print("\n")
+print(
+    "Reloading final checkpoint..."
 )
 
+
+result_rows = (
+    read_jsonl_checkpoint()
+)
+
+
+result_by_id = {
+
+    str(
+        row[
+            "review_id"
+        ]
+    ):
+        row
+
+    for row
+    in result_rows
+}
+
+
+result_df = pd.DataFrame(
+    list(
+        result_by_id.values()
+    )
+)
+
+
+# 按原始 review_id 顺序排序
+review_order = {
+
+    review_id:
+        index
+
+    for index, review_id
+    in enumerate(
+        df[
+            "review_id"
+        ].astype(str)
+    )
+}
+
+
+result_df[
+    "_sort_index"
+] = (
+    result_df[
+        "review_id"
+    ]
+    .astype(str)
+    .map(
+        review_order
+    )
+)
+
+
+result_df = (
+    result_df
+    .sort_values(
+        "_sort_index"
+    )
+    .drop(
+        columns=[
+            "_sort_index"
+        ]
+    )
+    .reset_index(
+        drop=True
+    )
+)
+
+
+# ============================================================
+# 21. Final Parquet + CSV
+#
+# 这里只在全部结束后写一次
+# ============================================================
+
+print(
+    "Saving final Parquet..."
+)
 
 result_df.to_parquet(
     DETAIL_FILE,
     index=False,
 )
 
+
+print(
+    "Saving final CSV..."
+)
 
 result_df.to_csv(
     DETAIL_CSV,
@@ -1010,7 +1658,7 @@ print(
 
 
 # ============================================================
-# 14. Summary helper
+# 22. Summary
 # ============================================================
 
 def build_summary(
@@ -1032,7 +1680,7 @@ def build_summary(
     )
 
 
-    def count(
+    def get_count(
         label,
     ):
 
@@ -1045,44 +1693,60 @@ def build_summary(
 
 
     pass_count = (
-        count(
+        get_count(
             "PASS"
         )
     )
 
-
     minor_count = (
-        count(
+        get_count(
             "MINOR"
         )
     )
 
-
     fail_count = (
-        count(
+        get_count(
             "FAIL"
         )
     )
 
-
     uncertain_count = (
-        count(
+        get_count(
             "UNCERTAIN"
         )
     )
 
 
     def rate(
-        value,
+        count,
     ):
 
         if total == 0:
             return 0.0
 
         return (
-            value
+            count
             /
             total
+            *
+            100
+        )
+
+
+    def bool_rate(
+        column,
+    ):
+
+        if total == 0:
+            return 0.0
+
+        return float(
+            part[
+                column
+            ]
+            .fillna(False)
+            .astype(bool)
+            .mean()
             *
             100
         )
@@ -1131,62 +1795,31 @@ def build_summary(
             ),
 
         "number_error_rate":
-            float(
-                part[
-                    "judge_number_error"
-                ]
-                .astype(bool)
-                .mean()
-                *
-                100
-            )
-            if total > 0
-            else 0.0,
+            bool_rate(
+                "judge_number_error"
+            ),
 
         "time_error_rate":
-            float(
-                part[
-                    "judge_time_error"
-                ]
-                .astype(bool)
-                .mean()
-                *
-                100
-            )
-            if total > 0
-            else 0.0,
+            bool_rate(
+                "judge_time_error"
+            ),
 
         "entity_error_rate":
-            float(
-                part[
-                    "judge_entity_error"
-                ]
-                .astype(bool)
-                .mean()
-                *
-                100
-            )
-            if total > 0
-            else 0.0,
+            bool_rate(
+                "judge_entity_error"
+            ),
 
         "negation_error_rate":
-            float(
-                part[
-                    "judge_negation_error"
-                ]
-                .astype(bool)
-                .mean()
-                *
-                100
-            )
-            if total > 0
-            else 0.0,
+            bool_rate(
+                "judge_negation_error"
+            ),
 
         "avg_confidence":
             float(
                 part[
                     "judge_confidence"
-                ].mean()
+                ]
+                .mean()
             )
             if total > 0
             else 0.0,
@@ -1195,23 +1828,16 @@ def build_summary(
             float(
                 part[
                     "judge_latency"
-                ].mean()
+                ]
+                .mean()
             )
             if total > 0
             else 0.0,
     }
 
 
-# ============================================================
-# 15. Build summaries
-# ============================================================
-
 summary_rows = []
 
-
-# ============================================================
-# ALL
-# ============================================================
 
 summary_rows.append(
     build_summary(
@@ -1221,15 +1847,9 @@ summary_rows.append(
 )
 
 
-# ============================================================
-# Review type
-# ============================================================
-
 for review_type in [
-
     "RISK_REVIEW",
     "AUTO_ACCEPT_AUDIT",
-
 ]:
 
     part = result_df[
@@ -1262,11 +1882,7 @@ summary_df.to_csv(
 
 
 # ============================================================
-# 16. Audit confidence interval information
-#
-# 简单记录 n 和错误数。
-#
-# 下一步再正式解释统计置信区间。
+# 23. AUTO_ACCEPT audit
 # ============================================================
 
 audit_df = result_df[
@@ -1294,6 +1910,28 @@ audit_fail = int(
 )
 
 
+audit_minor = int(
+    (
+        audit_df[
+            "judge_label"
+        ]
+        ==
+        "MINOR"
+    ).sum()
+)
+
+
+audit_uncertain = int(
+    (
+        audit_df[
+            "judge_label"
+        ]
+        ==
+        "UNCERTAIN"
+    ).sum()
+)
+
+
 audit_fail_rate = (
 
     audit_fail
@@ -1309,44 +1947,45 @@ audit_fail_rate = (
 
 
 # ============================================================
-# 17. JSON report
+# 24. Summary JSON
 # ============================================================
 
-summary_json = {
+summary_payload = {
 
     "pipeline":
         "en_uz",
 
     "step":
-        "05_qwen_semantic_judge",
+        "05_qwen_semantic_judge_batch",
 
     "judge_model":
         "Qwen3-8B",
+
+    "batch_size_initial":
+        BATCH_SIZE,
 
     "total_reviewed":
         len(
             result_df
         ),
 
-    "risk_review_count":
-        int(
-            (
-                result_df[
-                    "review_type"
-                ]
-                ==
-                "RISK_REVIEW"
-            ).sum()
-        ),
+    "audit": {
 
-    "auto_accept_audit_count":
-        audit_total,
+        "total":
+            audit_total,
 
-    "auto_accept_audit_fail":
-        audit_fail,
+        "minor":
+            audit_minor,
 
-    "auto_accept_audit_fail_rate_percent":
-        audit_fail_rate,
+        "fail":
+            audit_fail,
+
+        "uncertain":
+            audit_uncertain,
+
+        "fail_rate_percent":
+            audit_fail_rate,
+    },
 
     "summary":
         summary_df.to_dict(
@@ -1359,18 +1998,18 @@ with open(
     SUMMARY_JSON,
     "w",
     encoding="utf-8",
-) as f:
+) as file:
 
     json.dump(
-        summary_json,
-        f,
+        summary_payload,
+        file,
         ensure_ascii=False,
         indent=2,
     )
 
 
 # ============================================================
-# 18. Risk flag specific summary
+# 25. Risk flag results
 # ============================================================
 
 print("\n")
@@ -1379,7 +2018,7 @@ print("RISK FLAG RESULTS")
 print("=" * 100)
 
 
-risk_review_df = result_df[
+risk_df = result_df[
     result_df[
         "review_type"
     ]
@@ -1388,11 +2027,11 @@ risk_review_df = result_df[
 ]
 
 
-risk_flags = set()
+all_flags = set()
 
 
 for value in (
-    risk_review_df[
+    risk_df[
         "risk_flags"
     ]
     .fillna("")
@@ -1402,40 +2041,42 @@ for value in (
         value
     ).split("|"):
 
-        flag = flag.strip()
+        flag = (
+            flag.strip()
+        )
 
         if flag:
 
-            risk_flags.add(
+            all_flags.add(
                 flag
             )
 
 
 for flag in sorted(
-    risk_flags
+    all_flags
 ):
 
     mask = (
-        risk_review_df[
+        risk_df[
             "risk_flags"
         ]
         .fillna("")
         .str.split("|")
         .apply(
             lambda values:
-            flag in values
+                flag in values
         )
     )
 
 
-    part = risk_review_df[
+    part = risk_df[
         mask
     ]
 
 
-    if len(part) == 0:
-
-        continue
+    total = len(
+        part
+    )
 
 
     fail_count = int(
@@ -1460,6 +2101,17 @@ for flag in sorted(
     )
 
 
+    pass_count = int(
+        (
+            part[
+                "judge_label"
+            ]
+            ==
+            "PASS"
+        ).sum()
+    )
+
+
     print()
 
     print(
@@ -1468,20 +2120,12 @@ for flag in sorted(
 
     print(
         "  total:",
-        len(part)
+        total
     )
 
     print(
         "  PASS:",
-        int(
-            (
-                part[
-                    "judge_label"
-                ]
-                ==
-                "PASS"
-            ).sum()
-        )
+        pass_count
     )
 
     print(
@@ -1495,19 +2139,19 @@ for flag in sorted(
     )
 
     print(
-        "  fail rate:",
-        f"{fail_count / len(part) * 100:.2f}%"
+        "  FAIL rate:",
+        f"{fail_count / total * 100:.2f}%"
     )
 
 
 # ============================================================
-# 19. Final output
+# 26. Final summary
 # ============================================================
 
 print("\n")
-print("=" * 120)
+print("=" * 130)
 print("SEMANTIC QUALITY SUMMARY")
-print("=" * 120)
+print("=" * 130)
 
 
 display_columns = [
@@ -1557,8 +2201,18 @@ print(
 )
 
 print(
+    "MINOR:",
+    audit_minor
+)
+
+print(
     "FAIL:",
     audit_fail
+)
+
+print(
+    "UNCERTAIN:",
+    audit_uncertain
 )
 
 print(
@@ -1569,16 +2223,34 @@ print(
 
 print("\n")
 print("=" * 100)
-print("FILES")
+print("OUTPUT FILES")
 print("=" * 100)
 
 
 print(
-    "Details:"
+    "Checkpoint:"
+)
+
+print(
+    CHECKPOINT_JSONL
+)
+
+
+print(
+    "\nDetails:"
 )
 
 print(
     DETAIL_FILE
+)
+
+
+print(
+    "\nCSV:"
+)
+
+print(
+    DETAIL_CSV
 )
 
 
@@ -1600,6 +2272,4 @@ print(
 )
 
 
-print(
-    "\nDone."
-)
+print("\nDone.")

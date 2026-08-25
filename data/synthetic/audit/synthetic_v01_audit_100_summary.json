@@ -1,0 +1,24 @@
+{
+  "source_total": 1000,
+  "sample_size": 100,
+  "seed": 2026,
+  "frame_distribution": {
+    "TRANSITIVE_TIME": 27,
+    "MOTION_CLOCK": 22,
+    "MOTION_TIME": 18,
+    "TRANSITIVE_CLOCK": 32,
+    "WHERE_PLACE": 1
+  },
+  "polarity_distribution": {
+    "pos": 63,
+    "neg": 37
+  },
+  "tense_distribution": {
+    "present": 52,
+    "future": 48
+  },
+  "clock_distribution": {
+    "no_clock": 46,
+    "clock": 54
+  }
+}

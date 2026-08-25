@@ -1,0 +1,201 @@
+{
+  "version": "0.1",
+  "frames": [
+    {
+      "id": "MOTION_TIME",
+      "weight": 3,
+      "slot_order": [
+        "subject",
+        "time",
+        "destination"
+      ],
+      "fixed_slots": {
+        "verb": "GO"
+      },
+      "slots": {
+        "subject": {
+          "pos": "pronoun"
+        },
+        "time": {
+          "pos": "time"
+        },
+        "destination": {
+          "semantic_type": "destination"
+        }
+      },
+      "features": {
+        "polarity": [
+          "pos",
+          "neg"
+        ]
+      },
+      "roles": {
+        "subject": "base",
+        "time": "base",
+        "destination": "destination"
+      },
+      "templates": {
+        "zh": "{subject}{time}{verb}{destination}。",
+        "en": "{subject} {verb} {destination} {time}.",
+        "ru": "{subject} {time} {verb} {destination}.",
+        "uz": "{subject} {time} {destination} {verb}."
+      }
+    },
+    {
+      "id": "MOTION_CLOCK",
+      "weight": 3,
+      "slot_order": [
+        "subject",
+        "day",
+        "destination"
+      ],
+      "fixed_slots": {
+        "verb": "GO"
+      },
+      "slots": {
+        "subject": {
+          "pos": "pronoun"
+        },
+        "day": {
+          "semantic_type": "day"
+        },
+        "destination": {
+          "semantic_type": "destination"
+        }
+      },
+      "features": {
+        "polarity": [
+          "pos",
+          "neg"
+        ]
+      },
+      "computed": [
+        "clock"
+      ],
+      "roles": {
+        "subject": "base",
+        "day": "base",
+        "destination": "destination"
+      },
+      "templates": {
+        "zh": "{subject}{day}{clock}{verb}{destination}。",
+        "en": "{subject} {verb} {destination} at {clock} {day}.",
+        "ru": "{subject} {day} в {clock} {verb} {destination}.",
+        "uz": "{subject} {day} soat {clock} da {destination} {verb}."
+      }
+    },
+    {
+      "id": "TRANSITIVE_TIME",
+      "weight": 4,
+      "slot_order": [
+        "subject",
+        "time",
+        "verb",
+        "object"
+      ],
+      "slots": {
+        "subject": {
+          "pos": "pronoun"
+        },
+        "time": {
+          "pos": "time"
+        },
+        "verb": {
+          "semantic_type": "transitive_verb"
+        },
+        "object": {
+          "semantic_type": "object"
+        }
+      },
+      "features": {
+        "polarity": [
+          "pos",
+          "neg"
+        ]
+      },
+      "dependencies": {
+        "object_allowed_by_verb": true
+      },
+      "roles": {
+        "subject": "base",
+        "time": "base",
+        "object": "object"
+      },
+      "templates": {
+        "zh": "{subject}{time}{verb}{object}。",
+        "en": "{subject} {verb} {object} {time}.",
+        "ru": "{subject} {time} {verb} {object}.",
+        "uz": "{subject} {time} {object} {verb}."
+      }
+    },
+    {
+      "id": "TRANSITIVE_CLOCK",
+      "weight": 4,
+      "slot_order": [
+        "subject",
+        "day",
+        "verb",
+        "object"
+      ],
+      "slots": {
+        "subject": {
+          "pos": "pronoun"
+        },
+        "day": {
+          "semantic_type": "day"
+        },
+        "verb": {
+          "semantic_type": "transitive_verb"
+        },
+        "object": {
+          "semantic_type": "object"
+        }
+      },
+      "features": {
+        "polarity": [
+          "pos",
+          "neg"
+        ]
+      },
+      "dependencies": {
+        "object_allowed_by_verb": true
+      },
+      "computed": [
+        "clock"
+      ],
+      "roles": {
+        "subject": "base",
+        "day": "base",
+        "object": "object"
+      },
+      "templates": {
+        "zh": "{subject}{day}{clock}{verb}{object}。",
+        "en": "{subject} {verb} {object} at {clock} {day}.",
+        "ru": "{subject} {day} в {clock} {verb} {object}.",
+        "uz": "{subject} {day} soat {clock} da {object} {verb}."
+      }
+    },
+    {
+      "id": "WHERE_PLACE",
+      "weight": 1,
+      "slot_order": [
+        "place"
+      ],
+      "slots": {
+        "place": {
+          "semantic_type": "destination"
+        }
+      },
+      "features": {},
+      "roles": {
+        "place": "base"
+      },
+      "templates": {
+        "zh": "{place}在哪里？",
+        "en": "Where is {place}?",
+        "ru": "Где {place}?",
+        "uz": "{place} qayerda?"
+      }
+    }
+  ]
+}

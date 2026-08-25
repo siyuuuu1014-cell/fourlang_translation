@@ -1,0 +1,13 @@
+{
+  "target_samples": 1000,
+  "generated_samples": 1000,
+  "attempts": 1180,
+  "seed": 2026,
+  "frame_distribution": {
+    "MOTION_TIME": 200,
+    "TRANSITIVE_TIME": 244,
+    "TRANSITIVE_CLOCK": 303,
+    "WHERE_PLACE": 11,
+    "MOTION_CLOCK": 242
+  }
+}

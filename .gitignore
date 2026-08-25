@@ -61,3 +61,40 @@ tools/llama.cpp/runtime_*/
 tmp/
 temp/
 *.tmp
+# Large generated datasets
+data/pipeline/**/parallel_collected.csv
+data/pipeline/**/parallel_collected.parquet
+
+# HuggingFace cache
+data/.hf_datasets_cache/
+.hf_datasets_cache/
+
+# Model weights
+models/
+checkpoints/
+
+# Large generated results
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.onnx
+# ============================================================
+# Generated large parallel corpora
+# ============================================================
+
+data/pipeline/**/parallel_*.csv
+data/pipeline/**/parallel_*.parquet
+
+# HuggingFace cache
+data/.hf_datasets_cache/
+.hf_datasets_cache/
+
+# Model / checkpoint
+models/
+checkpoints/
+
+*.safetensors
+*.pt
+*.pth
+*.bin

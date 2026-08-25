@@ -1,0 +1,17 @@
+{
+  "pipeline": "en_uz",
+  "step": "02_normalization",
+  "input_rows": 211388,
+  "output_rows": 211388,
+  "normalized_empty": 0,
+  "uz_cyrillic_rows": 160,
+  "uz_cyrillic_rate_percent": 0.07569020001135353,
+  "source_word_count": {
+    "mean": 17.310164247734026,
+    "max": 102
+  },
+  "target_word_count": {
+    "mean": 14.030484228054572,
+    "max": 102
+  }
+}

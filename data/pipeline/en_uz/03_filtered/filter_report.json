@@ -1,0 +1,26 @@
+{
+  "pipeline": "en_uz",
+  "step": "03_dedup_quality_filter",
+  "input_rows": 211388,
+  "unique_normalized_pairs": 66791,
+  "duplicates_removed": 144597,
+  "multi_source_pairs": 56555,
+  "repeated_pairs": 56605,
+  "benchmark_files": [
+    "data\\benchmark\\en_uz\\challenge_v1.csv",
+    "data\\benchmark\\en_uz\\challenge_v1_report.csv",
+    "data\\benchmark\\en_uz\\tatoeba_en_uz_500.csv"
+  ],
+  "benchmark_unique_pairs": 729,
+  "rejection_stats": {
+    "normalized_empty": 0,
+    "invalid_word_length": 5,
+    "invalid_char_length": 0,
+    "invalid_length_ratio": 1,
+    "cyrillic_uz": 160,
+    "benchmark_leak": 729
+  },
+  "accepted_rows": 65897,
+  "rejected_rows": 894,
+  "accepted_rate_percent": 98.661496309383
+}

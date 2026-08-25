@@ -1,0 +1,30 @@
+{
+  "pipeline": "en_uz",
+  "step": "04_rule_quality_check",
+  "input_rows": 65897,
+  "route_counts": {
+    "NEEDS_QWEN": 65888,
+    "AUTO_ACCEPT": 9
+  },
+  "risk_flags": {
+    "NEGATION_MISMATCH": 9379,
+    "NUMBER_MISMATCH": 566,
+    "TIME_MISMATCH": 75,
+    "EMAIL_MISMATCH": 1,
+    "DATE_MISMATCH": 21,
+    "LOW_LETTER_RATIO": 183,
+    "REPEATED_PUNCT": 3,
+    "URL_MISMATCH": 7,
+    "SOURCE_TARGET_SAME": 2
+  },
+  "source_family_distribution": {
+    "1": 65888,
+    "2": 9
+  },
+  "quality_score": {
+    "mean": 79.39029090853909,
+    "median": 82.0,
+    "min": 30.0,
+    "max": 90.0
+  }
+}

@@ -138,71 +138,168 @@ def extract_json(
     )
 
 
-def build_prompt(
-    row,
-):
+def build_prompt(row):
 
-    texts = row[
-        "texts"
-    ]
+    texts = row["texts"]
+
+    slots = row.get(
+        "slots",
+        {}
+    )
+
+    features = row.get(
+        "features",
+        {}
+    )
+
+    computed = row.get(
+        "computed",
+        {}
+    )
 
     return f"""
-You are a multilingual translation quality auditor.
+You are a strict multilingual translation quality auditor for a training-data pipeline.
 
-The following four sentences were generated from ONE semantic representation.
-They MUST express the same meaning.
+Your job is NOT to approve the sample.
+Your job is to actively search for semantic, grammatical, morphological,
+temporal, polarity, entity, number, and naturalness errors.
 
-Chinese:
-{texts["zh"]}
+The four sentences below are intended to express exactly ONE semantic structure.
 
-English:
-{texts["en"]}
+============================================================
+CANONICAL SEMANTIC SPECIFICATION
+============================================================
 
-Russian:
-{texts["ru"]}
-
-Uzbek:
-{texts["uz"]}
-
-Semantic frame:
+Frame:
 {row["frame_id"]}
 
+Slots:
+{json.dumps(slots, ensure_ascii=False)}
+
 Features:
-{json.dumps(row["features"], ensure_ascii=False)}
+{json.dumps(features, ensure_ascii=False)}
 
-Check semantic equivalence and grammar.
+Computed values:
+{json.dumps(computed, ensure_ascii=False)}
 
-Return JSON ONLY:
+============================================================
+GENERATED SENTENCES
+============================================================
+
+Chinese (zh):
+{texts["zh"]}
+
+English (en):
+{texts["en"]}
+
+Russian (ru):
+{texts["ru"]}
+
+Uzbek (uz):
+{texts["uz"]}
+
+============================================================
+AUDIT REQUIREMENTS
+============================================================
+
+Evaluate EACH language independently against the canonical semantic
+specification.
+
+Then compare the four languages with each other.
+
+Check especially:
+
+1. Meaning equivalence
+2. Subject/person
+3. Object
+4. Destination/location
+5. Tense/aspect
+6. Positive vs negative polarity
+7. Time/date/clock
+8. Numbers
+9. Named entities
+10. Missing information
+11. Added information
+12. Russian case/conjugation/aspect
+13. Uzbek case suffixes/person/tense/morphology
+14. English tense/agreement/articles
+15. Chinese grammatical and semantic naturalness
+16. Whether the sentence sounds natural for a native speaker
+
+IMPORTANT:
+
+Do NOT give grade A merely because the four sentences look similar.
+
+A sentence that is understandable but unnatural or grammatically questionable
+must NOT automatically receive grade A.
+
+Grade definitions:
+
+A:
+Fully correct, semantically precise, grammatically correct, and natural
+in all four languages.
+
+B:
+Semantically correct in all four languages, with only harmless stylistic
+or very minor naturalness differences.
+
+C:
+Meaning is mostly preserved, but at least one language contains a real
+minor grammar, morphology, tense, aspect, or naturalness problem.
+
+D:
+Important semantic error, omission, addition, incorrect polarity,
+incorrect time/number/entity, or significant grammar problem.
+
+F:
+Unusable or seriously incorrect.
+
+Return JSON only.
+
+Use exactly this schema:
 
 {{
-  "grade": "A",
-  "semantic_consistent": true,
+  "grade": "",
+  "semantic_consistent": false,
+
   "grammar_ok": {{
-    "zh": true,
-    "en": true,
-    "ru": true,
-    "uz": true
+    "zh": false,
+    "en": false,
+    "ru": false,
+    "uz": false
   }},
+
+  "natural_ok": {{
+    "zh": false,
+    "en": false,
+    "ru": false,
+    "uz": false
+  }},
+
   "errors": {{
     "number_error": false,
     "time_error": false,
     "negation_error": false,
     "entity_error": false,
-    "meaning_error": false
+    "meaning_error": false,
+    "tense_aspect_error": false,
+    "omission_error": false,
+    "addition_error": false,
+    "morphology_error": false
   }},
+
+  "problem_languages": [],
+
   "reason": ""
 }}
 
-Grade rules:
-A = fully correct
-B = correct meaning with harmless stylistic variation
-C = minor language or grammar issue
-D = important translation error
-F = unusable
+The reason MUST NOT be empty.
 
-Do not explain outside JSON.
+If there is no error, briefly state why the meanings and grammatical forms
+are consistent.
+
+Do not output anything outside JSON.
 """.strip()
-
 
 @torch.inference_mode()
 def judge_one(
@@ -282,18 +379,22 @@ def judge_one(
     )
 
 
-def judge_accept(
-    result,
-):
+def judge_accept(result):
 
-    if result.get(
-        "grade"
-    ) not in {
+    # --------------------------------------------------------
+    # Grade
+    # --------------------------------------------------------
+
+    if result.get("grade") not in {
         "A",
         "B",
     }:
         return False
 
+
+    # --------------------------------------------------------
+    # Semantic consistency
+    # --------------------------------------------------------
 
     if not result.get(
         "semantic_consistent",
@@ -302,11 +403,14 @@ def judge_accept(
         return False
 
 
+    # --------------------------------------------------------
+    # Grammar
+    # --------------------------------------------------------
+
     grammar = result.get(
         "grammar_ok",
         {}
     )
-
 
     if not all(
         grammar.get(
@@ -323,31 +427,77 @@ def judge_accept(
         return False
 
 
+    # --------------------------------------------------------
+    # Naturalness
+    # --------------------------------------------------------
+
+    natural = result.get(
+        "natural_ok",
+        {}
+    )
+
+    if not all(
+        natural.get(
+            lang,
+            False,
+        )
+        for lang in [
+            "zh",
+            "en",
+            "ru",
+            "uz",
+        ]
+    ):
+        return False
+
+
+    # --------------------------------------------------------
+    # Error flags
+    # --------------------------------------------------------
+
     errors = result.get(
         "errors",
         {}
     )
 
+    high_risk_errors = [
+        "number_error",
+        "time_error",
+        "negation_error",
+        "entity_error",
+        "meaning_error",
+        "tense_aspect_error",
+        "omission_error",
+        "addition_error",
+        "morphology_error",
+    ]
 
     if any(
         errors.get(
             key,
             False,
         )
-        for key in [
-            "number_error",
-            "time_error",
-            "negation_error",
-            "entity_error",
-            "meaning_error",
-        ]
+        for key in high_risk_errors
     ):
         return False
 
 
+    # --------------------------------------------------------
+    # Reason必须存在
+    # --------------------------------------------------------
+
+    reason = str(
+        result.get(
+            "reason",
+            ""
+        )
+    ).strip()
+
+    if not reason:
+        return False
+
+
     return True
-
-
 def main():
 
     parser = argparse.ArgumentParser()

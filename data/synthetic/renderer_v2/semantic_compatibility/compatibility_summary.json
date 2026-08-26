@@ -1,0 +1,50 @@
+{
+  "version": "semantic_compatibility_v1",
+  "input_file": "D:\\dev\\projects\\fourlang_translation\\data\\synthetic\\renderer_v2\\semantic_v02.jsonl",
+  "resource_file": "D:\\dev\\projects\\fourlang_translation\\data\\synthetic\\resources\\semantic_compatibility.json",
+  "total": 1000,
+  "accepted": 942,
+  "rejected": 58,
+  "accept_rate": 0.942,
+  "rows_with_warnings": 208,
+  "warning_rate": 0.208,
+  "verb_distribution": {
+    "GO": 442,
+    "DRINK": 124,
+    "FIND": 120,
+    "BUY": 106,
+    "EAT": 101,
+    "READ": 96,
+    "": 11
+  },
+  "violation_counts": {
+    "EXPLICIT_FORBIDDEN_PAIR:READ:PASSPORT:": 45,
+    "OBJECT_CLASS_MISMATCH:READ:PASSPORT:": 45,
+    "OBJECT_CLASS_MISMATCH:BUY:PASSPORT:": 13
+  },
+  "warning_counts": {
+    "UNKNOWN_OBJECT_CLASS:DRINK:COFFEE:": 65,
+    "UNKNOWN_DESTINATION_CLASS:GO::MOSCOW": 40,
+    "UNKNOWN_DESTINATION_CLASS:GO::BANK": 34,
+    "UNKNOWN_OBJECT_CLASS:FIND:COFFEE:": 21,
+    "UNKNOWN_OBJECT_CLASS:BUY:COFFEE:": 13,
+    "UNKNOWN_OBJECT_CLASS:BUY:MEDICINE:": 12,
+    "UNKNOWN_OBJECT_CLASS:FIND:MEDICINE:": 12,
+    "UNKNOWN_VERB_RULE:::": 11
+  },
+  "rejected_pairs": {
+    "('READ', 'PASSPORT', None)": 45,
+    "('BUY', 'PASSPORT', None)": 13
+  },
+  "unknown_objects": {
+    "COFFEE": 99,
+    "MEDICINE": 24
+  },
+  "unknown_destinations": {
+    "MOSCOW": 40,
+    "BANK": 34
+  },
+  "unknown_verbs": {
+    "": 11
+  }
+}

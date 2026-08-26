@@ -1828,6 +1828,20 @@ def main():
 
     model.config.use_cache = True
 
+    # ============================================================
+    # Deterministic judge generation
+    # Qwen's generation_config.json contains sampling defaults:
+    # temperature=0.6, top_p=0.95, top_k=20.
+    #
+    # Step10C uses greedy deterministic decoding, so disable all
+    # sampling-only parameters explicitly.
+    # ============================================================
+
+    model.generation_config.do_sample = False
+    model.generation_config.temperature = None
+    model.generation_config.top_p = None
+    model.generation_config.top_k = None
+
     print(
         "Model:",
         type(

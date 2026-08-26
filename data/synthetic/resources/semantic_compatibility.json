@@ -1,0 +1,117 @@
+{
+  "version": "v1",
+  "unknown_concept_policy": "warn",
+  "concept_classes": {
+    "EDIBLE": [
+      "FOOD"
+    ],
+    "DRINKABLE": [
+      "WATER"
+    ],
+    "READABLE_TEXT": [
+      "BOOK",
+      "NEWSPAPER",
+      "ARTICLE",
+      "MESSAGE",
+      "TEXT",
+      "LETTER",
+      "MENU"
+    ],
+    "IDENTITY_DOCUMENT": [
+      "PASSPORT"
+    ],
+    "DEVICE": [
+      "PHONE"
+    ],
+    "TICKET": [
+      "TICKET"
+    ],
+    "GENERAL_PHYSICAL_OBJECT": [
+      "BAG",
+      "KEY",
+      "UMBRELLA"
+    ],
+    "PLACE": [
+      "AIRPORT",
+      "OFFICE",
+      "HOSPITAL",
+      "STATION",
+      "TRAIN_STATION",
+      "BUS_STATION",
+      "HOTEL",
+      "RESTAURANT",
+      "GUESTHOUSE",
+      "SCHOOL",
+      "UNIVERSITY",
+      "HOME",
+      "TASHKENT",
+      "BEIJING"
+    ]
+  },
+  "verb_rules": {
+    "EAT": {
+      "required_slot": "object",
+      "allowed_object_classes": [
+        "EDIBLE"
+      ]
+    },
+    "DRINK": {
+      "required_slot": "object",
+      "allowed_object_classes": [
+        "DRINKABLE"
+      ]
+    },
+    "READ": {
+      "required_slot": "object",
+      "allowed_object_classes": [
+        "READABLE_TEXT"
+      ]
+    },
+    "BUY": {
+      "required_slot": "object",
+      "allowed_object_classes": [
+        "EDIBLE",
+        "DRINKABLE",
+        "READABLE_TEXT",
+        "DEVICE",
+        "TICKET",
+        "GENERAL_PHYSICAL_OBJECT"
+      ]
+    },
+    "FIND": {
+      "required_slot": "object",
+      "allowed_object_classes": [
+        "EDIBLE",
+        "DRINKABLE",
+        "READABLE_TEXT",
+        "IDENTITY_DOCUMENT",
+        "DEVICE",
+        "TICKET",
+        "GENERAL_PHYSICAL_OBJECT"
+      ]
+    },
+    "GO": {
+      "required_slot": "destination",
+      "allowed_destination_classes": [
+        "PLACE"
+      ]
+    }
+  },
+  "explicit_forbidden_pairs": [
+    {
+      "verb": "READ",
+      "object": "PASSPORT",
+      "reason": "READ + PASSPORT is not a natural default collocation for the current synthetic domain."
+    },
+    {
+      "verb": "EAT",
+      "object": "WATER",
+      "reason": "Water is not an edible object."
+    },
+    {
+      "verb": "DRINK",
+      "object": "FOOD",
+      "reason": "Food is not a drinkable object."
+    }
+  ]
+}

@@ -1815,7 +1815,7 @@ def main():
             str(
                 qwen_path
             ),
-            dtype=torch.float16,
+            torch_dtype=torch.float16,
             local_files_only=True,
             trust_remote_code=True,
         )

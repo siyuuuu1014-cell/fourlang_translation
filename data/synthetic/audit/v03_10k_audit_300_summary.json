@@ -1,0 +1,69 @@
+{
+  "version": "v03_10k_audit_300",
+  "source": "D:\\dev\\projects\\fourlang_translation\\data\\synthetic\\generated\\v03_10k\\03_grammar_hard\\grammar_accepted.jsonl",
+  "source_rows": 10000,
+  "audit_rows": 300,
+  "seed": 2029,
+  "selection_policy": "stratified_rarity_coverage",
+  "distribution": {
+    "frame": {
+      "TRANSITIVE_TIME": 120,
+      "MOTION_TIME": 112,
+      "TRANSITIVE_CLOCK": 32,
+      "MOTION_CLOCK": 25,
+      "WHERE_PLACE": 11
+    },
+    "verb": {
+      "GO": 137,
+      "FIND": 41,
+      "BUY": 41,
+      "DRINK": 30,
+      "READ": 20,
+      "EAT": 20,
+      "NO_VERB": 11
+    },
+    "subject": {
+      "PERSON_WE": 49,
+      "PERSON_YOU": 49,
+      "PERSON_HE": 48,
+      "PERSON_THEY": 48,
+      "PERSON_I": 48,
+      "PERSON_SHE": 47
+    },
+    "object": {
+      "PASSPORT": 31,
+      "BOOK": 20,
+      "FOOD": 20,
+      "MEDICINE": 17,
+      "PHONE": 17,
+      "TICKET": 17,
+      "WATER": 15,
+      "COFFEE": 15
+    },
+    "destination": {
+      "RESTAURANT": 13,
+      "HOSPITAL": 13,
+      "SCHOOL": 13,
+      "STATION": 13,
+      "OFFICE": 13,
+      "AIRPORT": 12,
+      "MOSCOW": 12,
+      "BEIJING": 12,
+      "HOTEL": 12,
+      "TASHKENT": 12,
+      "BANK": 12
+    },
+    "tense": {
+      "present": 150,
+      "future": 150
+    },
+    "polarity": {
+      "neg": 198,
+      "pos": 102
+    },
+    "clock": {
+      "NO": 243,
+      "YES": 57
+    }
+  }
+}

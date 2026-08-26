@@ -1,12 +1,16 @@
 from __future__ import annotations
 
+import argparse
 import json
+import random
 import re
+from collections import Counter
 from pathlib import Path
 from typing import Any
 
+
 # ============================================================
-# Reuse the stable V0.1 generator
+# Stable V0.1 engine
 # ============================================================
 
 from scripts.synthetic import generate_synthetic_v01 as v01
@@ -16,6 +20,14 @@ from scripts.synthetic.renderer_v2 import (
     render_zh_verb_v2,
     render_ru_verb_v2,
 )
+
+
+# ============================================================
+# Version
+# ============================================================
+
+GENERATOR_VERSION = "0.3"
+RENDERER_VERSION = "v2"
 
 
 # ============================================================
@@ -36,43 +48,30 @@ COMPATIBILITY_FILE = (
     / "semantic_compatibility.json"
 )
 
-OUTPUT_DIR = (
+DEFAULT_OUTPUT_DIR = (
     PROJECT_ROOT
     / "data"
     / "synthetic"
     / "generated"
+    / "v03"
 )
-
-OUTPUT_FILE = (
-    OUTPUT_DIR
-    / "semantic_v03_raw.jsonl"
-)
-
-STATS_FILE = (
-    OUTPUT_DIR
-    / "semantic_v03_stats.json"
-)
-
-
-GENERATOR_VERSION = "0.3"
-RENDERER_VERSION = "v2"
 
 
 # ============================================================
-# Load resources
+# Basic IO
 # ============================================================
 
-def load_compatibility_resource() -> dict:
+def load_json(
+    path: Path,
+) -> dict:
 
-    if not COMPATIBILITY_FILE.exists():
+    if not path.exists():
 
         raise FileNotFoundError(
-            "Semantic compatibility resource "
-            "not found:\n"
-            f"{COMPATIBILITY_FILE}"
+            f"File not found:\n{path}"
         )
 
-    with COMPATIBILITY_FILE.open(
+    with path.open(
         "r",
         encoding="utf-8",
     ) as f:
@@ -85,12 +84,75 @@ def load_compatibility_resource() -> dict:
     ):
 
         raise ValueError(
-            "semantic_compatibility.json "
-            "must contain a JSON object."
+            f"Expected JSON object:\n{path}"
         )
 
+    return data
+
+
+def write_jsonl(
+    path: Path,
+    rows: list[dict],
+) -> None:
+
+    path.parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    with path.open(
+        "w",
+        encoding="utf-8",
+    ) as f:
+
+        for row in rows:
+
+            f.write(
+                json.dumps(
+                    row,
+                    ensure_ascii=False,
+                )
+                + "\n"
+            )
+
+
+def write_json(
+    path: Path,
+    data: dict,
+) -> None:
+
+    path.parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    with path.open(
+        "w",
+        encoding="utf-8",
+    ) as f:
+
+        json.dump(
+            data,
+            f,
+            ensure_ascii=False,
+            indent=2,
+        )
+
+
+# ============================================================
+# Compatibility resource
+# ============================================================
+
+def load_compatibility_resource() -> dict:
+
+    data = load_json(
+        COMPATIBILITY_FILE
+    )
+
     if not isinstance(
-        data.get("concept_classes"),
+        data.get(
+            "concept_classes"
+        ),
         dict,
     ):
 
@@ -100,7 +162,9 @@ def load_compatibility_resource() -> dict:
         )
 
     if not isinstance(
-        data.get("verb_rules"),
+        data.get(
+            "verb_rules"
+        ),
         dict,
     ):
 
@@ -116,8 +180,22 @@ COMPATIBILITY = (
     load_compatibility_resource()
 )
 
+
+# ============================================================
+# Renderer V2 resource
+# ============================================================
+
 VERB_POLICIES = (
     load_verb_policies()
+)
+
+
+# ============================================================
+# Keep original V0.1 renderer
+# ============================================================
+
+ORIGINAL_RENDER_VERB = (
+    v01.render_verb
 )
 
 
@@ -152,22 +230,16 @@ def concept_matches_pattern(
     pattern: str,
 ) -> bool:
 
-    """
-    Supports both:
-
-        FOOD
-        OBJECT_FOOD
-        ITEM_FOOD
-
-    while avoiding unrestricted substring matching.
-    """
-
-    concept_id = normalize_concept_id(
-        concept_id
+    concept_id = (
+        normalize_concept_id(
+            concept_id
+        )
     )
 
-    pattern = normalize_concept_id(
-        pattern
+    pattern = (
+        normalize_concept_id(
+            pattern
+        )
     )
 
     if (
@@ -175,9 +247,11 @@ def concept_matches_pattern(
         or
         not pattern
     ):
+
         return False
 
     if concept_id == pattern:
+
         return True
 
     tokens = [
@@ -191,26 +265,20 @@ def concept_matches_pattern(
 
 
 # ============================================================
-# Semantic classes
+# Semantic class
 # ============================================================
 
 def classify_concept(
     concept: dict,
 ) -> set[str]:
 
-    """
-    Return all semantic compatibility classes
-    for a Concept.
-    """
-
     concept_id = concept.get(
         "id"
     )
 
     if not concept_id:
-        return set()
 
-    classes: set[str] = set()
+        return set()
 
     class_map = (
         COMPATIBILITY.get(
@@ -218,6 +286,8 @@ def classify_concept(
             {},
         )
     )
+
+    result: set[str] = set()
 
     for (
         class_name,
@@ -228,6 +298,7 @@ def classify_concept(
             patterns,
             list,
         ):
+
             continue
 
         for pattern in patterns:
@@ -237,24 +308,28 @@ def classify_concept(
                 str(pattern),
             ):
 
-                classes.add(
+                result.add(
                     class_name
                 )
 
                 break
 
-    return classes
+    return result
 
 
 # ============================================================
-# Verb rule lookup
+# Verb compatibility rule
 # ============================================================
 
 def find_verb_rule(
     verb: dict | None,
-) -> tuple[str | None, dict | None]:
+) -> tuple[
+    str | None,
+    dict | None,
+]:
 
     if not verb:
+
         return None, None
 
     verb_id = verb.get(
@@ -262,6 +337,7 @@ def find_verb_rule(
     )
 
     if not verb_id:
+
         return None, None
 
     rules = (
@@ -293,17 +369,18 @@ def find_verb_rule(
 # Explicit forbidden pairs
 # ============================================================
 
-def is_explicitly_forbidden(
+def find_explicit_forbidden_pair(
     verb: dict | None,
     obj: dict | None,
-) -> bool:
+) -> dict | None:
 
     if (
         not verb
         or
         not obj
     ):
-        return False
+
+        return None
 
     verb_id = verb.get(
         "id"
@@ -318,7 +395,8 @@ def is_explicitly_forbidden(
         or
         not object_id
     ):
-        return False
+
+        return None
 
     pairs = (
         COMPATIBILITY.get(
@@ -329,47 +407,59 @@ def is_explicitly_forbidden(
 
     for pair in pairs:
 
-        pair_verb = pair.get(
-            "verb"
+        expected_verb = (
+            pair.get(
+                "verb"
+            )
         )
 
-        pair_object = pair.get(
-            "object"
+        expected_object = (
+            pair.get(
+                "object"
+            )
         )
 
         if (
-            not pair_verb
+            not expected_verb
             or
-            not pair_object
+            not expected_object
         ):
+
             continue
 
-        verb_match = (
+        if (
             concept_matches_pattern(
                 str(verb_id),
-                str(pair_verb),
+                str(expected_verb),
             )
-        )
-
-        object_match = (
+            and
             concept_matches_pattern(
                 str(object_id),
-                str(pair_object),
+                str(expected_object),
             )
-        )
-
-        if (
-            verb_match
-            and
-            object_match
         ):
-            return True
 
-    return False
+            return pair
+
+    return None
+
+
+def is_explicitly_forbidden(
+    verb: dict | None,
+    obj: dict | None,
+) -> bool:
+
+    return (
+        find_explicit_forbidden_pair(
+            verb,
+            obj,
+        )
+        is not None
+    )
 
 
 # ============================================================
-# Build ordinary candidate pool
+# Ordinary concept pool
 # ============================================================
 
 def build_base_pool(
@@ -388,7 +478,7 @@ def build_base_pool(
 
 
 # ============================================================
-# Object compatibility
+# Compatibility-aware object pool
 # ============================================================
 
 def build_object_pool(
@@ -413,9 +503,9 @@ def build_object_pool(
     if rule is None:
 
         raise RuntimeError(
-            "Generator V0.3 found a verb "
-            "without a semantic compatibility rule: "
-            f"{verb.get('id')}"
+            "\nNo semantic compatibility "
+            "rule for verb.\n"
+            f"verb={verb.get('id')}"
         )
 
     allowed_classes = set(
@@ -428,10 +518,11 @@ def build_object_pool(
     if not allowed_classes:
 
         raise RuntimeError(
-            "Verb requires object sampling "
-            "but has no allowed_object_classes: "
-            f"{verb.get('id')} "
-            f"(rule={rule_name})"
+            "\nVerb requires an object "
+            "but no allowed_object_classes "
+            "were configured.\n"
+            f"verb={verb.get('id')}\n"
+            f"rule={rule_name}"
         )
 
     compatible_pool = []
@@ -439,7 +530,7 @@ def build_object_pool(
     for concept in base_pool:
 
         # ----------------------------------------------------
-        # Explicit forbidden combination
+        # Known forbidden pair
         # ----------------------------------------------------
 
         if is_explicitly_forbidden(
@@ -450,7 +541,7 @@ def build_object_pool(
             continue
 
         # ----------------------------------------------------
-        # Semantic class
+        # Semantic class lookup
         # ----------------------------------------------------
 
         concept_classes = (
@@ -459,19 +550,15 @@ def build_object_pool(
             )
         )
 
+        # Production generator is strict:
+        # unknown compatibility is NOT sampled.
         if not concept_classes:
 
-            # Generator V0.3 is intentionally stricter
-            # than the audit validator.
-            #
-            # Validator V1.1 may WARN about an unknown
-            # concept, but a production generator should
-            # not randomly emit concepts whose compatibility
-            # is unknown.
             continue
 
-        if concept_classes.intersection(
-            allowed_classes
+        if (
+            concept_classes
+            & allowed_classes
         ):
 
             compatible_pool.append(
@@ -481,7 +568,8 @@ def build_object_pool(
     if not compatible_pool:
 
         raise RuntimeError(
-            "No compatible object candidates.\n"
+            "\nNo compatible object "
+            "candidates were found.\n"
             f"verb={verb.get('id')}\n"
             f"allowed_classes="
             f"{sorted(allowed_classes)}\n"
@@ -493,7 +581,7 @@ def build_object_pool(
 
 
 # ============================================================
-# Destination compatibility
+# Compatibility-aware destination pool
 # ============================================================
 
 def build_destination_pool(
@@ -518,9 +606,9 @@ def build_destination_pool(
     if rule is None:
 
         raise RuntimeError(
-            "Generator V0.3 found a verb "
-            "without a semantic compatibility rule: "
-            f"{verb.get('id')}"
+            "\nNo semantic compatibility "
+            "rule for verb.\n"
+            f"verb={verb.get('id')}"
         )
 
     allowed_classes = set(
@@ -533,27 +621,31 @@ def build_destination_pool(
     if not allowed_classes:
 
         raise RuntimeError(
-            "Verb requires destination sampling "
-            "but has no allowed_destination_classes: "
-            f"{verb.get('id')} "
-            f"(rule={rule_name})"
+            "\nVerb requires destination "
+            "sampling but no "
+            "allowed_destination_classes "
+            "were configured.\n"
+            f"verb={verb.get('id')}\n"
+            f"rule={rule_name}"
         )
 
     compatible_pool = []
 
     for concept in base_pool:
 
-        concept_classes = (
+        classes = (
             classify_concept(
                 concept
             )
         )
 
-        if not concept_classes:
+        if not classes:
+
             continue
 
-        if concept_classes.intersection(
-            allowed_classes
+        if (
+            classes
+            & allowed_classes
         ):
 
             compatible_pool.append(
@@ -563,7 +655,8 @@ def build_destination_pool(
     if not compatible_pool:
 
         raise RuntimeError(
-            "No compatible destination candidates.\n"
+            "\nNo compatible destination "
+            "candidates were found.\n"
             f"verb={verb.get('id')}\n"
             f"allowed_classes="
             f"{sorted(allowed_classes)}\n"
@@ -575,26 +668,21 @@ def build_destination_pool(
 
 
 # ============================================================
-# Validate already-selected fixed slots
+# Fixed-slot compatibility validation
 # ============================================================
 
-def validate_fixed_semantic_slots(
+def validate_selected_compatibility(
     selected: dict,
 ) -> None:
-
-    """
-    Fixed frame slots also have to obey compatibility.
-
-    Fail fast if resources define an impossible
-    fixed combination.
-    """
 
     verb = selected.get(
         "verb"
     )
 
+    # WHERE_PLACE and similar verbless frames
+    # are valid.
     if not verb:
-        # WHERE_PLACE and similar verbless frames.
+
         return
 
     (
@@ -605,7 +693,16 @@ def validate_fixed_semantic_slots(
     )
 
     if rule is None:
-        return
+
+        raise RuntimeError(
+            "\nSelected verb has no "
+            "compatibility rule:\n"
+            f"{verb.get('id')}"
+        )
+
+    # ========================================================
+    # Object
+    # ========================================================
 
     obj = selected.get(
         "object"
@@ -613,16 +710,23 @@ def validate_fixed_semantic_slots(
 
     if obj:
 
-        if is_explicitly_forbidden(
-            verb,
-            obj,
-        ):
+        forbidden = (
+            find_explicit_forbidden_pair(
+                verb,
+                obj,
+            )
+        )
+
+        if forbidden is not None:
 
             raise RuntimeError(
-                "Fixed frame slots contain "
-                "an explicitly forbidden pair: "
-                f"{verb.get('id')} + "
-                f"{obj.get('id')}"
+                "\nSelected slots contain "
+                "an explicitly forbidden "
+                "verb-object pair.\n"
+                f"verb={verb.get('id')}\n"
+                f"object={obj.get('id')}\n"
+                f"reason="
+                f"{forbidden.get('reason')}"
             )
 
         allowed_classes = set(
@@ -634,24 +738,31 @@ def validate_fixed_semantic_slots(
 
         if allowed_classes:
 
-            obj_classes = (
+            object_classes = (
                 classify_concept(
                     obj
                 )
             )
 
-            if not obj_classes.intersection(
-                allowed_classes
+            if not (
+                object_classes
+                & allowed_classes
             ):
 
                 raise RuntimeError(
-                    "Fixed object violates "
-                    "semantic compatibility: "
-                    f"verb={verb.get('id')} "
-                    f"object={obj.get('id')} "
-                    f"classes={sorted(obj_classes)} "
-                    f"allowed={sorted(allowed_classes)}"
+                    "\nObject violates semantic "
+                    "compatibility.\n"
+                    f"verb={verb.get('id')}\n"
+                    f"object={obj.get('id')}\n"
+                    f"object_classes="
+                    f"{sorted(object_classes)}\n"
+                    f"allowed_classes="
+                    f"{sorted(allowed_classes)}"
                 )
+
+    # ========================================================
+    # Destination
+    # ========================================================
 
     destination = selected.get(
         "destination"
@@ -676,36 +787,34 @@ def validate_fixed_semantic_slots(
 
             if not (
                 destination_classes
-                .intersection(
-                    allowed_classes
-                )
+                & allowed_classes
             ):
 
                 raise RuntimeError(
-                    "Fixed destination violates "
-                    "semantic compatibility: "
-                    f"verb={verb.get('id')} "
+                    "\nDestination violates "
+                    "semantic compatibility.\n"
+                    f"verb={verb.get('id')}\n"
                     f"destination="
-                    f"{destination.get('id')} "
-                    f"classes="
-                    f"{sorted(destination_classes)} "
-                    f"allowed="
+                    f"{destination.get('id')}\n"
+                    f"destination_classes="
+                    f"{sorted(destination_classes)}\n"
+                    f"allowed_classes="
                     f"{sorted(allowed_classes)}"
                 )
 
 
 # ============================================================
-# V0.3 Compatibility-aware slot selection
+# V0.3 slot selector
 # ============================================================
 
 def select_slots_v03(
-    frame,
-    concepts,
-    concepts_by_id,
-    rng,
-):
+    frame: dict,
+    concepts: list[dict],
+    concepts_by_id: dict,
+    rng: random.Random,
+) -> dict:
 
-    selected = {}
+    selected: dict = {}
 
     # ========================================================
     # 1. Fixed slots
@@ -722,8 +831,10 @@ def select_slots_v03(
         if concept_id not in concepts_by_id:
 
             raise RuntimeError(
-                "Unknown fixed concept ID: "
-                f"{concept_id}"
+                "\nUnknown fixed concept ID.\n"
+                f"frame={frame.get('id')}\n"
+                f"slot={slot_name}\n"
+                f"concept={concept_id}"
             )
 
         selected[
@@ -741,9 +852,9 @@ def select_slots_v03(
         [],
     ):
 
-        # If the same slot was already fixed,
-        # never overwrite it.
+        # Fixed slots must never be overwritten.
         if slot_name in selected:
+
             continue
 
         spec = frame[
@@ -801,7 +912,14 @@ def select_slots_v03(
             continue
 
         # ----------------------------------------------------
-        # All other slots keep V0.1 behavior
+        # Other slots:
+        #
+        # subject
+        # verb
+        # day/time concept
+        # etc.
+        #
+        # Reuse stable V0.1 behavior.
         # ----------------------------------------------------
 
         selected[
@@ -813,10 +931,10 @@ def select_slots_v03(
         )
 
     # ========================================================
-    # 3. Validate any fixed semantic slots
+    # 3. Final deterministic compatibility assertion
     # ========================================================
 
-    validate_fixed_semantic_slots(
+    validate_selected_compatibility(
         selected
     )
 
@@ -825,24 +943,20 @@ def select_slots_v03(
 
 # ============================================================
 # Renderer V0.3
-#
-# Reuses V0.1 renderer, then applies Renderer V2 policies.
 # ============================================================
 
-ORIGINAL_RENDER_VERB = (
-    v01.render_verb
-)
-
-
 def render_verb_v03(
-    concept,
-    lang,
-    tense,
-    polarity,
-    person,
+    concept: dict,
+    lang: str,
+    tense: str,
+    polarity: str,
+    person: str,
 ):
 
-    # First preserve all already-working V0.1 forms.
+    # ========================================================
+    # First obtain the already-working V0.1 surface.
+    # ========================================================
+
     original_surface = (
         ORIGINAL_RENDER_VERB(
             concept,
@@ -860,12 +974,14 @@ def render_verb_v03(
         )
     )
 
-    # --------------------------------------------------------
-    # Chinese V2:
-    # FIND + negative
+    # ========================================================
+    # Chinese Renderer V2
     #
+    # Example fixed previously:
+    #
+    # FIND + negative
     # 不找到 -> 没找到
-    # --------------------------------------------------------
+    # ========================================================
 
     if lang == "zh":
 
@@ -877,12 +993,14 @@ def render_verb_v03(
             policies=VERB_POLICIES,
         )
 
-    # --------------------------------------------------------
-    # Russian V2:
-    # FIND + future
+    # ========================================================
+    # Russian Renderer V2
     #
+    # Example fixed previously:
+    #
+    # FIND future:
     # будет находить -> найдёт
-    # --------------------------------------------------------
+    # ========================================================
 
     if lang == "ru":
 
@@ -895,168 +1013,546 @@ def render_verb_v03(
             policies=VERB_POLICIES,
         )
 
-    # EN / UZ unchanged
+    # ========================================================
+    # EN / UZ retain V0.1 forms
+    # ========================================================
+
     return original_surface
 
 
 # ============================================================
-# Post-process metadata
+# CLI
 # ============================================================
 
-def update_output_metadata() -> None:
+def parse_args() -> argparse.Namespace:
 
-    if not OUTPUT_FILE.exists():
+    parser = argparse.ArgumentParser(
+        description=(
+            "Synthetic Generator V0.3 - "
+            "compatibility-aware four-language "
+            "parallel data generator"
+        )
+    )
 
-        raise FileNotFoundError(
-            "V0.3 generation output "
-            "was not created:\n"
-            f"{OUTPUT_FILE}"
+    parser.add_argument(
+        "--n",
+        type=int,
+        default=1000,
+        help="Number of unique semantic samples.",
+    )
+
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=2027,
+        help="Random seed.",
+    )
+
+    parser.add_argument(
+        "--output-dir",
+        type=str,
+        default=str(
+            DEFAULT_OUTPUT_DIR
+        ),
+        help=(
+            "Output directory. "
+            "Relative paths are resolved "
+            "from project root."
+        ),
+    )
+
+    parser.add_argument(
+        "--max-attempt-multiplier",
+        type=int,
+        default=200,
+        help=(
+            "Maximum generation attempts = "
+            "n * this value."
+        ),
+    )
+
+    return parser.parse_args()
+
+
+# ============================================================
+# Resolve output
+# ============================================================
+
+def resolve_output_dir(
+    value: str,
+) -> Path:
+
+    path = Path(
+        value
+    )
+
+    if not path.is_absolute():
+
+        path = (
+            PROJECT_ROOT
+            / path
         )
 
-    rows = []
-
-    with OUTPUT_FILE.open(
-        "r",
-        encoding="utf-8",
-    ) as f:
-
-        for line in f:
-
-            line = line.strip()
-
-            if not line:
-                continue
-
-            row = json.loads(
-                line
-            )
-
-            row[
-                "resource_version"
-            ] = GENERATOR_VERSION
-
-            row[
-                "generator_version"
-            ] = GENERATOR_VERSION
-
-            row[
-                "renderer_version"
-            ] = RENDERER_VERSION
-
-            row[
-                "compatibility_version"
-            ] = COMPATIBILITY.get(
-                "version",
-                "unknown",
-            )
-
-            row[
-                "generation_policy"
-            ] = (
-                "compatibility_aware"
-            )
-
-            rows.append(
-                row
-            )
-
-    with OUTPUT_FILE.open(
-        "w",
-        encoding="utf-8",
-    ) as f:
-
-        for row in rows:
-
-            f.write(
-                json.dumps(
-                    row,
-                    ensure_ascii=False,
-                )
-                + "\n"
-            )
+    return path.resolve()
 
 
-def update_stats_metadata() -> None:
+# ============================================================
+# Generate
+# ============================================================
 
-    if not STATS_FILE.exists():
-        return
+def generate_samples(
+    *,
+    n: int,
+    seed: int,
+    max_attempt_multiplier: int,
+) -> tuple[
+    list[dict],
+    dict,
+]:
+
+    if n <= 0:
+
+        raise ValueError(
+            "--n must be > 0"
+        )
+
+    if max_attempt_multiplier <= 0:
+
+        raise ValueError(
+            "--max-attempt-multiplier "
+            "must be > 0"
+        )
+
+    # ========================================================
+    # Load the same resources as V0.1
+    # ========================================================
+
+    (
+        concepts,
+        concepts_by_id,
+        frames,
+    ) = v01.load_resources()
+
+    rng = random.Random(
+        seed
+    )
+
+    frame_weights = [
+        frame.get(
+            "weight",
+            1,
+        )
+        for frame in frames
+    ]
+
+    generated: list[dict] = []
+
+    signatures = set()
+
+    frame_counter = Counter()
+
+    verb_counter = Counter()
+
+    object_counter = Counter()
+
+    destination_counter = Counter()
+
+    polarity_counter = Counter()
+
+    tense_counter = Counter()
+
+    max_attempts = (
+        n
+        * max_attempt_multiplier
+    )
+
+    attempts = 0
+
+    # ========================================================
+    # render_sample() belongs to generate_synthetic_v01.py.
+    #
+    # Its global render_verb symbol must temporarily point to
+    # Renderer V0.3 while this generation is running.
+    # ========================================================
+
+    previous_render_verb = (
+        v01.render_verb
+    )
+
+    v01.render_verb = (
+        render_verb_v03
+    )
 
     try:
 
-        with STATS_FILE.open(
-            "r",
-            encoding="utf-8",
-        ) as f:
+        # ====================================================
+        # Generation loop
+        # ====================================================
 
-            stats = json.load(
-                f
+        while (
+            len(generated) < n
+            and
+            attempts < max_attempts
+        ):
+
+            attempts += 1
+
+            # ------------------------------------------------
+            # Frame sampling
+            # ------------------------------------------------
+
+            frame = rng.choices(
+                frames,
+                weights=frame_weights,
+                k=1,
+            )[0]
+
+            # ------------------------------------------------
+            # Compatibility-aware semantic slots
+            # ------------------------------------------------
+
+            selected = (
+                select_slots_v03(
+                    frame,
+                    concepts,
+                    concepts_by_id,
+                    rng,
+                )
             )
 
-    except Exception:
+            # ------------------------------------------------
+            # Same tense logic as V0.1
+            # ------------------------------------------------
 
-        # Stats are secondary.
-        # Never corrupt generation because
-        # an old stats format cannot be read.
-        return
+            tense = (
+                v01.derive_tense(
+                    selected
+                )
+            )
 
-    stats[
-        "generator_version"
-    ] = GENERATOR_VERSION
+            # ------------------------------------------------
+            # Same polarity sampling as V0.1
+            # ------------------------------------------------
 
-    stats[
-        "renderer_version"
-    ] = RENDERER_VERSION
+            polarity = (
+                v01.choose_polarity(
+                    frame,
+                    rng,
+                )
+            )
 
-    stats[
-        "compatibility_version"
-    ] = COMPATIBILITY.get(
-        "version",
-        "unknown",
-    )
+            features = {
+                "tense":
+                    tense,
 
-    stats[
-        "generation_policy"
-    ] = "compatibility_aware"
+                "polarity":
+                    polarity,
+            }
 
-    stats[
-        "output_file"
-    ] = str(
-        OUTPUT_FILE
-    )
+            # ------------------------------------------------
+            # Computed values
+            # ------------------------------------------------
 
-    with STATS_FILE.open(
-        "w",
-        encoding="utf-8",
-    ) as f:
+            computed = {}
 
-        json.dump(
-            stats,
-            f,
-            ensure_ascii=False,
-            indent=2,
+            if (
+                "clock"
+                in frame.get(
+                    "computed",
+                    [],
+                )
+            ):
+
+                computed[
+                    "clock"
+                ] = v01.build_clock(
+                    rng
+                )
+
+            # ------------------------------------------------
+            # Semantic signature / deduplication
+            # ------------------------------------------------
+
+            signature = (
+                v01.semantic_signature(
+                    frame,
+                    selected,
+                    features,
+                    computed,
+                )
+            )
+
+            if signature in signatures:
+
+                continue
+
+            signatures.add(
+                signature
+            )
+
+            # ------------------------------------------------
+            # Four-language rendering
+            #
+            # Uses V0.1 render_sample + patched render_verb_v03.
+            # ------------------------------------------------
+
+            (
+                texts,
+                traces,
+            ) = v01.render_sample(
+                frame,
+                selected,
+                features,
+                computed,
+            )
+
+            # ------------------------------------------------
+            # Output schema
+            # ------------------------------------------------
+
+            sample = {
+
+                "semantic_id":
+                    f"sem_{len(generated)+1:08d}",
+
+                "frame_id":
+                    frame["id"],
+
+                "slots": {
+                    key: value["id"]
+                    for (
+                        key,
+                        value,
+                    )
+                    in selected.items()
+                },
+
+                "features":
+                    features,
+
+                "computed":
+                    computed,
+
+                "texts":
+                    texts,
+
+                "trace":
+                    traces,
+
+                "source_type":
+                    "grammar_synthetic",
+
+                "resource_version":
+                    GENERATOR_VERSION,
+
+                "generator_version":
+                    GENERATOR_VERSION,
+
+                "renderer_version":
+                    RENDERER_VERSION,
+
+                "compatibility_version":
+                    COMPATIBILITY.get(
+                        "version",
+                        "unknown",
+                    ),
+
+                "generation_policy":
+                    "compatibility_aware",
+            }
+
+            generated.append(
+                sample
+            )
+
+            # ------------------------------------------------
+            # Statistics
+            # ------------------------------------------------
+
+            frame_counter[
+                frame["id"]
+            ] += 1
+
+            tense_counter[
+                tense
+            ] += 1
+
+            polarity_counter[
+                polarity
+            ] += 1
+
+            verb_id = (
+                sample.get(
+                    "slots",
+                    {},
+                ).get(
+                    "verb"
+                )
+            )
+
+            if verb_id:
+
+                verb_counter[
+                    verb_id
+                ] += 1
+
+            object_id = (
+                sample.get(
+                    "slots",
+                    {},
+                ).get(
+                    "object"
+                )
+            )
+
+            if object_id:
+
+                object_counter[
+                    object_id
+                ] += 1
+
+            destination_id = (
+                sample.get(
+                    "slots",
+                    {},
+                ).get(
+                    "destination"
+                )
+            )
+
+            if destination_id:
+
+                destination_counter[
+                    destination_id
+                ] += 1
+
+            # ------------------------------------------------
+            # Progress
+            # ------------------------------------------------
+
+            if (
+                len(generated) % 1000 == 0
+                or
+                len(generated) == n
+            ):
+
+                print(
+                    f"{len(generated)}/{n}"
+                    f" | attempts={attempts}"
+                    f" | unique="
+                    f"{len(signatures)}"
+                )
+
+    finally:
+
+        # Restore V0.1 module state.
+        v01.render_verb = (
+            previous_render_verb
         )
 
+    # ========================================================
+    # Guard
+    # ========================================================
 
-# ============================================================
-# Install V0.3 overrides into V0.1 engine
-# ============================================================
+    if len(generated) < n:
 
-def install_v03_overrides() -> None:
+        raise RuntimeError(
+            "\nUnable to generate requested "
+            "number of unique samples.\n"
+            f"Generated: {len(generated)}\n"
+            f"Target: {n}\n"
+            f"Attempts: {attempts}\n"
+            f"Max attempts: {max_attempts}\n"
+        )
 
-    # Output isolation:
-    # V0.1 data is NEVER overwritten.
-    v01.OUTPUT_DIR = OUTPUT_DIR
-    v01.OUTPUT_FILE = OUTPUT_FILE
-    v01.STATS_FILE = STATS_FILE
+    # ========================================================
+    # Stats
+    # ========================================================
 
-    # Compatibility-aware generation.
-    v01.select_slots = (
-        select_slots_v03
-    )
+    stats = {
 
-    # Renderer V2 fixes.
-    v01.render_verb = (
-        render_verb_v03
+        "generator_version":
+            GENERATOR_VERSION,
+
+        "renderer_version":
+            RENDERER_VERSION,
+
+        "compatibility_version":
+            COMPATIBILITY.get(
+                "version",
+                "unknown",
+            ),
+
+        "generation_policy":
+            "compatibility_aware",
+
+        "seed":
+            seed,
+
+        "target_samples":
+            n,
+
+        "generated_samples":
+            len(generated),
+
+        "attempts":
+            attempts,
+
+        "duplicate_or_retry_attempts":
+            attempts
+            - len(generated),
+
+        "generation_efficiency":
+            (
+                len(generated)
+                / attempts
+                if attempts
+                else 0
+            ),
+
+        "unique_signatures":
+            len(signatures),
+
+        "frame_distribution":
+            dict(
+                frame_counter
+                .most_common()
+            ),
+
+        "verb_distribution":
+            dict(
+                verb_counter
+                .most_common()
+            ),
+
+        "object_distribution":
+            dict(
+                object_counter
+                .most_common()
+            ),
+
+        "destination_distribution":
+            dict(
+                destination_counter
+                .most_common()
+            ),
+
+        "tense_distribution":
+            dict(
+                tense_counter
+                .most_common()
+            ),
+
+        "polarity_distribution":
+            dict(
+                polarity_counter
+                .most_common()
+            ),
+    }
+
+    return (
+        generated,
+        stats,
     )
 
 
@@ -1064,13 +1560,22 @@ def install_v03_overrides() -> None:
 # Diagnostics
 # ============================================================
 
-def print_v03_config() -> None:
+def print_configuration(
+    *,
+    args: argparse.Namespace,
+    output_dir: Path,
+    output_file: Path,
+    stats_file: Path,
+) -> None:
 
-    print("=" * 90)
+    print("=" * 100)
+    print("SYNTHETIC GENERATOR V0.3")
+    print("=" * 100)
+
     print(
-        "SYNTHETIC GENERATOR V0.3"
+        "Project root:",
+        PROJECT_ROOT,
     )
-    print("=" * 90)
 
     print(
         "Compatibility:",
@@ -1080,13 +1585,9 @@ def print_v03_config() -> None:
     print(
         "Compatibility version:",
         COMPATIBILITY.get(
-            "version"
+            "version",
+            "unknown",
         ),
-    )
-
-    print(
-        "Output:",
-        OUTPUT_FILE,
     )
 
     print(
@@ -1099,8 +1600,32 @@ def print_v03_config() -> None:
         "Renderer V2",
     )
 
-    print("=" * 90)
-    print()
+    print(
+        "Samples:",
+        args.n,
+    )
+
+    print(
+        "Seed:",
+        args.seed,
+    )
+
+    print(
+        "Output dir:",
+        output_dir,
+    )
+
+    print(
+        "Output file:",
+        output_file,
+    )
+
+    print(
+        "Stats file:",
+        stats_file,
+    )
+
+    print("=" * 100)
 
 
 # ============================================================
@@ -1109,38 +1634,167 @@ def print_v03_config() -> None:
 
 def main() -> None:
 
-    OUTPUT_DIR.mkdir(
+    args = parse_args()
+
+    output_dir = (
+        resolve_output_dir(
+            args.output_dir
+        )
+    )
+
+    output_file = (
+        output_dir
+        / "semantic_v03_raw.jsonl"
+    )
+
+    stats_file = (
+        output_dir
+        / "semantic_v03_stats.json"
+    )
+
+    output_dir.mkdir(
         parents=True,
         exist_ok=True,
     )
 
-    print_v03_config()
+    print_configuration(
+        args=args,
+        output_dir=output_dir,
+        output_file=output_file,
+        stats_file=stats_file,
+    )
 
-    install_v03_overrides()
+    # ========================================================
+    # Generate
+    # ========================================================
 
-    # Reuse the already-tested V0.1 main generation loop.
-    v01.main()
+    (
+        rows,
+        stats,
+    ) = generate_samples(
+        n=args.n,
+        seed=args.seed,
+        max_attempt_multiplier=(
+            args.max_attempt_multiplier
+        ),
+    )
 
-    # Rewrite version/provenance metadata.
-    update_output_metadata()
+    # ========================================================
+    # IMPORTANT:
+    #
+    # V0.3 writes its own files.
+    #
+    # We NEVER call v01.main().
+    #
+    # Therefore semantic_v01_raw.jsonl cannot be overwritten
+    # by V0.3.
+    # ========================================================
 
-    update_stats_metadata()
+    write_jsonl(
+        output_file,
+        rows,
+    )
+
+    stats[
+        "output_dir"
+    ] = str(
+        output_dir
+    )
+
+    stats[
+        "output_file"
+    ] = str(
+        output_file
+    )
+
+    stats[
+        "stats_file"
+    ] = str(
+        stats_file
+    )
+
+    write_json(
+        stats_file,
+        stats,
+    )
+
+    # ========================================================
+    # Final disk verification
+    # ========================================================
+
+    if not output_file.exists():
+
+        raise FileNotFoundError(
+            "\nGeneration completed but "
+            "output file was not created:\n"
+            f"{output_file}"
+        )
+
+    if not stats_file.exists():
+
+        raise FileNotFoundError(
+            "\nGeneration completed but "
+            "stats file was not created:\n"
+            f"{stats_file}"
+        )
+
+    # Count actual lines from disk.
+    with output_file.open(
+        "r",
+        encoding="utf-8",
+    ) as f:
+
+        actual_rows = sum(
+            1
+            for line in f
+            if line.strip()
+        )
+
+    if actual_rows != args.n:
+
+        raise RuntimeError(
+            "\nOutput verification failed.\n"
+            f"Expected rows: {args.n}\n"
+            f"Actual rows: {actual_rows}\n"
+            f"File: {output_file}"
+        )
+
+    # ========================================================
+    # Complete
+    # ========================================================
 
     print()
-    print("=" * 90)
+    print("=" * 100)
+    print("GENERATOR V0.3 COMPLETE")
+    print("=" * 100)
+
     print(
-        "GENERATOR V0.3 COMPLETE"
+        "Generated:",
+        actual_rows,
     )
-    print("=" * 90)
+
+    print(
+        "Attempts:",
+        stats.get(
+            "attempts"
+        ),
+    )
+
+    print(
+        "Efficiency:",
+        (
+            f"{stats.get('generation_efficiency', 0):.2%}"
+        ),
+    )
 
     print(
         "Output:",
-        OUTPUT_FILE,
+        output_file,
     )
 
     print(
         "Stats:",
-        STATS_FILE,
+        stats_file,
     )
 
     print(
@@ -1149,16 +1803,24 @@ def main() -> None:
     )
 
     print(
-        "Compatibility:",
-        COMPATIBILITY.get(
-            "version"
-        ),
+        "Renderer version:",
+        RENDERER_VERSION,
     )
 
     print(
-        "Renderer:",
-        RENDERER_VERSION,
+        "Compatibility version:",
+        COMPATIBILITY.get(
+            "version",
+            "unknown",
+        ),
     )
+
+    print()
+    print(
+        "IMPORTANT: V0.1 output was NOT used."
+    )
+
+    print("=" * 100)
 
 
 if __name__ == "__main__":

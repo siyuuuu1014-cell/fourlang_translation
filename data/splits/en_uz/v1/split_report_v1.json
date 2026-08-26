@@ -1,0 +1,106 @@
+{
+  "dataset": "en_uz_v1",
+  "seed": 2026,
+  "split_method": "connected-component group-level split",
+  "validation_ratio_target": 0.05,
+  "split_trials": 500,
+  "all_approved_pairs": 65441,
+  "split_groups": 63639,
+  "largest_group": 259,
+  "train_pairs": 62169,
+  "validation_pairs": 3272,
+  "validation_ratio_actual": 0.04999923595299583,
+  "exp1": {
+    "tiers": [
+      "GOLD",
+      "SILVER"
+    ],
+    "train_pairs": 61216,
+    "validation_pairs": 3220,
+    "train_bidirectional_samples": 122432,
+    "validation_bidirectional_samples": 6440
+  },
+  "split_quality": {
+    "objective": 0.002434608535878327,
+    "size_error": 0.0,
+    "tier_error": 0.0006627469498614631,
+    "source_error": 0.00024674141425062857,
+    "length_error": 0.001478005029558916
+  },
+  "leakage_checks": {
+    "pair_overlap": 0,
+    "group_overlap": 0,
+    "english_overlap": 0,
+    "uzbek_overlap": 0,
+    "benchmark_leak": 0
+  },
+  "test_policy": {
+    "internal_test_split": false,
+    "benchmark": "existing 429-pair benchmark",
+    "challenge_benchmark": "existing 300-pair challenge benchmark"
+  },
+  "future_experiments": {
+    "exp1": "GOLD + SILVER",
+    "exp2": "GOLD + SILVER + BRONZE using same split_manifest",
+    "exp3": "quality weighted using same split_manifest",
+    "exp4": "MADLAD synthetic using same validation split"
+  },
+  "train_quality_distribution": [
+    {
+      "quality_tier": "SILVER",
+      "count": 58738,
+      "percent": 94.48117228843958
+    },
+    {
+      "quality_tier": "GOLD",
+      "count": 2478,
+      "percent": 3.98590937605559
+    },
+    {
+      "quality_tier": "BRONZE",
+      "count": 953,
+      "percent": 1.5329183355048337
+    }
+  ],
+  "validation_quality_distribution": [
+    {
+      "quality_tier": "SILVER",
+      "count": 3088,
+      "percent": 94.37652811735941
+    },
+    {
+      "quality_tier": "GOLD",
+      "count": 132,
+      "percent": 4.034229828850855
+    },
+    {
+      "quality_tier": "BRONZE",
+      "count": 52,
+      "percent": 1.5892420537897312
+    }
+  ],
+  "train_source_distribution": [
+    {
+      "data_source": "public_5k_v1",
+      "count": 53046,
+      "percent": 85.32548376200357
+    },
+    {
+      "data_source": "hplt",
+      "count": 9123,
+      "percent": 14.67451623799643
+    }
+  ],
+  "validation_source_distribution": [
+    {
+      "data_source": "public_5k_v1",
+      "count": 2791,
+      "percent": 85.29951100244499
+    },
+    {
+      "data_source": "hplt",
+      "count": 481,
+      "percent": 14.700488997555011
+    }
+  ]
+}

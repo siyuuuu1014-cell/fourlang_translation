@@ -7,15 +7,14 @@ import pandas as pd
 
 
 # ============================================================
-# 1. Project paths
+# 1. Project
 # ============================================================
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
 # ============================================================
-# Step04
-# 65,897 条完整主表
+# 2. Input files
 # ============================================================
 
 STEP04_FILE = (
@@ -27,12 +26,6 @@ STEP04_FILE = (
     / "parallel_rule_checked.parquet"
 )
 
-
-# ============================================================
-# Step05B
-# 4,079 条 Qwen 第一次语义审核结果
-# ============================================================
-
 STEP05B_FILE = (
     PROJECT_ROOT
     / "data"
@@ -42,12 +35,6 @@ STEP05B_FILE = (
     / "results"
     / "qwen_semantic_judge_details.parquet"
 )
-
-
-# ============================================================
-# Step05C
-# 495 条 FAIL / UNCERTAIN 二审结果
-# ============================================================
 
 STEP05C_FILE = (
     PROJECT_ROOT
@@ -62,7 +49,7 @@ STEP05C_FILE = (
 
 
 # ============================================================
-# 2. Output
+# 3. Output directory
 # ============================================================
 
 OUTPUT_DIR = (
@@ -79,7 +66,10 @@ OUTPUT_DIR.mkdir(
 )
 
 
-# 完整主表
+# ============================================================
+# 4. Output files
+# ============================================================
+
 ALL_PAIRS_FILE = (
     OUTPUT_DIR
     / "en_uz_all_pairs_v1.parquet"
@@ -91,7 +81,6 @@ ALL_PAIRS_CSV = (
 )
 
 
-# 最终可训练数据
 APPROVED_FILE = (
     OUTPUT_DIR
     / "en_uz_approved_v1.parquet"
@@ -103,7 +92,6 @@ APPROVED_CSV = (
 )
 
 
-# 不同质量层
 GOLD_FILE = (
     OUTPUT_DIR
     / "en_uz_gold_v1.parquet"
@@ -119,8 +107,6 @@ BRONZE_FILE = (
     / "en_uz_bronze_v1.parquet"
 )
 
-
-# 不进入训练
 REJECT_FILE = (
     OUTPUT_DIR
     / "en_uz_reject_v1.parquet"
@@ -132,7 +118,6 @@ QUARANTINE_FILE = (
 )
 
 
-# 精简训练视图
 TRAINING_VIEW_FILE = (
     OUTPUT_DIR
     / "en_uz_training_view_v1.parquet"
@@ -144,13 +129,7 @@ TRAINING_VIEW_CSV = (
 )
 
 
-# Report
-REPORT_FILE = (
-    OUTPUT_DIR
-    / "dataset_report_v1.json"
-)
-
-TIER_REPORT_FILE = (
+QUALITY_REPORT_FILE = (
     OUTPUT_DIR
     / "quality_tier_report_v1.csv"
 )
@@ -160,10 +139,22 @@ SOURCE_REPORT_FILE = (
     / "source_report_v1.csv"
 )
 
+DECISION_REPORT_FILE = (
+    OUTPUT_DIR
+    / "decision_report_v1.csv"
+)
+
+DATASET_REPORT_FILE = (
+    OUTPUT_DIR
+    / "dataset_report_v1.json"
+)
+
 
 # ============================================================
-# 3. Quality policy
+# 5. Dataset config
 # ============================================================
+
+DATASET_VERSION = "en_uz_v1"
 
 QUALITY_WEIGHTS = {
     "GOLD": 1.0,
@@ -175,7 +166,66 @@ QUALITY_WEIGHTS = {
 
 
 # ============================================================
-# 4. Input validation
+# 6. Helpers
+# ============================================================
+
+def clean_string(value) -> str:
+    """
+    安全处理 pandas NaN / None。
+
+    这是之前报：
+        Unexpected first Qwen label: NAN
+
+    的核心修复。
+    """
+
+    if value is None:
+        return ""
+
+    try:
+        if pd.isna(value):
+            return ""
+    except Exception:
+        pass
+
+    return str(value).strip()
+
+
+def clean_upper(value) -> str:
+
+    return clean_string(
+        value
+    ).upper()
+
+
+def bool_value(value) -> bool:
+
+    if value is None:
+        return False
+
+    try:
+        if pd.isna(value):
+            return False
+    except Exception:
+        pass
+
+    if isinstance(value, bool):
+        return value
+
+    return (
+        str(value)
+        .strip()
+        .lower()
+        in {
+            "true",
+            "1",
+            "yes",
+        }
+    )
+
+
+# ============================================================
+# 7. Check files
 # ============================================================
 
 def check_input_files():
@@ -197,61 +247,53 @@ def check_input_files():
 
 
 # ============================================================
-# 5. Load data
+# 8. Validate unique pair id
 # ============================================================
 
-def load_data():
+def validate_unique_pair_id(
+    df: pd.DataFrame,
+    name: str,
+):
+
+    if "normalized_pair_id" not in df.columns:
+
+        raise ValueError(
+            f"{name} missing normalized_pair_id"
+        )
+
+    duplicate_count = int(
+        df[
+            "normalized_pair_id"
+        ]
+        .duplicated()
+        .sum()
+    )
+
+    if duplicate_count > 0:
+
+        raise RuntimeError(
+            f"{name} contains "
+            f"{duplicate_count} duplicated "
+            f"normalized_pair_id values."
+        )
+
+
+# ============================================================
+# 9. Load Step04
+# ============================================================
+
+def load_step04():
 
     print("\nLoading Step04...")
 
-    step04 = pd.read_parquet(
+    df = pd.read_parquet(
         STEP04_FILE
     )
 
     print(
         "Step04 rows:",
-        len(step04)
+        len(df)
     )
-
-
-    print("\nLoading Step05B...")
-
-    step05b = pd.read_parquet(
-        STEP05B_FILE
-    )
-
-    print(
-        "Step05B rows:",
-        len(step05b)
-    )
-
-
-    print("\nLoading Step05C...")
-
-    step05c = pd.read_parquet(
-        STEP05C_FILE
-    )
-
-    print(
-        "Step05C rows:",
-        len(step05c)
-    )
-
-
-    return (
-        step04,
-        step05b,
-        step05c,
-    )
-
-
-# ============================================================
-# 6. Validate Step04
-# ============================================================
-
-def validate_step04(
-    df: pd.DataFrame,
-):
 
     required = [
         "normalized_pair_id",
@@ -260,13 +302,11 @@ def validate_step04(
         "pipeline_route",
     ]
 
-
     missing = [
         col
         for col in required
         if col not in df.columns
     ]
-
 
     if missing:
 
@@ -275,23 +315,10 @@ def validate_step04(
             f"{missing}"
         )
 
-
-    duplicated = (
-        df[
-            "normalized_pair_id"
-        ]
-        .duplicated()
-        .sum()
+    validate_unique_pair_id(
+        df,
+        "Step04",
     )
-
-
-    if duplicated > 0:
-
-        raise RuntimeError(
-            "Step04 normalized_pair_id "
-            f"contains {duplicated} duplicates."
-        )
-
 
     print(
         "Step04 unique pair IDs:",
@@ -300,14 +327,25 @@ def validate_step04(
         ].nunique()
     )
 
+    return df
+
 
 # ============================================================
-# 7. Prepare Step05B fields
+# 10. Load Step05B
 # ============================================================
 
-def prepare_step05b(
-    df: pd.DataFrame,
-):
+def load_step05b():
+
+    print("\nLoading Step05B...")
+
+    df = pd.read_parquet(
+        STEP05B_FILE
+    )
+
+    print(
+        "Step05B rows:",
+        len(df)
+    )
 
     required = [
         "normalized_pair_id",
@@ -317,13 +355,11 @@ def prepare_step05b(
         "judge_confidence",
     ]
 
-
     missing = [
         col
         for col in required
         if col not in df.columns
     ]
-
 
     if missing:
 
@@ -332,23 +368,10 @@ def prepare_step05b(
             f"{missing}"
         )
 
-
-    duplicated = (
-        df[
-            "normalized_pair_id"
-        ]
-        .duplicated()
-        .sum()
+    validate_unique_pair_id(
+        df,
+        "Step05B",
     )
-
-
-    if duplicated > 0:
-
-        raise RuntimeError(
-            "Step05B contains duplicated "
-            f"normalized_pair_id: {duplicated}"
-        )
-
 
     keep_columns = [
         "normalized_pair_id",
@@ -374,21 +397,17 @@ def prepare_step05b(
         "judge_latency",
     ]
 
-
     keep_columns = [
         col
         for col in keep_columns
         if col in df.columns
     ]
 
-
     result = df[
         keep_columns
     ].copy()
 
-
     rename_map = {
-
         "review_id":
             "qwen_review_id",
 
@@ -435,36 +454,41 @@ def prepare_step05b(
             "qwen_first_latency",
     }
 
-
     result = result.rename(
         columns=rename_map
     )
-
 
     return result
 
 
 # ============================================================
-# 8. Prepare Step05C fields
+# 11. Load Step05C
 # ============================================================
 
-def prepare_step05c(
-    df: pd.DataFrame,
-):
+def load_step05c():
+
+    print("\nLoading Step05C...")
+
+    df = pd.read_parquet(
+        STEP05C_FILE
+    )
+
+    print(
+        "Step05C rows:",
+        len(df)
+    )
 
     required = [
         "normalized_pair_id",
-        "resolution",
         "second_label",
+        "resolution",
     ]
-
 
     missing = [
         col
         for col in required
         if col not in df.columns
     ]
-
 
     if missing:
 
@@ -473,29 +497,15 @@ def prepare_step05c(
             f"{missing}"
         )
 
-
-    duplicated = (
-        df[
-            "normalized_pair_id"
-        ]
-        .duplicated()
-        .sum()
+    validate_unique_pair_id(
+        df,
+        "Step05C",
     )
-
-
-    if duplicated > 0:
-
-        raise RuntimeError(
-            "Step05C contains duplicated "
-            f"normalized_pair_id: {duplicated}"
-        )
-
 
     keep_columns = [
         "normalized_pair_id",
 
         "second_label",
-
         "second_semantic_consistent",
 
         "second_omission",
@@ -518,21 +528,17 @@ def prepare_step05c(
         "resolution",
     ]
 
-
     keep_columns = [
         col
         for col in keep_columns
         if col in df.columns
     ]
 
-
     result = df[
         keep_columns
     ].copy()
 
-
     rename_map = {
-
         "second_label":
             "qwen_second_label",
 
@@ -579,53 +585,48 @@ def prepare_step05c(
             "qwen_second_resolution",
     }
 
-
     result = result.rename(
         columns=rename_map
     )
-
 
     return result
 
 
 # ============================================================
-# 9. Assign final quality
+# 12. Final quality decision
 # ============================================================
 
 def assign_final_quality(
     row,
 ):
 
-    pipeline_route = str(
+    pipeline_route = clean_upper(
         row.get(
             "pipeline_route",
             "",
         )
-    ).strip()
+    )
 
-
-    first_label = str(
+    first_label = clean_upper(
         row.get(
             "qwen_first_label",
             "",
         )
-    ).upper().strip()
+    )
 
-
-    second_resolution = str(
+    second_resolution = clean_upper(
         row.get(
             "qwen_second_resolution",
             "",
         )
-    ).upper().strip()
+    )
 
-
-    review_type = str(
+    review_type = clean_upper(
         row.get(
             "qwen_review_type",
             "",
         )
-    ).strip()
+    )
 
 
     # ========================================================
@@ -642,7 +643,9 @@ def assign_final_quality(
                 "REJECT",
 
             "training_weight":
-                0.0,
+                QUALITY_WEIGHTS[
+                    "REJECT"
+                ],
 
             "final_decision_source":
                 "STEP04_HARD_REJECT",
@@ -655,19 +658,21 @@ def assign_final_quality(
     # ========================================================
     # B. No Qwen review
     #
-    # AUTO_ACCEPT 中没有被抽进500条 audit 的数据
+    # 这是 AUTO_ACCEPT 中没有抽到500条审计的数据。
     # ========================================================
 
-    if not first_label:
+    if first_label == "":
 
         if pipeline_route != "AUTO_ACCEPT":
 
             raise RuntimeError(
-                "Found unreviewed sample that is "
-                "not AUTO_ACCEPT:\n"
-                f"{row['normalized_pair_id']}"
+                "Found sample without Qwen review "
+                "but pipeline_route is not AUTO_ACCEPT.\n"
+                f"Pair ID: "
+                f"{row['normalized_pair_id']}\n"
+                f"pipeline_route: "
+                f"{pipeline_route}"
             )
-
 
         return pd.Series({
             "final_status":
@@ -758,9 +763,9 @@ def assign_final_quality(
 
 
     # ========================================================
-    # E. First FAIL / UNCERTAIN
+    # E. FAIL / UNCERTAIN
     #
-    # 必须存在 Step05C 二审
+    # 这两类必须经过 Step05C。
     # ========================================================
 
     if first_label in {
@@ -768,11 +773,13 @@ def assign_final_quality(
         "UNCERTAIN",
     }:
 
-        if not second_resolution:
+        if second_resolution == "":
 
             raise RuntimeError(
-                "FAIL/UNCERTAIN sample "
-                "has no Step05C resolution:\n"
+                "First Qwen label is "
+                f"{first_label}, "
+                "but Step05C resolution is missing.\n"
+                f"Pair ID: "
                 f"{row['normalized_pair_id']}"
             )
 
@@ -795,7 +802,9 @@ def assign_final_quality(
                     "REJECT",
 
                 "training_weight":
-                    0.0,
+                    QUALITY_WEIGHTS[
+                        "REJECT"
+                    ],
 
                 "final_decision_source":
                     "QWEN_SECOND_CONFIRMED_FAIL",
@@ -806,7 +815,7 @@ def assign_final_quality(
 
 
         # ----------------------------------------------------
-        # uncertain after two reviews
+        # still uncertain
         # ----------------------------------------------------
 
         if (
@@ -823,7 +832,9 @@ def assign_final_quality(
                     "QUARANTINE",
 
                 "training_weight":
-                    0.0,
+                    QUALITY_WEIGHTS[
+                        "QUARANTINE"
+                    ],
 
                 "final_decision_source":
                     "QWEN_SECOND_QUARANTINE",
@@ -834,10 +845,10 @@ def assign_final_quality(
 
 
         # ----------------------------------------------------
-        # First judge was wrong / second resolves PASS
+        # First judge error / resolved pass
         #
-        # 不提升到 GOLD。
-        # 放 SILVER 更保守。
+        # 两轮意见冲突过，所以保守地放 SILVER，
+        # 不直接提升到 GOLD。
         # ----------------------------------------------------
 
         if second_resolution in {
@@ -870,7 +881,7 @@ def assign_final_quality(
 
 
         # ----------------------------------------------------
-        # Minor after second review
+        # Resolved minor
         # ----------------------------------------------------
 
         if second_resolution in {
@@ -903,19 +914,209 @@ def assign_final_quality(
 
 
         raise RuntimeError(
-            "Unknown Step05C resolution: "
-            f"{second_resolution}"
+            "Unknown Step05C resolution:\n"
+            f"{second_resolution}\n"
+            f"Pair ID: "
+            f"{row['normalized_pair_id']}"
         )
 
 
+    # ========================================================
+    # Unexpected label
+    # ========================================================
+
     raise RuntimeError(
-        "Unexpected first Qwen label: "
-        f"{first_label}"
+        "Unexpected first Qwen label:\n"
+        f"{first_label}\n"
+        f"Pair ID: "
+        f"{row['normalized_pair_id']}"
     )
 
 
 # ============================================================
-# 10. Main
+# 13. Integrity checks
+# ============================================================
+
+def run_integrity_checks(
+    master: pd.DataFrame,
+):
+
+    print(
+        "\nRunning invariant checks..."
+    )
+
+
+    # --------------------------------------------------------
+    # Pair ID unique
+    # --------------------------------------------------------
+
+    duplicate_count = int(
+        master[
+            "normalized_pair_id"
+        ]
+        .duplicated()
+        .sum()
+    )
+
+    if duplicate_count > 0:
+
+        raise RuntimeError(
+            f"Final master contains "
+            f"{duplicate_count} duplicate pairs."
+        )
+
+
+    # --------------------------------------------------------
+    # Every row must have final decision
+    # --------------------------------------------------------
+
+    if (
+        master[
+            "final_status"
+        ]
+        .isna()
+        .any()
+    ):
+
+        raise RuntimeError(
+            "Missing final_status detected."
+        )
+
+
+    if (
+        master[
+            "quality_tier"
+        ]
+        .isna()
+        .any()
+    ):
+
+        raise RuntimeError(
+            "Missing quality_tier detected."
+        )
+
+
+    # --------------------------------------------------------
+    # All NEEDS_QWEN reviewed
+    # --------------------------------------------------------
+
+    needs_qwen = master[
+        master[
+            "pipeline_route"
+        ]
+        .fillna("")
+        .astype(str)
+        .str.upper()
+        ==
+        "NEEDS_QWEN"
+    ]
+
+    missing_qwen = int(
+        needs_qwen[
+            "qwen_first_label"
+        ]
+        .isna()
+        .sum()
+    )
+
+    if missing_qwen > 0:
+
+        raise RuntimeError(
+            f"{missing_qwen} NEEDS_QWEN "
+            f"samples have no Qwen review."
+        )
+
+
+    # --------------------------------------------------------
+    # FAIL / UNCERTAIN must have Step05C
+    # --------------------------------------------------------
+
+    first_problem = master[
+        master[
+            "qwen_first_label"
+        ]
+        .fillna("")
+        .astype(str)
+        .str.upper()
+        .isin(
+            [
+                "FAIL",
+                "UNCERTAIN",
+            ]
+        )
+    ]
+
+    missing_second = int(
+        first_problem[
+            "qwen_second_resolution"
+        ]
+        .isna()
+        .sum()
+    )
+
+    if missing_second > 0:
+
+        raise RuntimeError(
+            f"{missing_second} first-pass "
+            f"FAIL/UNCERTAIN samples "
+            f"have no Step05C result."
+        )
+
+
+    # --------------------------------------------------------
+    # Benchmark leakage
+    # --------------------------------------------------------
+
+    if "benchmark_leak" in master.columns:
+
+        leak_count = int(
+            master[
+                "benchmark_leak"
+            ]
+            .fillna(False)
+            .astype(bool)
+            .sum()
+        )
+
+        if leak_count > 0:
+
+            raise RuntimeError(
+                f"Benchmark leakage detected: "
+                f"{leak_count}"
+            )
+
+
+    # --------------------------------------------------------
+    # Latin Uzbek
+    # --------------------------------------------------------
+
+    if "latin_uzbek" in master.columns:
+
+        non_latin = int(
+            (
+                ~master[
+                    "latin_uzbek"
+                ]
+                .fillna(False)
+                .astype(bool)
+            ).sum()
+        )
+
+        if non_latin > 0:
+
+            raise RuntimeError(
+                f"Non-Latin Uzbek remains: "
+                f"{non_latin}"
+            )
+
+
+    print(
+        "Invariant checks: PASS"
+    )
+
+
+# ============================================================
+# 14. Main
 # ============================================================
 
 def main():
@@ -927,63 +1128,35 @@ def main():
 
 
     # ========================================================
-    # Files
+    # Check files
     # ========================================================
 
     check_input_files()
 
 
     # ========================================================
-    # Load
+    # Load data
     # ========================================================
 
-    (
-        step04,
-        step05b,
-        step05c,
-    ) = load_data()
+    step04 = load_step04()
 
+    step05b = load_step05b()
 
-    # ========================================================
-    # Validate
-    # ========================================================
-
-    validate_step04(
-        step04
-    )
-
-
-    step05b_small = (
-        prepare_step05b(
-            step05b
-        )
-    )
-
-
-    step05c_small = (
-        prepare_step05c(
-            step05c
-        )
-    )
+    step05c = load_step05c()
 
 
     # ========================================================
-    # Merge Step04 + 05B
+    # Merge Step05B
     # ========================================================
 
     print(
         "\nMerging Step05B..."
     )
 
-
     master = step04.merge(
-
-        step05b_small,
-
+        step05b,
         on="normalized_pair_id",
-
         how="left",
-
         validate="one_to_one",
     )
 
@@ -1004,15 +1177,10 @@ def main():
         "Merging Step05C..."
     )
 
-
     master = master.merge(
-
-        step05c_small,
-
+        step05c,
         on="normalized_pair_id",
-
         how="left",
-
         validate="one_to_one",
     )
 
@@ -1026,13 +1194,44 @@ def main():
 
 
     # ========================================================
+    # Show merged review counts
+    # ========================================================
+
+    print(
+        "\nMerged first Qwen labels:"
+    )
+
+    print(
+        master[
+            "qwen_first_label"
+        ]
+        .fillna("NOT_REVIEWED")
+        .value_counts()
+        .to_string()
+    )
+
+
+    print(
+        "\nMerged Step05C resolutions:"
+    )
+
+    print(
+        master[
+            "qwen_second_resolution"
+        ]
+        .fillna("NO_SECOND_REVIEW")
+        .value_counts()
+        .to_string()
+    )
+
+
+    # ========================================================
     # Assign final quality
     # ========================================================
 
     print(
         "\nAssigning quality tiers..."
     )
-
 
     quality_df = master.apply(
         assign_final_quality,
@@ -1041,7 +1240,6 @@ def main():
 
 
     master = pd.concat(
-
         [
             master.reset_index(
                 drop=True
@@ -1051,18 +1249,17 @@ def main():
                 drop=True
             ),
         ],
-
         axis=1,
     )
 
 
     # ========================================================
-    # Basic final metadata
+    # Dataset metadata
     # ========================================================
 
     master[
         "dataset_version"
-    ] = "en_uz_v1"
+    ] = DATASET_VERSION
 
 
     master[
@@ -1082,238 +1279,113 @@ def main():
 
 
     # ========================================================
-    # 11. Final invariant checks
+    # Integrity checks
     # ========================================================
 
-    print(
-        "\nRunning invariant checks..."
+    run_integrity_checks(
+        master
     )
 
 
-    # --------------------------------------------------------
-    # Total rows
-    # --------------------------------------------------------
+    # ========================================================
+    # Split quality tiers
+    # ========================================================
 
-    if len(master) != len(step04):
-
-        raise RuntimeError(
-            "Final row count mismatch."
-        )
-
-
-    # --------------------------------------------------------
-    # Pair IDs unique
-    # --------------------------------------------------------
-
-    duplicated = (
+    gold_df = (
         master[
-            "normalized_pair_id"
-        ]
-        .duplicated()
-        .sum()
-    )
-
-
-    if duplicated > 0:
-
-        raise RuntimeError(
-            f"Final dataset contains "
-            f"{duplicated} duplicate pair IDs."
-        )
-
-
-    # --------------------------------------------------------
-    # No missing quality tiers
-    # --------------------------------------------------------
-
-    if master[
-        "quality_tier"
-    ].isna().any():
-
-        raise RuntimeError(
-            "Missing quality_tier detected."
-        )
-
-
-    # --------------------------------------------------------
-    # NEEDS_QWEN must be reviewed
-    # --------------------------------------------------------
-
-    needs_qwen = master[
-        master[
-            "pipeline_route"
-        ]
-        ==
-        "NEEDS_QWEN"
-    ]
-
-
-    missing_review = (
-        needs_qwen[
-            "qwen_first_label"
-        ]
-        .isna()
-        .sum()
-    )
-
-
-    if missing_review > 0:
-
-        raise RuntimeError(
-            f"{missing_review} NEEDS_QWEN rows "
-            f"were not reviewed."
-        )
-
-
-    # --------------------------------------------------------
-    # First FAIL/UNCERTAIN must have second review
-    # --------------------------------------------------------
-
-    first_problem = master[
-        master[
-            "qwen_first_label"
-        ]
-        .fillna("")
-        .isin(
-            [
-                "FAIL",
-                "UNCERTAIN",
-            ]
-        )
-    ]
-
-
-    missing_second = (
-        first_problem[
-            "qwen_second_resolution"
-        ]
-        .isna()
-        .sum()
-    )
-
-
-    if missing_second > 0:
-
-        raise RuntimeError(
-            f"{missing_second} first-pass "
-            f"FAIL/UNCERTAIN rows "
-            f"have no second review."
-        )
-
-
-    # --------------------------------------------------------
-    # Benchmark leakage should already be zero
-    # --------------------------------------------------------
-
-    if "benchmark_leak" in master.columns:
-
-        leak_count = int(
             master[
-                "benchmark_leak"
+                "quality_tier"
             ]
-            .fillna(False)
-            .astype(bool)
-            .sum()
+            ==
+            "GOLD"
+        ]
+        .copy()
+        .reset_index(
+            drop=True
         )
+    )
 
 
-        if leak_count > 0:
-
-            raise RuntimeError(
-                f"Benchmark leakage detected: "
-                f"{leak_count}"
-            )
-
-
-    # --------------------------------------------------------
-    # Cyrillic should already be removed
-    # --------------------------------------------------------
-
-    if "latin_uzbek" in master.columns:
-
-        non_latin = int(
-            (
-                ~master[
-                    "latin_uzbek"
-                ]
-                .fillna(False)
-                .astype(bool)
-            ).sum()
+    silver_df = (
+        master[
+            master[
+                "quality_tier"
+            ]
+            ==
+            "SILVER"
+        ]
+        .copy()
+        .reset_index(
+            drop=True
         )
+    )
 
 
-        if non_latin > 0:
+    bronze_df = (
+        master[
+            master[
+                "quality_tier"
+            ]
+            ==
+            "BRONZE"
+        ]
+        .copy()
+        .reset_index(
+            drop=True
+        )
+    )
 
-            raise RuntimeError(
-                f"Non-Latin Uzbek rows "
-                f"remain: {non_latin}"
-            )
+
+    reject_df = (
+        master[
+            master[
+                "quality_tier"
+            ]
+            ==
+            "REJECT"
+        ]
+        .copy()
+        .reset_index(
+            drop=True
+        )
+    )
+
+
+    quarantine_df = (
+        master[
+            master[
+                "quality_tier"
+            ]
+            ==
+            "QUARANTINE"
+        ]
+        .copy()
+        .reset_index(
+            drop=True
+        )
+    )
+
+
+    approved_df = (
+        master[
+            master[
+                "final_status"
+            ]
+            ==
+            "APPROVED"
+        ]
+        .copy()
+        .reset_index(
+            drop=True
+        )
+    )
 
 
     # ========================================================
-    # 12. Split tiers
+    # Final count check
     # ========================================================
 
-    gold_df = master[
-        master[
-            "quality_tier"
-        ]
-        ==
-        "GOLD"
-    ].copy()
-
-
-    silver_df = master[
-        master[
-            "quality_tier"
-        ]
-        ==
-        "SILVER"
-    ].copy()
-
-
-    bronze_df = master[
-        master[
-            "quality_tier"
-        ]
-        ==
-        "BRONZE"
-    ].copy()
-
-
-    reject_df = master[
-        master[
-            "quality_tier"
-        ]
-        ==
-        "REJECT"
-    ].copy()
-
-
-    quarantine_df = master[
-        master[
-            "quality_tier"
-        ]
-        ==
-        "QUARANTINE"
-    ].copy()
-
-
-    approved_df = master[
-        master[
-            "final_status"
-        ]
-        ==
-        "APPROVED"
-    ].copy()
-
-
-    # ========================================================
-    # 13. Count integrity
-    # ========================================================
-
-    final_sum = (
-
+    tier_sum = (
         len(gold_df)
         +
         len(silver_df)
@@ -1326,24 +1398,47 @@ def main():
     )
 
 
-    if final_sum != len(master):
+    if tier_sum != len(master):
 
         raise RuntimeError(
-            "Quality tier counts do not "
-            "sum to total."
+            "Quality tier count mismatch.\n"
+            f"Tier sum: {tier_sum}\n"
+            f"Master: {len(master)}"
+        )
+
+
+    approved_sum = (
+        len(gold_df)
+        +
+        len(silver_df)
+        +
+        len(bronze_df)
+    )
+
+
+    if approved_sum != len(
+        approved_df
+    ):
+
+        raise RuntimeError(
+            "Approved count mismatch."
         )
 
 
     # ========================================================
-    # 14. Training view
+    # Training view
     #
-    # 只保留 Student 训练真正需要的关键字段。
+    # 注意：
+    # 现在仍然保留 pair-level。
     #
-    # 当前仍然是 pair-level。
+    # Step07 切分完成后，
+    # 才展开为：
+    #
+    # EN -> UZ
+    # UZ -> EN
     # ========================================================
 
     training_columns = [
-
         "normalized_pair_id",
 
         "src_lang",
@@ -1364,9 +1459,13 @@ def main():
         "occurrence_count",
 
         "risk_flags",
+        "risk_count",
+
         "quality_score",
 
         "semantic_reviewed",
+
+        "final_decision_source",
 
         "dataset_version",
     ]
@@ -1391,11 +1490,11 @@ def main():
 
 
     # ========================================================
-    # 15. Save
+    # Save
     # ========================================================
 
     print(
-        "\nSaving dataset..."
+        "\nSaving datasets..."
     )
 
 
@@ -1403,7 +1502,6 @@ def main():
         ALL_PAIRS_FILE,
         index=False,
     )
-
 
     master.to_csv(
         ALL_PAIRS_CSV,
@@ -1417,7 +1515,6 @@ def main():
         index=False,
     )
 
-
     approved_df.to_csv(
         APPROVED_CSV,
         index=False,
@@ -1430,24 +1527,20 @@ def main():
         index=False,
     )
 
-
     silver_df.to_parquet(
         SILVER_FILE,
         index=False,
     )
-
 
     bronze_df.to_parquet(
         BRONZE_FILE,
         index=False,
     )
 
-
     reject_df.to_parquet(
         REJECT_FILE,
         index=False,
     )
-
 
     quarantine_df.to_parquet(
         QUARANTINE_FILE,
@@ -1460,7 +1553,6 @@ def main():
         index=False,
     )
 
-
     training_view.to_csv(
         TRAINING_VIEW_CSV,
         index=False,
@@ -1469,11 +1561,10 @@ def main():
 
 
     # ========================================================
-    # 16. Tier report
+    # Quality tier report
     # ========================================================
 
-    tier_report = (
-
+    quality_report = (
         master[
             "quality_tier"
         ]
@@ -1487,11 +1578,10 @@ def main():
     )
 
 
-    tier_report[
+    quality_report[
         "percent"
     ] = (
-
-        tier_report[
+        quality_report[
             "count"
         ]
         /
@@ -1501,10 +1591,10 @@ def main():
     )
 
 
-    tier_report[
+    quality_report[
         "training_weight"
     ] = (
-        tier_report[
+        quality_report[
             "quality_tier"
         ]
         .map(
@@ -1513,34 +1603,38 @@ def main():
     )
 
 
-    tier_report.to_csv(
-        TIER_REPORT_FILE,
+    quality_report.to_csv(
+        QUALITY_REPORT_FILE,
         index=False,
         encoding="utf-8-sig",
     )
 
 
     # ========================================================
-    # 17. Source report
+    # Source report
     # ========================================================
 
-    source_report = (
+    if "data_source" in approved_df.columns:
 
-        approved_df[
-            [
-                "data_source",
-                "quality_tier",
+        source_report = (
+            approved_df[
+                [
+                    "data_source",
+                    "quality_tier",
+                ]
             ]
-        ]
-
-        .value_counts()
-
-        .rename(
-            "count"
+            .value_counts()
+            .rename(
+                "count"
+            )
+            .reset_index()
         )
 
-        .reset_index()
-    )
+    else:
+
+        source_report = (
+            pd.DataFrame()
+        )
 
 
     source_report.to_csv(
@@ -1551,24 +1645,48 @@ def main():
 
 
     # ========================================================
-    # 18. Decision-source report
+    # Decision report
     # ========================================================
 
-    decision_distribution = (
-
+    decision_report = (
         master[
             "final_decision_source"
         ]
         .value_counts()
-        .to_dict()
+        .rename_axis(
+            "decision"
+        )
+        .reset_index(
+            name="count"
+        )
+    )
+
+
+    decision_report[
+        "percent"
+    ] = (
+        decision_report[
+            "count"
+        ]
+        /
+        len(master)
+        *
+        100
+    )
+
+
+    decision_report.to_csv(
+        DECISION_REPORT_FILE,
+        index=False,
+        encoding="utf-8-sig",
     )
 
 
     # ========================================================
-    # 19. Qwen statistics
+    # Semantic review stats
     # ========================================================
 
-    reviewed_count = int(
+    semantic_reviewed_count = int(
         master[
             "semantic_reviewed"
         ]
@@ -1578,15 +1696,43 @@ def main():
     )
 
 
-    unreviewed_count = (
+    not_reviewed_count = (
         len(master)
         -
-        reviewed_count
+        semantic_reviewed_count
     )
 
 
     # ========================================================
-    # 20. Report
+    # Qwen label distribution
+    # ========================================================
+
+    qwen_first_distribution = (
+        master[
+            "qwen_first_label"
+        ]
+        .fillna(
+            "NOT_REVIEWED"
+        )
+        .value_counts()
+        .to_dict()
+    )
+
+
+    qwen_second_distribution = (
+        master[
+            "qwen_second_resolution"
+        ]
+        .fillna(
+            "NO_SECOND_REVIEW"
+        )
+        .value_counts()
+        .to_dict()
+    )
+
+
+    # ========================================================
+    # Dataset report
     # ========================================================
 
     report = {
@@ -1595,12 +1741,12 @@ def main():
             "EN-UZ Approved Dataset",
 
         "dataset_version":
-            "v1",
+            DATASET_VERSION,
 
         "pair_level":
             True,
 
-        "input_rows":
+        "input_pairs":
             len(master),
 
         "unique_pairs":
@@ -1610,23 +1756,23 @@ def main():
                 ].nunique()
             ),
 
-        "approved_rows":
+        "approved_pairs":
             len(
                 approved_df
             ),
 
-        "rejected_rows":
-            len(
-                reject_df
-            ),
-
-        "quarantine_rows":
-            len(
-                quarantine_df
+        "approved_rate_percent":
+            float(
+                len(
+                    approved_df
+                )
+                /
+                len(master)
+                *
+                100
             ),
 
         "quality_tiers": {
-
             "GOLD":
                 len(
                     gold_df
@@ -1657,65 +1803,66 @@ def main():
             QUALITY_WEIGHTS,
 
         "semantic_review": {
-
             "reviewed":
-                reviewed_count,
+                semantic_reviewed_count,
 
             "not_individually_reviewed":
-                unreviewed_count,
+                not_reviewed_count,
         },
 
-        "decision_distribution":
-            {
-                str(key):
-                    int(value)
+        "step05b_distribution": {
+            str(key):
+                int(value)
 
-                for key, value
-                in decision_distribution.items()
-            },
+            for key, value
+            in qwen_first_distribution.items()
+        },
 
-        "approved_rate_percent":
-            float(
-                len(
-                    approved_df
+        "step05c_distribution": {
+            str(key):
+                int(value)
+
+            for key, value
+            in qwen_second_distribution.items()
+        },
+
+        "final_decision_distribution": {
+            str(
+                row["decision"]
+            ):
+                int(
+                    row["count"]
                 )
-                /
-                len(master)
-                *
-                100
-            ),
+
+            for _, row
+            in decision_report.iterrows()
+        },
 
         "benchmark_leak":
             0,
 
-        "training_policy": {
+        "synthetic_data_included":
+            False,
 
-            "baseline_exp1":
+        "training_policy": {
+            "exp1":
                 "GOLD + SILVER",
 
-            "baseline_exp2":
+            "exp2":
                 "GOLD + SILVER + BRONZE",
 
-            "weighted_exp":
-                {
-                    "GOLD":
-                        1.0,
+            "exp3":
+                "GOLD + SILVER + BRONZE "
+                "with quality weighting",
 
-                    "SILVER":
-                        0.8,
-
-                    "BRONZE":
-                        0.5,
-                },
-
-            "synthetic_data":
-                "NOT INCLUDED IN V1",
+            "exp4":
+                "Add MADLAD synthetic data",
         },
     }
 
 
     with open(
-        REPORT_FILE,
+        DATASET_REPORT_FILE,
         "w",
         encoding="utf-8",
     ) as file:
@@ -1729,7 +1876,7 @@ def main():
 
 
     # ========================================================
-    # 21. Terminal output
+    # Final terminal output
     # ========================================================
 
     print("\n")
@@ -1740,9 +1887,7 @@ def main():
 
     print(
         "Input pairs:",
-        len(
-            master
-        )
+        len(master)
     )
 
     print(
@@ -1756,7 +1901,7 @@ def main():
     print("\nQuality tiers:")
 
     print(
-        tier_report
+        quality_report
         .round(2)
         .to_string(
             index=False
@@ -1764,38 +1909,38 @@ def main():
     )
 
 
-    print("\nFinal dataset:")
+    print("\nFinal:")
 
     print(
-        "GOLD:",
+        "GOLD       :",
         len(
             gold_df
         )
     )
 
     print(
-        "SILVER:",
+        "SILVER     :",
         len(
             silver_df
         )
     )
 
     print(
-        "BRONZE:",
+        "BRONZE     :",
         len(
             bronze_df
         )
     )
 
     print(
-        "REJECT:",
+        "REJECT     :",
         len(
             reject_df
         )
     )
 
     print(
-        "QUARANTINE:",
+        "QUARANTINE :",
         len(
             quarantine_df
         )
@@ -1817,12 +1962,44 @@ def main():
 
     print(
         "\nSemantic reviewed:",
-        reviewed_count
+        semantic_reviewed_count
     )
 
     print(
         "Not individually reviewed:",
-        unreviewed_count
+        not_reviewed_count
+    )
+
+
+    print(
+        "\nFirst Qwen label distribution:"
+    )
+
+    print(
+        master[
+            "qwen_first_label"
+        ]
+        .fillna(
+            "NOT_REVIEWED"
+        )
+        .value_counts()
+        .to_string()
+    )
+
+
+    print(
+        "\nSecond review distribution:"
+    )
+
+    print(
+        master[
+            "qwen_second_resolution"
+        ]
+        .fillna(
+            "NO_SECOND_REVIEW"
+        )
+        .value_counts()
+        .to_string()
     )
 
 
@@ -1839,17 +2016,22 @@ def main():
     )
 
 
-    print(
-        "\nApproved source distribution:"
-    )
+    if (
+        "data_source"
+        in approved_df.columns
+    ):
 
-    print(
-        approved_df[
-            "data_source"
-        ]
-        .value_counts()
-        .to_string()
-    )
+        print(
+            "\nApproved source distribution:"
+        )
+
+        print(
+            approved_df[
+                "data_source"
+            ]
+            .value_counts()
+            .to_string()
+        )
 
 
     print("\nFiles:")
@@ -1862,6 +2044,7 @@ def main():
         ALL_PAIRS_FILE
     )
 
+
     print(
         "\nApproved:"
     )
@@ -1869,6 +2052,7 @@ def main():
     print(
         APPROVED_FILE
     )
+
 
     print(
         "\nTraining view:"
@@ -1878,17 +2062,22 @@ def main():
         TRAINING_VIEW_FILE
     )
 
+
     print(
-        "\nReport:"
+        "\nDataset report:"
     )
 
     print(
-        REPORT_FILE
+        DATASET_REPORT_FILE
     )
 
 
-    print("\nDataset V1 ready.")
+    print("\nEN-UZ Dataset V1 ready.")
 
+
+# ============================================================
+# Entry
+# ============================================================
 
 if __name__ == "__main__":
 

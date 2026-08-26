@@ -1,0 +1,64 @@
+{
+  "dataset_name": "EN-UZ Approved Dataset",
+  "dataset_version": "en_uz_v1",
+  "pair_level": true,
+  "input_pairs": 65897,
+  "unique_pairs": 65897,
+  "approved_pairs": 65441,
+  "approved_rate_percent": 99.3080109868431,
+  "quality_tiers": {
+    "GOLD": 2610,
+    "SILVER": 61826,
+    "BRONZE": 1005,
+    "REJECT": 414,
+    "QUARANTINE": 42
+  },
+  "quality_weights": {
+    "GOLD": 1.0,
+    "SILVER": 0.8,
+    "BRONZE": 0.5,
+    "REJECT": 0.0,
+    "QUARANTINE": 0.0
+  },
+  "semantic_review": {
+    "reviewed": 4079,
+    "not_individually_reviewed": 61818
+  },
+  "step05b_distribution": {
+    "NOT_REVIEWED": 61818,
+    "PASS": 2610,
+    "MINOR": 974,
+    "FAIL": 481,
+    "UNCERTAIN": 14
+  },
+  "step05c_distribution": {
+    "NO_SECOND_REVIEW": 65402,
+    "CONFIRMED_FAIL": 414,
+    "QUARANTINE": 42,
+    "DOWNGRADED_MINOR": 29,
+    "RESOLVED_PASS": 5,
+    "JUDGE_ERROR": 3,
+    "RESOLVED_MINOR": 2
+  },
+  "final_decision_distribution": {
+    "RULE_LOW_RISK": 61818,
+    "QWEN_PASS_RISK_REVIEW": 2147,
+    "QWEN_MINOR_RISK_REVIEW": 949,
+    "QWEN_PASS_AUTO_ACCEPT_AUDIT": 463,
+    "QWEN_SECOND_CONFIRMED_FAIL": 414,
+    "QWEN_SECOND_QUARANTINE": 42,
+    "QWEN_SECOND_DOWNGRADED_MINOR": 29,
+    "QWEN_MINOR_AUTO_ACCEPT_AUDIT": 25,
+    "QWEN_SECOND_RESOLVED_PASS": 5,
+    "QWEN_SECOND_JUDGE_ERROR": 3,
+    "QWEN_SECOND_RESOLVED_MINOR": 2
+  },
+  "benchmark_leak": 0,
+  "synthetic_data_included": false,
+  "training_policy": {
+    "exp1": "GOLD + SILVER",
+    "exp2": "GOLD + SILVER + BRONZE",
+    "exp3": "GOLD + SILVER + BRONZE with quality weighting",
+    "exp4": "Add MADLAD synthetic data"
+  }
+}

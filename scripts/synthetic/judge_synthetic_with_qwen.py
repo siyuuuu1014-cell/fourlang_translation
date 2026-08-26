@@ -13,15 +13,13 @@ from transformers import (
 )
 
 
-PROJECT_ROOT = Path(
-    "/root/autodl-tmp/fourlang_translation"
-)
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
-MODEL_PATH = Path(
+DEFAULT_MODEL_PATH = Path(
     "/root/autodl-tmp/models/Qwen3-8B"
 )
 
-INPUT_FILE = (
+DEFAULT_INPUT = (
     PROJECT_ROOT
     / "data"
     / "synthetic"
@@ -29,37 +27,34 @@ INPUT_FILE = (
     / "semantic_v01_valid.jsonl"
 )
 
-OUTPUT_DIR = (
+DEFAULT_OUTPUT_DIR = (
     PROJECT_ROOT
     / "data"
     / "synthetic"
     / "validated"
+    / "qwen_v2"
 )
 
-JUDGED_FILE = (
-    OUTPUT_DIR
-    / "semantic_v01_qwen_judged.jsonl"
-)
 
-ACCEPT_FILE = (
-    OUTPUT_DIR
-    / "semantic_v01_qwen_accepted.jsonl"
-)
+LANGUAGES = [
+    "zh",
+    "en",
+    "ru",
+    "uz",
+]
 
-REJECT_FILE = (
-    OUTPUT_DIR
-    / "semantic_v01_qwen_rejected.jsonl"
-)
 
+# ============================================================
+# IO
+# ============================================================
 
 def read_jsonl(
-    path,
+    path: Path,
 ):
 
     rows = []
 
-    with open(
-        path,
+    with path.open(
         "r",
         encoding="utf-8",
     ) as f:
@@ -68,24 +63,27 @@ def read_jsonl(
 
             line = line.strip()
 
-            if line:
+            if not line:
+                continue
 
-                rows.append(
-                    json.loads(
-                        line
-                    )
-                )
+            rows.append(
+                json.loads(line)
+            )
 
     return rows
 
 
-def save_jsonl(
-    path,
+def write_jsonl(
+    path: Path,
     rows,
 ):
 
-    with open(
-        path,
+    path.parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    with path.open(
         "w",
         encoding="utf-8",
     ) as f:
@@ -101,14 +99,360 @@ def save_jsonl(
             )
 
 
-def extract_json(
+def get_record_id(row):
+
+    return (
+        row.get(
+            "calibration_id"
+        )
+        or
+        row.get(
+            "semantic_id"
+        )
+        or
+        row.get(
+            "id"
+        )
+    )
+
+
+# ============================================================
+# Strict prompt
+# ============================================================
+
+def build_prompt(
+    row,
+    retry=False,
+):
+
+    texts = row[
+        "texts"
+    ]
+
+    slots = row.get(
+        "slots",
+        {},
+    )
+
+    features = row.get(
+        "features",
+        {},
+    )
+
+    computed = row.get(
+        "computed",
+        {},
+    )
+
+
+    retry_instruction = ""
+
+    if retry:
+
+        retry_instruction = """
+IMPORTANT RETRY:
+Your previous response could not be parsed.
+
+Return ONE valid compact JSON object only.
+Do not use Markdown.
+Do not use code fences.
+Do not output text before or after JSON.
+""".strip()
+
+
+    return f"""
+You are a STRICT multilingual translation quality auditor.
+
+This is training data for a multilingual translation model.
+
+Your goal is NOT to approve the sample.
+
+Your goal is to actively search for ANY:
+
+- semantic mismatch
+- object mismatch
+- destination mismatch
+- entity mismatch
+- time mismatch
+- number mismatch
+- polarity mismatch
+- subject mismatch
+- action mismatch
+- omission
+- addition
+- tense/aspect error
+- grammar error
+- morphology error
+- unnatural wording
+
+The canonical semantic specification below is the GROUND TRUTH.
+
+============================================================
+CANONICAL SEMANTIC SPECIFICATION
+============================================================
+
+Frame:
+{row.get("frame_id")}
+
+Slots:
+{json.dumps(slots, ensure_ascii=False)}
+
+Features:
+{json.dumps(features, ensure_ascii=False)}
+
+Computed:
+{json.dumps(computed, ensure_ascii=False)}
+
+============================================================
+GENERATED SENTENCES
+============================================================
+
+Chinese:
+{texts["zh"]}
+
+English:
+{texts["en"]}
+
+Russian:
+{texts["ru"]}
+
+Uzbek:
+{texts["uz"]}
+
+============================================================
+MANDATORY SEMANTIC RULES
+============================================================
+
+The following are REAL semantic errors.
+
+They are NEVER stylistic differences.
+
+FOOD vs WATER
+=> object mismatch
+=> REJECT
+
+AIRPORT vs HOTEL
+=> destination mismatch
+=> REJECT
+
+TASHKENT vs MOSCOW
+=> entity mismatch
+=> REJECT
+
+20:30 vs 01:30
+=> time mismatch
+=> REJECT
+
+positive vs negative
+=> polarity mismatch
+=> REJECT
+
+different subject
+=> subject mismatch
+=> REJECT
+
+different action
+=> action mismatch
+=> REJECT
+
+missing semantic information
+=> omission
+=> REJECT
+
+added semantic information
+=> addition
+=> REJECT
+
+
+If you detect ANY mismatch in:
+
+- subject
+- action
+- object
+- destination
+- entity
+- number
+- time
+- polarity
+
+the grade MUST be D or F.
+
+Never describe such a mismatch as:
+
+- stylistic
+- harmless
+- minor wording variation
+- acceptable variation
+
+
+Grade B is allowed ONLY when:
+
+ALL semantic information is identical
+
+AND
+
+the difference is purely wording/style.
+
+
+============================================================
+LANGUAGE-SPECIFIC CHECKS
+============================================================
+
+Chinese:
+- grammar
+- word order
+- naturalness
+- temporal expression
+
+English:
+- tense
+- agreement
+- article usage
+- naturalness
+
+Russian:
+- case
+- conjugation
+- tense/aspect
+- morphology
+- naturalness
+
+Uzbek:
+- case suffix
+- person agreement
+- tense
+- morphology
+- naturalness
+
+
+============================================================
+GRADING
+============================================================
+
+A:
+Fully correct, precise, grammatical and natural in all 4 languages.
+
+B:
+All semantic slots are identical.
+Only harmless wording/style variation exists.
+
+C:
+Meaning is mostly correct but there is a genuine minor
+grammar, morphology, tense/aspect, or naturalness issue.
+
+D:
+Important semantic mismatch, omission, addition,
+wrong time, entity, object, polarity, number,
+subject or action.
+
+F:
+Seriously wrong or unusable.
+
+
+============================================================
+OUTPUT
+============================================================
+
+Return ONE JSON object only.
+
+Do not use Markdown.
+
+Do not use code fences.
+
+The reason MUST NOT be empty.
+
+Keep reason under 40 words.
+
+Schema:
+
+{{
+  "grade": "A",
+
+  "semantic_consistent": true,
+
+  "slot_checks": {{
+    "subject": true,
+    "action": true,
+    "object": true,
+    "destination": true,
+    "time": true,
+    "number": true,
+    "polarity": true
+  }},
+
+  "grammar_ok": {{
+    "zh": true,
+    "en": true,
+    "ru": true,
+    "uz": true
+  }},
+
+  "natural_ok": {{
+    "zh": true,
+    "en": true,
+    "ru": true,
+    "uz": true
+  }},
+
+  "problem_languages": [],
+
+  "error_types": [],
+
+  "reason": "All four sentences preserve the canonical semantics."
+}}
+
+Allowed error_types:
+
+[
+  "SUBJECT_ERROR",
+  "ACTION_ERROR",
+  "OBJECT_ERROR",
+  "DESTINATION_ERROR",
+  "ENTITY_ERROR",
+  "NUMBER_ERROR",
+  "TIME_ERROR",
+  "NEGATION_ERROR",
+  "TENSE_ASPECT_ERROR",
+  "OMISSION_ERROR",
+  "ADDITION_ERROR",
+  "MORPHOLOGY_ERROR",
+  "GRAMMAR_ERROR",
+  "NATURALNESS_ERROR",
+  "MEANING_ERROR"
+]
+
+{retry_instruction}
+""".strip()
+
+
+# ============================================================
+# Robust JSON extraction
+# ============================================================
+
+def clean_model_output(
     text,
 ):
+
+    text = str(text)
+
+    # Remove Qwen thinking tags if any.
+    text = re.sub(
+        r"<think>.*?</think>",
+        "",
+        text,
+        flags=re.DOTALL
+        | re.IGNORECASE,
+    )
+
 
     text = (
         text
         .replace(
             "```json",
+            ""
+        )
+        .replace(
+            "```JSON",
             ""
         )
         .replace(
@@ -119,209 +463,463 @@ def extract_json(
     )
 
 
-    match = re.search(
-        r"\{.*\}",
-        text,
-        flags=re.DOTALL,
+    return text
+
+
+def extract_json(
+    text,
+):
+
+    text = clean_model_output(
+        text
     )
 
 
-    if not match:
+    decoder = json.JSONDecoder()
+
+
+    # Try every '{' until one complete
+    # valid JSON object is found.
+
+    for index, char in enumerate(
+        text
+    ):
+
+        if char != "{":
+            continue
+
+        try:
+
+            obj, _ = decoder.raw_decode(
+                text[
+                    index:
+                ]
+            )
+
+        except json.JSONDecodeError:
+
+            continue
+
+
+        if isinstance(
+            obj,
+            dict,
+        ):
+
+            return obj
+
+
+    raise ValueError(
+        "No valid JSON object found "
+        f"in model output: {text[:300]!r}"
+    )
+
+
+# ============================================================
+# Result normalization
+# ============================================================
+
+def normalize_result(
+    result,
+):
+
+    if not isinstance(
+        result,
+        dict,
+    ):
 
         raise ValueError(
-            "No JSON found"
+            "Judge result is not a dict"
         )
 
 
-    return json.loads(
-        match.group(0)
-    )
+    grade = str(
+        result.get(
+            "grade",
+            "",
+        )
+    ).strip().upper()
 
 
-def build_prompt(row):
+    result[
+        "grade"
+    ] = grade
 
-    texts = row["texts"]
+
+    # --------------------------------------------------------
+    # Handle older "errors" dict format if returned.
+    # --------------------------------------------------------
+
+    if (
+        "error_types"
+        not in result
+        and
+        isinstance(
+            result.get("errors"),
+            dict,
+        )
+    ):
+
+        converted = []
+
+        mapping = {
+            "number_error":
+                "NUMBER_ERROR",
+
+            "time_error":
+                "TIME_ERROR",
+
+            "negation_error":
+                "NEGATION_ERROR",
+
+            "entity_error":
+                "ENTITY_ERROR",
+
+            "meaning_error":
+                "MEANING_ERROR",
+
+            "tense_aspect_error":
+                "TENSE_ASPECT_ERROR",
+
+            "omission_error":
+                "OMISSION_ERROR",
+
+            "addition_error":
+                "ADDITION_ERROR",
+
+            "morphology_error":
+                "MORPHOLOGY_ERROR",
+        }
+
+
+        for (
+            old_key,
+            new_key,
+        ) in mapping.items():
+
+            if result[
+                "errors"
+            ].get(
+                old_key
+            ) is True:
+
+                converted.append(
+                    new_key
+                )
+
+
+        result[
+            "error_types"
+        ] = converted
+
+
+    if not isinstance(
+        result.get(
+            "error_types"
+        ),
+        list,
+    ):
+
+        result[
+            "error_types"
+        ] = [
+            "INVALID_ERROR_TYPES"
+        ]
+
+
+    if not isinstance(
+        result.get(
+            "problem_languages"
+        ),
+        list,
+    ):
+
+        result[
+            "problem_languages"
+        ] = []
+
+
+    return result
+
+
+# ============================================================
+# Determine which semantic slots actually apply
+# ============================================================
+
+def applicable_slot_checks(
+    row,
+):
 
     slots = row.get(
         "slots",
-        {}
-    )
-
-    features = row.get(
-        "features",
-        {}
+        {},
     )
 
     computed = row.get(
         "computed",
-        {}
+        {},
     )
 
-    return f"""
-You are a strict multilingual translation quality auditor for a training-data pipeline.
+    features = row.get(
+        "features",
+        {},
+    )
 
-Your job is NOT to approve the sample.
-Your job is to actively search for semantic, grammatical, morphological,
-temporal, polarity, entity, number, and naturalness errors.
 
-The four sentences below are intended to express exactly ONE semantic structure.
+    checks = []
 
-============================================================
-CANONICAL SEMANTIC SPECIFICATION
-============================================================
 
-Frame:
-{row["frame_id"]}
+    if "subject" in slots:
+        checks.append(
+            "subject"
+        )
 
-Slots:
-{json.dumps(slots, ensure_ascii=False)}
 
-Features:
-{json.dumps(features, ensure_ascii=False)}
+    if "verb" in slots:
+        checks.append(
+            "action"
+        )
 
-Computed values:
-{json.dumps(computed, ensure_ascii=False)}
 
-============================================================
-GENERATED SENTENCES
-============================================================
+    if "object" in slots:
+        checks.append(
+            "object"
+        )
 
-Chinese (zh):
-{texts["zh"]}
 
-English (en):
-{texts["en"]}
+    if (
+        "destination"
+        in slots
+        or
+        "place"
+        in slots
+    ):
 
-Russian (ru):
-{texts["ru"]}
+        checks.append(
+            "destination"
+        )
 
-Uzbek (uz):
-{texts["uz"]}
 
-============================================================
-AUDIT REQUIREMENTS
-============================================================
+    if (
+        "time" in slots
+        or
+        "day" in slots
+        or
+        "clock" in computed
+    ):
 
-Evaluate EACH language independently against the canonical semantic
-specification.
+        checks.append(
+            "time"
+        )
 
-Then compare the four languages with each other.
 
-Check especially:
+    if (
+        "number" in slots
+        or
+        "number" in computed
+    ):
 
-1. Meaning equivalence
-2. Subject/person
-3. Object
-4. Destination/location
-5. Tense/aspect
-6. Positive vs negative polarity
-7. Time/date/clock
-8. Numbers
-9. Named entities
-10. Missing information
-11. Added information
-12. Russian case/conjugation/aspect
-13. Uzbek case suffixes/person/tense/morphology
-14. English tense/agreement/articles
-15. Chinese grammatical and semantic naturalness
-16. Whether the sentence sounds natural for a native speaker
+        checks.append(
+            "number"
+        )
 
-IMPORTANT:
 
-Do NOT give grade A merely because the four sentences look similar.
+    if "polarity" in features:
 
-A sentence that is understandable but unnatural or grammatically questionable
-must NOT automatically receive grade A.
+        checks.append(
+            "polarity"
+        )
 
-Grade definitions:
 
-A:
-Fully correct, semantically precise, grammatically correct, and natural
-in all four languages.
+    return checks
 
-B:
-Semantically correct in all four languages, with only harmless stylistic
-or very minor naturalness differences.
 
-C:
-Meaning is mostly preserved, but at least one language contains a real
-minor grammar, morphology, tense, aspect, or naturalness problem.
+# ============================================================
+# Final Qwen acceptance
+# ============================================================
 
-D:
-Important semantic error, omission, addition, incorrect polarity,
-incorrect time/number/entity, or significant grammar problem.
+def judge_accept(
+    result,
+    row,
+):
 
-F:
-Unusable or seriously incorrect.
+    # --------------------------------------------------------
+    # Grade
+    # --------------------------------------------------------
 
-Return JSON only.
+    if result.get(
+        "grade"
+    ) not in {
+        "A",
+        "B",
+    }:
 
-Use exactly this schema:
+        return False
 
-{{
-  "grade": "",
-  "semantic_consistent": false,
 
-  "grammar_ok": {{
-    "zh": false,
-    "en": false,
-    "ru": false,
-    "uz": false
-  }},
+    # --------------------------------------------------------
+    # Overall semantic equivalence
+    # --------------------------------------------------------
 
-  "natural_ok": {{
-    "zh": false,
-    "en": false,
-    "ru": false,
-    "uz": false
-  }},
+    if result.get(
+        "semantic_consistent"
+    ) is not True:
 
-  "errors": {{
-    "number_error": false,
-    "time_error": false,
-    "negation_error": false,
-    "entity_error": false,
-    "meaning_error": false,
-    "tense_aspect_error": false,
-    "omission_error": false,
-    "addition_error": false,
-    "morphology_error": false
-  }},
+        return False
 
-  "problem_languages": [],
 
-  "reason": ""
-}}
+    # --------------------------------------------------------
+    # Applicable semantic slots
+    # --------------------------------------------------------
 
-The reason MUST NOT be empty.
+    slot_checks = result.get(
+        "slot_checks",
+        {},
+    )
 
-If there is no error, briefly state why the meanings and grammatical forms
-are consistent.
 
-Do not output anything outside JSON.
-""".strip()
+    if not isinstance(
+        slot_checks,
+        dict,
+    ):
+
+        return False
+
+
+    for slot in (
+        applicable_slot_checks(
+            row
+        )
+    ):
+
+        if slot_checks.get(
+            slot
+        ) is not True:
+
+            return False
+
+
+    # --------------------------------------------------------
+    # Grammar
+    # --------------------------------------------------------
+
+    grammar = result.get(
+        "grammar_ok",
+        {},
+    )
+
+
+    if not isinstance(
+        grammar,
+        dict,
+    ):
+
+        return False
+
+
+    for lang in LANGUAGES:
+
+        if grammar.get(
+            lang
+        ) is not True:
+
+            return False
+
+
+    # --------------------------------------------------------
+    # Naturalness
+    # --------------------------------------------------------
+
+    natural = result.get(
+        "natural_ok",
+        {},
+    )
+
+
+    if not isinstance(
+        natural,
+        dict,
+    ):
+
+        return False
+
+
+    for lang in LANGUAGES:
+
+        if natural.get(
+            lang
+        ) is not True:
+
+            return False
+
+
+    # --------------------------------------------------------
+    # Any declared error => reject
+    # --------------------------------------------------------
+
+    error_types = result.get(
+        "error_types",
+        [],
+    )
+
+
+    if len(
+        error_types
+    ) > 0:
+
+        return False
+
+
+    # --------------------------------------------------------
+    # Reason must exist
+    # --------------------------------------------------------
+
+    reason = str(
+        result.get(
+            "reason",
+            "",
+        )
+    ).strip()
+
+
+    if not reason:
+
+        return False
+
+
+    return True
+
+
+# ============================================================
+# Single Qwen generation
+# ============================================================
 
 @torch.inference_mode()
-def judge_one(
+def generate_once(
     row,
     tokenizer,
     model,
+    retry=False,
 ):
 
     prompt = build_prompt(
-        row
+        row,
+        retry=retry,
     )
 
 
     messages = [
         {
-            "role": "user",
-            "content": prompt,
+            "role":
+                "user",
+
+            "content":
+                prompt,
         }
     ]
 
 
-    text = (
+    chat_text = (
         tokenizer
         .apply_chat_template(
             messages,
@@ -333,8 +931,10 @@ def judge_one(
 
 
     inputs = tokenizer(
-        text,
+        chat_text,
         return_tensors="pt",
+        truncation=True,
+        max_length=4096,
     )
 
 
@@ -347,194 +947,135 @@ def judge_one(
 
 
     inputs = {
-        key: value.to(
-            device
-        )
-        for key, value
-        in inputs.items()
+        key:
+            value.to(device)
+
+        for (
+            key,
+            value,
+        ) in inputs.items()
     }
 
 
-    output = model.generate(
+    outputs = model.generate(
         **inputs,
-        max_new_tokens=256,
+        max_new_tokens=384,
         do_sample=False,
+        pad_token_id=
+            tokenizer.eos_token_id,
     )
 
 
-    generated = output[
+    generated_tokens = outputs[
         0,
-        inputs["input_ids"].shape[1]:
+        inputs[
+            "input_ids"
+        ].shape[1]:
     ]
 
 
     answer = tokenizer.decode(
-        generated,
+        generated_tokens,
         skip_special_tokens=True,
     )
 
 
-    return extract_json(
-        answer
-    )
+    return answer
 
 
-def judge_accept(result):
+# ============================================================
+# Judge with parse retry
+# ============================================================
 
-    # --------------------------------------------------------
-    # Grade
-    # --------------------------------------------------------
+def judge_with_retry(
+    row,
+    tokenizer,
+    model,
+    max_retries=2,
+):
 
-    if result.get("grade") not in {
-        "A",
-        "B",
-    }:
-        return False
+    last_error = None
+
+    raw_outputs = []
 
 
-    # --------------------------------------------------------
-    # Semantic consistency
-    # --------------------------------------------------------
-
-    if not result.get(
-        "semantic_consistent",
-        False,
+    for attempt in range(
+        max_retries + 1
     ):
-        return False
+
+        try:
+
+            raw = generate_once(
+                row,
+                tokenizer,
+                model,
+                retry=(
+                    attempt > 0
+                ),
+            )
 
 
-    # --------------------------------------------------------
-    # Grammar
-    # --------------------------------------------------------
-
-    grammar = result.get(
-        "grammar_ok",
-        {}
-    )
-
-    if not all(
-        grammar.get(
-            lang,
-            False,
-        )
-        for lang in [
-            "zh",
-            "en",
-            "ru",
-            "uz",
-        ]
-    ):
-        return False
+            raw_outputs.append(
+                raw
+            )
 
 
-    # --------------------------------------------------------
-    # Naturalness
-    # --------------------------------------------------------
-
-    natural = result.get(
-        "natural_ok",
-        {}
-    )
-
-    if not all(
-        natural.get(
-            lang,
-            False,
-        )
-        for lang in [
-            "zh",
-            "en",
-            "ru",
-            "uz",
-        ]
-    ):
-        return False
+            parsed = extract_json(
+                raw
+            )
 
 
-    # --------------------------------------------------------
-    # Error flags
-    # --------------------------------------------------------
-
-    errors = result.get(
-        "errors",
-        {}
-    )
-
-    high_risk_errors = [
-        "number_error",
-        "time_error",
-        "negation_error",
-        "entity_error",
-        "meaning_error",
-        "tense_aspect_error",
-        "omission_error",
-        "addition_error",
-        "morphology_error",
-    ]
-
-    if any(
-        errors.get(
-            key,
-            False,
-        )
-        for key in high_risk_errors
-    ):
-        return False
+            parsed = normalize_result(
+                parsed
+            )
 
 
-    # --------------------------------------------------------
-    # Reason必须存在
-    # --------------------------------------------------------
-
-    reason = str(
-        result.get(
-            "reason",
-            ""
-        )
-    ).strip()
-
-    if not reason:
-        return False
+            parsed[
+                "_parse_attempt"
+            ] = (
+                attempt + 1
+            )
 
 
-    return True
-def main():
+            return (
+                parsed,
+                raw_outputs,
+            )
 
-    parser = argparse.ArgumentParser()
 
-    parser.add_argument(
-        "--input",
-        type=str,
-        default=str(INPUT_FILE),
-    )
-    parser.add_argument(
-        "--limit",
-        type=int,
-        default=1000,
-        help="Maximum number of samples to judge",
-    )
-    args = parser.parse_args()
+        except Exception as exc:
 
-    input_file = Path(
-        args.input
-    )
+            last_error = exc
 
-    if not input_file.exists():
-        raise FileNotFoundError(
-            f"找不到输入文件：{input_file}"
-        )
 
-    rows = read_jsonl(
-        input_file
+            print(
+                "[PARSE RETRY] "
+                f"record="
+                f"{get_record_id(row)} "
+                f"attempt="
+                f"{attempt + 1}/"
+                f"{max_retries + 1} "
+                f"error="
+                f"{repr(exc)}"
+            )
+
+
+    raise RuntimeError(
+        "Judge parse failed "
+        f"after "
+        f"{max_retries + 1} "
+        f"attempts: "
+        f"{repr(last_error)}"
     )
 
 
-    if args.limit:
+# ============================================================
+# Load model
+# ============================================================
 
-        rows = rows[
-            :args.limit
-        ]
-
+def load_qwen(
+    model_path: Path,
+):
 
     print(
         "Loading Qwen3-8B..."
@@ -544,16 +1085,26 @@ def main():
     tokenizer = (
         AutoTokenizer
         .from_pretrained(
-            MODEL_PATH,
+            model_path,
             local_files_only=True,
         )
     )
 
 
+    if (
+        tokenizer.pad_token_id
+        is None
+    ):
+
+        tokenizer.pad_token_id = (
+            tokenizer.eos_token_id
+        )
+
+
     model = (
         AutoModelForCausalLM
         .from_pretrained(
-            MODEL_PATH,
+            model_path,
             torch_dtype=torch.float16,
             device_map="auto",
             low_cpu_mem_usage=True,
@@ -565,17 +1116,185 @@ def main():
     model.eval()
 
 
-    model.generation_config.do_sample = False
-    model.generation_config.temperature = None
-    model.generation_config.top_p = None
-    model.generation_config.top_k = None
+    model.generation_config.do_sample = (
+        False
+    )
+
+    model.generation_config.temperature = (
+        None
+    )
+
+    model.generation_config.top_p = (
+        None
+    )
+
+    model.generation_config.top_k = (
+        None
+    )
+
+
+    print(
+        "Qwen loaded."
+    )
+
+
+    return (
+        tokenizer,
+        model,
+    )
+
+
+# ============================================================
+# Main
+# ============================================================
+
+def main():
+
+    parser = argparse.ArgumentParser()
+
+
+    parser.add_argument(
+        "--input",
+        type=str,
+        default=str(
+            DEFAULT_INPUT
+        ),
+    )
+
+
+    parser.add_argument(
+        "--output-dir",
+        type=str,
+        default=str(
+            DEFAULT_OUTPUT_DIR
+        ),
+    )
+
+
+    parser.add_argument(
+        "--model",
+        type=str,
+        default=str(
+            DEFAULT_MODEL_PATH
+        ),
+    )
+
+
+    parser.add_argument(
+        "--limit",
+        type=int,
+        default=None,
+    )
+
+
+    parser.add_argument(
+        "--max-retries",
+        type=int,
+        default=2,
+    )
+
+
+    args = parser.parse_args()
+
+
+    input_file = Path(
+        args.input
+    )
+
+    output_dir = Path(
+        args.output_dir
+    )
+
+    model_path = Path(
+        args.model
+    )
+
+
+    if not input_file.exists():
+
+        raise FileNotFoundError(
+            f"Input not found:\n"
+            f"{input_file}"
+        )
+
+
+    if not model_path.exists():
+
+        raise FileNotFoundError(
+            f"Model not found:\n"
+            f"{model_path}"
+        )
+
+
+    output_dir.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+
+    judged_file = (
+        output_dir
+        / "qwen_judged.jsonl"
+    )
+
+    accepted_file = (
+        output_dir
+        / "qwen_accepted.jsonl"
+    )
+
+    rejected_file = (
+        output_dir
+        / "qwen_rejected.jsonl"
+    )
+
+    summary_file = (
+        output_dir
+        / "qwen_summary.json"
+    )
+
+
+    rows = read_jsonl(
+        input_file
+    )
+
+
+    if (
+        args.limit is not None
+        and
+        args.limit > 0
+    ):
+
+        rows = rows[
+            :args.limit
+        ]
+
+
+    print(
+        "Input:",
+        input_file
+    )
+
+    print(
+        "Samples:",
+        len(rows)
+    )
+
+    print(
+        "Output dir:",
+        output_dir
+    )
+
+
+    tokenizer, model = load_qwen(
+        model_path
+    )
 
 
     judged = []
-
     accepted = []
-
     rejected = []
+
+    parse_errors = 0
 
 
     total = len(
@@ -583,37 +1302,58 @@ def main():
     )
 
 
-    for i, row in enumerate(
+    for (
+        index,
+        row,
+    ) in enumerate(
         rows,
         start=1,
     ):
 
+        row = dict(
+            row
+        )
+
+
         try:
 
-            result = judge_one(
-                row,
-                tokenizer,
-                model,
+            result, raw_outputs = (
+                judge_with_retry(
+                    row,
+                    tokenizer,
+                    model,
+                    max_retries=
+                        args.max_retries,
+                )
             )
+
+
+            qwen_accept = judge_accept(
+                result,
+                row,
+            )
+
 
             row[
                 "qwen_judge"
             ] = result
 
-
-            accepted_flag = (
-                judge_accept(
-                    result
-                )
-            )
-
-
             row[
                 "qwen_accept"
-            ] = accepted_flag
+            ] = qwen_accept
+
+            row[
+                "qwen_raw_outputs"
+            ] = raw_outputs
 
 
         except Exception as exc:
+
+            parse_errors += 1
+
+
+            qwen_accept = False
+
 
             row[
                 "qwen_accept"
@@ -625,11 +1365,29 @@ def main():
                 "grade":
                     "PARSE_ERROR",
 
+                "semantic_consistent":
+                    False,
+
+                "slot_checks":
+                    {},
+
+                "grammar_ok":
+                    {},
+
+                "natural_ok":
+                    {},
+
+                "problem_languages":
+                    [],
+
+                "error_types":
+                    [
+                        "PARSE_ERROR"
+                    ],
+
                 "reason":
                     repr(exc),
             }
-
-            accepted_flag = False
 
 
         judged.append(
@@ -637,7 +1395,7 @@ def main():
         )
 
 
-        if accepted_flag:
+        if qwen_accept:
 
             accepted.append(
                 row
@@ -650,38 +1408,93 @@ def main():
             )
 
 
+        # ----------------------------------------------------
+        # Save every 10 rows
+        # ----------------------------------------------------
+
         if (
-            i % 10 == 0
+            index % 10 == 0
             or
-            i == total
+            index == total
         ):
 
-            save_jsonl(
-                JUDGED_FILE,
+            write_jsonl(
+                judged_file,
                 judged,
             )
 
-            save_jsonl(
-                ACCEPT_FILE,
+            write_jsonl(
+                accepted_file,
                 accepted,
             )
 
-            save_jsonl(
-                REJECT_FILE,
+            write_jsonl(
+                rejected_file,
                 rejected,
             )
 
+
             print(
-                f"{i}/{total} | "
-                f"accepted="
-                f"{len(accepted)} | "
-                f"rejected="
+                f"{index}/{total}"
+                f" | accepted="
+                f"{len(accepted)}"
+                f" | rejected="
                 f"{len(rejected)}"
+                f" | parse_errors="
+                f"{parse_errors}"
             )
 
 
+    summary = {
+        "input_file":
+            str(input_file),
+
+        "total":
+            total,
+
+        "accepted":
+            len(accepted),
+
+        "rejected":
+            len(rejected),
+
+        "accept_rate":
+            (
+                len(accepted)
+                / total
+                if total
+                else 0
+            ),
+
+        "parse_errors":
+            parse_errors,
+
+        "parse_error_rate":
+            (
+                parse_errors
+                / total
+                if total
+                else 0
+            ),
+    }
+
+
+    with summary_file.open(
+        "w",
+        encoding="utf-8",
+    ) as f:
+
+        json.dump(
+            summary,
+            f,
+            ensure_ascii=False,
+            indent=2,
+        )
+
+
+    print()
     print("=" * 80)
-    print("Qwen validation complete")
+    print("QWEN STRICT JUDGE V2 COMPLETE")
     print("=" * 80)
 
     print(
@@ -701,9 +1514,46 @@ def main():
 
     print(
         "Accept rate:",
-        f"{len(accepted)/total:.2%}"
-        if total
-        else "0%",
+        (
+            f"{len(accepted)/total:.2%}"
+            if total
+            else "0%"
+        ),
+    )
+
+    print(
+        "Parse errors:",
+        parse_errors,
+    )
+
+    print(
+        "Parse error rate:",
+        (
+            f"{parse_errors/total:.2%}"
+            if total
+            else "0%"
+        ),
+    )
+
+
+    print(
+        "\nFiles:"
+    )
+
+    print(
+        judged_file
+    )
+
+    print(
+        accepted_file
+    )
+
+    print(
+        rejected_file
+    )
+
+    print(
+        summary_file
     )
 
 

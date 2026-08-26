@@ -1,0 +1,8 @@
+{
+  "input_file": "data\\synthetic\\audit\\linguistic_v2\\linguistic_calibration_v02.jsonl",
+  "total": 100,
+  "accepted": 100,
+  "rejected": 0,
+  "accept_rate": 1.0,
+  "reject_reasons": {}
+}

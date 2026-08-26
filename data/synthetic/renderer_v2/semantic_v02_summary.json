@@ -1,0 +1,11 @@
+{
+  "source_file": "D:\\dev\\projects\\fourlang_translation\\data\\synthetic\\validated\\semantic_v01_valid.jsonl",
+  "output_file": "D:\\dev\\projects\\fourlang_translation\\data\\synthetic\\renderer_v2\\semantic_v02.jsonl",
+  "total_rows": 1000,
+  "renderer_version": "v2",
+  "fix_counts": {
+    "ru_find_future_aspect": 58,
+    "zh_find_negative": 36
+  },
+  "error_counts": {}
+}

@@ -1,0 +1,8 @@
+{
+  "input_file": "data\\synthetic\\renderer_v2\\semantic_v02.jsonl",
+  "total": 1000,
+  "accepted": 1000,
+  "rejected": 0,
+  "accept_rate": 1.0,
+  "reject_reasons": {}
+}

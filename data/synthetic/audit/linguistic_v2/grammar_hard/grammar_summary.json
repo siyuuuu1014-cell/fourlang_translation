@@ -1,5 +1,5 @@
 {
-  "input_file": "data\\synthetic\\audit\\linguistic_v2\\linguistic_calibration_v02.jsonl",
+  "input_file": "data\\synthetic\\audit\\linguistic_v2\\hard\\hard_accepted.jsonl",
   "total": 100,
   "accepted": 40,
   "rejected": 60,

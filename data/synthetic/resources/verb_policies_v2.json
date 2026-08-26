@@ -1,0 +1,34 @@
+{
+  "version": "v2",
+  "verbs": {
+    "FIND": {
+      "semantic_class": "achievement",
+      "zh": {
+        "negative_strategy": "mei_resultative",
+        "negative_surface": "没找到"
+      },
+      "ru": {
+        "aspect_policy": {
+          "present": "imperfective",
+          "future": "perfective"
+        },
+        "imperfective": {
+          "lemma": "находить",
+          "present_1sg": "нахожу",
+          "present_2sg": "находишь",
+          "present_3sg": "находит",
+          "present_1pl": "находим",
+          "present_3pl": "находят"
+        },
+        "perfective": {
+          "lemma": "найти",
+          "future_1sg": "найду",
+          "future_2sg": "найдёшь",
+          "future_3sg": "найдёт",
+          "future_1pl": "найдём",
+          "future_3pl": "найдут"
+        }
+      }
+    }
+  }
+}

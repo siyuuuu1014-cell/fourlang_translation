@@ -1,6 +1,6 @@
 {
   "version": "linguistic_calibration_v2",
-  "source_file": "D:\\dev\\projects\\fourlang_translation\\data\\synthetic\\validated\\semantic_v01_valid.jsonl",
+  "source_file": "data\\synthetic\\renderer_v2\\semantic_v02.jsonl",
   "source_rows": 1000,
   "seed": 2027,
   "per_group": 20,

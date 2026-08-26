@@ -1,0 +1,41 @@
+{
+  "input_file": "D:\\dev\\projects\\fourlang_translation\\data\\synthetic\\audit\\linguistic_v1\\linguistic_calibration_v01.jsonl",
+  "total": 100,
+  "accepted": 57,
+  "rejected": 43,
+  "accept_rate": 0.57,
+  "reject_reasons": {
+    "ru:ru_subject_verb_agreement:person=1pl:expected=едем": 4,
+    "en:en_subject_verb_agreement:person=3sg:expected=eats": 3,
+    "en:en_subject_verb_agreement:person=3sg:expected=goes": 3,
+    "ru:ru_subject_verb_agreement:person=3sg:expected=находит": 3,
+    "uz:uz_subject_verb_agreement:person=1pl:allowed=boramiz": 2,
+    "ru:ru_subject_verb_agreement:person=3sg:expected=едет": 2,
+    "uz:uz_subject_verb_agreement:person=3sg:allowed=bormaydi": 2,
+    "ru:ru_subject_verb_agreement:person=3sg:expected=пьёт": 2,
+    "uz:uz_subject_verb_agreement:person=3pl:allowed=topadilar|topadi": 2,
+    "ru:ru_subject_verb_agreement:person=3pl:expected=едут": 2,
+    "ru:ru_subject_verb_agreement:person=1sg:expected=нахожу": 2,
+    "ru:ru_subject_verb_agreement:person=1pl:expected=едим": 1,
+    "uz:uz_subject_verb_agreement:person=2sg:allowed=ichasan": 1,
+    "uz:uz_subject_verb_agreement:person=3sg:allowed=topadi": 1,
+    "uz:uz_subject_verb_agreement:person=1pl:allowed=topamiz": 1,
+    "uz:uz_subject_verb_agreement:person=2sg:allowed=o'qiysan": 1,
+    "uz:uz_subject_verb_agreement:person=3pl:allowed=bormaydilar|bormaydi": 1,
+    "uz:uz_subject_verb_agreement:person=1pl:allowed=ichamiz": 1,
+    "uz:uz_subject_verb_agreement:person=3sg:allowed=o'qimaydi": 1,
+    "ru:ru_subject_verb_agreement:person=3sg:expected=покупает": 1,
+    "uz:uz_subject_verb_agreement:person=3pl:allowed=yeydilar|yeydi": 1,
+    "en:en_subject_verb_agreement:person=3sg:expected=finds": 1,
+    "en:en_subject_verb_agreement:person=3sg:expected=buys": 1,
+    "ru:ru_subject_verb_agreement:person=2sg:expected=едешь": 1,
+    "ru:ru_subject_verb_agreement:person=3sg:expected=ест": 1,
+    "ru:ru_subject_verb_agreement:person=2sg:expected=ешь": 1,
+    "uz:uz_subject_verb_agreement:person=3sg:allowed=boradi": 1
+  },
+  "rejected_by_language": {
+    "ru": 20,
+    "uz": 15,
+    "en": 8
+  }
+}

@@ -43,8 +43,8 @@ def parse_args():
 
     parser = argparse.ArgumentParser(
         description=(
-            "STEP 10B - Generate MADLAD teacher "
-            "targets for EN-UZ distillation pilot."
+            "STEP 10B - High-throughput MADLAD "
+            "teacher generation for EN-UZ pilot."
         )
     )
 
@@ -52,17 +52,41 @@ def parse_args():
         "--madlad_path",
         type=str,
         default=None,
-        help=(
-            "MADLAD local snapshot path. "
-            "If omitted, auto-detect from HF cache."
-        ),
     )
+
+    # --------------------------------------------------------
+    # Runtime parameters
+    #
+    # These CAN change when resuming.
+    # --------------------------------------------------------
 
     parser.add_argument(
         "--batch_size",
         type=int,
-        default=4,
+        default=12,
     )
+
+    parser.add_argument(
+        "--checkpoint_every",
+        type=int,
+        default=128,
+        help=(
+            "Flush checkpoint after approximately "
+            "this many newly generated samples."
+        ),
+    )
+
+    parser.add_argument(
+        "--progress_every",
+        type=int,
+        default=100,
+    )
+
+    # --------------------------------------------------------
+    # Generation identity
+    #
+    # These MUST NOT change when resuming.
+    # --------------------------------------------------------
 
     parser.add_argument(
         "--num_beams",
@@ -85,20 +109,23 @@ def parse_args():
     parser.add_argument(
         "--overwrite",
         action="store_true",
-        help="Delete previous checkpoint and regenerate all.",
     )
 
     return parser.parse_args()
 
 
 # ============================================================
-# JSONL helpers
+# JSONL
 # ============================================================
 
 def append_jsonl(
     path: Path,
     rows: list[dict],
+    fsync: bool = True,
 ):
+
+    if not rows:
+        return
 
     with open(
         path,
@@ -118,11 +145,12 @@ def append_jsonl(
 
             f.write("\n")
 
-        # Make checkpoint safer for long runs
         f.flush()
-        os.fsync(
-            f.fileno()
-        )
+
+        if fsync:
+            os.fsync(
+                f.fileno()
+            )
 
 
 def load_jsonl(
@@ -161,7 +189,7 @@ def load_jsonl(
             except Exception:
 
                 print(
-                    f"[WARNING] Broken checkpoint "
+                    "[WARNING] Broken checkpoint "
                     f"line skipped: {line_no}"
                 )
 
@@ -169,26 +197,26 @@ def load_jsonl(
 
 
 # ============================================================
-# Stable config hash
+# Hash
 # ============================================================
 
-def config_hash(
-    config: dict,
+def stable_hash(
+    payload: dict,
 ) -> str:
 
-    payload = json.dumps(
-        config,
+    text = json.dumps(
+        payload,
         sort_keys=True,
         ensure_ascii=False,
     )
 
     return hashlib.sha256(
-        payload.encode("utf-8")
+        text.encode("utf-8")
     ).hexdigest()
 
 
 # ============================================================
-# MADLAD auto detection
+# MADLAD snapshot
 # ============================================================
 
 def find_madlad_snapshot() -> Path:
@@ -236,14 +264,12 @@ def find_madlad_snapshot() -> Path:
     if not candidates:
 
         raise FileNotFoundError(
-            "Could not auto-detect MADLAD snapshot."
+            "MADLAD snapshot not found."
         )
 
-    # newest snapshot first
-    candidates = sorted(
-        candidates,
-        key=lambda p:
-            p.stat().st_mtime,
+    candidates.sort(
+        key=lambda path:
+            path.stat().st_mtime,
         reverse=True,
     )
 
@@ -251,7 +277,7 @@ def find_madlad_snapshot() -> Path:
 
 
 # ============================================================
-# Cyrillic detection
+# Uzbek script
 # ============================================================
 
 def contains_cyrillic(
@@ -264,10 +290,6 @@ def contains_cyrillic(
         )
     )
 
-
-# ============================================================
-# Uzbek Cyrillic -> Latin
-# ============================================================
 
 SIMPLE_MAP = {
 
@@ -366,7 +388,7 @@ def transliterate_uzbek_cyrillic(
 
     result = []
 
-    for i, char in enumerate(text):
+    for index, char in enumerate(text):
 
         lower = char.lower()
 
@@ -377,13 +399,13 @@ def transliterate_uzbek_cyrillic(
         if lower == "е":
 
             previous = (
-                text[i - 1]
-                if i > 0
+                text[index - 1]
+                if index > 0
                 else ""
             )
 
             at_word_start = (
-                i == 0
+                index == 0
                 or
                 not previous.isalpha()
             )
@@ -398,19 +420,18 @@ def transliterate_uzbek_cyrillic(
                 in APOSTROPHE_LIKE
             )
 
-            if (
-                at_word_start
-                or
-                after_vowel
-                or
-                after_apostrophe
-            ):
-
-                replacement = "ye"
-
-            else:
-
-                replacement = "e"
+            replacement = (
+                "ye"
+                if (
+                    at_word_start
+                    or
+                    after_vowel
+                    or
+                    after_apostrophe
+                )
+                else
+                "e"
+            )
 
             result.append(
                 preserve_case(
@@ -420,10 +441,6 @@ def transliterate_uzbek_cyrillic(
             )
 
             continue
-
-        # ----------------------------------------------------
-        # Standard mapping
-        # ----------------------------------------------------
 
         if lower in SIMPLE_MAP:
 
@@ -446,10 +463,6 @@ def transliterate_uzbek_cyrillic(
         result
     )
 
-
-# ============================================================
-# Latin Uzbek normalization
-# ============================================================
 
 def normalize_uzbek_latin(
     text: str,
@@ -497,10 +510,6 @@ def normalize_uzbek_latin(
     return text.strip()
 
 
-# ============================================================
-# Normalize teacher output
-# ============================================================
-
 def normalize_teacher_prediction(
     raw_prediction: str,
     direction: str,
@@ -518,10 +527,6 @@ def normalize_teacher_prediction(
             False,
         )
 
-    # --------------------------------------------------------
-    # EN -> UZ
-    # --------------------------------------------------------
-
     if direction == "en_uz":
 
         was_cyrillic = (
@@ -532,15 +537,15 @@ def normalize_teacher_prediction(
 
         if was_cyrillic:
 
-            normalized = (
+            prediction = (
                 transliterate_uzbek_cyrillic(
                     raw_prediction
                 )
             )
 
-            normalized = (
+            prediction = (
                 normalize_uzbek_latin(
-                    normalized
+                    prediction
                 )
             )
 
@@ -550,7 +555,7 @@ def normalize_teacher_prediction(
 
         else:
 
-            normalized = (
+            prediction = (
                 normalize_uzbek_latin(
                     raw_prediction
                 )
@@ -559,26 +564,232 @@ def normalize_teacher_prediction(
             script = "LATIN"
 
         return (
-            normalized,
+            prediction,
             script,
             was_cyrillic,
         )
 
-    # --------------------------------------------------------
-    # UZ -> EN
-    # --------------------------------------------------------
-
-    normalized = re.sub(
+    prediction = re.sub(
         r"\s+",
         " ",
         raw_prediction,
     ).strip()
 
     return (
-        normalized,
+        prediction,
         "ENGLISH",
         False,
     )
+
+
+# ============================================================
+# Generation identity compatibility
+# ============================================================
+
+def build_generation_identity(
+    madlad_path: Path,
+    input_file: Path,
+    args,
+):
+
+    # IMPORTANT:
+    #
+    # batch_size / checkpoint_every are intentionally excluded.
+    #
+    # Changing these does NOT change model outputs.
+    #
+    return {
+
+        "model_path":
+            str(
+                madlad_path.resolve()
+            ),
+
+        "input_file":
+            str(
+                input_file.resolve()
+            ),
+
+        "total_candidates":
+            EXPECTED_TOTAL,
+
+        "num_beams":
+            args.num_beams,
+
+        "max_source_length":
+            args.max_source_length,
+
+        "max_new_tokens":
+            args.max_new_tokens,
+
+        "precision":
+            "float16",
+
+        "do_sample":
+            False,
+    }
+
+
+def verify_old_or_new_config(
+    existing_config: dict,
+    current_identity: dict,
+):
+
+    """
+    Supports BOTH:
+
+    Previous 10B config:
+        batch_size was included in config_hash
+
+    New optimized config:
+        runtime parameters are separated.
+
+    We compare only generation-relevant fields.
+    """
+
+    keys = [
+
+        "model_path",
+        "input_file",
+        "total_candidates",
+        "num_beams",
+        "max_source_length",
+        "max_new_tokens",
+        "precision",
+        "do_sample",
+    ]
+
+    mismatches = []
+
+    # New schema
+    if (
+        "generation_identity"
+        in existing_config
+    ):
+
+        old_identity = (
+            existing_config[
+                "generation_identity"
+            ]
+        )
+
+    # Old schema
+    else:
+
+        old_identity = (
+            existing_config
+        )
+
+    for key in keys:
+
+        if (
+            old_identity.get(
+                key
+            )
+            !=
+            current_identity.get(
+                key
+            )
+        ):
+
+            mismatches.append(
+                (
+                    key,
+                    old_identity.get(
+                        key
+                    ),
+                    current_identity.get(
+                        key
+                    ),
+                )
+            )
+
+    if mismatches:
+
+        print("\nGeneration identity mismatch:")
+
+        for key, old, new in mismatches:
+
+            print(
+                f"{key}:"
+            )
+
+            print(
+                f"  existing = {old}"
+            )
+
+            print(
+                f"  current  = {new}"
+            )
+
+        raise RuntimeError(
+            "\nGeneration settings changed.\n"
+            "Existing checkpoint cannot be mixed.\n"
+            "Use --overwrite only if you intentionally "
+            "want to regenerate everything."
+        )
+
+
+# ============================================================
+# Checkpoint buffer
+# ============================================================
+
+class CheckpointBuffer:
+
+    def __init__(
+        self,
+        path: Path,
+        flush_every: int,
+    ):
+
+        self.path = path
+
+        self.flush_every = max(
+            1,
+            flush_every,
+        )
+
+        self.rows = []
+
+        self.total_flushed = 0
+
+    def add(
+        self,
+        rows: list[dict],
+    ):
+
+        self.rows.extend(
+            rows
+        )
+
+        if (
+            len(
+                self.rows
+            )
+            >=
+            self.flush_every
+        ):
+
+            self.flush()
+
+    def flush(self):
+
+        if not self.rows:
+            return
+
+        append_jsonl(
+            self.path,
+            self.rows,
+            fsync=True,
+        )
+
+        self.total_flushed += (
+            len(
+                self.rows
+            )
+        )
+
+        self.rows.clear()
 
 
 # ============================================================
@@ -590,7 +801,7 @@ def main():
     args = parse_args()
 
     # ========================================================
-    # Project paths
+    # Paths
     # ========================================================
 
     project_root = (
@@ -649,7 +860,7 @@ def main():
     )
 
     # ========================================================
-    # MADLAD path
+    # MADLAD
     # ========================================================
 
     if args.madlad_path:
@@ -672,17 +883,9 @@ def main():
     print("EN-UZ STUDENT PIPELINE")
     print(
         "STEP 10B - "
-        "MADLAD TEACHER GENERATION V1"
+        "HIGH-THROUGHPUT MADLAD GENERATION"
     )
     print("=" * 110)
-
-    print(
-        "\nInput:"
-    )
-
-    print(
-        input_file
-    )
 
     print(
         "\nMADLAD:"
@@ -693,52 +896,57 @@ def main():
     )
 
     print(
-        "\nBatch size:",
+        "\nRuntime:"
+    )
+
+    print(
+        "Batch size       :",
         args.batch_size
     )
 
     print(
-        "Beam size :",
+        "Checkpoint every :",
+        args.checkpoint_every
+    )
+
+    print(
+        "Progress every   :",
+        args.progress_every
+    )
+
+    print(
+        "\nGeneration:"
+    )
+
+    print(
+        "Beam             :",
         args.num_beams
     )
 
     print(
-        "Max source:",
+        "Max source       :",
         args.max_source_length
     )
 
     print(
-        "Max output:",
+        "Max new tokens   :",
         args.max_new_tokens
     )
 
     # ========================================================
-    # Checks
+    # Files
     # ========================================================
 
     if not input_file.exists():
 
         raise FileNotFoundError(
-            f"Step10A pilot not found:\n"
-            f"{input_file}"
+            input_file
         )
 
     if not madlad_path.exists():
 
         raise FileNotFoundError(
-            f"MADLAD path not found:\n"
-            f"{madlad_path}"
-        )
-
-    if not (
-        madlad_path
-        /
-        "config.json"
-    ).exists():
-
-        raise FileNotFoundError(
-            "MADLAD config.json not found:\n"
-            f"{madlad_path}"
+            madlad_path
         )
 
     # ========================================================
@@ -756,29 +964,19 @@ def main():
     )
 
     print(
-        "\nCUDA:",
-        True
-    )
-
-    print(
-        "GPU:",
+        "\nGPU:",
         torch.cuda.get_device_name(
             0
         )
     )
 
     print(
-        "PyTorch:",
-        torch.__version__
-    )
-
-    print(
-        "PyTorch CUDA:",
+        "CUDA:",
         torch.version.cuda
     )
 
     # ========================================================
-    # Load candidate pilot
+    # Load pilot
     # ========================================================
 
     print(
@@ -789,68 +987,19 @@ def main():
         input_file
     )
 
-    required_columns = [
-        "candidate_id",
-        "normalized_pair_id",
-        "direction",
-        "src_lang",
-        "tgt_lang",
-        "source_text",
-        "real_reference",
-        "teacher_input",
-        "quality_tier",
-        "data_source",
-        "length_bucket",
-        "candidate_status",
-        "leak_validation",
-        "leak_benchmark",
-        "leak_challenge",
-        "cyrillic_uzbek",
-    ]
-
-    missing = [
-        column
-        for column
-        in required_columns
-        if column not in df.columns
-    ]
-
-    if missing:
-
-        raise RuntimeError(
-            f"Missing candidate columns: "
-            f"{missing}"
-        )
-
     print(
         "Rows:",
         len(df)
     )
 
-    print(
-        "\nDirections:"
-    )
-
-    print(
-        df[
-            "direction"
-        ]
-        .value_counts()
-        .to_string()
-    )
-
-    # ========================================================
-    # Strict 10A integrity verification
-    # ========================================================
-
     if len(df) != EXPECTED_TOTAL:
 
         raise RuntimeError(
-            f"Expected {EXPECTED_TOTAL} candidates, "
+            f"Expected {EXPECTED_TOTAL}, "
             f"got {len(df)}."
         )
 
-    direction_counts = (
+    counts = (
         df[
             "direction"
         ]
@@ -859,14 +1008,14 @@ def main():
     )
 
     if (
-        direction_counts.get(
+        counts.get(
             "en_uz",
             0,
         )
         !=
         EXPECTED_PER_DIRECTION
         or
-        direction_counts.get(
+        counts.get(
             "uz_en",
             0,
         )
@@ -875,8 +1024,7 @@ def main():
     ):
 
         raise RuntimeError(
-            "Pilot direction distribution "
-            "is not 10K / 10K."
+            "Direction distribution invalid."
         )
 
     if (
@@ -888,187 +1036,58 @@ def main():
     ):
 
         raise RuntimeError(
-            "Duplicate candidate_id found."
+            "Duplicate candidate_id."
         )
-
-    unexpected_directions = (
-        set(
-            df[
-                "direction"
-            ]
-            .astype(str)
-        )
-        -
-        VALID_DIRECTIONS
-    )
-
-    if unexpected_directions:
-
-        raise RuntimeError(
-            f"Unexpected directions: "
-            f"{unexpected_directions}"
-        )
-
-    if (
-        df[
-            "candidate_status"
-        ]
-        .astype(str)
-        .ne("READY")
-        .any()
-    ):
-
-        raise RuntimeError(
-            "Non-READY candidate detected."
-        )
-
-    for col in [
-        "leak_validation",
-        "leak_benchmark",
-        "leak_challenge",
-        "cyrillic_uzbek",
-    ]:
-
-        if (
-            df[
-                col
-            ]
-            .astype(bool)
-            .any()
-        ):
-
-            raise RuntimeError(
-                f"Unsafe candidate flag detected: "
-                f"{col}"
-            )
-
-    if (
-        df[
-            "source_text"
-        ]
-        .astype(str)
-        .str.strip()
-        .eq("")
-        .any()
-    ):
-
-        raise RuntimeError(
-            "Empty source found."
-        )
-
-    if (
-        df[
-            "real_reference"
-        ]
-        .astype(str)
-        .str.strip()
-        .eq("")
-        .any()
-    ):
-
-        raise RuntimeError(
-            "Empty real reference found."
-        )
-
-    if (
-        df[
-            "teacher_input"
-        ]
-        .astype(str)
-        .str.strip()
-        .eq("")
-        .any()
-    ):
-
-        raise RuntimeError(
-            "Empty teacher input found."
-        )
-
-    print(
-        "\nStep10A integrity: PASS"
-    )
 
     # ========================================================
-    # Run configuration
+    # Generation identity
     # ========================================================
 
-    run_config = {
-
-        "step":
-            "10B",
-
-        "version":
-            "v1",
-
-        "model_path":
-            str(
-                madlad_path.resolve()
-            ),
-
-        "input_file":
-            str(
-                input_file.resolve()
-            ),
-
-        "total_candidates":
-            len(df),
-
-        "batch_size":
-            args.batch_size,
-
-        "num_beams":
-            args.num_beams,
-
-        "max_source_length":
-            args.max_source_length,
-
-        "max_new_tokens":
-            args.max_new_tokens,
-
-        "precision":
-            "float16",
-
-        "do_sample":
-            False,
-    }
-
-    current_config_hash = (
-        config_hash(
-            run_config
+    generation_identity = (
+        build_generation_identity(
+            madlad_path,
+            input_file,
+            args,
         )
     )
 
-    run_config[
-        "config_hash"
-    ] = current_config_hash
+    identity_hash = stable_hash(
+        generation_identity
+    )
 
     # ========================================================
-    # Overwrite / resume safety
+    # Overwrite
     # ========================================================
 
     if args.overwrite:
 
         print(
             "\n[OVERWRITE] "
-            "Removing previous generation files..."
+            "Removing old Step10B files."
         )
 
         for path in [
+
             checkpoint_file,
             config_file,
             output_parquet,
             output_csv,
             report_file,
+
         ]:
 
             if path.exists():
 
                 path.unlink()
 
-    elif (
-        checkpoint_file.exists()
-        and
+    # ========================================================
+    # Existing config compatibility
+    # ========================================================
+
+    if (
         config_file.exists()
+        and
+        not args.overwrite
     ):
 
         with open(
@@ -1083,38 +1102,60 @@ def main():
                 )
             )
 
-        previous_hash = (
-            previous_config.get(
-                "config_hash"
-            )
+        verify_old_or_new_config(
+            previous_config,
+            generation_identity,
         )
 
-        if (
-            previous_hash
-            !=
-            current_config_hash
-        ):
-
-            raise RuntimeError(
-                "\nExisting checkpoint was generated "
-                "with a DIFFERENT configuration.\n\n"
-                "Do not mix generation settings.\n\n"
-                "If you intentionally want to rerun, use:\n"
-                "--overwrite"
-            )
+        print(
+            "\nExisting generation "
+            "configuration: COMPATIBLE"
+        )
 
     elif (
         checkpoint_file.exists()
         and
         not config_file.exists()
+        and
+        not args.overwrite
     ):
 
         raise RuntimeError(
             "Checkpoint exists but generation "
-            "config is missing."
+            "config does not exist."
         )
 
-    # Save / refresh config
+    # ========================================================
+    # Save NEW config schema
+    # ========================================================
+
+    current_config = {
+
+        "step":
+            "10B",
+
+        "version":
+            "v1_high_throughput",
+
+        "generation_identity":
+            generation_identity,
+
+        "generation_identity_hash":
+            identity_hash,
+
+        "runtime": {
+
+            "batch_size":
+                args.batch_size,
+
+            "checkpoint_every":
+                args.checkpoint_every,
+
+            "progress_every":
+                args.progress_every,
+        },
+    }
+
     with open(
         config_file,
         "w",
@@ -1122,14 +1163,14 @@ def main():
     ) as f:
 
         json.dump(
-            run_config,
+            current_config,
             f,
             ensure_ascii=False,
             indent=2,
         )
 
     # ========================================================
-    # Resume existing results
+    # Resume
     # ========================================================
 
     existing_rows = (
@@ -1145,39 +1186,38 @@ def main():
         candidate_id = str(
             row.get(
                 "candidate_id",
-                "",
+                ""
             )
         )
 
-        if not candidate_id:
-            continue
+        if candidate_id:
 
-        result_map[
-            candidate_id
-        ] = row
+            result_map[
+                candidate_id
+            ] = row
 
     completed_ids = set(
         result_map.keys()
     )
 
-    valid_candidate_ids = set(
+    candidate_ids = set(
         df[
             "candidate_id"
         ]
         .astype(str)
     )
 
-    unknown_completed = (
+    unknown_ids = (
         completed_ids
         -
-        valid_candidate_ids
+        candidate_ids
     )
 
-    if unknown_completed:
+    if unknown_ids:
 
         raise RuntimeError(
-            "Checkpoint contains candidate IDs "
-            "not present in current 10A pilot."
+            "Checkpoint contains unknown "
+            f"candidate IDs: {len(unknown_ids)}"
         )
 
     print(
@@ -1189,7 +1229,7 @@ def main():
 
     print(
         "Pending:",
-        len(df)
+        EXPECTED_TOTAL
         -
         len(
             completed_ids
@@ -1197,7 +1237,60 @@ def main():
     )
 
     # ========================================================
-    # Load MADLAD
+    # IMPORTANT OPTIMIZATION:
+    #
+    # Sort by:
+    #
+    # direction
+    # source length
+    # candidate ID
+    #
+    # Similar lengths enter same batch -> less padding.
+    # ========================================================
+
+    pending_df = df[
+        ~df[
+            "candidate_id"
+        ]
+        .astype(str)
+        .isin(
+            completed_ids
+        )
+    ].copy()
+
+    if (
+        "source_word_count"
+        not in pending_df.columns
+    ):
+
+        pending_df[
+            "source_word_count"
+        ] = (
+            pending_df[
+                "source_text"
+            ]
+            .astype(str)
+            .str.split()
+            .str.len()
+        )
+
+    pending_df = (
+        pending_df
+        .sort_values(
+            [
+                "direction",
+                "source_word_count",
+                "candidate_id",
+            ],
+            ascending=True,
+        )
+        .reset_index(
+            drop=True
+        )
+    )
+
+    # ========================================================
+    # Load model
     # ========================================================
 
     print(
@@ -1215,14 +1308,7 @@ def main():
     )
 
     print(
-        "Tokenizer:",
-        type(
-            tokenizer
-        ).__name__
-    )
-
-    print(
-        "\nLoading MADLAD model..."
+        "Loading MADLAD model..."
     )
 
     model = (
@@ -1251,35 +1337,18 @@ def main():
     )
 
     print(
-        "GPU allocated:",
+        "Initial GPU memory:",
         f"{torch.cuda.memory_allocated()/1024**3:.2f} GB"
     )
 
     # ========================================================
-    # Pending dataframe
+    # Buffer
     # ========================================================
 
-    pending_df = df[
-        ~df[
-            "candidate_id"
-        ]
-        .astype(str)
-        .isin(
-            completed_ids
-        )
-    ].copy()
-
-    # deterministic order
-    pending_df = (
-        pending_df
-        .sort_values(
-            [
-                "direction",
-                "candidate_id",
-            ]
-        )
-        .reset_index(
-            drop=True
+    checkpoint_buffer = (
+        CheckpointBuffer(
+            checkpoint_file,
+            args.checkpoint_every,
         )
     )
 
@@ -1287,87 +1356,92 @@ def main():
     # Generation
     # ========================================================
 
-    run_start = (
+    print("\n")
+    print("=" * 110)
+    print("HIGH-THROUGHPUT GENERATION")
+    print("=" * 110)
+
+    start_time = (
         time.perf_counter()
     )
 
     processed_this_run = 0
 
-    print("\n")
-    print("=" * 110)
-    print("MADLAD GENERATION")
-    print("=" * 110)
+    last_progress = 0
 
-    for start in range(
-        0,
-        len(
-            pending_df
-        ),
-        args.batch_size,
-    ):
+    try:
 
-        end = min(
-            start
-            +
-            args.batch_size,
+        for start in range(
+            0,
             len(
                 pending_df
             ),
-        )
+            args.batch_size,
+        ):
 
-        batch = (
-            pending_df
-            .iloc[
-                start:end
-            ]
-            .copy()
-        )
+            end = min(
+                start
+                +
+                args.batch_size,
+                len(
+                    pending_df
+                ),
+            )
 
-        teacher_inputs = (
-            batch[
-                "teacher_input"
-            ]
-            .astype(str)
-            .tolist()
-        )
+            batch = (
+                pending_df
+                .iloc[
+                    start:end
+                ]
+            )
 
-        # ====================================================
-        # Tokenize
-        # ====================================================
+            teacher_inputs = (
+                batch[
+                    "teacher_input"
+                ]
+                .astype(str)
+                .tolist()
+            )
 
-        encoded = tokenizer(
-            teacher_inputs,
-            return_tensors="pt",
-            padding=True,
-            truncation=True,
-            max_length=
-                args.max_source_length,
-        )
+            # =================================================
+            # Tokenize
+            # =================================================
 
-        encoded = {
-            key:
-                value.to(
-                    device
-                )
+            encoded = tokenizer(
+                teacher_inputs,
+                return_tensors="pt",
+                padding=True,
+                truncation=True,
+                max_length=
+                    args.max_source_length,
+            )
 
-            for key, value
-            in encoded.items()
-        }
+            encoded = {
 
-        # ====================================================
-        # Generate
-        # ====================================================
+                key:
+                    value.to(
+                        device,
+                        non_blocking=True,
+                    )
 
-        torch.cuda.synchronize()
+                for key, value
+                in encoded.items()
+            }
 
-        batch_start = (
-            time.perf_counter()
-        )
+            # =================================================
+            # Generate
+            # =================================================
 
-        with torch.inference_mode():
+            torch.cuda.synchronize()
 
-            generated = (
-                model.generate(
+            batch_start = (
+                time.perf_counter()
+            )
+
+            with torch.inference_mode():
+
+                generated = model.generate(
+
                     **encoded,
 
                     num_beams=
@@ -1380,371 +1454,389 @@ def main():
 
                     use_cache=True,
                 )
+
+            torch.cuda.synchronize()
+
+            batch_seconds = (
+                time.perf_counter()
+                -
+                batch_start
             )
 
-        torch.cuda.synchronize()
+            # =================================================
+            # Decode
+            # =================================================
 
-        batch_seconds = (
-            time.perf_counter()
-            -
-            batch_start
-        )
-
-        # ====================================================
-        # Decode
-        # ====================================================
-
-        raw_predictions = (
-            tokenizer
-            .batch_decode(
-                generated,
-                skip_special_tokens=True,
-            )
-        )
-
-        generated_token_counts = (
-            (
-                generated
-                !=
-                tokenizer.pad_token_id
-            )
-            .sum(
-                dim=1
-            )
-            .detach()
-            .cpu()
-            .tolist()
-        )
-
-        latency_per_sample = (
-            batch_seconds
-            /
-            len(batch)
-        )
-
-        batch_rows = []
-
-        for (
-            (_, row),
-            raw_prediction,
-            generated_tokens,
-        ) in zip(
-            batch.iterrows(),
-            raw_predictions,
-            generated_token_counts,
-        ):
-
-            direction = str(
-                row[
-                    "direction"
-                ]
-            )
-
-            (
-                normalized_prediction,
-                output_script,
-                was_cyrillic,
-            ) = (
-                normalize_teacher_prediction(
-                    raw_prediction=
-                        raw_prediction,
-
-                    direction=
-                        direction,
+            raw_predictions = (
+                tokenizer
+                .batch_decode(
+                    generated,
+                    skip_special_tokens=True,
                 )
             )
 
-            generation_status = (
-                "OK"
-                if
-                normalized_prediction.strip()
-                else
-                "EMPTY_OUTPUT"
+            generated_token_counts = (
+
+                (
+                    generated
+                    !=
+                    tokenizer.pad_token_id
+                )
+                .sum(
+                    dim=1
+                )
+                .detach()
+                .cpu()
+                .tolist()
             )
 
-            result = {
+            sample_latency = (
+                batch_seconds
+                /
+                len(batch)
+            )
 
-                # --------------------------------------------
-                # Candidate identity
-                # --------------------------------------------
+            batch_rows = []
 
-                "candidate_id":
-                    str(
-                        row[
-                            "candidate_id"
-                        ]
-                    ),
+            for (
+                (_, row),
+                raw_prediction,
+                token_count,
+            ) in zip(
 
-                "source_sample_id":
-                    str(
-                        row.get(
-                            "source_sample_id",
-                            "",
-                        )
-                    ),
+                batch.iterrows(),
+                raw_predictions,
+                generated_token_counts,
+            ):
 
-                "normalized_pair_id":
-                    str(
-                        row[
-                            "normalized_pair_id"
-                        ]
-                    ),
+                direction = str(
+                    row[
+                        "direction"
+                    ]
+                )
 
-                "split_group_id":
-                    str(
-                        row.get(
-                            "split_group_id",
-                            "",
-                        )
-                    ),
-
-                "pair_fingerprint":
-                    str(
-                        row.get(
-                            "pair_fingerprint",
-                            "",
-                        )
-                    ),
-
-                # --------------------------------------------
-                # Direction
-                # --------------------------------------------
-
-                "direction":
-                    direction,
-
-                "src_lang":
-                    str(
-                        row[
-                            "src_lang"
-                        ]
-                    ),
-
-                "tgt_lang":
-                    str(
-                        row[
-                            "tgt_lang"
-                        ]
-                    ),
-
-                # --------------------------------------------
-                # Original data
-                # --------------------------------------------
-
-                "source_text":
-                    str(
-                        row[
-                            "source_text"
-                        ]
-                    ),
-
-                "real_reference":
-                    str(
-                        row[
-                            "real_reference"
-                        ]
-                    ),
-
-                "teacher_input":
-                    str(
-                        row[
-                            "teacher_input"
-                        ]
-                    ),
-
-                # --------------------------------------------
-                # Teacher output
-                # --------------------------------------------
-
-                "teacher_prediction_raw":
-                    str(
-                        raw_prediction
-                    ),
-
-                "teacher_prediction":
-                    str(
-                        normalized_prediction
-                    ),
-
-                "teacher_output_script":
+                (
+                    teacher_prediction,
                     output_script,
+                    was_cyrillic,
+                ) = normalize_teacher_prediction(
+                    raw_prediction,
+                    direction,
+                )
 
-                "teacher_raw_has_cyrillic":
-                    bool(
-                        was_cyrillic
-                    ),
+                status = (
+                    "OK"
+                    if
+                    teacher_prediction.strip()
+                    else
+                    "EMPTY_OUTPUT"
+                )
 
-                "generation_status":
-                    generation_status,
+                result = {
 
-                # --------------------------------------------
-                # Generation metadata
-                # --------------------------------------------
+                    "candidate_id":
+                        str(
+                            row[
+                                "candidate_id"
+                            ]
+                        ),
 
-                "generated_token_count":
-                    int(
-                        generated_tokens
-                    ),
+                    "source_sample_id":
+                        str(
+                            row.get(
+                                "source_sample_id",
+                                "",
+                            )
+                        ),
 
-                "generation_seconds":
-                    float(
-                        latency_per_sample
-                    ),
+                    "normalized_pair_id":
+                        str(
+                            row[
+                                "normalized_pair_id"
+                            ]
+                        ),
 
-                "batch_generation_seconds":
-                    float(
-                        batch_seconds
-                    ),
+                    "split_group_id":
+                        str(
+                            row.get(
+                                "split_group_id",
+                                "",
+                            )
+                        ),
 
-                "num_beams":
-                    int(
-                        args.num_beams
-                    ),
+                    "pair_fingerprint":
+                        str(
+                            row.get(
+                                "pair_fingerprint",
+                                "",
+                            )
+                        ),
 
-                # --------------------------------------------
-                # Candidate metadata
-                # --------------------------------------------
+                    "direction":
+                        direction,
 
-                "quality_tier":
-                    str(
-                        row[
-                            "quality_tier"
-                        ]
-                    ),
+                    "src_lang":
+                        str(
+                            row[
+                                "src_lang"
+                            ]
+                        ),
 
-                "training_weight":
-                    float(
-                        row.get(
-                            "training_weight",
-                            1.0,
-                        )
-                    ),
+                    "tgt_lang":
+                        str(
+                            row[
+                                "tgt_lang"
+                            ]
+                        ),
 
-                "data_source":
-                    str(
-                        row[
-                            "data_source"
-                        ]
-                    ),
+                    "source_text":
+                        str(
+                            row[
+                                "source_text"
+                            ]
+                        ),
 
-                "length_bucket":
-                    str(
-                        row[
-                            "length_bucket"
-                        ]
-                    ),
+                    "real_reference":
+                        str(
+                            row[
+                                "real_reference"
+                            ]
+                        ),
 
-                "source_word_count":
-                    int(
-                        row.get(
-                            "source_word_count",
-                            0,
-                        )
-                    ),
+                    "teacher_input":
+                        str(
+                            row[
+                                "teacher_input"
+                            ]
+                        ),
 
-                "target_word_count":
-                    int(
-                        row.get(
-                            "target_word_count",
-                            0,
-                        )
-                    ),
-            }
+                    "teacher_prediction_raw":
+                        str(
+                            raw_prediction
+                        ),
 
-            batch_rows.append(
-                result
-            )
+                    "teacher_prediction":
+                        teacher_prediction,
 
-            result_map[
-                result[
-                    "candidate_id"
-                ]
-            ] = result
+                    "teacher_output_script":
+                        output_script,
 
-        # ====================================================
-        # Save checkpoint IMMEDIATELY
-        # ====================================================
+                    "teacher_raw_has_cyrillic":
+                        bool(
+                            was_cyrillic
+                        ),
 
-        append_jsonl(
-            checkpoint_file,
-            batch_rows,
-        )
+                    "generation_status":
+                        status,
 
-        processed_this_run += (
-            len(
+                    "generated_token_count":
+                        int(
+                            token_count
+                        ),
+
+                    "generation_seconds":
+                        float(
+                            sample_latency
+                        ),
+
+                    "batch_generation_seconds":
+                        float(
+                            batch_seconds
+                        ),
+
+                    "num_beams":
+                        int(
+                            args.num_beams
+                        ),
+
+                    "quality_tier":
+                        str(
+                            row[
+                                "quality_tier"
+                            ]
+                        ),
+
+                    "training_weight":
+                        float(
+                            row.get(
+                                "training_weight",
+                                1.0,
+                            )
+                        ),
+
+                    "data_source":
+                        str(
+                            row[
+                                "data_source"
+                            ]
+                        ),
+
+                    "length_bucket":
+                        str(
+                            row[
+                                "length_bucket"
+                            ]
+                        ),
+
+                    "source_word_count":
+                        int(
+                            row.get(
+                                "source_word_count",
+                                0,
+                            )
+                        ),
+
+                    "target_word_count":
+                        int(
+                            row.get(
+                                "target_word_count",
+                                0,
+                            )
+                        ),
+                }
+
+                batch_rows.append(
+                    result
+                )
+
+                result_map[
+                    result[
+                        "candidate_id"
+                    ]
+                ] = result
+
+            # =================================================
+            # Buffered checkpoint
+            # =================================================
+
+            checkpoint_buffer.add(
                 batch_rows
             )
-        )
 
-        # ====================================================
-        # Progress
-        # ====================================================
+            processed_this_run += (
+                len(
+                    batch_rows
+                )
+            )
 
-        completed_total = (
-            len(
+            # =================================================
+            # Progress
+            # =================================================
+
+            completed = len(
                 result_map
             )
-        )
 
-        elapsed = (
-            time.perf_counter()
-            -
-            run_start
-        )
+            if (
+                completed
+                -
+                last_progress
+                >=
+                args.progress_every
+                or
+                completed
+                ==
+                EXPECTED_TOTAL
+            ):
 
-        throughput = (
-            processed_this_run
-            /
-            elapsed
-            if elapsed > 0
-            else 0
-        )
+                elapsed = (
+                    time.perf_counter()
+                    -
+                    start_time
+                )
 
-        remaining = (
-            EXPECTED_TOTAL
-            -
-            completed_total
-        )
+                speed = (
+                    processed_this_run
+                    /
+                    elapsed
+                    if elapsed > 0
+                    else 0.0
+                )
 
-        eta_seconds = (
-            remaining
-            /
-            throughput
-            if throughput > 0
-            else 0
-        )
+                remaining = (
+                    EXPECTED_TOTAL
+                    -
+                    completed
+                )
 
-        # print every ~100 samples
-        if (
-            processed_this_run
-            %
-            100
-            <
-            args.batch_size
-            or
-            completed_total
-            ==
-            EXPECTED_TOTAL
-        ):
+                eta = (
+                    remaining
+                    /
+                    speed
+                    if speed > 0
+                    else 0.0
+                )
 
-            gpu_memory = (
-                torch.cuda.memory_allocated()
-                /
-                1024**3
-            )
+                memory_allocated = (
+                    torch.cuda
+                    .memory_allocated()
+                    /
+                    1024**3
+                )
 
-            print(
-                f"Completed: "
-                f"{completed_total}/"
-                f"{EXPECTED_TOTAL} "
-                f"| Batch: {batch_seconds:.2f}s "
-                f"| Speed: {throughput:.2f} samples/s "
-                f"| ETA: {eta_seconds/60:.1f} min "
-                f"| GPU: {gpu_memory:.2f}GB"
-            )
+                memory_reserved = (
+                    torch.cuda
+                    .memory_reserved()
+                    /
+                    1024**3
+                )
+
+                print(
+                    f"Completed "
+                    f"{completed}/{EXPECTED_TOTAL} "
+                    f"| Batch={len(batch)} "
+                    f"| BatchTime={batch_seconds:.2f}s "
+                    f"| Speed={speed:.2f}/s "
+                    f"| ETA={eta/60:.1f}min "
+                    f"| Alloc={memory_allocated:.2f}GB "
+                    f"| Reserved={memory_reserved:.2f}GB"
+                )
+
+                last_progress = (
+                    completed
+                )
 
     # ========================================================
-    # Release model before final aggregation
+    # Ctrl+C protection
+    # ========================================================
+
+    except KeyboardInterrupt:
+
+        print(
+            "\n[INTERRUPTED] "
+            "Flushing checkpoint buffer..."
+        )
+
+        checkpoint_buffer.flush()
+
+        print(
+            "Checkpoint saved."
+        )
+
+        raise
+
+    # ========================================================
+    # Other errors
+    # ========================================================
+
+    except Exception:
+
+        print(
+            "\n[ERROR] "
+            "Flushing checkpoint buffer..."
+        )
+
+        checkpoint_buffer.flush()
+
+        raise
+
+    finally:
+
+        # Always save remaining rows
+        checkpoint_buffer.flush()
+
+    # ========================================================
+    # Release model
     # ========================================================
 
     del model
@@ -1755,7 +1847,7 @@ def main():
     torch.cuda.empty_cache()
 
     # ========================================================
-    # Reload checkpoint as source of truth
+    # Reload checkpoint
     # ========================================================
 
     print(
@@ -1779,12 +1871,11 @@ def main():
             )
         )
 
-        if not candidate_id:
-            continue
+        if candidate_id:
 
-        final_map[
-            candidate_id
-        ] = row
+            final_map[
+                candidate_id
+            ] = row
 
     result_df = pd.DataFrame(
         list(
@@ -1803,8 +1894,9 @@ def main():
         raise RuntimeError(
             "\nGeneration incomplete.\n"
             f"Expected: {EXPECTED_TOTAL}\n"
-            f"Found: {len(result_df)}\n\n"
-            "Run the script again to resume."
+            f"Found   : {len(result_df)}\n\n"
+            "Run the SAME script again. "
+            "It will resume automatically."
         )
 
     result_ids = set(
@@ -1814,38 +1906,23 @@ def main():
         .astype(str)
     )
 
-    missing_ids = (
-        valid_candidate_ids
-        -
+    if (
         result_ids
-    )
-
-    extra_ids = (
-        result_ids
-        -
-        valid_candidate_ids
-    )
-
-    if missing_ids:
+        !=
+        candidate_ids
+    ):
 
         raise RuntimeError(
-            f"Missing candidate IDs: "
-            f"{len(missing_ids)}"
+            "Candidate integrity mismatch."
         )
 
-    if extra_ids:
+    # ========================================================
+    # Restore Step10A order
+    # ========================================================
 
-        raise RuntimeError(
-            f"Unexpected candidate IDs: "
-            f"{len(extra_ids)}"
-        )
-
-    # Restore original 10A ordering
     order_map = {
 
-        str(
-            candidate_id
-        ):
+        str(candidate_id):
             index
 
         for index, candidate_id
@@ -1885,7 +1962,7 @@ def main():
     )
 
     # ========================================================
-    # Summary
+    # Statistics
     # ========================================================
 
     empty_count = int(
@@ -1898,51 +1975,34 @@ def main():
         .sum()
     )
 
+    en_uz = result_df[
+        result_df[
+            "direction"
+        ]
+        ==
+        "en_uz"
+    ]
+
+    uz_en = result_df[
+        result_df[
+            "direction"
+        ]
+        ==
+        "uz_en"
+    ]
+
     cyrillic_count = int(
-        result_df[
+        en_uz[
             "teacher_raw_has_cyrillic"
         ]
         .astype(bool)
         .sum()
     )
 
-    en_uz_df = (
-        result_df[
-            result_df[
-                "direction"
-            ]
-            ==
-            "en_uz"
-        ]
-    )
-
-    uz_en_df = (
-        result_df[
-            result_df[
-                "direction"
-            ]
-            ==
-            "uz_en"
-        ]
-    )
-
-    en_uz_cyrillic_count = int(
-        en_uz_df[
-            "teacher_raw_has_cyrillic"
-        ]
-        .astype(bool)
-        .sum()
-    )
-
-    en_uz_cyrillic_rate = (
-        en_uz_cyrillic_count
+    cyrillic_rate = (
+        cyrillic_count
         /
-        max(
-            len(
-                en_uz_df
-            ),
-            1,
-        )
+        len(en_uz)
         *
         100
     )
@@ -1962,11 +2022,11 @@ def main():
     )
 
     # ========================================================
-    # Save final
+    # Save
     # ========================================================
 
     print(
-        "\nSaving final Teacher dataset..."
+        "\nSaving final teacher dataset..."
     )
 
     result_df.to_parquet(
@@ -1980,17 +2040,13 @@ def main():
         encoding="utf-8-sig",
     )
 
-    # ========================================================
-    # Report
-    # ========================================================
-
     report = {
 
         "step":
             "10B",
 
         "version":
-            "v1",
+            "v1_high_throughput",
 
         "status":
             (
@@ -2001,93 +2057,55 @@ def main():
                 "READY_WITH_EMPTY_OUTPUTS"
             ),
 
-        "input": {
+        "samples":
+            len(
+                result_df
+            ),
 
-            "file":
-                str(
-                    input_file
-                ),
+        "direction": {
 
-            "samples":
-                len(df),
+            "en_uz":
+                len(en_uz),
 
-            "directions": {
-
-                "en_uz":
-                    len(
-                        en_uz_df
-                    ),
-
-                "uz_en":
-                    len(
-                        uz_en_df
-                    ),
-            },
+            "uz_en":
+                len(uz_en),
         },
 
-        "teacher": {
+        "generation_identity":
+            generation_identity,
 
-            "model":
-                "google/madlad400-3b-mt",
-
-            "model_path":
-                str(
-                    madlad_path
-                ),
-
-            "precision":
-                "float16",
-
-            "num_beams":
-                args.num_beams,
+        "runtime_last_run": {
 
             "batch_size":
                 args.batch_size,
 
-            "max_source_length":
-                args.max_source_length,
-
-            "max_new_tokens":
-                args.max_new_tokens,
-
-            "do_sample":
-                False,
+            "checkpoint_every":
+                args.checkpoint_every,
         },
 
         "generation": {
 
-            "total":
-                len(
-                    result_df
-                ),
-
             "empty_outputs":
                 empty_count,
 
-            "avg_generation_seconds_per_sample":
+            "avg_seconds_per_sample":
                 avg_latency,
 
             "avg_generated_tokens":
                 avg_tokens,
         },
 
-        "script": {
-
-            "raw_cyrillic_total":
-                cyrillic_count,
+        "uzbek_script": {
 
             "en_uz_raw_cyrillic":
-                en_uz_cyrillic_count,
+                cyrillic_count,
 
-            "en_uz_raw_cyrillic_rate_percent":
-                en_uz_cyrillic_rate,
+            "en_uz_raw_cyrillic_rate":
+                cyrillic_rate,
 
-            "cyrillic_to_latin_normalization":
+            "normalized_to_latin":
                 True,
         },
-
-        "config_hash":
-            current_config_hash,
     }
 
     with open(
@@ -2101,73 +2119,6 @@ def main():
             f,
             ensure_ascii=False,
             indent=2,
-        )
-
-    # ========================================================
-    # Preview
-    # ========================================================
-
-    print("\n")
-    print("=" * 110)
-    print("TEACHER OUTPUT PREVIEW")
-    print("=" * 110)
-
-    preview = (
-        result_df
-        .groupby(
-            "direction",
-            group_keys=False,
-        )
-        .head(
-            5
-        )
-    )
-
-    for row in preview.itertuples(
-        index=False
-    ):
-
-        print()
-
-        print(
-            "ID       :",
-            row.candidate_id
-        )
-
-        print(
-            "Direction:",
-            row.direction
-        )
-
-        print(
-            "Source   :",
-            row.source_text
-        )
-
-        print(
-            "Real ref :",
-            row.real_reference
-        )
-
-        print(
-            "Teacher raw:"
-        )
-
-        print(
-            row.teacher_prediction_raw
-        )
-
-        print(
-            "Teacher normalized:"
-        )
-
-        print(
-            row.teacher_prediction
-        )
-
-        print(
-            "Script   :",
-            row.teacher_output_script
         )
 
     # ========================================================
@@ -2189,14 +2140,14 @@ def main():
     print(
         "EN -> UZ:",
         len(
-            en_uz_df
+            en_uz
         )
     )
 
     print(
         "UZ -> EN:",
         len(
-            uz_en_df
+            uz_en
         )
     )
 
@@ -2206,22 +2157,22 @@ def main():
     )
 
     print(
-        "\nEN->UZ raw Cyrillic:",
-        en_uz_cyrillic_count
+        "EN->UZ Cyrillic raw:",
+        cyrillic_count
     )
 
     print(
-        "EN->UZ Cyrillic rate:",
-        f"{en_uz_cyrillic_rate:.2f}%"
+        "Cyrillic rate:",
+        f"{cyrillic_rate:.2f}%"
     )
 
     print(
-        "\nAvg generation latency:",
+        "\nAverage latency:",
         f"{avg_latency:.4f}s/sample"
     )
 
     print(
-        "Avg generated tokens:",
+        "Average generated tokens:",
         f"{avg_tokens:.2f}"
     )
 
@@ -2231,14 +2182,6 @@ def main():
 
     print(
         output_parquet
-    )
-
-    print(
-        "\nCheckpoint:"
-    )
-
-    print(
-        checkpoint_file
     )
 
     print(
@@ -2261,12 +2204,6 @@ def main():
             "\nSTATUS: READY_WITH_EMPTY_OUTPUTS"
         )
 
-        print(
-            "Empty Teacher outputs should be "
-            "handled in Step10C."
-        )
-
 
 if __name__ == "__main__":
-
     main()

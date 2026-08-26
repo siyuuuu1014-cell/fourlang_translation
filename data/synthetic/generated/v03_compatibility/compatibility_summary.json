@@ -1,0 +1,26 @@
+{
+  "version": "semantic_compatibility_v1",
+  "input_file": "data\\synthetic\\generated\\semantic_v03_raw.jsonl",
+  "resource_file": "D:\\dev\\projects\\fourlang_translation\\data\\synthetic\\resources\\semantic_compatibility.json",
+  "total": 1000,
+  "accepted": 1000,
+  "rejected": 0,
+  "accept_rate": 1.0,
+  "rows_with_warnings": 0,
+  "warning_rate": 0.0,
+  "verb_distribution": {
+    "GO": 440,
+    "FIND": 149,
+    "BUY": 114,
+    "DRINK": 103,
+    "READ": 99,
+    "EAT": 84,
+    "": 11
+  },
+  "violation_counts": {},
+  "warning_counts": {},
+  "rejected_pairs": {},
+  "unknown_objects": {},
+  "unknown_destinations": {},
+  "unknown_verbs": {}
+}

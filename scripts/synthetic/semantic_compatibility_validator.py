@@ -475,8 +475,21 @@ def validate_row(
         resource,
     )
 
+    # ========================================================
+    # Frames without a verb slot
+    # ========================================================
 
-    if rule is None:
+    if not normalized_verb:
+
+        # WHERE_PLACE and similar frames may legitimately
+        # contain no verb concept.
+        #
+        # This is not an UNKNOWN_VERB_RULE.
+        rule_verb = None
+        rule = None
+
+
+    elif rule is None:
 
         warnings.append({
             "type":

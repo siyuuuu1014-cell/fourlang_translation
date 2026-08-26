@@ -1,13 +1,21 @@
 {
-  "version": "v1",
+  "version": "v1.1",
   "unknown_concept_policy": "warn",
+
   "concept_classes": {
     "EDIBLE": [
       "FOOD"
     ],
+
     "DRINKABLE": [
-      "WATER"
+      "WATER",
+      "COFFEE"
     ],
+
+    "MEDICINE": [
+      "MEDICINE"
+    ],
+
     "READABLE_TEXT": [
       "BOOK",
       "NEWSPAPER",
@@ -17,20 +25,25 @@
       "LETTER",
       "MENU"
     ],
+
     "IDENTITY_DOCUMENT": [
       "PASSPORT"
     ],
+
     "DEVICE": [
       "PHONE"
     ],
+
     "TICKET": [
       "TICKET"
     ],
+
     "GENERAL_PHYSICAL_OBJECT": [
       "BAG",
       "KEY",
       "UMBRELLA"
     ],
+
     "PLACE": [
       "AIRPORT",
       "OFFICE",
@@ -45,9 +58,12 @@
       "UNIVERSITY",
       "HOME",
       "TASHKENT",
-      "BEIJING"
+      "BEIJING",
+      "MOSCOW",
+      "BANK"
     ]
   },
+
   "verb_rules": {
     "EAT": {
       "required_slot": "object",
@@ -55,34 +71,40 @@
         "EDIBLE"
       ]
     },
+
     "DRINK": {
       "required_slot": "object",
       "allowed_object_classes": [
         "DRINKABLE"
       ]
     },
+
     "READ": {
       "required_slot": "object",
       "allowed_object_classes": [
         "READABLE_TEXT"
       ]
     },
+
     "BUY": {
       "required_slot": "object",
       "allowed_object_classes": [
         "EDIBLE",
         "DRINKABLE",
+        "MEDICINE",
         "READABLE_TEXT",
         "DEVICE",
         "TICKET",
         "GENERAL_PHYSICAL_OBJECT"
       ]
     },
+
     "FIND": {
       "required_slot": "object",
       "allowed_object_classes": [
         "EDIBLE",
         "DRINKABLE",
+        "MEDICINE",
         "READABLE_TEXT",
         "IDENTITY_DOCUMENT",
         "DEVICE",
@@ -90,6 +112,7 @@
         "GENERAL_PHYSICAL_OBJECT"
       ]
     },
+
     "GO": {
       "required_slot": "destination",
       "allowed_destination_classes": [
@@ -97,17 +120,26 @@
       ]
     }
   },
+
   "explicit_forbidden_pairs": [
     {
       "verb": "READ",
       "object": "PASSPORT",
-      "reason": "READ + PASSPORT is not a natural default collocation for the current synthetic domain."
+      "reason": "READ + PASSPORT is not used as a default natural collocation in the current synthetic domain."
     },
+
+    {
+      "verb": "BUY",
+      "object": "PASSPORT",
+      "reason": "BUY + PASSPORT is not an appropriate normal-domain synthetic training pair."
+    },
+
     {
       "verb": "EAT",
       "object": "WATER",
       "reason": "Water is not an edible object."
     },
+
     {
       "verb": "DRINK",
       "object": "FOOD",

@@ -1,0 +1,18 @@
+{
+  "target_samples": 1000,
+  "generated_samples": 1000,
+  "attempts": 1223,
+  "seed": 2027,
+  "frame_distribution": {
+    "MOTION_TIME": 203,
+    "TRANSITIVE_CLOCK": 302,
+    "MOTION_CLOCK": 237,
+    "TRANSITIVE_TIME": 247,
+    "WHERE_PLACE": 11
+  },
+  "generator_version": "0.3",
+  "renderer_version": "v2",
+  "compatibility_version": "v1.1",
+  "generation_policy": "compatibility_aware",
+  "output_file": "D:\\dev\\projects\\fourlang_translation\\data\\synthetic\\generated\\semantic_v03_raw.jsonl"
+}

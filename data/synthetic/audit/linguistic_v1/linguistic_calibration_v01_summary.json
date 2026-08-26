@@ -1,0 +1,24 @@
+{
+  "source_file": "D:\\dev\\projects\\fourlang_translation\\data\\synthetic\\validated\\semantic_v01_valid.jsonl",
+  "seed": 2026,
+  "per_group": 20,
+  "total": 100,
+  "expected_labels": {
+    "REJECT": 80,
+    "ACCEPT": 20
+  },
+  "error_types": {
+    "none": 20,
+    "ru_agreement_error": 20,
+    "uz_agreement_error": 20,
+    "en_agreement_error": 20,
+    "zh_word_order_error": 20
+  },
+  "languages": {
+    "uz": 20,
+    "none": 20,
+    "zh": 20,
+    "ru": 20,
+    "en": 20
+  }
+}

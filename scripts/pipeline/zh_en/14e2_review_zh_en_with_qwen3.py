@@ -24,9 +24,9 @@ from transformers import (
 # Versions
 # ============================================================
 
-STEP_VERSION = "14E2_V3"
+STEP_VERSION = "14E2_V4"
 
-PROMPT_VERSION = "ZH_EN_JUDGE_V3"
+PROMPT_VERSION = "ZH_EN_JUDGE_V4"
 
 JUDGE_MODEL_NAME = "Qwen3-8B"
 
@@ -108,7 +108,7 @@ def parse_args():
     parser.add_argument(
         "--max_input_tokens",
         type=int,
-        default=1024,
+        default=1536,
     )
 
     parser.add_argument(
@@ -559,222 +559,64 @@ def build_calibration_subset(
 # ============================================================
 
 SYSTEM_PROMPT = r"""
-You are an independent bilingual Chinese-English translation
-quality judge.
+You are an independent bilingual Chinese-English translation quality judge.
 
-You will receive exactly:
-1. one English sentence;
-2. one Chinese sentence.
+Judge whether the English sentence and Chinese sentence express the same
+underlying factual meaning.
 
-Judge ONLY whether they are valid parallel translations.
+Be tolerant of differences in expression, but strict about differences
+in meaning.
 
-Do not infer anything about how the sample was selected.
-Do not assume that literal wording must match.
-Judge the factual propositions and semantic relations.
+Normal translation differences are NOT errors by themselves, including:
+- word order or grammar changes;
+- natural Chinese-English restructuring;
+- colloquial vs formal wording;
+- equivalent number, date, and time formats;
+- reasonable transliteration differences;
+- different surface forms of questions or negation.
 
-============================================================
-CORE PRINCIPLE
-============================================================
+Examples of equivalent formatting:
+160 million <-> 1.6亿
+9:00 p.m. <-> 晚上9点
+39th article <-> 第39条
+1997 <-> 一九九七
 
-Be tolerant of differences in EXPRESSION.
-
-Be strict about differences in MEANING.
-
-A translation may use different:
-- grammar
-- word order
-- tense/aspect realization
-- question structure
-- negation structure
-- punctuation
-- number formatting
-- date/time formatting
-- units
-- transliteration style
-- formal vs colloquial wording
-
-These differences alone are NOT errors.
-
-However, if a factual proposition changes, that is a real
-translation error even when the two sentences remain broadly
-related.
-
-============================================================
-CRITICAL SEMANTIC CHECK
-============================================================
-
-Before choosing a label, compare whether both sentences preserve:
-
+Before assigning a label, check whether both sentences preserve:
 - the main action or state;
 - who did what to whom;
 - subject/object roles;
-- location and direction;
 - time and event order;
+- location and direction;
 - cause and effect;
 - intention vs accident;
 - affirmation vs negation;
-- quantities and dates;
-- important entities;
-- important modifiers;
-- whether an event happened, was expected to happen,
-  failed to happen, or merely might happen.
+- important quantities, entities, and modifiers;
+- whether an event happened, failed, was expected, or was only possible.
 
-A mismatch in one of these can be a substantive error.
+Labels:
 
-Examples:
+PASS:
+The factual/core meaning is preserved. Slightly awkward, literal, colloquial,
+or less elegant wording is still PASS if it does not change meaning.
 
-English:
-That thought crossed my mind.
+MINOR:
+There is a real but small defect, such as a minor lost nuance, non-critical
+omission, limited ambiguity, or mild grammatical problem. The main factual
+meaning remains correct.
 
-Chinese:
-这应证了我的想法。
+FAIL:
+There is a substantive semantic error, such as wrong action/state, important
+omission/addition, wrong number/entity, reversed relation, wrong location,
+changed participant role, changed causality/intention, or incorrect event status.
 
-This is FAIL.
-"came to mind" and "confirmed my idea" are different events.
+UNCERTAIN:
+Use only when the semantic relationship genuinely cannot be judged reliably.
 
-English:
-the only employee based out of New York City
+Only mark an error flag true when an actual error exists.
+Do not mark number errors merely because equivalent numbers use different formats.
+Do not mark fluency errors merely because a more elegant translation is possible.
 
-Chinese:
-在纽约市以外唯一的员工
-
-This is FAIL.
-The location relation has been reversed.
-
-English:
-Download QQ.
-
-Chinese:
-下个QQ。
-
-This is NOT FAIL merely because the Chinese is colloquial.
-The intended command is still understandable as downloading QQ.
-
-English:
-160 million
-
-Chinese:
-1.6亿
-
-This is equivalent.
-
-English:
-9:00 p.m.
-
-Chinese:
-晚上9点
-
-This is equivalent.
-
-English:
-39th article
-
-Chinese:
-第39条
-
-This is equivalent.
-
-============================================================
-PASS
-============================================================
-
-Use PASS when the factual meaning is preserved.
-
-PASS includes translations that are:
-
-- literal but understandable;
-- slightly stylistically awkward;
-- colloquial;
-- less elegant than an ideal translation;
-- differently ordered;
-- expressed using natural Chinese-English structural changes;
-- using equivalent number/date/time formats;
-- using a plausible transliteration.
-
-Do NOT use MINOR simply because you can write a better sentence.
-
-============================================================
-MINOR
-============================================================
-
-Use MINOR only when there is a REAL but SMALL defect.
-
-The main factual proposition must still be correct.
-
-Examples:
-
-- a non-essential modifier is weakened;
-- a small nuance is lost;
-- a small non-critical detail is omitted;
-- wording introduces a genuine but limited ambiguity;
-- grammar slightly damages interpretation;
-- a non-critical entity rendering is clearly imperfect but
-  the intended entity remains identifiable.
-
-Do NOT use MINOR when a core predicate, relation, location,
-participant role, action, or event status is wrong.
-Those should normally be FAIL.
-
-============================================================
-FAIL
-============================================================
-
-Use FAIL when there is a substantive semantic error.
-
-Examples include:
-
-- wrong main action;
-- wrong state;
-- important omission;
-- important unsupported addition;
-- wrong entity;
-- wrong quantity/date;
-- reversed relation;
-- wrong location or direction;
-- changed subject/object role;
-- changed intention;
-- changed causality;
-- changed event status;
-- source and target substantially disagree.
-
-A translation can still share many words with the source and
-be FAIL if an important proposition is wrong.
-
-============================================================
-UNCERTAIN
-============================================================
-
-Use UNCERTAIN only when the semantic relationship genuinely
-cannot be judged reliably.
-
-Do not use UNCERTAIN because the wording is merely unusual.
-
-============================================================
-ERROR FLAGS
-============================================================
-
-Set an error flag to true only when an ACTUAL error exists.
-
-Do not mark number=true only because equivalent numbers use
-different written formats.
-
-Do not mark entity=true merely because a proper name has a
-different but plausible transliteration.
-
-Do not mark fluency=true merely because a more elegant wording
-is possible.
-
-============================================================
-OUTPUT
-============================================================
-
-Return exactly ONE valid JSON object.
-
-No markdown.
-No text outside JSON.
-No chain-of-thought.
-
-Schema:
+Return exactly ONE valid JSON object and nothing else:
 
 {
   "label": "PASS|MINOR|FAIL|UNCERTAIN",
@@ -816,8 +658,7 @@ def build_user_prompt(
         f"{en}\n\n"
         "CHINESE:\n"
         f"{zh}\n\n"
-        "Independently judge whether these two sentences "
-        "are valid parallel translations. "
+        "Judge whether these sentences are valid parallel translations. "
         "Return only the required JSON object."
     )
 
@@ -1508,14 +1349,53 @@ def generate_batch(
     list[str],
     float,
 ]:
+    # ============================================================
+    # Never silently truncate judge inputs.
+    # ============================================================
+
+    token_lengths = []
+
+    for prompt in prompts:
+        encoded = tokenizer(
+            prompt,
+            add_special_tokens=False,
+        )
+
+        token_lengths.append(
+            len(
+                encoded["input_ids"]
+            )
+        )
+
+    max_prompt_tokens = max(
+        token_lengths
+    )
+
+    if (
+            max_prompt_tokens
+            >
+            max_input_tokens
+    ):
+        longest_index = (
+            token_lengths
+            .index(
+                max_prompt_tokens
+            )
+        )
+
+        raise RuntimeError(
+            "\nJudge input exceeds safe token limit.\n"
+            f"Longest prompt index: {longest_index}\n"
+            f"Longest prompt tokens: {max_prompt_tokens}\n"
+            f"max_input_tokens: {max_input_tokens}\n\n"
+            "Refusing to silently truncate translation content."
+        )
 
     inputs = tokenizer(
         prompts,
         return_tensors="pt",
         padding=True,
-        truncation=True,
-        max_length=
-            max_input_tokens,
+        truncation=False,
     )
 
     inputs = {
@@ -2425,7 +2305,75 @@ def main():
         len(
             selected_df
         )
+
     )
+    # ============================================================
+    # Prompt length diagnostics
+    # ============================================================
+
+    print(
+        "\nChecking judge prompt lengths..."
+    )
+
+    diagnostic_tokenizer = (
+        AutoTokenizer
+        .from_pretrained(
+            str(
+                model_path
+            ),
+            local_files_only=True,
+            trust_remote_code=True,
+        )
+    )
+
+    prompt_lengths = []
+
+    for _, row in selected_df.iterrows():
+        prompt = render_prompt(
+            diagnostic_tokenizer,
+            row,
+        )
+
+        ids = diagnostic_tokenizer(
+            prompt,
+            add_special_tokens=False,
+        )["input_ids"]
+
+        prompt_lengths.append(
+            len(ids)
+        )
+
+    print(
+        "Prompt tokens min:",
+        min(prompt_lengths)
+    )
+
+    print(
+        "Prompt tokens mean:",
+        f"{sum(prompt_lengths) / len(prompt_lengths):.2f}"
+    )
+
+    print(
+        "Prompt tokens max:",
+        max(prompt_lengths)
+    )
+
+    print(
+        "Configured max_input_tokens:",
+        args.max_input_tokens
+    )
+
+    if (
+            max(prompt_lengths)
+            >
+            args.max_input_tokens
+    ):
+        raise RuntimeError(
+            "\nPrompt preflight failed: "
+            "at least one judge input would be truncated."
+        )
+
+    del diagnostic_tokenizer
 
     # ========================================================
     # Existing checkpoint

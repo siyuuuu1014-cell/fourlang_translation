@@ -12,7 +12,7 @@ from huggingface_hub import HfApi
 DATASET_ID = "openlanguagedata/flores_plus"
 
 EN_CONFIG = "eng_Latn"
-ZH_CONFIG = "zho_Hans"
+ZH_CONFIG = "cmn_Hans"
 
 
 def load_language(

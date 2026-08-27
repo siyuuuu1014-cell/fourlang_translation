@@ -1,0 +1,110 @@
+{
+  "version": "0.4.1",
+  "description": "Balanced generation policy for FourLang Synthetic Generator V0.4.1.",
+  "languages": [
+    "zh",
+    "en",
+    "ru",
+    "uz"
+  ],
+  "enabled_scenarios": [
+    "daily",
+    "travel",
+    "shopping",
+    "restaurant",
+    "hotel",
+    "transport",
+    "medical",
+    "communication",
+    "work_study"
+  ],
+  "scenario_weights": {
+    "daily": 0.2,
+    "travel": 0.2,
+    "shopping": 0.15,
+    "restaurant": 0.1,
+    "hotel": 0.1,
+    "transport": 0.1,
+    "medical": 0.05,
+    "communication": 0.05,
+    "work_study": 0.05
+  },
+  "polarity_weights": {
+    "pos": 0.7,
+    "neg": 0.3
+  },
+  "tense_weights": {
+    "present": 0.6,
+    "future": 0.4
+  },
+  "clock_policy": {
+    "enabled": true,
+    "minute_step": 15,
+    "min_hour": 0,
+    "max_hour": 23
+  },
+  "sampling_policy": {
+    "mode": "quota_deficit_balancing",
+    "scenario_frame_joint_sampling": true,
+    "compatibility_aware_slot_sampling": true,
+    "verb_global_deficit_balancing": true,
+    "avoid_duplicate_semantic_signature": true,
+    "shuffle_output": true
+  },
+  "frame_target_ratios": {
+    "INTRANSITIVE": 0.03,
+    "INTRANSITIVE_TIME": 0.03,
+    "MOTION_DESTINATION": 0.08,
+    "MOTION_TIME": 0.08,
+    "MOTION_CLOCK": 0.08,
+    "TRANSITIVE": 0.15,
+    "TRANSITIVE_TIME": 0.15,
+    "TRANSITIVE_CLOCK": 0.15,
+    "WANT_OBJECT": 0.1,
+    "WHERE_PLACE": 0.15
+  },
+  "verb_target_ratios": {
+    "GO": 0.11,
+    "COME": 0.11,
+    "ARRIVE": 0.08,
+    "BUY": 0.09,
+    "FIND": 0.09,
+    "EAT": 0.09,
+    "DRINK": 0.09,
+    "READ": 0.09,
+    "WANT": 0.1
+  },
+  "verb_frame_constraints": {
+    "WANT": {
+      "allowed_frame_ids": [
+        "WANT_OBJECT"
+      ]
+    }
+  },
+  "coverage_constraints": {
+    "min_each_enabled_frame": 1,
+    "min_each_enabled_verb": 1,
+    "min_each_enabled_scenario": 1,
+    "max_single_verb_ratio": 0.12,
+    "max_single_frame_ratio": 0.15,
+    "max_single_scenario_ratio": 0.25
+  },
+  "pilot": {
+    "first_smoke_test_samples": 100,
+    "first_pilot_samples": 1000,
+    "second_pilot_samples": 10000
+  },
+  "quality_targets": {
+    "semantic_compatibility_accept_rate": 1.0,
+    "hard_semantic_accept_rate": 1.0,
+    "grammar_hard_accept_rate": 1.0,
+    "linguistic_audit_target_accept_rate": 0.95,
+    "max_parse_error_rate": 0.01
+  },
+  "meta": {
+    "generator_family": "fourlang_synthetic",
+    "base_version": "0.4.0",
+    "status": "development",
+    "purpose": "sampling_balance"
+  }
+}

@@ -5,6 +5,7 @@ import json
 import re
 from collections import Counter
 from datetime import datetime, timezone
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
 import pandas as pd
@@ -14,20 +15,93 @@ import pandas as pd
 # Version
 # ============================================================
 
-ROUTING_VERSION = "14D_V3"
+ROUTING_VERSION = "14D_V4_FINAL_CALIBRATION"
 
 
 # ============================================================
-# Patterns
+# Number patterns
+#
+# IMPORTANT:
+#
+# Do NOT use \w boundaries here.
+#
+# In Python Unicode regex:
+# Chinese characters are also \w.
+#
+# Therefore:
+#
+#   1979年
+#
+# failed under:
+#
+#   (?![\w])
+#
+# V4 only blocks ASCII alphanumeric attachment.
 # ============================================================
 
-NUMBER_RE = re.compile(
-    r"(?<![\w])[-+]?\d+(?:[.,]\d+)*(?![\w])"
+ARABIC_NUMBER_RE = re.compile(
+    r"(?<![A-Za-z0-9_.])"
+    r"[-+]?\d+(?:,\d{3})*(?:\.\d+)?"
+    r"(?![A-Za-z0-9_])"
 )
+
+
+# Chinese numeric expressions.
+#
+# Examples:
+#
+# 一九九七
+# 六点半
+# 三百
+# 两千
+# 十二
+#
+# We DO NOT automatically convert these into Arabic values,
+# because contextual forms such as:
+#
+#   6.30 -> 六点半
+#
+# are semantic time expressions rather than simple decimals.
+#
+# These are treated as cross-format numeric evidence.
+CHINESE_NUMBER_RE = re.compile(
+    r"[零〇○一二两三四五六七八九十百千万亿兆点半]+"
+)
+
+
+# Common English number words.
+#
+# Used only to recognize cases such as:
+#
+#   two people -> 2个人
+#
+# It is NOT used for direct semantic equality.
+ENGLISH_NUMBER_WORD_RE = re.compile(
+    r"\b(?:"
+    r"zero|one|two|three|four|five|six|seven|eight|nine|"
+    r"ten|eleven|twelve|thirteen|fourteen|fifteen|"
+    r"sixteen|seventeen|eighteen|nineteen|twenty|"
+    r"thirty|forty|fifty|sixty|seventy|eighty|ninety|"
+    r"hundred|thousand|million|billion|"
+    r"first|second|third|fourth|fifth|sixth|seventh|"
+    r"eighth|ninth|tenth"
+    r")\b",
+    flags=re.IGNORECASE,
+)
+
+
+# ============================================================
+# Percentage
+# ============================================================
 
 PERCENT_RE = re.compile(
-    r"(?:\d+(?:\.\d+)?)\s*[%％]"
+    r"([-+]?\d+(?:\.\d+)?)\s*[%％]"
 )
+
+
+# ============================================================
+# URL / Email
+# ============================================================
 
 URL_RE = re.compile(
     r"https?://[^\s]+|www\.[^\s]+",
@@ -35,8 +109,14 @@ URL_RE = re.compile(
 )
 
 EMAIL_RE = re.compile(
-    r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b"
+    r"\b[A-Za-z0-9._%+-]+@"
+    r"[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b"
 )
+
+
+# ============================================================
+# Repeated punctuation
+# ============================================================
 
 REPEATED_PUNCT_RE = re.compile(
     r"([!?！？。，,.])\1{2,}"
@@ -44,19 +124,9 @@ REPEATED_PUNCT_RE = re.compile(
 
 
 # ============================================================
-# English negation
+# English explicit negation
 #
-# IMPORTANT:
-# Use word-boundary regex rather than:
-#
-#     if "no" in text
-#
-# Otherwise:
-#     known
-#     another
-#     northern
-#
-# can be falsely detected as negation.
+# High precision word-boundary patterns.
 # ============================================================
 
 EN_NEGATION_PATTERNS = [
@@ -97,25 +167,36 @@ EN_NEGATION_PATTERNS = [
 
 
 # ============================================================
+# Chinese broad negation evidence
+#
+# Used ONLY when English already has explicit negation.
+#
+# At that point we only ask:
+#
+# "Does Chinese have some surface evidence of negation?"
+#
+# Therefore broad characters are acceptable here.
+# ============================================================
+
+ZH_NEGATION_EVIDENCE_PATTERNS = [
+
+    r"不",
+    r"没",
+    r"无",
+    r"未",
+    r"非",
+    r"别",
+    r"勿",
+    r"莫",
+]
+
+
+# ============================================================
 # Chinese strong negation
 #
-# Do NOT use:
+# Used when English has NO explicit negation.
 #
-#     "不" in text
-#     "无" in text
-#
-# because normal lexical words such as:
-#
-#     不同
-#     不知道
-#     无耻
-#     无偿
-#
-# can be legitimate translations without representing
-# a source-target negation mismatch.
-#
-# This list intentionally prefers PRECISION over recall.
-# Borderline semantics will later be audited by Qwen.
+# This list is intentionally much stricter.
 # ============================================================
 
 ZH_STRONG_NEGATION_PATTERNS = [
@@ -154,17 +235,6 @@ ZH_STRONG_NEGATION_PATTERNS = [
 
 # ============================================================
 # Negative question rewrite
-#
-# Example:
-#
-# EN:
-#   Isn't that mine?
-#
-# ZH:
-#   那是我的吗？
-#
-# This is a perfectly natural translation although
-# explicit surface negation disappears in Chinese.
 # ============================================================
 
 EN_NEGATIVE_QUESTION_RE = re.compile(
@@ -181,7 +251,7 @@ EN_NEGATIVE_QUESTION_RE = re.compile(
 
 
 # ============================================================
-# Currency markers
+# Currency
 # ============================================================
 
 EN_CURRENCY = [
@@ -231,8 +301,8 @@ def parse_args():
 
     parser = argparse.ArgumentParser(
         description=(
-            "Step 14D V3 - Quality risk routing "
-            "for ZH-EN human parallel corpus."
+            "Step 14D V4 Final - "
+            "ZH-EN quality risk routing."
         )
     )
 
@@ -248,73 +318,260 @@ def parse_args():
 # Number helpers
 # ============================================================
 
-def normalize_number(
+def canonicalize_arabic_number(
     value: str,
 ) -> str:
 
-    value = str(
-        value
+    value = (
+        str(value)
+        .replace(",", "")
+        .strip()
     )
 
-    value = value.replace(
-        ",",
-        "",
-    )
+    try:
 
-    return value
+        number = Decimal(
+            value
+        )
+
+        if (
+            number
+            ==
+            number.to_integral()
+        ):
+
+            return str(
+                number.quantize(
+                    Decimal("1")
+                )
+            )
+
+        return format(
+            number.normalize(),
+            "f",
+        )
+
+    except (
+        InvalidOperation,
+        ValueError,
+    ):
+
+        return value
 
 
-def extract_numbers(
+def extract_arabic_numbers(
     text: str,
 ) -> list[str]:
 
-    values = NUMBER_RE.findall(
-        str(
-            text
+    matches = (
+        ARABIC_NUMBER_RE
+        .findall(
+            str(text)
         )
     )
 
-    return sorted(
-        normalize_number(
+    values = [
+
+        canonicalize_arabic_number(
             value
         )
+
         for value
-        in values
+        in matches
+    ]
+
+    return sorted(
+        values
     )
+
+
+def extract_chinese_number_expressions(
+    text: str,
+) -> list[str]:
+
+    return (
+        CHINESE_NUMBER_RE
+        .findall(
+            str(text)
+        )
+    )
+
+
+def extract_english_number_words(
+    text: str,
+) -> list[str]:
+
+    return [
+
+        match.group(0).lower()
+
+        for match
+        in ENGLISH_NUMBER_WORD_RE.finditer(
+            str(text)
+        )
+    ]
 
 
 # ============================================================
-# Percentage helpers
+# Number-risk analysis
+# ============================================================
+
+def analyze_number_risk(
+    en: str,
+    zh: str,
+) -> dict:
+
+    en_arabic = (
+        extract_arabic_numbers(
+            en
+        )
+    )
+
+    zh_arabic = (
+        extract_arabic_numbers(
+            zh
+        )
+    )
+
+    zh_chinese_numbers = (
+        extract_chinese_number_expressions(
+            zh
+        )
+    )
+
+    en_number_words = (
+        extract_english_number_words(
+            en
+        )
+    )
+
+    flag = None
+
+    # --------------------------------------------------------
+    # Both sides contain Arabic digits
+    #
+    # Example:
+    #
+    # EN: 1979
+    # ZH: 1979年
+    #
+    # V4 correctly extracts both as 1979.
+    # --------------------------------------------------------
+
+    if (
+        en_arabic
+        and
+        zh_arabic
+    ):
+
+        if (
+            en_arabic
+            !=
+            zh_arabic
+        ):
+
+            flag = (
+                "NUMBER_MISMATCH"
+            )
+
+    # --------------------------------------------------------
+    # EN uses Arabic digits,
+    # ZH uses Chinese numeric expression.
+    #
+    # Examples:
+    #
+    # 1997 -> 一九九七
+    #
+    # 6.30 -> 六点半
+    #
+    # This is NOT automatically incorrect.
+    # Route to semantic review.
+    # --------------------------------------------------------
+
+    elif (
+        en_arabic
+        and
+        not zh_arabic
+    ):
+
+        if zh_chinese_numbers:
+
+            flag = (
+                "NUMBER_CROSS_FORMAT"
+            )
+
+        else:
+
+            flag = (
+                "NUMBER_MISSING_ZH"
+            )
+
+    # --------------------------------------------------------
+    # ZH uses Arabic digits,
+    # EN may use number words.
+    #
+    # Example:
+    #
+    # two people -> 2个人
+    # --------------------------------------------------------
+
+    elif (
+        zh_arabic
+        and
+        not en_arabic
+    ):
+
+        if en_number_words:
+
+            flag = (
+                "NUMBER_CROSS_FORMAT"
+            )
+
+        else:
+
+            flag = (
+                "NUMBER_EXTRA_ZH"
+            )
+
+    return {
+
+        "number_flag":
+            flag,
+
+        "en_arabic_numbers":
+            en_arabic,
+
+        "zh_arabic_numbers":
+            zh_arabic,
+
+        "zh_chinese_number_expressions":
+            zh_chinese_numbers,
+
+        "en_number_words":
+            en_number_words,
+    }
+
+
+# ============================================================
+# Percentage
 # ============================================================
 
 def extract_percentages(
     text: str,
 ) -> list[str]:
 
-    matches = PERCENT_RE.findall(
-        str(
-            text
-        )
-    )
-
     values = []
 
-    for item in matches:
-
-        item = (
-            item
-            .replace(
-                "％",
-                "%"
-            )
-            .replace(
-                " ",
-                ""
-            )
+    for value in (
+        PERCENT_RE.findall(
+            str(text)
         )
+    ):
 
         values.append(
-            item
+            canonicalize_arabic_number(
+                value
+            )
         )
 
     return sorted(
@@ -326,19 +583,13 @@ def extract_percentages(
 # URL / email
 # ============================================================
 
-# ============================================================
-# URL / email
-# ============================================================
-
 def extract_urls(
     text: str,
 ) -> list[str]:
 
     return sorted(
         URL_RE.findall(
-            str(
-                text
-            )
+            str(text)
         )
     )
 
@@ -349,15 +600,13 @@ def extract_emails(
 
     return sorted(
         EMAIL_RE.findall(
-            str(
-                text
-            ).lower()
+            str(text).lower()
         )
     )
 
 
 # ============================================================
-# English negation
+# Negation
 # ============================================================
 
 def has_english_negation(
@@ -365,13 +614,12 @@ def has_english_negation(
 ) -> bool:
 
     text = (
-        str(
-            text
-        )
+        str(text)
         .lower()
     )
 
     return any(
+
         re.search(
             pattern,
             text,
@@ -381,11 +629,9 @@ def has_english_negation(
         for pattern
         in EN_NEGATION_PATTERNS
     )
-# ============================================================
-# Chinese negation
-# ============================================================
 
-def has_chinese_negation(
+
+def has_chinese_negation_evidence(
     text: str,
 ) -> bool:
 
@@ -394,6 +640,28 @@ def has_chinese_negation(
     )
 
     return any(
+
+        re.search(
+            pattern,
+            text,
+        )
+        is not None
+
+        for pattern
+        in ZH_NEGATION_EVIDENCE_PATTERNS
+    )
+
+
+def has_chinese_strong_negation(
+    text: str,
+) -> bool:
+
+    text = str(
+        text
+    )
+
+    return any(
+
         re.search(
             pattern,
             text,
@@ -405,48 +673,46 @@ def has_chinese_negation(
     )
 
 
-# ============================================================
-# Negative-question rewrite
-# ============================================================
-
 def is_negative_question_rewrite(
     en: str,
     zh: str,
 ) -> bool:
 
-    en = str(
-        en
-    ).strip()
-
-    zh = str(
-        zh
-    ).strip()
+    en = str(en).strip()
+    zh = str(zh).strip()
 
     en_negative_question = (
-        (
-            "?" in en
-        )
+
+        "?" in en
+
         and
-        (
-            EN_NEGATIVE_QUESTION_RE.search(
-                en
-            )
-            is not None
+
+        EN_NEGATIVE_QUESTION_RE.search(
+            en
         )
+        is not None
     )
 
     zh_question = (
+
         "?" in zh
         or
         "？" in zh
+
         or
         "吗" in zh
+
         or
         "么" in zh
+
         or
         "是不是" in zh
+
         or
         "难道" in zh
+
+        or
+        "能不能" in zh
     )
 
     return bool(
@@ -465,22 +731,18 @@ def has_english_currency(
 ) -> bool:
 
     lower = (
-        str(
-            text
-        )
+        str(text)
         .lower()
     )
 
-    for token in EN_CURRENCY:
+    return any(
 
-        if (
-            token.lower()
-            in lower
-        ):
+        token.lower()
+        in lower
 
-            return True
-
-    return False
+        for token
+        in EN_CURRENCY
+    )
 
 
 def has_chinese_currency(
@@ -491,13 +753,14 @@ def has_chinese_currency(
         text
     )
 
-    for token in ZH_CURRENCY:
+    return any(
 
-        if token in text:
+        token
+        in text
 
-            return True
-
-    return False
+        for token
+        in ZH_CURRENCY
+    )
 
 
 # ============================================================
@@ -519,51 +782,48 @@ def analyze_row(
     flags = []
 
     # ========================================================
-    # Number
+    # 1. Number
     # ========================================================
 
-    en_numbers = (
-        extract_numbers(
-            en
+    number_result = (
+        analyze_number_risk(
+            en,
+            zh,
         )
     )
 
-    zh_numbers = (
-        extract_numbers(
-            zh
-        )
+    number_flag = (
+        number_result[
+            "number_flag"
+        ]
     )
 
-    if (
-        en_numbers
-        !=
-        zh_numbers
-    ):
+    if number_flag:
 
         flags.append(
-            "NUMBER_MISMATCH"
+            number_flag
         )
 
     # ========================================================
-    # Percentage
+    # 2. Percentage
     # ========================================================
 
-    en_percent = (
+    en_percentages = (
         extract_percentages(
             en
         )
     )
 
-    zh_percent = (
+    zh_percentages = (
         extract_percentages(
             zh
         )
     )
 
     if (
-        en_percent
+        en_percentages
         !=
-        zh_percent
+        zh_percentages
     ):
 
         flags.append(
@@ -571,7 +831,22 @@ def analyze_row(
         )
 
     # ========================================================
-    # Negation
+    # 3. Negation
+    #
+    # NEGATION IS NO LONGER A STRONG ROUTING RULE.
+    #
+    # Translation can legitimately change surface form:
+    #
+    # barely
+    #   -> 不是很
+    #
+    # unharmed
+    #   -> 没有受到伤害
+    #
+    # different
+    #   -> 不同
+    #
+    # Therefore this is diagnostic only.
     # ========================================================
 
     en_neg = (
@@ -580,41 +855,59 @@ def analyze_row(
         )
     )
 
-    zh_neg = (
-        has_chinese_negation(
+    zh_neg_evidence = (
+        has_chinese_negation_evidence(
             zh
         )
     )
 
-    negation_question_rewrite = (
+    zh_strong_neg = (
+        has_chinese_strong_negation(
+            zh
+        )
+    )
+
+    negative_question_rewrite = (
         is_negative_question_rewrite(
             en,
             zh,
         )
     )
 
-    if (
-        en_neg
-        !=
-        zh_neg
-    ):
+    negation_flag = None
 
-        if (
-            negation_question_rewrite
-        ):
+    if en_neg:
 
-            flags.append(
-                "NEGATION_QUESTION_REWRITE"
+        if not zh_neg_evidence:
+
+            if negative_question_rewrite:
+
+                negation_flag = (
+                    "NEGATION_QUESTION_REWRITE"
+                )
+
+            else:
+
+                negation_flag = (
+                    "NEGATION_SURFACE_MISMATCH"
+                )
+
+    else:
+
+        if zh_strong_neg:
+
+            negation_flag = (
+                "NEGATION_SURFACE_MISMATCH"
             )
 
-        else:
+    if negation_flag:
 
-            flags.append(
-                "NEGATION_MISMATCH"
-            )
+        flags.append(
+            negation_flag
+        )
 
     # ========================================================
-    # URL
+    # 4. URL
     # ========================================================
 
     en_urls = (
@@ -640,7 +933,7 @@ def analyze_row(
         )
 
     # ========================================================
-    # Email
+    # 5. Email
     # ========================================================
 
     en_emails = (
@@ -666,10 +959,7 @@ def analyze_row(
         )
 
     # ========================================================
-    # Currency
-    #
-    # Presence-only risk signal.
-    # Not treated as strong semantic failure by itself.
+    # 6. Currency
     # ========================================================
 
     en_currency = (
@@ -695,7 +985,7 @@ def analyze_row(
         )
 
     # ========================================================
-    # Repeated punctuation
+    # 7. Repeated punctuation
     # ========================================================
 
     if (
@@ -713,15 +1003,7 @@ def analyze_row(
         )
 
     # ========================================================
-    # Very short pair
-    #
-    # Short translations are NOT bad.
-    #
-    # Example:
-    #
-    # Fine! <-> 好吧
-    #
-    # Only retain as an audit signal.
+    # 8. Very short pair
     # ========================================================
 
     en_words = int(
@@ -747,10 +1029,7 @@ def analyze_row(
         )
 
     # ========================================================
-    # Soft length ratio
-    #
-    # 14C hard band was broad.
-    # This narrower band is only a risk signal.
+    # 9. Soft length ratio
     # ========================================================
 
     length_ratio = (
@@ -777,14 +1056,7 @@ def analyze_row(
         )
 
     # ========================================================
-    # Mixed-script risk
-    #
-    # Examples such as:
-    #
-    # The Beatles 由四个音乐家组成。
-    #
-    # are valid translations, therefore this must NEVER
-    # be a hard rejection signal.
+    # 10. Mixed script
     # ========================================================
 
     en_latin_ratio = float(
@@ -812,23 +1084,30 @@ def analyze_row(
     # ========================================================
     # Quality score
     #
-    # This is an interpretable routing score.
-    #
-    # IMPORTANT:
-    # It is NOT a probability that the translation is correct.
+    # Diagnostic routing score only.
+    # NOT correctness probability.
     # ========================================================
 
     penalties = {
 
-        # Strong signals
+        # ---------------------
+        # Strong / review
+        # ---------------------
+
         "NUMBER_MISMATCH":
             30,
 
+        "NUMBER_MISSING_ZH":
+            30,
+
+        "NUMBER_EXTRA_ZH":
+            30,
+
+        "NUMBER_CROSS_FORMAT":
+            15,
+
         "PERCENT_MISMATCH":
             35,
-
-        "NEGATION_MISMATCH":
-            30,
 
         "URL_MISMATCH":
             40,
@@ -836,12 +1115,18 @@ def analyze_row(
         "EMAIL_MISMATCH":
             40,
 
-        # Soft signals
+        # ---------------------
+        # Soft
+        # ---------------------
+
+        "NEGATION_SURFACE_MISMATCH":
+            5,
+
         "NEGATION_QUESTION_REWRITE":
             5,
 
         "CURRENCY_MISMATCH":
-            20,
+            15,
 
         "REPEATED_PUNCT":
             10,
@@ -873,25 +1158,56 @@ def analyze_row(
     )
 
     # ========================================================
-    # Strong risk flags
-    #
-    # Any one strong flag routes to Qwen.
-    #
-    # NEGATION_QUESTION_REWRITE is deliberately NOT here.
+    # Strong flags
     # ========================================================
 
     strong_flags = {
 
         "NUMBER_MISMATCH",
+
+        "NUMBER_MISSING_ZH",
+
+        "NUMBER_EXTRA_ZH",
+
         "PERCENT_MISMATCH",
-        "NEGATION_MISMATCH",
+
         "URL_MISMATCH",
+
         "EMAIL_MISMATCH",
     }
 
     strong_risk = any(
-        flag in strong_flags
-        for flag in flags
+
+        flag
+        in strong_flags
+
+        for flag
+        in flags
+    )
+
+    # ========================================================
+    # Semantic review flags
+    #
+    # NUMBER_CROSS_FORMAT is not an error,
+    # but should be reviewed because deterministic rules
+    # cannot safely evaluate:
+    #
+    # 1997 -> 一九九七
+    # 6.30 -> 六点半
+    # ========================================================
+
+    semantic_review_flags = {
+
+        "NUMBER_CROSS_FORMAT",
+    }
+
+    semantic_review = any(
+
+        flag
+        in semantic_review_flags
+
+        for flag
+        in flags
     )
 
     # ========================================================
@@ -899,6 +1215,8 @@ def analyze_row(
     # ========================================================
 
     soft_flags = {
+
+        "NEGATION_SURFACE_MISMATCH",
 
         "NEGATION_QUESTION_REWRITE",
 
@@ -914,8 +1232,12 @@ def analyze_row(
     }
 
     soft_flag_count = sum(
-        flag in soft_flags
-        for flag in flags
+
+        flag
+        in soft_flags
+
+        for flag
+        in flags
     )
 
     # ========================================================
@@ -928,17 +1250,19 @@ def analyze_row(
             "NEEDS_QWEN"
         )
 
-    elif (
-        soft_flag_count >= 2
-    ):
+    elif semantic_review:
 
         route = (
             "NEEDS_QWEN"
         )
 
-    elif (
-        quality_score < 80
-    ):
+    elif soft_flag_count >= 2:
+
+        route = (
+            "NEEDS_QWEN"
+        )
+
+    elif quality_score < 80:
 
         route = (
             "NEEDS_QWEN"
@@ -973,6 +1297,11 @@ def analyze_row(
                 strong_risk
             ),
 
+        "semantic_review":
+            bool(
+                semantic_review
+            ),
+
         "soft_flag_count":
             int(
                 soft_flag_count
@@ -986,60 +1315,92 @@ def analyze_row(
         "route":
             route,
 
-        # -------------------------
-        # Numbers
-        # -------------------------
+        # ---------------------
+        # Number diagnostics
+        # ---------------------
 
-        "en_numbers":
+        "number_risk_type":
+            (
+                number_flag
+                if number_flag
+                else ""
+            ),
+
+        "en_arabic_numbers":
             json.dumps(
-                en_numbers,
+                number_result[
+                    "en_arabic_numbers"
+                ],
                 ensure_ascii=False,
             ),
 
-        "zh_numbers":
+        "zh_arabic_numbers":
             json.dumps(
-                zh_numbers,
+                number_result[
+                    "zh_arabic_numbers"
+                ],
                 ensure_ascii=False,
             ),
 
-        # -------------------------
-        # Percent
-        # -------------------------
+        "zh_chinese_number_expressions":
+            json.dumps(
+                number_result[
+                    "zh_chinese_number_expressions"
+                ],
+                ensure_ascii=False,
+            ),
+
+        "en_number_words":
+            json.dumps(
+                number_result[
+                    "en_number_words"
+                ],
+                ensure_ascii=False,
+            ),
+
+        # ---------------------
+        # Percentage
+        # ---------------------
 
         "en_percentages":
             json.dumps(
-                en_percent,
+                en_percentages,
                 ensure_ascii=False,
             ),
 
         "zh_percentages":
             json.dumps(
-                zh_percent,
+                zh_percentages,
                 ensure_ascii=False,
             ),
 
-        # -------------------------
+        # ---------------------
         # Negation
-        # -------------------------
+        # ---------------------
 
-        "en_has_negation":
+        "en_has_explicit_negation":
             bool(
                 en_neg
             ),
 
-        "zh_has_negation":
+        "zh_has_negation_evidence":
             bool(
-                zh_neg
+                zh_neg_evidence
+            ),
+
+        "zh_has_strong_negation":
+            bool(
+                zh_strong_neg
             ),
 
         "negation_question_rewrite":
             bool(
-                negation_question_rewrite
+                negative_question_rewrite
             ),
 
-        # -------------------------
-        # URLs / emails
-        # -------------------------
+        # ---------------------
+        # URLs
+        # ---------------------
 
         "en_urls":
             json.dumps(
@@ -1053,6 +1414,10 @@ def analyze_row(
                 ensure_ascii=False,
             ),
 
+        # ---------------------
+        # Emails
+        # ---------------------
+
         "en_emails":
             json.dumps(
                 en_emails,
@@ -1065,9 +1430,9 @@ def analyze_row(
                 ensure_ascii=False,
             ),
 
-        # -------------------------
+        # ---------------------
         # Other
-        # -------------------------
+        # ---------------------
 
         "en_has_currency":
             bool(
@@ -1093,15 +1458,6 @@ def analyze_row(
 def main():
 
     args = parse_args()
-
-    # Script location:
-    #
-    # scripts/
-    #   pipeline/
-    #     zh_en/
-    #       14d_route_zh_en_quality_risk.py
-    #
-    # parents[3] = project root
 
     project_root = (
         Path(__file__)
@@ -1188,10 +1544,6 @@ def main():
         "risk_routing_report_v1.json"
     )
 
-    # ========================================================
-    # Header
-    # ========================================================
-
     print(
         "=" * 110
     )
@@ -1201,7 +1553,7 @@ def main():
     )
 
     print(
-        "STEP 14D V3 - QUALITY RISK ROUTING"
+        "STEP 14D V4 FINAL - QUALITY RISK ROUTING"
     )
 
     print(
@@ -1237,11 +1589,8 @@ def main():
     ):
 
         raise RuntimeError(
-
             "\nOutput already exists:\n"
-
             f"{routed_file}\n\n"
-
             "Use --overwrite to rebuild."
         )
 
@@ -1306,7 +1655,7 @@ def main():
     )
 
     # ========================================================
-    # Analyze all pairs
+    # Analyze
     # ========================================================
 
     print(
@@ -1315,7 +1664,7 @@ def main():
 
     analyses = []
 
-    total_rows = len(
+    total = len(
         df
     )
 
@@ -1336,11 +1685,11 @@ def main():
         if (
             index % 10000 == 0
             or
-            index == total_rows
+            index == total
         ):
 
             print(
-                f"{index}/{total_rows}"
+                f"{index}/{total}"
             )
 
     analysis_df = pd.DataFrame(
@@ -1359,7 +1708,7 @@ def main():
     )
 
     # ========================================================
-    # Split routes
+    # Split
     # ========================================================
 
     auto_accept = (
@@ -1425,7 +1774,7 @@ def main():
         )
 
     # ========================================================
-    # Risk flag counts
+    # Flag counts
     # ========================================================
 
     flag_counter = Counter()
@@ -1435,7 +1784,6 @@ def main():
     ]:
 
         if not value:
-
             continue
 
         for flag in (
@@ -1509,8 +1857,7 @@ def main():
         route,
         count,
     ) in (
-        route_counts
-        .items()
+        route_counts.items()
     ):
 
         route_rows.append({
@@ -1619,32 +1966,6 @@ def main():
                     .mean()
                 ),
 
-            "negation_mismatch":
-                int(
-                    part[
-                        "risk_flags"
-                    ]
-                    .astype(str)
-                    .str.contains(
-                        "NEGATION_MISMATCH",
-                        regex=False,
-                    )
-                    .sum()
-                ),
-
-            "negation_question_rewrite":
-                int(
-                    part[
-                        "risk_flags"
-                    ]
-                    .astype(str)
-                    .str.contains(
-                        "NEGATION_QUESTION_REWRITE",
-                        regex=False,
-                    )
-                    .sum()
-                ),
-
             "number_mismatch":
                 int(
                     part[
@@ -1657,10 +1978,64 @@ def main():
                     )
                     .sum()
                 ),
+
+            "number_cross_format":
+                int(
+                    part[
+                        "risk_flags"
+                    ]
+                    .astype(str)
+                    .str.contains(
+                        "NUMBER_CROSS_FORMAT",
+                        regex=False,
+                    )
+                    .sum()
+                ),
+
+            "number_missing_zh":
+                int(
+                    part[
+                        "risk_flags"
+                    ]
+                    .astype(str)
+                    .str.contains(
+                        "NUMBER_MISSING_ZH",
+                        regex=False,
+                    )
+                    .sum()
+                ),
+
+            "number_extra_zh":
+                int(
+                    part[
+                        "risk_flags"
+                    ]
+                    .astype(str)
+                    .str.contains(
+                        "NUMBER_EXTRA_ZH",
+                        regex=False,
+                    )
+                    .sum()
+                ),
+
+            "negation_surface_mismatch":
+                int(
+                    part[
+                        "risk_flags"
+                    ]
+                    .astype(str)
+                    .str.contains(
+                        "NEGATION_SURFACE_MISMATCH",
+                        regex=False,
+                    )
+                    .sum()
+                ),
         })
 
-    source_report = pd.DataFrame(
-        source_rows
+    source_report = (
+        pd.DataFrame(
+            source_rows
+        )
     )
 
     # ========================================================
@@ -1721,11 +2096,6 @@ def main():
         "pipeline":
             "zh_en_exp1_v1",
 
-        "input_file":
-            str(
-                input_file
-            ),
-
         "input_rows":
             int(
                 len(
@@ -1735,40 +2105,26 @@ def main():
 
         "routes": {
 
-            str(
-                key
-            ):
-                int(
-                    value
-                )
+            str(key):
+                int(value)
 
             for (
                 key,
                 value,
             )
-            in (
-                route_counts
-                .items()
-            )
+            in route_counts.items()
         },
 
         "flags": {
 
-            str(
-                key
-            ):
-                int(
-                    value
-                )
+            str(key):
+                int(value)
 
             for (
                 key,
                 value,
             )
-            in (
-                flag_counter
-                .items()
-            )
+            in flag_counter.items()
         },
 
         "quality_score": {
@@ -1808,20 +2164,29 @@ def main():
 
         "routing_policy": {
 
-            "strong_flags_route_to_qwen": [
+            "strong_flags": [
 
                 "NUMBER_MISMATCH",
 
-                "PERCENT_MISMATCH",
+                "NUMBER_MISSING_ZH",
 
-                "NEGATION_MISMATCH",
+                "NUMBER_EXTRA_ZH",
+
+                "PERCENT_MISMATCH",
 
                 "URL_MISMATCH",
 
                 "EMAIL_MISMATCH",
             ],
 
+            "semantic_review_flags": [
+
+                "NUMBER_CROSS_FORMAT",
+            ],
+
             "soft_flags": [
+
+                "NEGATION_SURFACE_MISMATCH",
 
                 "NEGATION_QUESTION_REWRITE",
 
@@ -1842,13 +2207,20 @@ def main():
             "quality_score_qwen_threshold":
                 80,
 
+            "number_policy":
+                (
+                    "Arabic digit comparison is exact after "
+                    "canonicalization. Chinese-number or "
+                    "English-number-word conversions are "
+                    "treated as semantic review rather than "
+                    "automatic mismatch."
+                ),
+
             "negation_policy":
                 (
-                    "High-precision English word-boundary "
-                    "patterns plus high-precision Chinese "
-                    "strong-negation patterns. Natural "
-                    "negative-question rewrites are treated "
-                    "as a soft audit signal."
+                    "Surface negation mismatch is diagnostic "
+                    "only and does not independently route "
+                    "a pair to Qwen."
                 ),
         },
 
@@ -1923,7 +2295,7 @@ def main():
             ).isoformat(),
 
         "status":
-            "RISK_ROUTING_V3_COMPLETE",
+            "RISK_ROUTING_V4_COMPLETE",
     }
 
     with open(
@@ -1949,7 +2321,7 @@ def main():
     )
 
     print(
-        "STEP 14D V3 RESULT"
+        "STEP 14D V4 RESULT"
     )
 
     print(
@@ -2050,31 +2422,53 @@ def main():
     )
 
     print(
+        "\nNumber diagnostics:"
+    )
+
+    for flag in [
+
+        "NUMBER_MISMATCH",
+
+        "NUMBER_CROSS_FORMAT",
+
+        "NUMBER_MISSING_ZH",
+
+        "NUMBER_EXTRA_ZH",
+
+    ]:
+
+        print(
+            f"{flag}:",
+            int(
+                flag_counter.get(
+                    flag,
+                    0,
+                )
+            )
+        )
+
+    print(
         "\nNegation diagnostics:"
     )
 
-    neg_mismatch_count = int(
-        flag_counter.get(
-            "NEGATION_MISMATCH",
-            0,
-        )
-    )
-
-    neg_question_count = int(
-        flag_counter.get(
-            "NEGATION_QUESTION_REWRITE",
-            0,
-        )
-    )
-
     print(
-        "NEGATION_MISMATCH:",
-        neg_mismatch_count
+        "NEGATION_SURFACE_MISMATCH:",
+        int(
+            flag_counter.get(
+                "NEGATION_SURFACE_MISMATCH",
+                0,
+            )
+        )
     )
 
     print(
         "NEGATION_QUESTION_REWRITE:",
-        neg_question_count
+        int(
+            flag_counter.get(
+                "NEGATION_QUESTION_REWRITE",
+                0,
+            )
+        )
     )
 
     print(
@@ -2106,7 +2500,7 @@ def main():
     )
 
     print(
-        "RISK_ROUTING_V3_COMPLETE"
+        "RISK_ROUTING_V4_COMPLETE"
     )
 
 

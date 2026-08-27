@@ -326,6 +326,10 @@ def extract_percentages(
 # URL / email
 # ============================================================
 
+# ============================================================
+# URL / email
+# ============================================================
+
 def extract_urls(
     text: str,
 ) -> list[str]:
@@ -334,6 +338,7 @@ def extract_urls(
         URL_RE.findall(
             str(
                 text
+            )
         )
     )
 
@@ -346,7 +351,8 @@ def extract_emails(
         EMAIL_RE.findall(
             str(
                 text
-        ).lower()
+            ).lower()
+        )
     )
 
 
@@ -375,8 +381,6 @@ def has_english_negation(
         for pattern
         in EN_NEGATION_PATTERNS
     )
-
-
 # ============================================================
 # Chinese negation
 # ============================================================

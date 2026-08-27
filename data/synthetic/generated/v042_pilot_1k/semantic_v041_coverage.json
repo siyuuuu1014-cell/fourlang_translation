@@ -1,0 +1,192 @@
+{
+  "samples": 1000,
+  "counts": {
+    "scenario": {
+      "travel": 200,
+      "daily": 200,
+      "shopping": 150,
+      "restaurant": 100,
+      "hotel": 100,
+      "transport": 100,
+      "work_study": 50,
+      "medical": 50,
+      "communication": 50
+    },
+    "frame": {
+      "TRANSITIVE_CLOCK": 153,
+      "TRANSITIVE_TIME": 145,
+      "MOTION_DESTINATION": 139,
+      "TRANSITIVE": 131,
+      "MOTION_CLOCK": 127,
+      "MOTION_TIME": 123,
+      "WANT_OBJECT": 90,
+      "INTRANSITIVE_TIME": 51,
+      "INTRANSITIVE": 26,
+      "WHERE_PLACE": 15
+    },
+    "verb": {
+      "ARRIVE": 156,
+      "COME": 155,
+      "GO": 155,
+      "WANT": 90,
+      "FIND": 90,
+      "DRINK": 89,
+      "BUY": 89,
+      "EAT": 86,
+      "READ": 75
+    },
+    "subject": {
+      "PERSON_HE": 182,
+      "PERSON_WE": 170,
+      "PERSON_SHE": 167,
+      "PERSON_YOU": 165,
+      "PERSON_I": 152,
+      "PERSON_THEY": 149
+    },
+    "object": {
+      "FOOD": 126,
+      "BOOK": 105,
+      "WATER": 88,
+      "COFFEE": 71,
+      "PHONE": 40,
+      "MEDICINE": 38,
+      "TICKET": 31,
+      "PASSPORT": 20
+    },
+    "destination": {
+      "SCHOOL": 46,
+      "MOSCOW": 43,
+      "TASHKENT": 39,
+      "BEIJING": 37,
+      "AIRPORT": 36,
+      "BANK": 36,
+      "RESTAURANT": 35,
+      "STATION": 34,
+      "HOSPITAL": 33,
+      "HOTEL": 26,
+      "OFFICE": 24
+    },
+    "time": {
+      "TIME_TOMORROW": 222,
+      "TIME_TODAY": 211,
+      "TIME_NEXT_WEEK": 84,
+      "TIME_NOW": 82
+    },
+    "tense": {
+      "present": 567,
+      "future": 433
+    },
+    "polarity": {
+      "pos": 659,
+      "neg": 341
+    }
+  },
+  "ratios": {
+    "scenario": {
+      "work_study": 0.05,
+      "restaurant": 0.1,
+      "shopping": 0.15,
+      "hotel": 0.1,
+      "travel": 0.2,
+      "medical": 0.05,
+      "daily": 0.2,
+      "communication": 0.05,
+      "transport": 0.1
+    },
+    "frame": {
+      "INTRANSITIVE": 0.026,
+      "TRANSITIVE_TIME": 0.145,
+      "MOTION_TIME": 0.123,
+      "WHERE_PLACE": 0.015,
+      "MOTION_DESTINATION": 0.139,
+      "WANT_OBJECT": 0.09,
+      "MOTION_CLOCK": 0.127,
+      "TRANSITIVE": 0.131,
+      "INTRANSITIVE_TIME": 0.051,
+      "TRANSITIVE_CLOCK": 0.153
+    },
+    "verb": {
+      "COME": 0.155,
+      "EAT": 0.086,
+      "DRINK": 0.089,
+      "GO": 0.155,
+      "WANT": 0.09,
+      "READ": 0.075,
+      "BUY": 0.089,
+      "ARRIVE": 0.156,
+      "FIND": 0.09
+    },
+    "subject": {
+      "PERSON_THEY": 0.149,
+      "PERSON_I": 0.152,
+      "PERSON_YOU": 0.165,
+      "PERSON_HE": 0.182,
+      "PERSON_WE": 0.17,
+      "PERSON_SHE": 0.167
+    },
+    "object": {
+      "FOOD": 0.126,
+      "COFFEE": 0.071,
+      "TICKET": 0.031,
+      "BOOK": 0.105,
+      "WATER": 0.088,
+      "PHONE": 0.04,
+      "MEDICINE": 0.038,
+      "PASSPORT": 0.02
+    },
+    "destination": {
+      "RESTAURANT": 0.035,
+      "TASHKENT": 0.039,
+      "OFFICE": 0.024,
+      "MOSCOW": 0.043,
+      "AIRPORT": 0.036,
+      "BEIJING": 0.037,
+      "SCHOOL": 0.046,
+      "HOTEL": 0.026,
+      "HOSPITAL": 0.033,
+      "STATION": 0.034,
+      "BANK": 0.036
+    },
+    "time": {
+      "TIME_NOW": 0.082,
+      "TIME_TODAY": 0.211,
+      "TIME_NEXT_WEEK": 0.084,
+      "TIME_TOMORROW": 0.222
+    },
+    "tense": {
+      "present": 0.567,
+      "future": 0.433
+    },
+    "polarity": {
+      "pos": 0.659,
+      "neg": 0.341
+    }
+  },
+  "coverage_constraint_violations": [
+    {
+      "type": "verb",
+      "id": "COME",
+      "ratio": 0.155,
+      "max_ratio": 0.15
+    },
+    {
+      "type": "verb",
+      "id": "GO",
+      "ratio": 0.155,
+      "max_ratio": 0.15
+    },
+    {
+      "type": "verb",
+      "id": "ARRIVE",
+      "ratio": 0.156,
+      "max_ratio": 0.15
+    },
+    {
+      "type": "frame",
+      "id": "TRANSITIVE_CLOCK",
+      "ratio": 0.153,
+      "max_ratio": 0.15
+    }
+  ],
+  "note": "Coverage constraint violations during a 100-sample smoke test are diagnostic only and do not automatically invalidate the corpus."
+}

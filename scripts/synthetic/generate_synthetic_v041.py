@@ -938,7 +938,14 @@ class SyntheticGeneratorV041(
 
             metadata[
                 "generation_policy_version"
-            ] = "0.4.1"
+            ] = (
+                self.resources
+                .policy
+                .get(
+                    "version",
+                    "unknown",
+                )
+            )
 
             metadata[
                 "generation_policy"
@@ -949,7 +956,16 @@ class SyntheticGeneratorV041(
         stats[
             "generator_version"
         ] = GENERATOR_VERSION
-
+        stats[
+            "generation_policy_version"
+        ] = (
+            self.resources
+            .policy
+            .get(
+                "version",
+                "unknown",
+            )
+        )
         stats[
             "balance_fallback_count"
         ] = (

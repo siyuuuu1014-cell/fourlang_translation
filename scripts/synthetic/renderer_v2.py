@@ -246,91 +246,96 @@ def render_zh_verb_v2(
     *,
     verb_id: str,
     original_surface: str,
-    tense: str | None,
-    polarity: str | None,
+    tense: str,
+    polarity: str,
     policies: dict,
 ) -> str:
     """
-    Render a Chinese verb using Renderer V2 policies.
+    Chinese verb rendering policy V2.1.
 
-    Current V2 only modifies a confirmed problem:
+    Main purpose:
+    correctly render resultative FIND in Chinese.
 
-        FIND + negative
+    FIND:
+        present + positive -> 找到了
+        present + negative -> 没找到
+        future  + positive -> 会找到
+        future  + negative -> 不会找到
 
-    V1 could generate:
-
-        他今天不找到食物。
-
-    V2 changes the verb surface to:
-
-        没找到
-
-    so the sentence becomes:
-
-        他今天没找到食物。
-
-    Other verbs and other FIND cases fall back to
-    original_surface so that this experiment changes
-    as few variables as possible.
+    Other verbs keep the original V0.1 surface unless
+    explicitly configured in the policy resource.
     """
 
-    policy = get_verb_policy(
-        verb_id,
-        policies,
+    verb_id_norm = (
+        str(verb_id)
+        .strip()
+        .upper()
     )
 
-    if policy is None:
-        return original_surface
-
-    policy_key = get_policy_key(
-        verb_id
+    tense_norm = (
+        str(tense)
+        .strip()
+        .lower()
     )
 
-    zh_policy = policy.get(
-        "zh",
-        {},
+    polarity_norm = (
+        str(polarity)
+        .strip()
+        .lower()
     )
 
-    # --------------------------------------------------------
-    # FIND + negative
-    # --------------------------------------------------------
+    # ========================================================
+    # FIND
+    # ========================================================
 
-    if (
-        policy_key == "FIND"
-        and
-        polarity == "neg"
-    ):
-        strategy = zh_policy.get(
-            "negative_strategy"
+    if verb_id_norm == "FIND":
+
+        verb_policy = (
+            policies
+            .get("FIND", {})
+            .get("zh", {})
         )
 
-        negative_surface = zh_policy.get(
-            "negative_surface"
+        # ----------------------------------------------------
+        # Future
+        # ----------------------------------------------------
+
+        if tense_norm == "future":
+
+            if polarity_norm == "neg":
+
+                return verb_policy.get(
+                    "future_negative",
+                    "不会找到",
+                )
+
+            return verb_policy.get(
+                "future_positive",
+                "会找到",
+            )
+
+        # ----------------------------------------------------
+        # Present / non-future
+        # ----------------------------------------------------
+
+        if polarity_norm == "neg":
+
+            return verb_policy.get(
+                "present_negative",
+                "没找到",
+            )
+
+        return verb_policy.get(
+            "present_positive",
+            "找到了",
         )
 
-        if (
-            strategy == "mei_resultative"
-            and
-            negative_surface
-        ):
-            return str(
-                negative_surface
-            )
-
-        # Even if the strategy name is omitted,
-        # allow an explicitly configured surface.
-        if negative_surface:
-            return str(
-                negative_surface
-            )
-
-    # --------------------------------------------------------
-    # All other cases retain Renderer V1 output.
-    # --------------------------------------------------------
+    # ========================================================
+    # Other verbs:
+    # preserve existing stable renderer output
+    # ========================================================
 
     return original_surface
-
-
 # ============================================================
 # Russian helpers
 # ============================================================

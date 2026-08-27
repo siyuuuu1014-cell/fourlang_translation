@@ -26,8 +26,8 @@ from scripts.synthetic.renderer_v2 import (
 # Version
 # ============================================================
 
-GENERATOR_VERSION = "0.3"
-RENDERER_VERSION = "v2"
+GENERATOR_VERSION = "0.3.1"
+RENDERER_VERSION = "v2.1"
 
 
 # ============================================================

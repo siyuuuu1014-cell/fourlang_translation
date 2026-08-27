@@ -1,0 +1,9 @@
+{
+  "input_file": "data\\synthetic\\generated\\v03_10k\\02_hard_semantic\\hard_accepted.jsonl",
+  "total": 10000,
+  "accepted": 10000,
+  "rejected": 0,
+  "accept_rate": 1.0,
+  "reject_reasons": {},
+  "rejected_by_language": {}
+}

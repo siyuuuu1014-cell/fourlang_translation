@@ -1,0 +1,46 @@
+{
+  "generator_version": "0.3",
+  "renderer_version": "v2",
+  "compatibility_version": "v1.1",
+  "generation_policy": "compatibility_aware",
+  "seed": 2028,
+  "target_samples": 10,
+  "generated_samples": 10,
+  "attempts": 10,
+  "duplicate_or_retry_attempts": 0,
+  "generation_efficiency": 1.0,
+  "unique_signatures": 10,
+  "frame_distribution": {
+    "TRANSITIVE_CLOCK": 4,
+    "MOTION_CLOCK": 2,
+    "MOTION_TIME": 2,
+    "TRANSITIVE_TIME": 2
+  },
+  "verb_distribution": {
+    "GO": 4,
+    "READ": 3,
+    "DRINK": 2,
+    "EAT": 1
+  },
+  "object_distribution": {
+    "BOOK": 3,
+    "COFFEE": 2,
+    "FOOD": 1
+  },
+  "destination_distribution": {
+    "TASHKENT": 2,
+    "BANK": 1,
+    "HOTEL": 1
+  },
+  "tense_distribution": {
+    "present": 6,
+    "future": 4
+  },
+  "polarity_distribution": {
+    "pos": 6,
+    "neg": 4
+  },
+  "output_dir": "D:\\dev\\projects\\fourlang_translation\\data\\synthetic\\generated\\v03_test",
+  "output_file": "D:\\dev\\projects\\fourlang_translation\\data\\synthetic\\generated\\v03_test\\semantic_v03_raw.jsonl",
+  "stats_file": "D:\\dev\\projects\\fourlang_translation\\data\\synthetic\\generated\\v03_test\\semantic_v03_stats.json"
+}

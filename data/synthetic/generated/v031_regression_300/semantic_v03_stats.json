@@ -1,0 +1,62 @@
+{
+  "generator_version": "0.3.1",
+  "renderer_version": "v2.1",
+  "compatibility_version": "v1.1",
+  "generation_policy": "compatibility_aware",
+  "seed": 2030,
+  "target_samples": 300,
+  "generated_samples": 300,
+  "attempts": 321,
+  "duplicate_or_retry_attempts": 21,
+  "generation_efficiency": 0.9345794392523364,
+  "unique_signatures": 300,
+  "frame_distribution": {
+    "TRANSITIVE_CLOCK": 88,
+    "MOTION_CLOCK": 73,
+    "TRANSITIVE_TIME": 68,
+    "MOTION_TIME": 62,
+    "WHERE_PLACE": 9
+  },
+  "verb_distribution": {
+    "GO": 135,
+    "BUY": 35,
+    "DRINK": 34,
+    "READ": 31,
+    "FIND": 29,
+    "EAT": 27
+  },
+  "object_distribution": {
+    "BOOK": 40,
+    "FOOD": 35,
+    "WATER": 27,
+    "COFFEE": 26,
+    "TICKET": 12,
+    "PHONE": 7,
+    "MEDICINE": 6,
+    "PASSPORT": 3
+  },
+  "destination_distribution": {
+    "HOSPITAL": 16,
+    "RESTAURANT": 16,
+    "OFFICE": 15,
+    "BEIJING": 14,
+    "HOTEL": 14,
+    "BANK": 14,
+    "MOSCOW": 12,
+    "SCHOOL": 9,
+    "STATION": 9,
+    "AIRPORT": 9,
+    "TASHKENT": 7
+  },
+  "tense_distribution": {
+    "present": 165,
+    "future": 135
+  },
+  "polarity_distribution": {
+    "pos": 216,
+    "neg": 84
+  },
+  "output_dir": "D:\\dev\\projects\\fourlang_translation\\data\\synthetic\\generated\\v031_regression_300",
+  "output_file": "D:\\dev\\projects\\fourlang_translation\\data\\synthetic\\generated\\v031_regression_300\\semantic_v03_raw.jsonl",
+  "stats_file": "D:\\dev\\projects\\fourlang_translation\\data\\synthetic\\generated\\v031_regression_300\\semantic_v03_stats.json"
+}

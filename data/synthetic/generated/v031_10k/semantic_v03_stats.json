@@ -1,0 +1,62 @@
+{
+  "generator_version": "0.3.1",
+  "renderer_version": "v2.1",
+  "compatibility_version": "v1.1",
+  "generation_policy": "compatibility_aware",
+  "seed": 2031,
+  "target_samples": 10000,
+  "generated_samples": 10000,
+  "attempts": 20911,
+  "duplicate_or_retry_attempts": 10911,
+  "generation_efficiency": 0.4782172062550811,
+  "unique_signatures": 10000,
+  "frame_distribution": {
+    "TRANSITIVE_CLOCK": 4789,
+    "MOTION_CLOCK": 3829,
+    "TRANSITIVE_TIME": 845,
+    "MOTION_TIME": 526,
+    "WHERE_PLACE": 11
+  },
+  "verb_distribution": {
+    "GO": 4355,
+    "FIND": 1391,
+    "BUY": 1367,
+    "DRINK": 1086,
+    "READ": 909,
+    "EAT": 881
+  },
+  "object_distribution": {
+    "BOOK": 1265,
+    "FOOD": 1237,
+    "COFFEE": 950,
+    "WATER": 906,
+    "PHONE": 370,
+    "TICKET": 359,
+    "MEDICINE": 349,
+    "PASSPORT": 198
+  },
+  "destination_distribution": {
+    "AIRPORT": 419,
+    "MOSCOW": 409,
+    "TASHKENT": 409,
+    "RESTAURANT": 404,
+    "BEIJING": 400,
+    "HOTEL": 394,
+    "OFFICE": 394,
+    "STATION": 387,
+    "BANK": 386,
+    "SCHOOL": 385,
+    "HOSPITAL": 368
+  },
+  "tense_distribution": {
+    "present": 5031,
+    "future": 4969
+  },
+  "polarity_distribution": {
+    "pos": 6609,
+    "neg": 3391
+  },
+  "output_dir": "D:\\dev\\projects\\fourlang_translation\\data\\synthetic\\generated\\v031_10k",
+  "output_file": "D:\\dev\\projects\\fourlang_translation\\data\\synthetic\\generated\\v031_10k\\semantic_v03_raw.jsonl",
+  "stats_file": "D:\\dev\\projects\\fourlang_translation\\data\\synthetic\\generated\\v031_10k\\semantic_v03_stats.json"
+}

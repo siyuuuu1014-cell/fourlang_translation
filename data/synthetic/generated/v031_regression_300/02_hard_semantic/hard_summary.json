@@ -1,0 +1,8 @@
+{
+  "input_file": "data\\synthetic\\generated\\v031_regression_300\\semantic_v03_raw.jsonl",
+  "total": 300,
+  "accepted": 300,
+  "rejected": 0,
+  "accept_rate": 1.0,
+  "reject_reasons": {}
+}

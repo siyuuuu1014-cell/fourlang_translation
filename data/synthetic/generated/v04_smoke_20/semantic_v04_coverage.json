@@ -1,0 +1,152 @@
+{
+  "samples": 20,
+  "counts": {
+    "scenario": {
+      "work_study": 5,
+      "daily": 5,
+      "travel": 3,
+      "shopping": 3,
+      "restaurant": 1,
+      "transport": 1,
+      "medical": 1,
+      "hotel": 1
+    },
+    "frame": {
+      "INTRANSITIVE_TIME": 3,
+      "MOTION_DESTINATION": 3,
+      "WHERE_PLACE": 3,
+      "TRANSITIVE_CLOCK": 3,
+      "TRANSITIVE_TIME": 3,
+      "MOTION_TIME": 2,
+      "MOTION_CLOCK": 1,
+      "TRANSITIVE": 1,
+      "INTRANSITIVE": 1
+    },
+    "verb": {
+      "GO": 6,
+      "COME": 3,
+      "WANT": 2,
+      "READ": 2,
+      "BUY": 2,
+      "EAT": 1,
+      "ARRIVE": 1
+    },
+    "subject": {
+      "PERSON_I": 5,
+      "PERSON_WE": 3,
+      "PERSON_THEY": 3,
+      "PERSON_SHE": 3,
+      "PERSON_HE": 2,
+      "PERSON_YOU": 1
+    },
+    "object": {
+      "BOOK": 3,
+      "COFFEE": 2,
+      "FOOD": 2
+    },
+    "destination": {
+      "TASHKENT": 1,
+      "SCHOOL": 1,
+      "BEIJING": 1,
+      "AIRPORT": 1,
+      "STATION": 1,
+      "BANK": 1
+    },
+    "time": {
+      "TIME_TODAY": 6,
+      "TIME_NEXT_WEEK": 4,
+      "TIME_TOMORROW": 1,
+      "TIME_NOW": 1
+    },
+    "tense": {
+      "future": 10,
+      "present": 10
+    },
+    "polarity": {
+      "pos": 16,
+      "neg": 4
+    }
+  },
+  "ratios": {
+    "scenario": {
+      "travel": 0.15,
+      "work_study": 0.25,
+      "daily": 0.25,
+      "restaurant": 0.05,
+      "shopping": 0.15,
+      "transport": 0.05,
+      "medical": 0.05,
+      "hotel": 0.05
+    },
+    "frame": {
+      "MOTION_TIME": 0.1,
+      "MOTION_CLOCK": 0.05,
+      "INTRANSITIVE_TIME": 0.15,
+      "MOTION_DESTINATION": 0.15,
+      "WHERE_PLACE": 0.15,
+      "TRANSITIVE_CLOCK": 0.15,
+      "TRANSITIVE": 0.05,
+      "TRANSITIVE_TIME": 0.15,
+      "INTRANSITIVE": 0.05
+    },
+    "verb": {
+      "COME": 0.15,
+      "GO": 0.3,
+      "WANT": 0.1,
+      "READ": 0.1,
+      "BUY": 0.1,
+      "EAT": 0.05,
+      "ARRIVE": 0.05
+    },
+    "subject": {
+      "PERSON_WE": 0.15,
+      "PERSON_I": 0.25,
+      "PERSON_THEY": 0.15,
+      "PERSON_YOU": 0.05,
+      "PERSON_HE": 0.1,
+      "PERSON_SHE": 0.15
+    },
+    "object": {
+      "BOOK": 0.15,
+      "COFFEE": 0.1,
+      "FOOD": 0.1
+    },
+    "destination": {
+      "TASHKENT": 0.05,
+      "SCHOOL": 0.05,
+      "BEIJING": 0.05,
+      "AIRPORT": 0.05,
+      "STATION": 0.05,
+      "BANK": 0.05
+    },
+    "time": {
+      "TIME_NEXT_WEEK": 0.2,
+      "TIME_TODAY": 0.3,
+      "TIME_TOMORROW": 0.05,
+      "TIME_NOW": 0.05
+    },
+    "tense": {
+      "future": 0.5,
+      "present": 0.5
+    },
+    "polarity": {
+      "pos": 0.8,
+      "neg": 0.2
+    }
+  },
+  "coverage_constraint_violations": [
+    {
+      "type": "verb",
+      "id": "COME",
+      "ratio": 0.15,
+      "max_ratio": 0.12
+    },
+    {
+      "type": "verb",
+      "id": "GO",
+      "ratio": 0.3,
+      "max_ratio": 0.12
+    }
+  ],
+  "note": "Coverage constraint violations during a 100-sample smoke test are diagnostic only and do not automatically invalidate the corpus."
+}

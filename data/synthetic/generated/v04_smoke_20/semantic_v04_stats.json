@@ -1,0 +1,13 @@
+{
+  "generated": 20,
+  "attempts": 20,
+  "efficiency": 1.0,
+  "duplicate_signatures": 0,
+  "candidate_errors": 0,
+  "top_candidate_errors": [],
+  "generator_version": "0.4.0",
+  "renderer_version": "0.4",
+  "resource_version": "0.4",
+  "seed": 2040,
+  "output": "data\\synthetic\\generated\\v04_smoke_20\\semantic_v04_raw.jsonl"
+}

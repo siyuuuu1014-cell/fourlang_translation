@@ -1,0 +1,22 @@
+{
+  "validator_version": "0.4",
+  "input": "data\\synthetic\\generated\\v04_smoke_100\\semantic_v04_raw.jsonl",
+  "total": 100,
+  "accepted": 100,
+  "rejected": 0,
+  "accept_rate": 1.0,
+  "rows_with_warnings": 0,
+  "warning_rate": 0.0,
+  "verb_distribution": {
+    "COME": 21,
+    "GO": 19,
+    "WANT": 17,
+    "BUY": 14,
+    "ARRIVE": 8,
+    "DRINK": 4,
+    "READ": 3,
+    "EAT": 3,
+    "FIND": 3
+  },
+  "violations": {}
+}

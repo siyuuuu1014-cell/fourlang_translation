@@ -1,0 +1,32 @@
+{
+  "validator_version": "0.4",
+  "input": "data\\synthetic\\generated\\v04_smoke_100\\01_compatibility\\compatibility_accepted.jsonl",
+  "total": 100,
+  "accepted": 100,
+  "rejected": 0,
+  "accept_rate": 1.0,
+  "violation_counts": {},
+  "frame_distribution": {
+    "MOTION_CLOCK": 13,
+    "WANT_OBJECT": 12,
+    "MOTION_DESTINATION": 12,
+    "MOTION_TIME": 12,
+    "TRANSITIVE_CLOCK": 12,
+    "TRANSITIVE_TIME": 12,
+    "TRANSITIVE": 8,
+    "WHERE_PLACE": 8,
+    "INTRANSITIVE_TIME": 8,
+    "INTRANSITIVE": 3
+  },
+  "verb_distribution": {
+    "COME": 21,
+    "GO": 19,
+    "WANT": 17,
+    "BUY": 14,
+    "ARRIVE": 8,
+    "DRINK": 4,
+    "READ": 3,
+    "EAT": 3,
+    "FIND": 3
+  }
+}

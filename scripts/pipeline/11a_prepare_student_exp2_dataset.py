@@ -376,16 +376,8 @@ def main():
     )
 
     human_invalid_direction = int(
-        ~human[
-            "direction"
-        ]
-        .isin(
-            {
-                "en_uz",
-                "uz_en",
-            }
-        )
-    ).sum()
+        (~human["direction"].isin({"en_uz", "uz_en"})).sum()
+    )
 
     if human_empty_source > 0:
 
@@ -653,18 +645,7 @@ def main():
     )
 
     kd_invalid_direction = int(
-        (
-            ~kd[
-                "direction"
-            ]
-            .isin(
-                {
-                    "en_uz",
-                    "uz_en",
-                }
-            )
-        )
-        .sum()
+        (~kd["direction"].isin({"en_uz", "uz_en"})).sum()
     )
 
     if kd_empty_source:

@@ -1,0 +1,680 @@
+{
+  "version": "0.4",
+  "description": "Semantic frame definitions for FourLang Synthetic Generator V0.4.",
+  "frames": [
+    {
+      "id": "INTRANSITIVE",
+      "scenario_tags": [
+        "daily",
+        "work_study"
+      ],
+      "weight": 1.0,
+      "slots": {
+        "subject": {
+          "required": true,
+          "concept_types": [
+            "person"
+          ],
+          "semantic_role": "agent"
+        },
+        "verb": {
+          "required": true,
+          "concept_types": [
+            "verb"
+          ],
+          "features": {
+            "transitivity": [
+              "intransitive"
+            ]
+          }
+        }
+      },
+      "slot_order": [
+        "subject",
+        "verb"
+      ],
+      "features": {
+        "polarity": [
+          "pos",
+          "neg"
+        ]
+      },
+      "render_template": {
+        "zh": "{subject}{verb}。",
+        "en": "{subject} {verb}.",
+        "ru": "{subject} {verb}.",
+        "uz": "{subject} {verb}."
+      },
+      "meta": {
+        "enabled": true,
+        "version_added": "0.4"
+      }
+    },
+    {
+      "id": "INTRANSITIVE_TIME",
+      "scenario_tags": [
+        "daily",
+        "travel",
+        "work_study"
+      ],
+      "weight": 1.0,
+      "slots": {
+        "subject": {
+          "required": true,
+          "concept_types": [
+            "person"
+          ],
+          "semantic_role": "agent"
+        },
+        "time": {
+          "required": true,
+          "concept_types": [
+            "time"
+          ],
+          "semantic_role": "time"
+        },
+        "verb": {
+          "required": true,
+          "concept_types": [
+            "verb"
+          ],
+          "features": {
+            "transitivity": [
+              "intransitive"
+            ]
+          }
+        }
+      },
+      "slot_order": [
+        "subject",
+        "time",
+        "verb"
+      ],
+      "features": {
+        "polarity": [
+          "pos",
+          "neg"
+        ]
+      },
+      "render_template": {
+        "zh": "{subject}{time}{verb}。",
+        "en": "{subject} {verb} {time}.",
+        "ru": "{subject} {time} {verb}.",
+        "uz": "{subject} {time} {verb}."
+      },
+      "meta": {
+        "enabled": true,
+        "version_added": "0.4"
+      }
+    },
+    {
+      "id": "TRANSITIVE",
+      "scenario_tags": [
+        "daily",
+        "shopping",
+        "restaurant",
+        "communication",
+        "work_study"
+      ],
+      "weight": 1.0,
+      "slots": {
+        "subject": {
+          "required": true,
+          "concept_types": [
+            "person"
+          ],
+          "semantic_role": "agent"
+        },
+        "verb": {
+          "required": true,
+          "concept_types": [
+            "verb"
+          ],
+          "features": {
+            "transitivity": [
+              "transitive"
+            ]
+          }
+        },
+        "object": {
+          "required": true,
+          "concept_types": [
+            "object"
+          ],
+          "semantic_role": "patient",
+          "case_role": {
+            "ru": "acc",
+            "uz": "acc"
+          }
+        }
+      },
+      "slot_order": [
+        "subject",
+        "verb",
+        "object"
+      ],
+      "features": {
+        "polarity": [
+          "pos",
+          "neg"
+        ]
+      },
+      "constraints": {
+        "object_compatible_with_verb": true
+      },
+      "render_template": {
+        "zh": "{subject}{verb}{object}。",
+        "en": "{subject} {verb} {object}.",
+        "ru": "{subject} {verb} {object}.",
+        "uz": "{subject} {object} {verb}."
+      },
+      "meta": {
+        "enabled": true,
+        "version_added": "0.4"
+      }
+    },
+    {
+      "id": "TRANSITIVE_TIME",
+      "scenario_tags": [
+        "daily",
+        "shopping",
+        "restaurant",
+        "communication",
+        "work_study"
+      ],
+      "weight": 1.0,
+      "slots": {
+        "subject": {
+          "required": true,
+          "concept_types": [
+            "person"
+          ],
+          "semantic_role": "agent"
+        },
+        "time": {
+          "required": true,
+          "concept_types": [
+            "time"
+          ],
+          "semantic_role": "time"
+        },
+        "verb": {
+          "required": true,
+          "concept_types": [
+            "verb"
+          ],
+          "features": {
+            "transitivity": [
+              "transitive"
+            ]
+          }
+        },
+        "object": {
+          "required": true,
+          "concept_types": [
+            "object"
+          ],
+          "semantic_role": "patient",
+          "case_role": {
+            "ru": "acc",
+            "uz": "acc"
+          }
+        }
+      },
+      "slot_order": [
+        "subject",
+        "time",
+        "verb",
+        "object"
+      ],
+      "features": {
+        "polarity": [
+          "pos",
+          "neg"
+        ]
+      },
+      "constraints": {
+        "object_compatible_with_verb": true
+      },
+      "render_template": {
+        "zh": "{subject}{time}{verb}{object}。",
+        "en": "{subject} {verb} {object} {time}.",
+        "ru": "{subject} {time} {verb} {object}.",
+        "uz": "{subject} {time} {object} {verb}."
+      },
+      "meta": {
+        "enabled": true,
+        "version_added": "0.4"
+      }
+    },
+    {
+      "id": "TRANSITIVE_CLOCK",
+      "scenario_tags": [
+        "daily",
+        "travel",
+        "shopping",
+        "restaurant"
+      ],
+      "weight": 1.0,
+      "computed": [
+        "clock"
+      ],
+      "slots": {
+        "subject": {
+          "required": true,
+          "concept_types": [
+            "person"
+          ],
+          "semantic_role": "agent"
+        },
+        "day": {
+          "required": true,
+          "concept_types": [
+            "time"
+          ],
+          "semantic_role": "day"
+        },
+        "verb": {
+          "required": true,
+          "concept_types": [
+            "verb"
+          ],
+          "features": {
+            "transitivity": [
+              "transitive"
+            ]
+          }
+        },
+        "object": {
+          "required": true,
+          "concept_types": [
+            "object"
+          ],
+          "semantic_role": "patient",
+          "case_role": {
+            "ru": "acc",
+            "uz": "acc"
+          }
+        }
+      },
+      "slot_order": [
+        "subject",
+        "day",
+        "verb",
+        "object"
+      ],
+      "features": {
+        "polarity": [
+          "pos",
+          "neg"
+        ]
+      },
+      "constraints": {
+        "object_compatible_with_verb": true
+      },
+      "render_template": {
+        "zh": "{subject}{day}{clock}{verb}{object}。",
+        "en": "{subject} {verb} {object} at {clock} {day}.",
+        "ru": "{subject} {day} в {clock} {verb} {object}.",
+        "uz": "{subject} {day} soat {clock} da {object} {verb}."
+      },
+      "meta": {
+        "enabled": true,
+        "version_added": "0.4"
+      }
+    },
+    {
+      "id": "MOTION_DESTINATION",
+      "scenario_tags": [
+        "daily",
+        "travel",
+        "transport",
+        "hotel",
+        "medical"
+      ],
+      "weight": 1.0,
+      "slots": {
+        "subject": {
+          "required": true,
+          "concept_types": [
+            "person"
+          ],
+          "semantic_role": "agent"
+        },
+        "verb": {
+          "required": true,
+          "concept_types": [
+            "verb"
+          ],
+          "semantic_classes": [
+            "MOTION_ACTION"
+          ]
+        },
+        "destination": {
+          "required": true,
+          "concept_types": [
+            "place"
+          ],
+          "semantic_role": "destination",
+          "case_role": {
+            "ru": "destination",
+            "uz": "destination"
+          }
+        }
+      },
+      "slot_order": [
+        "subject",
+        "verb",
+        "destination"
+      ],
+      "features": {
+        "polarity": [
+          "pos",
+          "neg"
+        ]
+      },
+      "constraints": {
+        "destination_compatible_with_verb": true
+      },
+      "render_template": {
+        "zh": "{subject}{verb}{destination}。",
+        "en": "{subject} {verb} {destination}.",
+        "ru": "{subject} {verb} {destination}.",
+        "uz": "{subject} {destination} {verb}."
+      },
+      "meta": {
+        "enabled": true,
+        "version_added": "0.4"
+      }
+    },
+    {
+      "id": "MOTION_TIME",
+      "scenario_tags": [
+        "daily",
+        "travel",
+        "transport",
+        "hotel",
+        "medical"
+      ],
+      "weight": 1.0,
+      "slots": {
+        "subject": {
+          "required": true,
+          "concept_types": [
+            "person"
+          ],
+          "semantic_role": "agent"
+        },
+        "time": {
+          "required": true,
+          "concept_types": [
+            "time"
+          ],
+          "semantic_role": "time"
+        },
+        "verb": {
+          "required": true,
+          "concept_types": [
+            "verb"
+          ],
+          "semantic_classes": [
+            "MOTION_ACTION"
+          ]
+        },
+        "destination": {
+          "required": true,
+          "concept_types": [
+            "place"
+          ],
+          "semantic_role": "destination",
+          "case_role": {
+            "ru": "destination",
+            "uz": "destination"
+          }
+        }
+      },
+      "slot_order": [
+        "subject",
+        "time",
+        "verb",
+        "destination"
+      ],
+      "features": {
+        "polarity": [
+          "pos",
+          "neg"
+        ]
+      },
+      "constraints": {
+        "destination_compatible_with_verb": true
+      },
+      "render_template": {
+        "zh": "{subject}{time}{verb}{destination}。",
+        "en": "{subject} {verb} {destination} {time}.",
+        "ru": "{subject} {time} {verb} {destination}.",
+        "uz": "{subject} {time} {destination} {verb}."
+      },
+      "meta": {
+        "enabled": true,
+        "version_added": "0.4"
+      }
+    },
+    {
+      "id": "MOTION_CLOCK",
+      "scenario_tags": [
+        "daily",
+        "travel",
+        "transport"
+      ],
+      "weight": 1.0,
+      "computed": [
+        "clock"
+      ],
+      "slots": {
+        "subject": {
+          "required": true,
+          "concept_types": [
+            "person"
+          ],
+          "semantic_role": "agent"
+        },
+        "day": {
+          "required": true,
+          "concept_types": [
+            "time"
+          ],
+          "semantic_role": "day"
+        },
+        "verb": {
+          "required": true,
+          "concept_types": [
+            "verb"
+          ],
+          "semantic_classes": [
+            "MOTION_ACTION"
+          ]
+        },
+        "destination": {
+          "required": true,
+          "concept_types": [
+            "place"
+          ],
+          "semantic_role": "destination",
+          "case_role": {
+            "ru": "destination",
+            "uz": "destination"
+          }
+        }
+      },
+      "slot_order": [
+        "subject",
+        "day",
+        "verb",
+        "destination"
+      ],
+      "features": {
+        "polarity": [
+          "pos",
+          "neg"
+        ]
+      },
+      "constraints": {
+        "destination_compatible_with_verb": true
+      },
+      "render_template": {
+        "zh": "{subject}{day}{clock}{verb}{destination}。",
+        "en": "{subject} {verb} {destination} at {clock} {day}.",
+        "ru": "{subject} {day} в {clock} {verb} {destination}.",
+        "uz": "{subject} {day} soat {clock} da {destination} {verb}."
+      },
+      "meta": {
+        "enabled": true,
+        "version_added": "0.4"
+      }
+    },
+    {
+      "id": "WANT_OBJECT",
+      "scenario_tags": [
+        "daily",
+        "shopping",
+        "restaurant",
+        "hotel",
+        "medical"
+      ],
+      "weight": 0.8,
+      "slots": {
+        "subject": {
+          "required": true,
+          "concept_types": [
+            "person"
+          ],
+          "semantic_role": "experiencer"
+        },
+        "verb": {
+          "required": true,
+          "fixed_concept_id": "WANT"
+        },
+        "object": {
+          "required": true,
+          "concept_types": [
+            "object"
+          ],
+          "semantic_role": "theme"
+        }
+      },
+      "slot_order": [
+        "subject",
+        "verb",
+        "object"
+      ],
+      "features": {
+        "polarity": [
+          "pos",
+          "neg"
+        ]
+      },
+      "constraints": {
+        "object_compatible_with_verb": true
+      },
+      "render_template": {
+        "zh": "{subject}{verb}{object}。",
+        "en": "{subject} {verb} {object}.",
+        "ru": "{subject} {verb} {object}.",
+        "uz": "{subject} {object} {verb}."
+      },
+      "meta": {
+        "enabled": true,
+        "version_added": "0.4"
+      }
+    },
+    {
+      "id": "NEED_OBJECT",
+      "scenario_tags": [
+        "daily",
+        "travel",
+        "hotel",
+        "medical"
+      ],
+      "weight": 0.8,
+      "slots": {
+        "subject": {
+          "required": true,
+          "concept_types": [
+            "person"
+          ],
+          "semantic_role": "experiencer"
+        },
+        "verb": {
+          "required": true,
+          "fixed_concept_id": "NEED"
+        },
+        "object": {
+          "required": true,
+          "concept_types": [
+            "object"
+          ],
+          "semantic_role": "theme"
+        }
+      },
+      "slot_order": [
+        "subject",
+        "verb",
+        "object"
+      ],
+      "features": {
+        "polarity": [
+          "pos",
+          "neg"
+        ]
+      },
+      "constraints": {
+        "object_compatible_with_verb": true
+      },
+      "render_template": {
+        "zh": "{subject}{verb}{object}。",
+        "en": "{subject} {verb} {object}.",
+        "ru": "{subject} {verb} {object}.",
+        "uz": "{subject} {object} {verb}."
+      },
+      "meta": {
+        "enabled": true,
+        "version_added": "0.4"
+      }
+    },
+    {
+      "id": "WHERE_PLACE",
+      "scenario_tags": [
+        "daily",
+        "travel",
+        "transport",
+        "hotel",
+        "restaurant",
+        "medical"
+      ],
+      "weight": 0.8,
+      "slots": {
+        "place": {
+          "required": true,
+          "concept_types": [
+            "place"
+          ],
+          "semantic_role": "location_target"
+        }
+      },
+      "slot_order": [
+        "place"
+      ],
+      "features": {},
+      "render_template": {
+        "zh": "{place}在哪里？",
+        "en": "Where is {place}?",
+        "ru": "Где {place}?",
+        "uz": "{place} qayerda?"
+      },
+      "meta": {
+        "enabled": true,
+        "version_added": "0.4"
+      }
+    }
+  ]
+}

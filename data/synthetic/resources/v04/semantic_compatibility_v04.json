@@ -1,0 +1,382 @@
+{
+  "version": "0.4",
+  "description": "Semantic compatibility rules for FourLang Synthetic Generator V0.4.",
+  "unknown_policy": "reject",
+  "semantic_classes": {
+    "PERSON": {
+      "description": "Human participant."
+    },
+    "PLACE": {
+      "description": "General physical place or destination."
+    },
+    "TRANSPORT_HUB": {
+      "parent": "PLACE"
+    },
+    "ACCOMMODATION_PLACE": {
+      "parent": "PLACE"
+    },
+    "MEDICAL_PLACE": {
+      "parent": "PLACE"
+    },
+    "FOOD_PLACE": {
+      "parent": "PLACE"
+    },
+    "WORK_STUDY_PLACE": {
+      "parent": "PLACE"
+    },
+    "SHOPPING_PLACE": {
+      "parent": "PLACE"
+    },
+    "EDIBLE": {
+      "description": "Food that can naturally be eaten."
+    },
+    "DRINKABLE": {
+      "description": "Liquid that can naturally be drunk."
+    },
+    "READABLE_TEXT": {
+      "description": "Textual content naturally suitable for reading."
+    },
+    "IDENTITY_DOCUMENT": {
+      "description": "Passport, ID card and similar identity documents."
+    },
+    "TRAVEL_DOCUMENT": {
+      "description": "Ticket, boarding pass, visa and similar travel documents."
+    },
+    "DEVICE": {
+      "description": "Electronic device."
+    },
+    "MEDICINE": {
+      "description": "Medicine or medically consumable item."
+    },
+    "CLOTHING": {
+      "description": "Wearable clothing item."
+    },
+    "MONEY_ITEM": {
+      "description": "Money, bill, price-related object."
+    },
+    "PHYSICAL_OBJECT": {
+      "description": "General tangible object."
+    },
+    "PURCHASABLE": {
+      "description": "Object naturally purchasable in an ordinary context."
+    },
+    "PHONE_CONTACT": {
+      "description": "A person or contact that can naturally be called."
+    },
+    "MOTION_ACTION": {
+      "description": "Motion or travel action."
+    },
+    "CONSUMPTION_ACTION": {
+      "description": "Eating or drinking action."
+    },
+    "COMMUNICATION_ACTION": {
+      "description": "Speaking or communication action."
+    },
+    "INFORMATION_ACTION": {
+      "description": "Reading, finding, knowing or information-related action."
+    },
+    "TRANSFER_ACTION": {
+      "description": "Giving, taking, bringing or transferring an object."
+    },
+    "COMMERCE_ACTION": {
+      "description": "Buying, selling or paying."
+    }
+  },
+  "verb_rules": {
+    "GO": {
+      "destination": {
+        "required": false,
+        "allowed_classes": [
+          "PLACE"
+        ]
+      }
+    },
+    "COME": {
+      "destination": {
+        "required": false,
+        "allowed_classes": [
+          "PLACE"
+        ]
+      }
+    },
+    "LEAVE": {
+      "source": {
+        "required": false,
+        "allowed_classes": [
+          "PLACE"
+        ]
+      }
+    },
+    "ARRIVE": {
+      "destination": {
+        "required": false,
+        "allowed_classes": [
+          "PLACE"
+        ]
+      }
+    },
+    "RETURN": {
+      "destination": {
+        "required": false,
+        "allowed_classes": [
+          "PLACE"
+        ]
+      }
+    },
+    "ENTER": {
+      "destination": {
+        "required": false,
+        "allowed_classes": [
+          "PLACE"
+        ]
+      }
+    },
+    "EXIT": {
+      "source": {
+        "required": false,
+        "allowed_classes": [
+          "PLACE"
+        ]
+      }
+    },
+    "EAT": {
+      "object": {
+        "required": true,
+        "allowed_classes": [
+          "EDIBLE"
+        ]
+      }
+    },
+    "DRINK": {
+      "object": {
+        "required": true,
+        "allowed_classes": [
+          "DRINKABLE"
+        ]
+      }
+    },
+    "READ": {
+      "object": {
+        "required": true,
+        "allowed_classes": [
+          "READABLE_TEXT"
+        ]
+      }
+    },
+    "FIND": {
+      "object": {
+        "required": true,
+        "allowed_classes": [
+          "PHYSICAL_OBJECT",
+          "IDENTITY_DOCUMENT",
+          "TRAVEL_DOCUMENT",
+          "DEVICE",
+          "READABLE_TEXT",
+          "MEDICINE"
+        ]
+      }
+    },
+    "LOSE": {
+      "object": {
+        "required": true,
+        "allowed_classes": [
+          "PHYSICAL_OBJECT",
+          "IDENTITY_DOCUMENT",
+          "TRAVEL_DOCUMENT",
+          "DEVICE"
+        ]
+      }
+    },
+    "BUY": {
+      "object": {
+        "required": true,
+        "allowed_classes": [
+          "PURCHASABLE"
+        ]
+      }
+    },
+    "SELL": {
+      "object": {
+        "required": true,
+        "allowed_classes": [
+          "PURCHASABLE"
+        ]
+      }
+    },
+    "TAKE": {
+      "object": {
+        "required": true,
+        "allowed_classes": [
+          "PHYSICAL_OBJECT"
+        ]
+      }
+    },
+    "GIVE": {
+      "object": {
+        "required": true,
+        "allowed_classes": [
+          "PHYSICAL_OBJECT"
+        ]
+      },
+      "recipient": {
+        "required": false,
+        "allowed_classes": [
+          "PERSON"
+        ]
+      }
+    },
+    "BRING": {
+      "object": {
+        "required": true,
+        "allowed_classes": [
+          "PHYSICAL_OBJECT"
+        ]
+      },
+      "destination": {
+        "required": false,
+        "allowed_classes": [
+          "PLACE"
+        ]
+      }
+    },
+    "PUT": {
+      "object": {
+        "required": true,
+        "allowed_classes": [
+          "PHYSICAL_OBJECT"
+        ]
+      },
+      "location": {
+        "required": false,
+        "allowed_classes": [
+          "PLACE"
+        ]
+      }
+    },
+    "OPEN": {
+      "object": {
+        "required": true,
+        "allowed_classes": [
+          "PHYSICAL_OBJECT",
+          "DEVICE"
+        ]
+      }
+    },
+    "CLOSE": {
+      "object": {
+        "required": true,
+        "allowed_classes": [
+          "PHYSICAL_OBJECT",
+          "DEVICE"
+        ]
+      }
+    },
+    "USE": {
+      "object": {
+        "required": true,
+        "allowed_classes": [
+          "PHYSICAL_OBJECT",
+          "DEVICE"
+        ]
+      }
+    },
+    "CALL": {
+      "object": {
+        "required": true,
+        "allowed_classes": [
+          "PERSON",
+          "PHONE_CONTACT"
+        ]
+      }
+    },
+    "WRITE": {
+      "object": {
+        "required": false,
+        "allowed_classes": [
+          "READABLE_TEXT"
+        ]
+      }
+    },
+    "SEE": {
+      "object": {
+        "required": false,
+        "allowed_classes": [
+          "PERSON",
+          "PHYSICAL_OBJECT",
+          "PLACE"
+        ]
+      }
+    },
+    "LOOK": {
+      "object": {
+        "required": false,
+        "allowed_classes": [
+          "PERSON",
+          "PHYSICAL_OBJECT",
+          "PLACE"
+        ]
+      }
+    },
+    "WANT": {
+      "object": {
+        "required": false,
+        "allowed_classes": [
+          "PHYSICAL_OBJECT",
+          "EDIBLE",
+          "DRINKABLE",
+          "DEVICE",
+          "MEDICINE",
+          "TRAVEL_DOCUMENT"
+        ]
+      }
+    },
+    "NEED": {
+      "object": {
+        "required": false,
+        "allowed_classes": [
+          "PHYSICAL_OBJECT",
+          "IDENTITY_DOCUMENT",
+          "TRAVEL_DOCUMENT",
+          "DEVICE",
+          "MEDICINE"
+        ]
+      }
+    }
+  },
+  "explicit_forbidden": [
+    {
+      "verb": "READ",
+      "object": "PASSPORT",
+      "reason": "Passport is not treated as ordinary reading material."
+    },
+    {
+      "verb": "READ",
+      "object": "ID_CARD",
+      "reason": "Identity card is not treated as ordinary reading material."
+    },
+    {
+      "verb": "EAT",
+      "object": "WATER",
+      "reason": "Water is drinkable rather than edible."
+    },
+    {
+      "verb": "EAT",
+      "object": "COFFEE",
+      "reason": "Coffee is drinkable rather than edible."
+    },
+    {
+      "verb": "DRINK",
+      "object": "FOOD",
+      "reason": "Generic food is not treated as drinkable."
+    },
+    {
+      "verb": "BUY",
+      "object": "PASSPORT",
+      "reason": "Passport is not treated as an ordinary purchasable object."
+    }
+  ],
+  "meta": {
+    "base_version": "v1.1",
+    "status": "development"
+  }
+}

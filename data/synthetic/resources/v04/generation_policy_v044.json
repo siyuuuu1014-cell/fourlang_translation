@@ -1,0 +1,133 @@
+{
+  "version": "0.4.4",
+  "description": "V0.4.4 motion-event cleanup: GO/COME present is habitual-only; TIME_NOW progressive motion is deferred.",
+  "languages": [
+    "zh",
+    "en",
+    "ru",
+    "uz"
+  ],
+  "enabled_scenarios": [
+    "daily",
+    "travel",
+    "shopping",
+    "restaurant",
+    "hotel",
+    "transport",
+    "medical",
+    "communication",
+    "work_study"
+  ],
+  "scenario_weights": {
+    "daily": 0.2,
+    "travel": 0.2,
+    "shopping": 0.15,
+    "restaurant": 0.1,
+    "hotel": 0.1,
+    "transport": 0.1,
+    "medical": 0.05,
+    "communication": 0.05,
+    "work_study": 0.05
+  },
+  "polarity_weights": {
+    "pos": 0.7,
+    "neg": 0.3
+  },
+  "tense_weights": {
+    "present": 0.6,
+    "future": 0.4
+  },
+  "clock_policy": {
+    "enabled": true,
+    "minute_step": 15,
+    "min_hour": 0,
+    "max_hour": 23,
+    "force_future": true,
+    "allowed_day_ids": [
+      "TIME_TOMORROW"
+    ]
+  },
+  "sampling_policy": {
+    "mode": "quota_deficit_balancing",
+    "scenario_frame_joint_sampling": true,
+    "compatibility_aware_slot_sampling": true,
+    "verb_global_deficit_balancing": true,
+    "avoid_duplicate_semantic_signature": true,
+    "shuffle_output": true
+  },
+  "frame_target_ratios": {
+    "INTRANSITIVE": 0.03,
+    "INTRANSITIVE_TIME": 0.05,
+    "MOTION_DESTINATION": 0.13,
+    "MOTION_TIME": 0.12,
+    "MOTION_CLOCK": 0.12,
+    "TRANSITIVE": 0.15,
+    "TRANSITIVE_TIME": 0.15,
+    "TRANSITIVE_CLOCK": 0.15,
+    "WANT_OBJECT": 0.09,
+    "WHERE_PLACE": 0.01
+  },
+  "verb_target_ratios": {
+    "GO": 0.15,
+    "COME": 0.15,
+    "ARRIVE": 0.15,
+    "BUY": 0.09,
+    "FIND": 0.09,
+    "EAT": 0.09,
+    "DRINK": 0.09,
+    "READ": 0.09,
+    "WANT": 0.09
+  },
+  "verb_frame_constraints": {
+    "WANT": {
+      "allowed_frame_ids": [
+        "WANT_OBJECT"
+      ]
+    }
+  },
+  "coverage_constraints": {
+    "min_each_enabled_frame": 1,
+    "min_each_enabled_verb": 1,
+    "min_each_enabled_scenario": 1,
+    "max_single_verb_ratio": 0.15,
+    "max_single_frame_ratio": 0.15,
+    "max_single_scenario_ratio": 0.25
+  },
+  "pilot": {
+    "target_samples": 1000
+  },
+  "quality_targets": {
+    "semantic_compatibility_accept_rate": 1.0,
+    "hard_semantic_accept_rate": 1.0,
+    "grammar_hard_accept_rate": 1.0,
+    "linguistic_audit_target_accept_rate": 0.95,
+    "max_parse_error_rate": 0.01
+  },
+  "meta": {
+    "generator_family": "fourlang_synthetic",
+    "base_generator_version": "0.4.1",
+    "previous_policy_version": "0.4.2",
+    "status": "development",
+    "purpose": "motion_aspect_cleanup",
+    "version": "0.4.4",
+    "changes": [
+      "ARRIVE future-only",
+      "clock frames force future",
+      "clock frames use TIME_TOMORROW",
+      "WHERE_PLACE removes tense metadata"
+    ],
+    "previous_version": "0.4.3"
+  },
+  "motion_event_policy": {
+    "target_verbs": [
+      "GO",
+      "COME"
+    ],
+    "present_event_type": "habitual",
+    "habitual_time_id": "TIME_EVERY_DAY",
+    "time_now_policy": "convert_to_habitual",
+    "time_today_policy": "convert_to_future_planned",
+    "no_time_present_policy": "convert_to_future_planned",
+    "progressive_enabled": false
+  }
+}

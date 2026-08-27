@@ -1,0 +1,55 @@
+{
+  "generated": 200,
+  "attempts": 216,
+  "efficiency": 0.9259259259259259,
+  "duplicate_signatures": 5,
+  "candidate_errors": 11,
+  "top_candidate_errors": [
+    {
+      "reason": "V0.4.4.1 habitual motion supports positive polarity only.",
+      "count": 8
+    },
+    {
+      "reason": "Habitual GO requires destination.",
+      "count": 3
+    }
+  ],
+  "generator_version": "0.4.4.1",
+  "generation_policy_version": "0.4.4",
+  "balance_fallback_count": 2,
+  "scenario_quotas": {
+    "daily": 40,
+    "travel": 40,
+    "shopping": 30,
+    "restaurant": 20,
+    "hotel": 20,
+    "transport": 20,
+    "medical": 10,
+    "communication": 10,
+    "work_study": 10
+  },
+  "frame_quotas": {
+    "INTRANSITIVE": 6,
+    "INTRANSITIVE_TIME": 10,
+    "MOTION_DESTINATION": 26,
+    "MOTION_TIME": 24,
+    "MOTION_CLOCK": 24,
+    "TRANSITIVE": 30,
+    "TRANSITIVE_TIME": 30,
+    "TRANSITIVE_CLOCK": 30,
+    "WANT_OBJECT": 18,
+    "WHERE_PLACE": 2
+  },
+  "verb_quotas": {
+    "GO": 30,
+    "COME": 30,
+    "ARRIVE": 30,
+    "BUY": 18,
+    "FIND": 18,
+    "EAT": 18,
+    "DRINK": 18,
+    "READ": 18,
+    "WANT": 18
+  },
+  "renderer_version": "0.4.4.1"
+}

@@ -1,0 +1,196 @@
+{
+  "samples": 200,
+  "counts": {
+    "scenario": {
+      "daily": 40,
+      "travel": 40,
+      "shopping": 30,
+      "restaurant": 20,
+      "hotel": 20,
+      "transport": 20,
+      "work_study": 10,
+      "communication": 10,
+      "medical": 10
+    },
+    "frame": {
+      "MOTION_DESTINATION": 31,
+      "TRANSITIVE_CLOCK": 31,
+      "MOTION_TIME": 28,
+      "TRANSITIVE_TIME": 25,
+      "MOTION_CLOCK": 24,
+      "TRANSITIVE": 24,
+      "WANT_OBJECT": 20,
+      "INTRANSITIVE_TIME": 10,
+      "INTRANSITIVE": 5,
+      "WHERE_PLACE": 2
+    },
+    "verb": {
+      "COME": 36,
+      "GO": 36,
+      "ARRIVE": 26,
+      "WANT": 20,
+      "READ": 17,
+      "EAT": 17,
+      "DRINK": 16,
+      "FIND": 15,
+      "BUY": 15
+    },
+    "subject": {
+      "PERSON_WE": 44,
+      "PERSON_SHE": 37,
+      "PERSON_THEY": 32,
+      "PERSON_HE": 32,
+      "PERSON_YOU": 28,
+      "PERSON_I": 25
+    },
+    "object": {
+      "FOOD": 25,
+      "BOOK": 22,
+      "COFFEE": 19,
+      "WATER": 12,
+      "MEDICINE": 7,
+      "PHONE": 6,
+      "TICKET": 6,
+      "PASSPORT": 3
+    },
+    "destination": {
+      "HOTEL": 11,
+      "STATION": 11,
+      "OFFICE": 9,
+      "SCHOOL": 9,
+      "HOSPITAL": 8,
+      "TASHKENT": 7,
+      "AIRPORT": 7,
+      "BEIJING": 7,
+      "RESTAURANT": 5,
+      "BANK": 5,
+      "MOSCOW": 4
+    },
+    "time": {
+      "TIME_TOMORROW": 77,
+      "TIME_NEXT_WEEK": 15,
+      "TIME_TODAY": 9,
+      "TIME_EVERY_DAY": 9,
+      "TIME_NOW": 8
+    },
+    "tense": {
+      "future": 141,
+      "present": 57,
+      "NONE": 2
+    },
+    "polarity": {
+      "pos": 140,
+      "neg": 60
+    }
+  },
+  "ratios": {
+    "scenario": {
+      "daily": 0.2,
+      "restaurant": 0.1,
+      "travel": 0.2,
+      "work_study": 0.05,
+      "hotel": 0.1,
+      "transport": 0.1,
+      "shopping": 0.15,
+      "communication": 0.05,
+      "medical": 0.05
+    },
+    "frame": {
+      "WHERE_PLACE": 0.01,
+      "WANT_OBJECT": 0.1,
+      "MOTION_CLOCK": 0.12,
+      "MOTION_DESTINATION": 0.155,
+      "TRANSITIVE_TIME": 0.125,
+      "TRANSITIVE": 0.12,
+      "INTRANSITIVE": 0.025,
+      "INTRANSITIVE_TIME": 0.05,
+      "TRANSITIVE_CLOCK": 0.155,
+      "MOTION_TIME": 0.14
+    },
+    "verb": {
+      "WANT": 0.1,
+      "COME": 0.18,
+      "FIND": 0.075,
+      "READ": 0.085,
+      "GO": 0.18,
+      "BUY": 0.075,
+      "EAT": 0.085,
+      "DRINK": 0.08,
+      "ARRIVE": 0.13
+    },
+    "subject": {
+      "PERSON_YOU": 0.14,
+      "PERSON_WE": 0.22,
+      "PERSON_SHE": 0.185,
+      "PERSON_THEY": 0.16,
+      "PERSON_I": 0.125,
+      "PERSON_HE": 0.16
+    },
+    "object": {
+      "PHONE": 0.03,
+      "PASSPORT": 0.015,
+      "BOOK": 0.11,
+      "FOOD": 0.125,
+      "COFFEE": 0.095,
+      "MEDICINE": 0.035,
+      "TICKET": 0.03,
+      "WATER": 0.06
+    },
+    "destination": {
+      "OFFICE": 0.045,
+      "TASHKENT": 0.035,
+      "AIRPORT": 0.035,
+      "SCHOOL": 0.045,
+      "HOTEL": 0.055,
+      "STATION": 0.055,
+      "MOSCOW": 0.02,
+      "BEIJING": 0.035,
+      "RESTAURANT": 0.025,
+      "HOSPITAL": 0.04,
+      "BANK": 0.025
+    },
+    "time": {
+      "TIME_TOMORROW": 0.385,
+      "TIME_NEXT_WEEK": 0.075,
+      "TIME_TODAY": 0.045,
+      "TIME_EVERY_DAY": 0.045,
+      "TIME_NOW": 0.04
+    },
+    "tense": {
+      "NONE": 0.01,
+      "present": 0.285,
+      "future": 0.705
+    },
+    "polarity": {
+      "pos": 0.7,
+      "neg": 0.3
+    }
+  },
+  "coverage_constraint_violations": [
+    {
+      "type": "verb",
+      "id": "COME",
+      "ratio": 0.18,
+      "max_ratio": 0.15
+    },
+    {
+      "type": "verb",
+      "id": "GO",
+      "ratio": 0.18,
+      "max_ratio": 0.15
+    },
+    {
+      "type": "frame",
+      "id": "MOTION_DESTINATION",
+      "ratio": 0.155,
+      "max_ratio": 0.15
+    },
+    {
+      "type": "frame",
+      "id": "TRANSITIVE_CLOCK",
+      "ratio": 0.155,
+      "max_ratio": 0.15
+    }
+  ],
+  "note": "Coverage constraint violations during a 100-sample smoke test are diagnostic only and do not automatically invalidate the corpus."
+}

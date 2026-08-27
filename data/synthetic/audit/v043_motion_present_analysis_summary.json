@@ -1,0 +1,69 @@
+{
+  "source_samples": 200,
+  "present_motion_samples": 38,
+  "target_verbs": [
+    "COME",
+    "GO"
+  ],
+  "verb_distribution": {
+    "COME": 21,
+    "GO": 17
+  },
+  "frame_distribution": {
+    "MOTION_DESTINATION": 16,
+    "MOTION_TIME": 13,
+    "INTRANSITIVE_TIME": 5,
+    "INTRANSITIVE": 4
+  },
+  "time_distribution": {
+    "NO_TIME": 20,
+    "TIME_NOW": 12,
+    "TIME_TODAY": 6
+  },
+  "polarity_distribution": {
+    "pos": 23,
+    "neg": 15
+  },
+  "subject_distribution": {
+    "PERSON_THEY": 11,
+    "PERSON_SHE": 7,
+    "PERSON_HE": 6,
+    "PERSON_WE": 5,
+    "PERSON_I": 5,
+    "PERSON_YOU": 4
+  },
+  "risk_distribution": {
+    "HIGH": 32,
+    "MEDIUM": 6
+  },
+  "risk_type_distribution": {
+    "DESTINATION_SIMPLE_PRESENT_NO_CUE": 16,
+    "PRESENT_NOW_SIMPLE": 12,
+    "TODAY_PRESENT_AMBIGUOUS": 6,
+    "BARE_MOTION_SIMPLE_PRESENT": 4
+  },
+  "verb_frame_distribution": {
+    "COME|MOTION_DESTINATION": 9,
+    "COME|MOTION_TIME": 9,
+    "GO|MOTION_DESTINATION": 7,
+    "GO|MOTION_TIME": 4,
+    "GO|INTRANSITIVE": 3,
+    "GO|INTRANSITIVE_TIME": 3,
+    "COME|INTRANSITIVE_TIME": 2,
+    "COME|INTRANSITIVE": 1
+  },
+  "verb_time_distribution": {
+    "COME|NO_TIME": 10,
+    "GO|NO_TIME": 10,
+    "COME|TIME_NOW": 7,
+    "GO|TIME_NOW": 5,
+    "COME|TIME_TODAY": 4,
+    "GO|TIME_TODAY": 2
+  },
+  "verb_risk_distribution": {
+    "COME|HIGH": 17,
+    "GO|HIGH": 15,
+    "COME|MEDIUM": 4,
+    "GO|MEDIUM": 2
+  }
+}

@@ -1,0 +1,150 @@
+{
+  "samples": 200,
+  "balance_fallback_count": 2,
+  "scenario": {
+    "communication": {
+      "target": 10,
+      "actual": 10,
+      "delta": 0
+    },
+    "daily": {
+      "target": 40,
+      "actual": 40,
+      "delta": 0
+    },
+    "hotel": {
+      "target": 20,
+      "actual": 20,
+      "delta": 0
+    },
+    "medical": {
+      "target": 10,
+      "actual": 10,
+      "delta": 0
+    },
+    "restaurant": {
+      "target": 20,
+      "actual": 20,
+      "delta": 0
+    },
+    "shopping": {
+      "target": 30,
+      "actual": 30,
+      "delta": 0
+    },
+    "transport": {
+      "target": 20,
+      "actual": 20,
+      "delta": 0
+    },
+    "travel": {
+      "target": 40,
+      "actual": 40,
+      "delta": 0
+    },
+    "work_study": {
+      "target": 10,
+      "actual": 10,
+      "delta": 0
+    }
+  },
+  "frame": {
+    "INTRANSITIVE": {
+      "target": 6,
+      "actual": 6,
+      "delta": 0
+    },
+    "INTRANSITIVE_TIME": {
+      "target": 10,
+      "actual": 10,
+      "delta": 0
+    },
+    "MOTION_CLOCK": {
+      "target": 24,
+      "actual": 24,
+      "delta": 0
+    },
+    "MOTION_DESTINATION": {
+      "target": 26,
+      "actual": 27,
+      "delta": 1
+    },
+    "MOTION_TIME": {
+      "target": 24,
+      "actual": 24,
+      "delta": 0
+    },
+    "TRANSITIVE": {
+      "target": 30,
+      "actual": 30,
+      "delta": 0
+    },
+    "TRANSITIVE_CLOCK": {
+      "target": 30,
+      "actual": 30,
+      "delta": 0
+    },
+    "TRANSITIVE_TIME": {
+      "target": 30,
+      "actual": 28,
+      "delta": -2
+    },
+    "WANT_OBJECT": {
+      "target": 18,
+      "actual": 18,
+      "delta": 0
+    },
+    "WHERE_PLACE": {
+      "target": 2,
+      "actual": 3,
+      "delta": 1
+    }
+  },
+  "verb": {
+    "ARRIVE": {
+      "target": 30,
+      "actual": 29,
+      "delta": -1
+    },
+    "BUY": {
+      "target": 18,
+      "actual": 18,
+      "delta": 0
+    },
+    "COME": {
+      "target": 30,
+      "actual": 31,
+      "delta": 1
+    },
+    "DRINK": {
+      "target": 18,
+      "actual": 18,
+      "delta": 0
+    },
+    "EAT": {
+      "target": 18,
+      "actual": 18,
+      "delta": 0
+    },
+    "FIND": {
+      "target": 18,
+      "actual": 17,
+      "delta": -1
+    },
+    "GO": {
+      "target": 30,
+      "actual": 31,
+      "delta": 1
+    },
+    "READ": {
+      "target": 18,
+      "actual": 17,
+      "delta": -1
+    },
+    "WANT": {
+      "target": 18,
+      "actual": 18,
+      "delta": 0
+    }
+  }
+}

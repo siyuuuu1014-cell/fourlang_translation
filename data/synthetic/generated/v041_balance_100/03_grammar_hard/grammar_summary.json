@@ -1,0 +1,21 @@
+{
+  "validator_version": "0.4",
+  "input": "data\\synthetic\\generated\\v041_balance_100\\02_hard_semantic\\hard_accepted.jsonl",
+  "total": 100,
+  "accepted": 100,
+  "rejected": 0,
+  "accept_rate": 1.0,
+  "rejected_by_language": {},
+  "reject_reasons": {},
+  "verb_distribution": {
+    "COME": 12,
+    "GO": 11,
+    "WANT": 10,
+    "BUY": 9,
+    "DRINK": 9,
+    "READ": 9,
+    "EAT": 9,
+    "ARRIVE": 8,
+    "FIND": 8
+  }
+}

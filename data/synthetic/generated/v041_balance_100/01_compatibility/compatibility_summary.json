@@ -1,0 +1,22 @@
+{
+  "validator_version": "0.4",
+  "input": "data\\synthetic\\generated\\v041_balance_100\\semantic_v041_raw.jsonl",
+  "total": 100,
+  "accepted": 100,
+  "rejected": 0,
+  "accept_rate": 1.0,
+  "rows_with_warnings": 0,
+  "warning_rate": 0.0,
+  "verb_distribution": {
+    "COME": 12,
+    "GO": 11,
+    "WANT": 10,
+    "BUY": 9,
+    "DRINK": 9,
+    "READ": 9,
+    "EAT": 9,
+    "ARRIVE": 8,
+    "FIND": 8
+  },
+  "violations": {}
+}

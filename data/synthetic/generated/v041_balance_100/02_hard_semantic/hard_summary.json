@@ -1,0 +1,32 @@
+{
+  "validator_version": "0.4",
+  "input": "data\\synthetic\\generated\\v041_balance_100\\01_compatibility\\compatibility_accepted.jsonl",
+  "total": 100,
+  "accepted": 100,
+  "rejected": 0,
+  "accept_rate": 1.0,
+  "violation_counts": {},
+  "frame_distribution": {
+    "TRANSITIVE_CLOCK": 15,
+    "TRANSITIVE_TIME": 15,
+    "WHERE_PLACE": 15,
+    "TRANSITIVE": 14,
+    "WANT_OBJECT": 10,
+    "MOTION_CLOCK": 9,
+    "MOTION_DESTINATION": 8,
+    "MOTION_TIME": 8,
+    "INTRANSITIVE": 3,
+    "INTRANSITIVE_TIME": 3
+  },
+  "verb_distribution": {
+    "COME": 12,
+    "GO": 11,
+    "WANT": 10,
+    "BUY": 9,
+    "DRINK": 9,
+    "READ": 9,
+    "EAT": 9,
+    "ARRIVE": 8,
+    "FIND": 8
+  }
+}

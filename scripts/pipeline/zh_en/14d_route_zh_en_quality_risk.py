@@ -3,12 +3,18 @@ from __future__ import annotations
 import argparse
 import json
 import re
-
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 
 import pandas as pd
+
+
+# ============================================================
+# Version
+# ============================================================
+
+ROUTING_VERSION = "14D_V3"
 
 
 # ============================================================
@@ -38,7 +44,19 @@ REPEATED_PUNCT_RE = re.compile(
 
 
 # ============================================================
-# Negation lexicons
+# English negation
+#
+# IMPORTANT:
+# Use word-boundary regex rather than:
+#
+#     if "no" in text
+#
+# Otherwise:
+#     known
+#     another
+#     northern
+#
+# can be falsely detected as negation.
 # ============================================================
 
 EN_NEGATION_PATTERNS = [
@@ -78,44 +96,88 @@ EN_NEGATION_PATTERNS = [
 ]
 
 
-def has_english_negation(
-    text: str,
-) -> bool:
+# ============================================================
+# Chinese strong negation
+#
+# Do NOT use:
+#
+#     "不" in text
+#     "无" in text
+#
+# because normal lexical words such as:
+#
+#     不同
+#     不知道
+#     无耻
+#     无偿
+#
+# can be legitimate translations without representing
+# a source-target negation mismatch.
+#
+# This list intentionally prefers PRECISION over recall.
+# Borderline semantics will later be audited by Qwen.
+# ============================================================
 
-    text = (
-        str(text)
-        .lower()
-    )
+ZH_STRONG_NEGATION_PATTERNS = [
 
-    return any(
+    r"没有",
+    r"没能",
+    r"没法",
 
-        re.search(
-            pattern,
-            text,
-        )
+    r"未能",
+    r"未曾",
 
-        is not None
+    r"从未",
+    r"从不",
+    r"从来不",
 
-        for pattern
-        in EN_NEGATION_PATTERNS
-    )
-ZH_NEGATIONS = [
+    r"不是",
+    r"并非",
+    r"并不",
 
-    "不",
-    "没",
-    "没有",
-    "无",
-    "未",
-    "不是",
-    "不能",
-    "不会",
-    "不得",
-    "从未",
-    "并非",
-    "无需",
-    "不必",
-    "不要",
+    r"不能",
+    r"不会",
+
+    r"不再",
+    r"不要",
+    r"不必",
+
+    r"无需",
+    r"无法",
+
+    r"不得",
+
+    r"绝不",
+    r"毫不",
 ]
+
+
+# ============================================================
+# Negative question rewrite
+#
+# Example:
+#
+# EN:
+#   Isn't that mine?
+#
+# ZH:
+#   那是我的吗？
+#
+# This is a perfectly natural translation although
+# explicit surface negation disappears in Chinese.
+# ============================================================
+
+EN_NEGATIVE_QUESTION_RE = re.compile(
+    r"\b("
+    r"isn't|aren't|wasn't|weren't|"
+    r"don't|doesn't|didn't|"
+    r"can't|couldn't|"
+    r"won't|wouldn't|"
+    r"haven't|hasn't|hadn't|"
+    r"shouldn't"
+    r")\b",
+    flags=re.IGNORECASE,
+)
 
 
 # ============================================================
@@ -128,15 +190,19 @@ EN_CURRENCY = [
     "€",
     "£",
     "¥",
+
     "USD",
     "EUR",
     "GBP",
     "CNY",
     "RMB",
+
     "dollar",
     "dollars",
+
     "euro",
     "euros",
+
     "yuan",
 ]
 
@@ -146,10 +212,12 @@ ZH_CURRENCY = [
     "€",
     "£",
     "¥",
+
     "美元",
     "欧元",
     "英镑",
     "人民币",
+
     "元",
     "块",
 ]
@@ -159,13 +227,12 @@ ZH_CURRENCY = [
 # Args
 # ============================================================
 
-
 def parse_args():
 
     parser = argparse.ArgumentParser(
         description=(
-            "Step 14D - Risk routing for "
-            "ZH-EN human parallel corpus."
+            "Step 14D V3 - Quality risk routing "
+            "for ZH-EN human parallel corpus."
         )
     )
 
@@ -178,9 +245,8 @@ def parse_args():
 
 
 # ============================================================
-# Helpers
+# Number helpers
 # ============================================================
-
 
 def normalize_number(
     value: str,
@@ -217,29 +283,48 @@ def extract_numbers(
     )
 
 
+# ============================================================
+# Percentage helpers
+# ============================================================
+
 def extract_percentages(
     text: str,
 ) -> list[str]:
 
-    values = []
-
-    for item in PERCENT_RE.findall(
+    matches = PERCENT_RE.findall(
         str(
             text
         )
-    ):
+    )
 
-        values.append(
-            item.replace(
+    values = []
+
+    for item in matches:
+
+        item = (
+            item
+            .replace(
                 "％",
                 "%"
             )
+            .replace(
+                " ",
+                ""
+            )
+        )
+
+        values.append(
+            item
         )
 
     return sorted(
         values
     )
 
+
+# ============================================================
+# URL / email
+# ============================================================
 
 def extract_urls(
     text: str,
@@ -250,7 +335,8 @@ def extract_urls(
             str(
                 text
         )
-    ))
+    )
+
 
 def extract_emails(
     text: str,
@@ -260,12 +346,40 @@ def extract_emails(
         EMAIL_RE.findall(
             str(
                 text
+        ).lower()
+    )
+
+
+# ============================================================
+# English negation
+# ============================================================
+
+def has_english_negation(
+    text: str,
+) -> bool:
+
+    text = (
+        str(
+            text
         )
         .lower()
-    ))
+    )
+
+    return any(
+        re.search(
+            pattern,
+            text,
+        )
+        is not None
+
+        for pattern
+        in EN_NEGATION_PATTERNS
+    )
 
 
-
+# ============================================================
+# Chinese negation
+# ============================================================
 
 def has_chinese_negation(
     text: str,
@@ -275,26 +389,90 @@ def has_chinese_negation(
         text
     )
 
-    for token in ZH_NEGATIONS:
+    return any(
+        re.search(
+            pattern,
+            text,
+        )
+        is not None
 
-        if token in text:
+        for pattern
+        in ZH_STRONG_NEGATION_PATTERNS
+    )
 
-            return True
 
-    return False
+# ============================================================
+# Negative-question rewrite
+# ============================================================
 
+def is_negative_question_rewrite(
+    en: str,
+    zh: str,
+) -> bool:
+
+    en = str(
+        en
+    ).strip()
+
+    zh = str(
+        zh
+    ).strip()
+
+    en_negative_question = (
+        (
+            "?" in en
+        )
+        and
+        (
+            EN_NEGATIVE_QUESTION_RE.search(
+                en
+            )
+            is not None
+        )
+    )
+
+    zh_question = (
+        "?" in zh
+        or
+        "？" in zh
+        or
+        "吗" in zh
+        or
+        "么" in zh
+        or
+        "是不是" in zh
+        or
+        "难道" in zh
+    )
+
+    return bool(
+        en_negative_question
+        and
+        zh_question
+    )
+
+
+# ============================================================
+# Currency
+# ============================================================
 
 def has_english_currency(
     text: str,
 ) -> bool:
 
-    lower = str(
-        text
-    ).lower()
+    lower = (
+        str(
+            text
+        )
+        .lower()
+    )
 
     for token in EN_CURRENCY:
 
-        if token.lower() in lower:
+        if (
+            token.lower()
+            in lower
+        ):
 
             return True
 
@@ -322,7 +500,6 @@ def has_chinese_currency(
 # Risk analysis
 # ============================================================
 
-
 def analyze_row(
     row: pd.Series,
 ) -> dict:
@@ -337,16 +514,20 @@ def analyze_row(
 
     flags = []
 
-    # --------------------------------------------------------
+    # ========================================================
     # Number
-    # --------------------------------------------------------
+    # ========================================================
 
-    en_numbers = extract_numbers(
-        en
+    en_numbers = (
+        extract_numbers(
+            en
+        )
     )
 
-    zh_numbers = extract_numbers(
-        zh
+    zh_numbers = (
+        extract_numbers(
+            zh
+        )
     )
 
     if (
@@ -359,9 +540,9 @@ def analyze_row(
             "NUMBER_MISMATCH"
         )
 
-    # --------------------------------------------------------
-    # Percent
-    # --------------------------------------------------------
+    # ========================================================
+    # Percentage
+    # ========================================================
 
     en_percent = (
         extract_percentages(
@@ -385,9 +566,9 @@ def analyze_row(
             "PERCENT_MISMATCH"
         )
 
-    # --------------------------------------------------------
+    # ========================================================
     # Negation
-    # --------------------------------------------------------
+    # ========================================================
 
     en_neg = (
         has_english_negation(
@@ -401,26 +582,47 @@ def analyze_row(
         )
     )
 
+    negation_question_rewrite = (
+        is_negative_question_rewrite(
+            en,
+            zh,
+        )
+    )
+
     if (
         en_neg
         !=
         zh_neg
     ):
 
-        flags.append(
-            "NEGATION_MISMATCH"
-        )
+        if (
+            negation_question_rewrite
+        ):
 
-    # --------------------------------------------------------
+            flags.append(
+                "NEGATION_QUESTION_REWRITE"
+            )
+
+        else:
+
+            flags.append(
+                "NEGATION_MISMATCH"
+            )
+
+    # ========================================================
     # URL
-    # --------------------------------------------------------
+    # ========================================================
 
-    en_urls = extract_urls(
-        en
+    en_urls = (
+        extract_urls(
+            en
+        )
     )
 
-    zh_urls = extract_urls(
-        zh
+    zh_urls = (
+        extract_urls(
+            zh
+        )
     )
 
     if (
@@ -433,9 +635,9 @@ def analyze_row(
             "URL_MISMATCH"
         )
 
-    # --------------------------------------------------------
+    # ========================================================
     # Email
-    # --------------------------------------------------------
+    # ========================================================
 
     en_emails = (
         extract_emails(
@@ -459,13 +661,12 @@ def analyze_row(
             "EMAIL_MISMATCH"
         )
 
-    # --------------------------------------------------------
+    # ========================================================
     # Currency
     #
-    # Presence-only check.
-    # Currency wording can legitimately change,
-    # so this is only a risk signal.
-    # --------------------------------------------------------
+    # Presence-only risk signal.
+    # Not treated as strong semantic failure by itself.
+    # ========================================================
 
     en_currency = (
         has_english_currency(
@@ -489,9 +690,9 @@ def analyze_row(
             "CURRENCY_MISMATCH"
         )
 
-    # --------------------------------------------------------
+    # ========================================================
     # Repeated punctuation
-    # --------------------------------------------------------
+    # ========================================================
 
     if (
         REPEATED_PUNCT_RE.search(
@@ -507,13 +708,17 @@ def analyze_row(
             "REPEATED_PUNCT"
         )
 
-    # --------------------------------------------------------
+    # ========================================================
     # Very short pair
     #
-    # IMPORTANT:
-    # This is NOT automatically bad.
-    # We track it as an audit signal.
-    # --------------------------------------------------------
+    # Short translations are NOT bad.
+    #
+    # Example:
+    #
+    # Fine! <-> 好吧
+    #
+    # Only retain as an audit signal.
+    # ========================================================
 
     en_words = int(
         row[
@@ -537,19 +742,19 @@ def analyze_row(
             "VERY_SHORT_PAIR"
         )
 
-    # --------------------------------------------------------
-    # Soft length anomaly
+    # ========================================================
+    # Soft length ratio
     #
-    # Hard filter used 0.2~8.0.
-    # Here use a narrower band only as a risk signal.
-    # --------------------------------------------------------
+    # 14C hard band was broad.
+    # This narrower band is only a risk signal.
+    # ========================================================
 
-    ratio = (
+    length_ratio = (
         zh_cjk
         /
         max(
             en_words,
-            1
+            1,
         )
     )
 
@@ -557,9 +762,9 @@ def analyze_row(
         en_words > 3
         and
         (
-            ratio < 0.55
+            length_ratio < 0.55
             or
-            ratio > 3.50
+            length_ratio > 3.50
         )
     ):
 
@@ -567,9 +772,16 @@ def analyze_row(
             "SOFT_LENGTH_RATIO"
         )
 
-    # --------------------------------------------------------
+    # ========================================================
     # Mixed-script risk
-    # --------------------------------------------------------
+    #
+    # Examples such as:
+    #
+    # The Beatles 由四个音乐家组成。
+    #
+    # are valid translations, therefore this must NEVER
+    # be a hard rejection signal.
+    # ========================================================
 
     en_latin_ratio = float(
         row[
@@ -596,12 +808,15 @@ def analyze_row(
     # ========================================================
     # Quality score
     #
-    # Interpretability only.
-    # It does NOT mean probability of correctness.
+    # This is an interpretable routing score.
+    #
+    # IMPORTANT:
+    # It is NOT a probability that the translation is correct.
     # ========================================================
 
     penalties = {
 
+        # Strong signals
         "NUMBER_MISMATCH":
             30,
 
@@ -616,6 +831,10 @@ def analyze_row(
 
         "EMAIL_MISMATCH":
             40,
+
+        # Soft signals
+        "NEGATION_QUESTION_REWRITE":
+            5,
 
         "CURRENCY_MISMATCH":
             20,
@@ -640,7 +859,7 @@ def analyze_row(
         quality_score -= (
             penalties.get(
                 flag,
-                0
+                0,
             )
         )
 
@@ -650,11 +869,11 @@ def analyze_row(
     )
 
     # ========================================================
-    # Routing
+    # Strong risk flags
     #
-    # Strong semantic-risk flags automatically route to Qwen.
+    # Any one strong flag routes to Qwen.
     #
-    # Soft-only signals do NOT necessarily route.
+    # NEGATION_QUESTION_REWRITE is deliberately NOT here.
     # ========================================================
 
     strong_flags = {
@@ -671,20 +890,33 @@ def analyze_row(
         for flag in flags
     )
 
+    # ========================================================
+    # Soft flags
+    # ========================================================
+
+    soft_flags = {
+
+        "NEGATION_QUESTION_REWRITE",
+
+        "CURRENCY_MISMATCH",
+
+        "REPEATED_PUNCT",
+
+        "VERY_SHORT_PAIR",
+
+        "SOFT_LENGTH_RATIO",
+
+        "MIXED_SCRIPT_RISK",
+    }
+
     soft_flag_count = sum(
-
-        flag
-        in {
-            "CURRENCY_MISMATCH",
-            "REPEATED_PUNCT",
-            "VERY_SHORT_PAIR",
-            "SOFT_LENGTH_RATIO",
-            "MIXED_SCRIPT_RISK",
-        }
-
-        for flag
-        in flags
+        flag in soft_flags
+        for flag in flags
     )
+
+    # ========================================================
+    # Routing
+    # ========================================================
 
     if strong_risk:
 
@@ -692,13 +924,17 @@ def analyze_row(
             "NEEDS_QWEN"
         )
 
-    elif soft_flag_count >= 2:
+    elif (
+        soft_flag_count >= 2
+    ):
 
         route = (
             "NEEDS_QWEN"
         )
 
-    elif quality_score < 80:
+    elif (
+        quality_score < 80
+    ):
 
         route = (
             "NEEDS_QWEN"
@@ -710,6 +946,10 @@ def analyze_row(
             "AUTO_ACCEPT"
         )
 
+    # ========================================================
+    # Output diagnostics
+    # ========================================================
+
     return {
 
         "risk_flags":
@@ -718,8 +958,20 @@ def analyze_row(
             ),
 
         "risk_flag_count":
-            len(
-                flags
+            int(
+                len(
+                    flags
+                )
+            ),
+
+        "strong_risk":
+            bool(
+                strong_risk
+            ),
+
+        "soft_flag_count":
+            int(
+                soft_flag_count
             ),
 
         "quality_score":
@@ -729,6 +981,10 @@ def analyze_row(
 
         "route":
             route,
+
+        # -------------------------
+        # Numbers
+        # -------------------------
 
         "en_numbers":
             json.dumps(
@@ -742,6 +998,26 @@ def analyze_row(
                 ensure_ascii=False,
             ),
 
+        # -------------------------
+        # Percent
+        # -------------------------
+
+        "en_percentages":
+            json.dumps(
+                en_percent,
+                ensure_ascii=False,
+            ),
+
+        "zh_percentages":
+            json.dumps(
+                zh_percent,
+                ensure_ascii=False,
+            ),
+
+        # -------------------------
+        # Negation
+        # -------------------------
+
         "en_has_negation":
             bool(
                 en_neg
@@ -752,9 +1028,56 @@ def analyze_row(
                 zh_neg
             ),
 
+        "negation_question_rewrite":
+            bool(
+                negation_question_rewrite
+            ),
+
+        # -------------------------
+        # URLs / emails
+        # -------------------------
+
+        "en_urls":
+            json.dumps(
+                en_urls,
+                ensure_ascii=False,
+            ),
+
+        "zh_urls":
+            json.dumps(
+                zh_urls,
+                ensure_ascii=False,
+            ),
+
+        "en_emails":
+            json.dumps(
+                en_emails,
+                ensure_ascii=False,
+            ),
+
+        "zh_emails":
+            json.dumps(
+                zh_emails,
+                ensure_ascii=False,
+            ),
+
+        # -------------------------
+        # Other
+        # -------------------------
+
+        "en_has_currency":
+            bool(
+                en_currency
+            ),
+
+        "zh_has_currency":
+            bool(
+                zh_currency
+            ),
+
         "length_ratio":
             float(
-                ratio
+                length_ratio
             ),
     }
 
@@ -763,10 +1086,18 @@ def analyze_row(
 # Main
 # ============================================================
 
-
 def main():
 
     args = parse_args()
+
+    # Script location:
+    #
+    # scripts/
+    #   pipeline/
+    #     zh_en/
+    #       14d_route_zh_en_quality_risk.py
+    #
+    # parents[3] = project root
 
     project_root = (
         Path(__file__)
@@ -811,6 +1142,12 @@ def main():
         "parallel_routed_v1.parquet"
     )
 
+    routed_csv = (
+        output_dir
+        /
+        "parallel_routed_v1.csv"
+    )
+
     auto_file = (
         output_dir
         /
@@ -847,6 +1184,10 @@ def main():
         "risk_routing_report_v1.json"
     )
 
+    # ========================================================
+    # Header
+    # ========================================================
+
     print(
         "=" * 110
     )
@@ -856,11 +1197,19 @@ def main():
     )
 
     print(
-        "STEP 14D - QUALITY RISK ROUTING"
+        "STEP 14D V3 - QUALITY RISK ROUTING"
     )
 
     print(
         "=" * 110
+    )
+
+    print(
+        "\nRouting version:"
+    )
+
+    print(
+        ROUTING_VERSION
     )
 
     print(
@@ -884,10 +1233,17 @@ def main():
     ):
 
         raise RuntimeError(
+
             "\nOutput already exists:\n"
-            f"{routed_file}\n"
+
+            f"{routed_file}\n\n"
+
             "Use --overwrite to rebuild."
         )
+
+    # ========================================================
+    # Load
+    # ========================================================
 
     df = pd.read_parquet(
         input_file
@@ -933,13 +1289,39 @@ def main():
         )
     )
 
+    print(
+        "\nSource distribution:"
+    )
+
+    print(
+        df[
+            "source_dataset"
+        ]
+        .value_counts()
+        .to_string()
+    )
+
     # ========================================================
-    # Analyze
+    # Analyze all pairs
     # ========================================================
+
+    print(
+        "\nRunning risk analysis..."
+    )
 
     analyses = []
 
-    for _, row in df.iterrows():
+    total_rows = len(
+        df
+    )
+
+    for index, (
+        _,
+        row,
+    ) in enumerate(
+        df.iterrows(),
+        start=1,
+    ):
 
         analyses.append(
             analyze_row(
@@ -947,10 +1329,18 @@ def main():
             )
         )
 
-    analysis_df = (
-        pd.DataFrame(
-            analyses
-        )
+        if (
+            index % 10000 == 0
+            or
+            index == total_rows
+        ):
+
+            print(
+                f"{index}/{total_rows}"
+            )
+
+    analysis_df = pd.DataFrame(
+        analyses
     )
 
     routed = pd.concat(
@@ -965,7 +1355,7 @@ def main():
     )
 
     # ========================================================
-    # Split
+    # Split routes
     # ========================================================
 
     auto_accept = (
@@ -1000,7 +1390,7 @@ def main():
     # Integrity
     # ========================================================
 
-    assert (
+    if (
         len(
             auto_accept
         )
@@ -1008,22 +1398,30 @@ def main():
         len(
             needs_qwen
         )
-        ==
+        !=
         len(
             routed
         )
-    )
+    ):
 
-    assert not (
+        raise RuntimeError(
+            "Route partition mismatch."
+        )
+
+    if (
         routed[
             "normalized_pair_hash"
         ]
         .duplicated()
         .any()
-    )
+    ):
+
+        raise RuntimeError(
+            "Normalized pair duplicates found."
+        )
 
     # ========================================================
-    # Flag counts
+    # Risk flag counts
     # ========================================================
 
     flag_counter = Counter()
@@ -1033,12 +1431,16 @@ def main():
     ]:
 
         if not value:
+
             continue
 
-        for flag in str(
-            value
-        ).split(
-            "|"
+        for flag in (
+            str(
+                value
+            )
+            .split(
+                "|"
+            )
         ):
 
             if flag:
@@ -1103,7 +1505,8 @@ def main():
         route,
         count,
     ) in (
-        route_counts.items()
+        route_counts
+        .items()
     ):
 
         route_rows.append({
@@ -1148,10 +1551,34 @@ def main():
         "source_dataset"
     ):
 
+        auto_count = int(
+            (
+                part[
+                    "route"
+                ]
+                ==
+                "AUTO_ACCEPT"
+            )
+            .sum()
+        )
+
+        qwen_count = int(
+            (
+                part[
+                    "route"
+                ]
+                ==
+                "NEEDS_QWEN"
+            )
+            .sum()
+        )
+
         source_rows.append({
 
             "source_dataset":
-                source,
+                str(
+                    source
+                ),
 
             "rows":
                 int(
@@ -1161,39 +1588,21 @@ def main():
                 ),
 
             "auto_accept":
-                int(
-                    (
-                        part[
-                            "route"
-                        ]
-                        ==
-                        "AUTO_ACCEPT"
-                    )
-                    .sum()
-                ),
+                auto_count,
 
             "needs_qwen":
-                int(
-                    (
-                        part[
-                            "route"
-                        ]
-                        ==
-                        "NEEDS_QWEN"
-                    )
-                    .sum()
-                ),
+                qwen_count,
 
             "needs_qwen_percent":
                 float(
-                    (
-                        part[
-                            "route"
-                        ]
-                        ==
-                        "NEEDS_QWEN"
+                    qwen_count
+                    /
+                    max(
+                        len(
+                            part
+                        ),
+                        1,
                     )
-                    .mean()
                     *
                     100
                 ),
@@ -1205,12 +1614,49 @@ def main():
                     ]
                     .mean()
                 ),
+
+            "negation_mismatch":
+                int(
+                    part[
+                        "risk_flags"
+                    ]
+                    .astype(str)
+                    .str.contains(
+                        "NEGATION_MISMATCH",
+                        regex=False,
+                    )
+                    .sum()
+                ),
+
+            "negation_question_rewrite":
+                int(
+                    part[
+                        "risk_flags"
+                    ]
+                    .astype(str)
+                    .str.contains(
+                        "NEGATION_QUESTION_REWRITE",
+                        regex=False,
+                    )
+                    .sum()
+                ),
+
+            "number_mismatch":
+                int(
+                    part[
+                        "risk_flags"
+                    ]
+                    .astype(str)
+                    .str.contains(
+                        "NUMBER_MISMATCH",
+                        regex=False,
+                    )
+                    .sum()
+                ),
         })
 
-    source_report = (
-        pd.DataFrame(
-            source_rows
-        )
+    source_report = pd.DataFrame(
+        source_rows
     )
 
     # ========================================================
@@ -1220,6 +1666,12 @@ def main():
     routed.to_parquet(
         routed_file,
         index=False,
+    )
+
+    routed.to_csv(
+        routed_csv,
+        index=False,
+        encoding="utf-8-sig",
     )
 
     auto_accept.to_parquet(
@@ -1259,8 +1711,16 @@ def main():
         "step":
             "14D",
 
+        "routing_version":
+            ROUTING_VERSION,
+
         "pipeline":
             "zh_en_exp1_v1",
+
+        "input_file":
+            str(
+                input_file
+            ),
 
         "input_rows":
             int(
@@ -1347,18 +1807,28 @@ def main():
             "strong_flags_route_to_qwen": [
 
                 "NUMBER_MISMATCH",
+
                 "PERCENT_MISMATCH",
+
                 "NEGATION_MISMATCH",
+
                 "URL_MISMATCH",
+
                 "EMAIL_MISMATCH",
             ],
 
             "soft_flags": [
 
+                "NEGATION_QUESTION_REWRITE",
+
                 "CURRENCY_MISMATCH",
+
                 "REPEATED_PUNCT",
+
                 "VERY_SHORT_PAIR",
+
                 "SOFT_LENGTH_RATIO",
+
                 "MIXED_SCRIPT_RISK",
             ],
 
@@ -1367,16 +1837,54 @@ def main():
 
             "quality_score_qwen_threshold":
                 80,
+
+            "negation_policy":
+                (
+                    "High-precision English word-boundary "
+                    "patterns plus high-precision Chinese "
+                    "strong-negation patterns. Natural "
+                    "negative-question rewrites are treated "
+                    "as a soft audit signal."
+                ),
         },
 
         "source_report":
             source_rows,
+
+        "final_assertions": {
+
+            "all_rows_routed":
+                True,
+
+            "no_duplicate_normalized_pairs":
+                True,
+
+            "auto_plus_qwen_equals_input":
+                (
+                    len(
+                        auto_accept
+                    )
+                    +
+                    len(
+                        needs_qwen
+                    )
+                    ==
+                    len(
+                        routed
+                    )
+                ),
+        },
 
         "outputs": {
 
             "routed":
                 str(
                     routed_file
+                ),
+
+            "routed_csv":
+                str(
+                    routed_csv
                 ),
 
             "auto_accept":
@@ -1411,7 +1919,7 @@ def main():
             ).isoformat(),
 
         "status":
-            "RISK_ROUTING_COMPLETE",
+            "RISK_ROUTING_V3_COMPLETE",
     }
 
     with open(
@@ -1437,7 +1945,7 @@ def main():
     )
 
     print(
-        "STEP 14D RESULT"
+        "STEP 14D V3 RESULT"
     )
 
     print(
@@ -1514,6 +2022,16 @@ def main():
     )
 
     print(
+        "Max:",
+        int(
+            routed[
+                "quality_score"
+            ]
+            .max()
+        )
+    )
+
+    print(
         "\nSource report:"
     )
 
@@ -1525,6 +2043,34 @@ def main():
         .to_string(
             index=False
         )
+    )
+
+    print(
+        "\nNegation diagnostics:"
+    )
+
+    neg_mismatch_count = int(
+        flag_counter.get(
+            "NEGATION_MISMATCH",
+            0,
+        )
+    )
+
+    neg_question_count = int(
+        flag_counter.get(
+            "NEGATION_QUESTION_REWRITE",
+            0,
+        )
+    )
+
+    print(
+        "NEGATION_MISMATCH:",
+        neg_mismatch_count
+    )
+
+    print(
+        "NEGATION_QUESTION_REWRITE:",
+        neg_question_count
     )
 
     print(
@@ -1544,11 +2090,19 @@ def main():
     )
 
     print(
+        "\nReport:"
+    )
+
+    print(
+        report_file
+    )
+
+    print(
         "\nSTATUS:"
     )
 
     print(
-        "RISK_ROUTING_COMPLETE"
+        "RISK_ROUTING_V3_COMPLETE"
     )
 
 

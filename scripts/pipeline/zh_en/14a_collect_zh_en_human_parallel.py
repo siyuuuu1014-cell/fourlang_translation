@@ -20,7 +20,7 @@ import pandas as pd
 # Source definitions
 # ============================================================
 
-SOURCES = {
+SSOURCES = {
 
     "tatoeba": {
 
@@ -36,36 +36,28 @@ SOURCES = {
         "homepage":
             "https://opus.nlpl.eu/datasets/Tatoeba",
 
-        # OPUS/Tatoeba normally uses ISO language code cmn
-        # for Mandarin Chinese.
+        # Verified through OPUS API on 2026-08-27.
         #
-        # Keep fallback candidates because OPUS resource
-        # naming can differ between releases.
+        # OPUS canonical pair orientation:
+        # cmn -> en
+        #
+        # Orientation of archive filename does NOT matter.
+        # We read both .cmn and .en from the archive and
+        # normalize them into our internal fields:
+        #
+        # en = English
+        # zh = Mandarin Chinese
         "url_candidates": [
 
             (
                 "https://object.pouta.csc.fi/"
                 "OPUS-Tatoeba/v2026-07-08/"
-                "moses/en-cmn.txt.zip"
-            ),
-
-            (
-                "https://object.pouta.csc.fi/"
-                "OPUS-Tatoeba/v2026-07-08/"
-                "moses/en-zh_CN.txt.zip"
-            ),
-
-            (
-                "https://object.pouta.csc.fi/"
-                "OPUS-Tatoeba/v2026-07-08/"
-                "moses/en-zh.txt.zip"
+                "moses/cmn-en.txt.zip"
             ),
         ],
 
         "target_codes": [
             "cmn",
-            "zh_CN",
-            "zh",
         ],
     },
 
@@ -83,31 +75,21 @@ SOURCES = {
         "homepage":
             "https://opus.nlpl.eu/datasets/ALT",
 
+        # Verified through OPUS API on 2026-08-27.
+        #
+        # OPUS canonical pair:
+        # en -> zh
         "url_candidates": [
-
-            (
-                "https://object.pouta.csc.fi/"
-                "OPUS-ALT/v20191206/"
-                "moses/en-zh_CN.txt.zip"
-            ),
 
             (
                 "https://object.pouta.csc.fi/"
                 "OPUS-ALT/v20191206/"
                 "moses/en-zh.txt.zip"
             ),
-
-            (
-                "https://object.pouta.csc.fi/"
-                "OPUS-ALT/v20191206/"
-                "moses/en-cmn.txt.zip"
-            ),
         ],
 
         "target_codes": [
-            "zh_CN",
             "zh",
-            "cmn",
         ],
     },
 }

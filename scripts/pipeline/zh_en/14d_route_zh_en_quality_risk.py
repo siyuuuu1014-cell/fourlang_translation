@@ -222,8 +222,7 @@ def extract_urls(
             str(
                 text
         )
-    )
-
+    ))
 
 def extract_emails(
     text: str,
@@ -235,7 +234,7 @@ def extract_emails(
                 text
         )
         .lower()
-    )
+    ))
 
 
 def has_english_negation(

@@ -24,15 +24,15 @@ from transformers import (
 # Versions
 # ============================================================
 
-STEP_VERSION = "14E2_V4"
+STEP_VERSION = "14E2_V5"
 
-PROMPT_VERSION = "ZH_EN_JUDGE_V4"
+PROMPT_VERSION = "ZH_EN_JUDGE_V5_STRUCTURED_FINAL"
 
 JUDGE_MODEL_NAME = "Qwen3-8B"
 
 
 # ============================================================
-# Labels
+# Final labels
 # ============================================================
 
 VALID_LABELS = {
@@ -42,15 +42,38 @@ VALID_LABELS = {
     "UNCERTAIN",
 }
 
-ERROR_KEYS = [
-    "meaning",
-    "omission",
-    "addition",
-    "number",
-    "entity",
-    "negation",
-    "grammar",
-    "fluency",
+
+# ============================================================
+# Structured semantic fields
+# ============================================================
+
+BOOLEAN_FIELDS = [
+
+    "uncertain",
+
+    "core_meaning_preserved",
+
+    "main_action_state_match",
+
+    "participant_roles_match",
+
+    "location_direction_match",
+
+    "time_event_order_match",
+
+    "quantity_match",
+
+    "entity_match",
+
+    "negation_event_status_match",
+
+    "important_information_preserved",
+
+    "unsupported_information_added",
+
+    "minor_semantic_issue",
+
+    "fluency_or_grammar_affects_understanding",
 ]
 
 
@@ -62,8 +85,8 @@ def parse_args():
 
     parser = argparse.ArgumentParser(
         description=(
-            "Step 14E-2 - Review ZH-EN human parallel "
-            "data with local Qwen3-8B."
+            "Step 14E-2 V5 - Structured semantic review "
+            "for ZH-EN using local Qwen3-8B."
         )
     )
 
@@ -86,11 +109,6 @@ def parse_args():
         "--calibration_risk_size",
         type=int,
         default=400,
-        help=(
-            "Number of RISK_REVIEW rows in calibration. "
-            "Remaining calibration rows come from "
-            "AUTO_ACCEPT_AUDIT."
-        ),
     )
 
     parser.add_argument(
@@ -114,33 +132,19 @@ def parse_args():
     parser.add_argument(
         "--max_new_tokens",
         type=int,
-        default=220,
+        default=260,
     )
 
     parser.add_argument(
         "--parse_retries",
         type=int,
-        default=1,
-    )
-
-    parser.add_argument(
-        "--checkpoint_every",
-        type=int,
-        default=1,
-        help=(
-            "Append each completed batch to checkpoint. "
-            "1 means every batch."
-        ),
+        default=2,
     )
 
     parser.add_argument(
         "--no_reuse_calibration",
         dest="reuse_calibration",
         action="store_false",
-        help=(
-            "In full mode, do not reuse matching "
-            "calibration results."
-        ),
     )
 
     parser.set_defaults(
@@ -156,7 +160,7 @@ def parse_args():
 
 
 # ============================================================
-# Stable deterministic sampling
+# Deterministic sampling
 # ============================================================
 
 def stable_hash(
@@ -164,13 +168,13 @@ def stable_hash(
     seed: int,
 ) -> str:
 
-    content = (
+    text = (
         f"{seed}\n"
         f"{value}"
     )
 
     return hashlib.sha256(
-        content.encode(
+        text.encode(
             "utf-8"
         )
     ).hexdigest()
@@ -183,17 +187,20 @@ def allocate_proportional(
 ) -> dict[str, int]:
 
     if total_size < 0:
+
         raise ValueError(
             "total_size must be >= 0"
         )
 
     if total_size > len(df):
+
         raise ValueError(
-            f"Requested {total_size}, "
-            f"but only {len(df)} rows available."
+            f"Requested {total_size} rows, "
+            f"but only {len(df)} are available."
         )
 
     if total_size == 0:
+
         return {}
 
     counts = (
@@ -208,6 +215,7 @@ def allocate_proportional(
     )
 
     allocations = {}
+
     fractions = {}
 
     for key, count in counts.items():
@@ -220,7 +228,7 @@ def allocate_proportional(
             total_rows
         )
 
-        base = int(
+        floor_value = int(
             math.floor(
                 exact
             )
@@ -228,14 +236,14 @@ def allocate_proportional(
 
         allocations[
             str(key)
-        ] = base
+        ] = floor_value
 
         fractions[
             str(key)
         ] = (
             exact
             -
-            base
+            floor_value
         )
 
     remaining = (
@@ -290,17 +298,13 @@ def deterministic_stratified_sample(
             )
         )
 
-    allocations = (
-        allocate_proportional(
-            df=df,
-            total_size=
-                sample_size,
-            column=
-                stratum_column,
-        )
+    allocations = allocate_proportional(
+        df=df,
+        total_size=sample_size,
+        column=stratum_column,
     )
 
-    sampled = []
+    parts = []
 
     for (
         stratum,
@@ -320,31 +324,26 @@ def deterministic_stratified_sample(
         )
 
         part[
-            "_calibration_hash"
+            "_sample_hash"
         ] = [
 
             stable_hash(
-                value=
-                    str(
-                        review_id
-                    ),
-                seed=
-                    seed,
+                str(review_id),
+                seed,
             )
 
             for review_id
-            in (
-                part[
-                    "review_id"
-                ]
-            )
+            in part[
+                "review_id"
+            ]
+            .astype(str)
         ]
 
         part = (
             part
             .sort_values(
                 [
-                    "_calibration_hash",
+                    "_sample_hash",
                     "review_id",
                 ]
             )
@@ -354,15 +353,13 @@ def deterministic_stratified_sample(
             .copy()
         )
 
-        sampled.append(
+        parts.append(
             part
         )
 
-    result = (
-        pd.concat(
-            sampled,
-            ignore_index=True,
-        )
+    result = pd.concat(
+        parts,
+        ignore_index=True,
     )
 
     result = (
@@ -370,13 +367,13 @@ def deterministic_stratified_sample(
         .sort_values(
             [
                 stratum_column,
-                "_calibration_hash",
+                "_sample_hash",
                 "review_id",
             ]
         )
         .drop(
             columns=[
-                "_calibration_hash"
+                "_sample_hash"
             ],
             errors="ignore",
         )
@@ -385,26 +382,16 @@ def deterministic_stratified_sample(
         )
     )
 
-    if (
-        len(
-            result
-        )
-        !=
-        sample_size
-    ):
+    if len(result) != sample_size:
 
         raise RuntimeError(
-            "\nCalibration sampling size mismatch.\n"
+            "\nCalibration sample size mismatch.\n"
             f"Expected: {sample_size}\n"
             f"Found: {len(result)}"
         )
 
     return result
 
-
-# ============================================================
-# Build calibration subset
-# ============================================================
 
 def build_calibration_subset(
     review_df: pd.DataFrame,
@@ -413,17 +400,12 @@ def build_calibration_subset(
     seed: int,
 ) -> pd.DataFrame:
 
-    if (
-        calibration_size
-        >
-        len(
-            review_df
-        )
+    if calibration_size > len(
+        review_df
     ):
 
         raise ValueError(
-            "\nCalibration size is larger "
-            "than review dataset."
+            "Calibration size exceeds dataset size."
         )
 
     if (
@@ -433,8 +415,7 @@ def build_calibration_subset(
     ):
 
         raise ValueError(
-            "calibration_risk_size cannot "
-            "exceed calibration_size."
+            "calibration_risk_size exceeds calibration_size."
         )
 
     risk = (
@@ -465,60 +446,28 @@ def build_calibration_subset(
         calibration_risk_size
     )
 
-    if (
-        calibration_risk_size
-        >
-        len(
-            risk
-        )
-    ):
-
-        raise RuntimeError(
-            "\nNot enough RISK_REVIEW rows "
-            "for calibration."
-        )
-
-    if (
-        auto_size
-        >
-        len(
-            auto
-        )
-    ):
-
-        raise RuntimeError(
-            "\nNot enough AUTO_ACCEPT_AUDIT "
-            "rows for calibration."
-        )
-
     risk_sample = (
         deterministic_stratified_sample(
-            df=risk,
-            sample_size=
-                calibration_risk_size,
-            seed=
-                seed,
+            risk,
+            calibration_risk_size,
+            seed,
         )
     )
 
     auto_sample = (
         deterministic_stratified_sample(
-            df=auto,
-            sample_size=
-                auto_size,
-            seed=
-                seed + 1,
+            auto,
+            auto_size,
+            seed + 1,
         )
     )
 
-    calibration = (
-        pd.concat(
-            [
-                risk_sample,
-                auto_sample,
-            ],
-            ignore_index=True,
-        )
+    calibration = pd.concat(
+        [
+            risk_sample,
+            auto_sample,
+        ],
+        ignore_index=True,
     )
 
     calibration[
@@ -555,87 +504,135 @@ def build_calibration_subset(
 
 
 # ============================================================
-# Judge prompt
+# Structured blind judge prompt
 # ============================================================
 
 SYSTEM_PROMPT = r"""
-You are an independent bilingual Chinese-English translation quality judge.
+You are an independent bilingual Chinese-English translation
+quality analyst.
 
-Judge whether the English sentence and Chinese sentence express the same
-underlying factual meaning.
+You will receive one English sentence and one Chinese sentence.
 
-Be tolerant of differences in expression, but strict about differences
-in meaning.
+Do NOT assign PASS, MINOR, or FAIL yourself.
 
-Normal translation differences are NOT errors by themselves, including:
-- word order or grammar changes;
-- natural Chinese-English restructuring;
-- colloquial vs formal wording;
-- equivalent number, date, and time formats;
-- reasonable transliteration differences;
-- different surface forms of questions or negation.
+Instead, independently compare the factual and semantic content
+and return structured semantic checks.
 
-Examples of equivalent formatting:
+Be tolerant of differences in expression, but strict about
+differences in meaning.
+
+Normal translation differences are not errors by themselves:
+
+- word order differences;
+- English-Chinese grammatical restructuring;
+- colloquial versus formal wording;
+- equivalent number formats;
+- equivalent date/time formats;
+- natural question or negation restructuring;
+- reasonable proper-name transliterations;
+- slightly awkward wording that remains understandable.
+
+Examples of equivalent formats:
+
 160 million <-> 1.6亿
 9:00 p.m. <-> 晚上9点
 39th article <-> 第39条
 1997 <-> 一九九七
 
-Before assigning a label, check whether both sentences preserve:
-- the main action or state;
-- who did what to whom;
-- subject/object roles;
-- time and event order;
-- location and direction;
-- cause and effect;
-- intention vs accident;
-- affirmation vs negation;
-- important quantities, entities, and modifiers;
-- whether an event happened, failed, was expected, or was only possible.
+Evaluate these dimensions independently:
 
-Labels:
+1. core_meaning_preserved
+Does the overall factual proposition remain the same?
 
-PASS:
-The factual/core meaning is preserved. Slightly awkward, literal, colloquial,
-or less elegant wording is still PASS if it does not change meaning.
+2. main_action_state_match
+Do the main action and/or state match?
 
-MINOR:
-There is a real but small defect, such as a minor lost nuance, non-critical
-omission, limited ambiguity, or mild grammatical problem. The main factual
-meaning remains correct.
+3. participant_roles_match
+Are subject/object/agent/patient roles preserved?
 
-FAIL:
-There is a substantive semantic error, such as wrong action/state, important
-omission/addition, wrong number/entity, reversed relation, wrong location,
-changed participant role, changed causality/intention, or incorrect event status.
+4. location_direction_match
+Are locations, directions, inside/outside, to/from and similar
+relations preserved?
 
-UNCERTAIN:
-Use only when the semantic relationship genuinely cannot be judged reliably.
+5. time_event_order_match
+Are time information, event order and event sequence preserved?
 
-Only mark an error flag true when an actual error exists.
-Do not mark number errors merely because equivalent numbers use different formats.
-Do not mark fluency errors merely because a more elegant translation is possible.
+6. quantity_match
+Are important quantities, dates, percentages and numerical
+facts semantically equivalent?
+Equivalent written formats count as matching.
 
-Return exactly ONE valid JSON object and nothing else:
+7. entity_match
+Are important people, organizations, places and named entities
+preserved?
+Reasonable transliteration variation counts as matching.
+
+8. negation_event_status_match
+Are negation, possibility, expectation, success/failure,
+intention, completion and event-status meanings preserved?
+
+9. important_information_preserved
+Is important information from the English source retained?
+Tiny stylistic details do not count as important omissions.
+
+10. unsupported_information_added
+Does the Chinese translation introduce an important factual
+claim not supported by the English source?
+
+11. minor_semantic_issue
+Is there a real but non-critical semantic defect while all
+critical factual meaning remains correct?
+
+12. fluency_or_grammar_affects_understanding
+Does grammar or fluency genuinely damage understanding?
+Do NOT set this true merely because a more elegant translation
+could be written.
+
+13. uncertain
+Set true only if you genuinely cannot judge reliably.
+
+IMPORTANT:
+
+Do not confuse style problems with meaning problems.
+
+A colloquial but understandable translation may still have all
+semantic dimensions marked correct.
+
+If an important factual relation changes, such as:
+- action/state;
+- location;
+- direction;
+- participant role;
+- number;
+- entity;
+- event status;
+then mark the corresponding semantic check false.
+
+Return exactly ONE valid JSON object.
+No markdown.
+No text outside JSON.
+No chain-of-thought.
+
+Schema:
 
 {
-  "label": "PASS|MINOR|FAIL|UNCERTAIN",
-  "semantic_equivalent": true,
-  "major_error": false,
-  "minor_error": false,
-  "errors": {
-    "meaning": false,
-    "omission": false,
-    "addition": false,
-    "number": false,
-    "entity": false,
-    "negation": false,
-    "grammar": false,
-    "fluency": false
-  },
+  "uncertain": false,
+  "core_meaning_preserved": true,
+  "main_action_state_match": true,
+  "participant_roles_match": true,
+  "location_direction_match": true,
+  "time_event_order_match": true,
+  "quantity_match": true,
+  "entity_match": true,
+  "negation_event_status_match": true,
+  "important_information_preserved": true,
+  "unsupported_information_added": false,
+  "minor_semantic_issue": false,
+  "fluency_or_grammar_affects_understanding": false,
   "reason": "brief evidence-based reason"
 }
 """.strip()
+
 
 def build_user_prompt(
     row: pd.Series,
@@ -658,14 +655,10 @@ def build_user_prompt(
         f"{en}\n\n"
         "CHINESE:\n"
         f"{zh}\n\n"
-        "Judge whether these sentences are valid parallel translations. "
-        "Return only the required JSON object."
+        "Evaluate the semantic dimensions and return only "
+        "the required JSON object."
     )
 
-
-# ============================================================
-# Chat template
-# ============================================================
 
 def render_prompt(
     tokenizer,
@@ -695,33 +688,24 @@ def render_prompt(
 
     try:
 
-        return (
-            tokenizer
-            .apply_chat_template(
-                messages,
-                tokenize=False,
-                add_generation_prompt=True,
-                enable_thinking=False,
-            )
+        return tokenizer.apply_chat_template(
+            messages,
+            tokenize=False,
+            add_generation_prompt=True,
+            enable_thinking=False,
         )
 
     except TypeError:
 
-        # Compatibility fallback for older
-        # tokenizer/chat-template versions.
-
-        return (
-            tokenizer
-            .apply_chat_template(
-                messages,
-                tokenize=False,
-                add_generation_prompt=True,
-            )
+        return tokenizer.apply_chat_template(
+            messages,
+            tokenize=False,
+            add_generation_prompt=True,
         )
 
 
 # ============================================================
-# JSON parsing
+# Parsing
 # ============================================================
 
 THINK_RE = re.compile(
@@ -775,8 +759,6 @@ def extract_json_object(
         text
     )
 
-    # First attempt:
-    # response is already pure JSON.
     try:
 
         value = json.loads(
@@ -793,8 +775,6 @@ def extract_json_object(
     except Exception:
         pass
 
-    # Second attempt:
-    # extract outermost {...}
     start = text.find(
         "{"
     )
@@ -832,7 +812,6 @@ def extract_json_object(
 
 def coerce_bool(
     value,
-    default: bool = False,
 ) -> bool:
 
     if isinstance(
@@ -847,9 +826,14 @@ def coerce_bool(
         int,
     ):
 
-        return bool(
-            value
-        )
+        if value in (
+            0,
+            1,
+        ):
+
+            return bool(
+                value
+            )
 
     if isinstance(
         value,
@@ -878,82 +862,137 @@ def coerce_bool(
 
             return False
 
-    return default
+    raise ValueError(
+        f"Cannot convert to bool: {value!r}"
+    )
 
 
-def normalize_judge_json(
+# ============================================================
+# Deterministic label mapping
+# ============================================================
+
+def derive_final_label(
+    values: dict,
+) -> tuple[
+    str,
+    list[str],
+]:
+
+    failed_dimensions = []
+
+    if values[
+        "uncertain"
+    ]:
+
+        return (
+            "UNCERTAIN",
+            failed_dimensions,
+        )
+
+    critical_match_fields = [
+
+        "core_meaning_preserved",
+
+        "main_action_state_match",
+
+        "participant_roles_match",
+
+        "location_direction_match",
+
+        "time_event_order_match",
+
+        "quantity_match",
+
+        "entity_match",
+
+        "negation_event_status_match",
+
+        "important_information_preserved",
+    ]
+
+    for field in (
+        critical_match_fields
+    ):
+
+        if not values[
+            field
+        ]:
+
+            failed_dimensions.append(
+                field
+            )
+
+    if values[
+        "unsupported_information_added"
+    ]:
+
+        failed_dimensions.append(
+            "unsupported_information_added"
+        )
+
+    # ========================================================
+    # FAIL:
+    # any critical factual / semantic mismatch
+    # ========================================================
+
+    if failed_dimensions:
+
+        return (
+            "FAIL",
+            failed_dimensions,
+        )
+
+    # ========================================================
+    # MINOR:
+    # no critical mismatch, but a real limited issue remains
+    # ========================================================
+
+    if (
+        values[
+            "minor_semantic_issue"
+        ]
+        or
+        values[
+            "fluency_or_grammar_affects_understanding"
+        ]
+    ):
+
+        return (
+            "MINOR",
+            failed_dimensions,
+        )
+
+    # ========================================================
+    # PASS
+    # ========================================================
+
+    return (
+        "PASS",
+        failed_dimensions,
+    )
+
+
+def normalize_structured_json(
     value: dict,
 ) -> dict:
 
-    label = (
-        str(
-            value.get(
-                "label",
-                ""
-            )
-        )
-        .strip()
-        .upper()
-    )
+    normalized = {}
 
-    if label not in VALID_LABELS:
+    for field in BOOLEAN_FIELDS:
 
-        raise ValueError(
-            f"Invalid label: {label}"
-        )
+        if field not in value:
 
-    errors_raw = value.get(
-        "errors",
-        {}
-    )
-
-    if not isinstance(
-        errors_raw,
-        dict,
-    ):
-
-        errors_raw = {}
-
-    errors = {
-
-        key:
-            coerce_bool(
-                errors_raw.get(
-                    key,
-                    False
-                )
+            raise ValueError(
+                f"Missing field: {field}"
             )
 
-        for key
-        in ERROR_KEYS
-    }
-
-    # Canonicalize the high-level
-    # interpretation by label.
-
-    if label == "PASS":
-
-        semantic_equivalent = True
-        major_error = False
-        minor_error = False
-
-    elif label == "MINOR":
-
-        semantic_equivalent = True
-        major_error = False
-        minor_error = True
-
-    elif label == "FAIL":
-
-        semantic_equivalent = False
-        major_error = True
-        minor_error = False
-
-    else:
-
-        semantic_equivalent = None
-        major_error = False
-        minor_error = False
+        normalized[
+            field
+        ] = coerce_bool(
+            value[
+                field
+            ]
+        )
 
     reason = str(
         value.get(
@@ -970,59 +1009,213 @@ def normalize_judge_json(
             :1000
         ]
 
+    (
+        final_label,
+        failed_dimensions,
+    ) = derive_final_label(
+        normalized
+    )
+
+    # ========================================================
+    # Deterministic error flags
+    # ========================================================
+
+    error_meaning = bool(
+        (
+            not normalized[
+                "core_meaning_preserved"
+            ]
+        )
+        or
+        (
+            not normalized[
+                "main_action_state_match"
+            ]
+        )
+    )
+
+    error_omission = bool(
+        not normalized[
+            "important_information_preserved"
+        ]
+    )
+
+    error_addition = bool(
+        normalized[
+            "unsupported_information_added"
+        ]
+    )
+
+    error_number = bool(
+        not normalized[
+            "quantity_match"
+        ]
+    )
+
+    error_entity = bool(
+        not normalized[
+            "entity_match"
+        ]
+    )
+
+    error_negation = bool(
+        not normalized[
+            "negation_event_status_match"
+        ]
+    )
+
+    error_grammar = bool(
+        normalized[
+            "fluency_or_grammar_affects_understanding"
+        ]
+    )
+
+    error_fluency = bool(
+        normalized[
+            "fluency_or_grammar_affects_understanding"
+        ]
+    )
+
+    semantic_equivalent = None
+
+    if final_label in {
+        "PASS",
+        "MINOR",
+    }:
+
+        semantic_equivalent = True
+
+    elif final_label == "FAIL":
+
+        semantic_equivalent = False
+
     return {
 
+        # ----------------------------
+        # Final deterministic label
+        # ----------------------------
+
         "judge_label":
-            label,
+            final_label,
 
         "judge_semantic_equivalent":
             semantic_equivalent,
 
         "judge_major_error":
-            major_error,
+            bool(
+                final_label
+                ==
+                "FAIL"
+            ),
 
         "judge_minor_error":
-            minor_error,
+            bool(
+                final_label
+                ==
+                "MINOR"
+            ),
+
+        # ----------------------------
+        # Structured dimensions
+        # ----------------------------
+
+        "judge_uncertain":
+            normalized[
+                "uncertain"
+            ],
+
+        "judge_core_meaning_preserved":
+            normalized[
+                "core_meaning_preserved"
+            ],
+
+        "judge_main_action_state_match":
+            normalized[
+                "main_action_state_match"
+            ],
+
+        "judge_participant_roles_match":
+            normalized[
+                "participant_roles_match"
+            ],
+
+        "judge_location_direction_match":
+            normalized[
+                "location_direction_match"
+            ],
+
+        "judge_time_event_order_match":
+            normalized[
+                "time_event_order_match"
+            ],
+
+        "judge_quantity_match":
+            normalized[
+                "quantity_match"
+            ],
+
+        "judge_entity_match":
+            normalized[
+                "entity_match"
+            ],
+
+        "judge_negation_event_status_match":
+            normalized[
+                "negation_event_status_match"
+            ],
+
+        "judge_important_information_preserved":
+            normalized[
+                "important_information_preserved"
+            ],
+
+        "judge_unsupported_information_added":
+            normalized[
+                "unsupported_information_added"
+            ],
+
+        "judge_minor_semantic_issue":
+            normalized[
+                "minor_semantic_issue"
+            ],
+
+        "judge_fluency_or_grammar_affects_understanding":
+            normalized[
+                "fluency_or_grammar_affects_understanding"
+            ],
+
+        # ----------------------------
+        # Derived error flags
+        # ----------------------------
 
         "judge_error_meaning":
-            errors[
-                "meaning"
-            ],
+            error_meaning,
 
         "judge_error_omission":
-            errors[
-                "omission"
-            ],
+            error_omission,
 
         "judge_error_addition":
-            errors[
-                "addition"
-            ],
+            error_addition,
 
         "judge_error_number":
-            errors[
-                "number"
-            ],
+            error_number,
 
         "judge_error_entity":
-            errors[
-                "entity"
-            ],
+            error_entity,
 
         "judge_error_negation":
-            errors[
-                "negation"
-            ],
+            error_negation,
 
         "judge_error_grammar":
-            errors[
-                "grammar"
-            ],
+            error_grammar,
 
         "judge_error_fluency":
-            errors[
-                "fluency"
-            ],
+            error_fluency,
+
+        "judge_failed_dimensions":
+            "|".join(
+                failed_dimensions
+            ),
 
         "judge_reason":
             reason,
@@ -1037,7 +1230,7 @@ def parse_response(
         text
     )
 
-    return normalize_judge_json(
+    return normalize_structured_json(
         value
     )
 
@@ -1067,6 +1260,7 @@ def load_checkpoint(
             line = line.strip()
 
             if not line:
+
                 continue
 
             try:
@@ -1076,6 +1270,7 @@ def load_checkpoint(
                 )
 
             except Exception:
+
                 continue
 
             review_id = str(
@@ -1086,6 +1281,18 @@ def load_checkpoint(
             )
 
             if review_id:
+
+                # Reject stale checkpoints generated
+                # using older prompts.
+                if (
+                    record.get(
+                        "judge_prompt_version"
+                    )
+                    !=
+                    PROMPT_VERSION
+                ):
+
+                    continue
 
                 completed[
                     review_id
@@ -1127,7 +1334,7 @@ def append_checkpoint_records(
 
 
 # ============================================================
-# Calibration reuse for full review
+# Calibration reuse
 # ============================================================
 
 def load_calibration_reuse(
@@ -1143,9 +1350,14 @@ def load_calibration_reuse(
     )
 
     required = {
+
         "review_id",
+
         "judge_label",
+
         "judge_parse_success",
+
+        "judge_prompt_version",
     }
 
     if not required.issubset(
@@ -1168,12 +1380,26 @@ def load_calibration_reuse(
 
             continue
 
+        if (
+            str(
+                row[
+                    "judge_prompt_version"
+                ]
+            )
+            !=
+            PROMPT_VERSION
+        ):
+
+            continue
+
         record = {}
 
         for column in df.columns:
 
-            if column.startswith(
-                "judge_"
+            if (
+                column.startswith(
+                    "judge_"
+                )
             ):
 
                 value = row[
@@ -1192,8 +1418,11 @@ def load_calibration_reuse(
                 ):
 
                     try:
+
                         value = value.item()
+
                     except Exception:
+
                         pass
 
                 record[
@@ -1301,9 +1530,6 @@ def load_judge_model(
 
     model.config.use_cache = True
 
-    # Prevent irrelevant warnings from
-    # sampling configuration where possible.
-
     try:
 
         model.generation_config.do_sample = (
@@ -1323,6 +1549,7 @@ def load_judge_model(
         )
 
     except Exception:
+
         pass
 
     print(
@@ -1336,6 +1563,122 @@ def load_judge_model(
 
 
 # ============================================================
+# Prompt preflight
+# ============================================================
+
+def check_prompt_lengths(
+    tokenizer,
+    selected_df: pd.DataFrame,
+    max_input_tokens: int,
+):
+
+    print(
+        "\nChecking judge prompt lengths..."
+    )
+
+    lengths = []
+
+    longest_review_id = None
+
+    longest_length = -1
+
+    for _, row in (
+        selected_df.iterrows()
+    ):
+
+        prompt = render_prompt(
+            tokenizer,
+            row,
+        )
+
+        ids = tokenizer(
+            prompt,
+            add_special_tokens=False,
+        )[
+            "input_ids"
+        ]
+
+        length = len(
+            ids
+        )
+
+        lengths.append(
+            length
+        )
+
+        if (
+            length
+            >
+            longest_length
+        ):
+
+            longest_length = length
+
+            longest_review_id = str(
+                row[
+                    "review_id"
+                ]
+            )
+
+    min_length = min(
+        lengths
+    )
+
+    max_length = max(
+        lengths
+    )
+
+    mean_length = (
+        sum(
+            lengths
+        )
+        /
+        len(
+            lengths
+        )
+    )
+
+    print(
+        "Prompt tokens min:",
+        min_length
+    )
+
+    print(
+        "Prompt tokens mean:",
+        f"{mean_length:.2f}"
+    )
+
+    print(
+        "Prompt tokens max:",
+        max_length
+    )
+
+    print(
+        "Longest review_id:",
+        longest_review_id
+    )
+
+    print(
+        "Configured max_input_tokens:",
+        max_input_tokens
+    )
+
+    if (
+        max_length
+        >
+        max_input_tokens
+    ):
+
+        raise RuntimeError(
+            "\nPrompt preflight failed.\n"
+            f"Longest prompt: {max_length}\n"
+            f"Limit: {max_input_tokens}\n"
+            f"Review: {longest_review_id}\n\n"
+            "Refusing to silently truncate."
+        )
+
+
+# ============================================================
 # Batched generation
 # ============================================================
 
@@ -1345,25 +1688,25 @@ def generate_batch(
     prompts: list[str],
     max_input_tokens: int,
     max_new_tokens: int,
-) -> tuple[
-    list[str],
-    float,
-]:
-    # ============================================================
-    # Never silently truncate judge inputs.
-    # ============================================================
+):
+
+    # ========================================================
+    # Permanent safety protection:
+    # NEVER silently truncate judge input.
+    # ========================================================
 
     token_lengths = []
 
     for prompt in prompts:
-        encoded = tokenizer(
-            prompt,
-            add_special_tokens=False,
-        )
 
         token_lengths.append(
             len(
-                encoded["input_ids"]
+                tokenizer(
+                    prompt,
+                    add_special_tokens=False,
+                )[
+                    "input_ids"
+                ]
             )
         )
 
@@ -1372,23 +1715,16 @@ def generate_batch(
     )
 
     if (
-            max_prompt_tokens
-            >
-            max_input_tokens
+        max_prompt_tokens
+        >
+        max_input_tokens
     ):
-        longest_index = (
-            token_lengths
-            .index(
-                max_prompt_tokens
-            )
-        )
 
         raise RuntimeError(
             "\nJudge input exceeds safe token limit.\n"
-            f"Longest prompt index: {longest_index}\n"
             f"Longest prompt tokens: {max_prompt_tokens}\n"
-            f"max_input_tokens: {max_input_tokens}\n\n"
-            "Refusing to silently truncate translation content."
+            f"max_input_tokens: {max_input_tokens}\n"
+            "Refusing to silently truncate."
         )
 
     inputs = tokenizer(
@@ -1426,25 +1762,24 @@ def generate_batch(
 
     with torch.inference_mode():
 
-        output_ids = (
-            model.generate(
-                **inputs,
+        output_ids = model.generate(
 
-                do_sample=False,
+            **inputs,
 
-                num_beams=1,
+            do_sample=False,
 
-                max_new_tokens=
-                    max_new_tokens,
+            num_beams=1,
 
-                use_cache=True,
+            max_new_tokens=
+                max_new_tokens,
 
-                pad_token_id=
-                    tokenizer.pad_token_id,
+            use_cache=True,
 
-                eos_token_id=
-                    tokenizer.eos_token_id,
-            )
+            pad_token_id=
+                tokenizer.pad_token_id,
+
+            eos_token_id=
+                tokenizer.eos_token_id,
         )
 
     torch.cuda.synchronize()
@@ -1455,19 +1790,14 @@ def generate_batch(
         start
     )
 
-    generated_ids = (
-        output_ids[
-            :,
-            input_width:
-        ]
-    )
+    generated_ids = output_ids[
+        :,
+        input_width:
+    ]
 
-    texts = (
-        tokenizer
-        .batch_decode(
-            generated_ids,
-            skip_special_tokens=True,
-        )
+    texts = tokenizer.batch_decode(
+        generated_ids,
+        skip_special_tokens=True,
     )
 
     return (
@@ -1485,7 +1815,7 @@ def generate_batch(
 
 
 # ============================================================
-# Judge one batch
+# Judge batch
 # ============================================================
 
 def judge_batch(
@@ -1495,7 +1825,7 @@ def judge_batch(
     max_input_tokens: int,
     max_new_tokens: int,
     parse_retries: int,
-) -> list[dict]:
+):
 
     prompts = [
 
@@ -1509,15 +1839,19 @@ def judge_batch(
     ]
 
     (
-        raw_outputs,
+        outputs,
         elapsed,
     ) = generate_batch(
+
         model=model,
+
         tokenizer=tokenizer,
-        prompts=
-            prompts,
+
+        prompts=prompts,
+
         max_input_tokens=
             max_input_tokens,
+
         max_new_tokens=
             max_new_tokens,
     )
@@ -1543,16 +1877,14 @@ def judge_batch(
     ) in enumerate(
         zip(
             batch_df.iterrows(),
-            raw_outputs,
+            outputs,
         )
     ):
 
         try:
 
-            parsed = (
-                parse_response(
-                    raw_output
-                )
+            parsed = parse_response(
+                raw_output
             )
 
             parse_success = True
@@ -1575,6 +1907,9 @@ def judge_batch(
                         "review_id"
                     ]
                 ),
+
+            "judge_step_version":
+                STEP_VERSION,
 
             "judge_prompt_version":
                 PROMPT_VERSION,
@@ -1616,14 +1951,15 @@ def judge_batch(
         )
 
     # ========================================================
-    # Parse retry
+    # Retry invalid JSON
     # ========================================================
 
-    for retry_index in range(
+    for _ in range(
         parse_retries
     ):
 
         if not failed_indexes:
+
             break
 
         retry_prompts = []
@@ -1632,28 +1968,17 @@ def judge_batch(
 
         for index in failed_indexes:
 
-            previous_output = (
-                records[
-                    index
-                ][
-                    "judge_raw_response"
-                ]
-            )
+            original_prompt = prompts[
+                index
+            ]
 
             retry_prompt = (
-                prompts[
-                    index
-                ]
+                original_prompt
                 +
-                "\n\nIMPORTANT: Your previous response "
-                "could not be parsed as valid JSON. "
-                "Return ONE JSON object only. "
-                "No markdown, no comments, no reasoning.\n"
-                "Previous invalid response:\n"
-                +
-                previous_output[
-                    :2000
-                ]
+                "\n\nYour previous response was not valid "
+                "JSON. Return exactly ONE JSON object using "
+                "the required schema. No markdown and no "
+                "additional text."
             )
 
             retry_prompts.append(
@@ -1668,12 +1993,16 @@ def judge_batch(
             retry_outputs,
             retry_elapsed,
         ) = generate_batch(
+
             model=model,
+
             tokenizer=tokenizer,
-            prompts=
-                retry_prompts,
+
+            prompts=retry_prompts,
+
             max_input_tokens=
                 max_input_tokens,
+
             max_new_tokens=
                 max_new_tokens,
         )
@@ -1699,11 +2028,9 @@ def judge_batch(
             retry_outputs,
         ):
 
-            record = (
-                records[
-                    record_index
-                ]
-            )
+            record = records[
+                record_index
+            ]
 
             record[
                 "judge_parse_attempts"
@@ -1721,10 +2048,8 @@ def judge_batch(
 
             try:
 
-                parsed = (
-                    parse_response(
-                        retry_output
-                    )
+                parsed = parse_response(
+                    retry_output
                 )
 
                 record.update(
@@ -1750,7 +2075,7 @@ def judge_batch(
         )
 
     # ========================================================
-    # Final fallback for unparseable rows
+    # Parse failure fallback
     # ========================================================
 
     for record in records:
@@ -1772,6 +2097,45 @@ def judge_batch(
 
                 "judge_minor_error":
                     False,
+
+                "judge_uncertain":
+                    True,
+
+                "judge_core_meaning_preserved":
+                    None,
+
+                "judge_main_action_state_match":
+                    None,
+
+                "judge_participant_roles_match":
+                    None,
+
+                "judge_location_direction_match":
+                    None,
+
+                "judge_time_event_order_match":
+                    None,
+
+                "judge_quantity_match":
+                    None,
+
+                "judge_entity_match":
+                    None,
+
+                "judge_negation_event_status_match":
+                    None,
+
+                "judge_important_information_preserved":
+                    None,
+
+                "judge_unsupported_information_added":
+                    None,
+
+                "judge_minor_semantic_issue":
+                    None,
+
+                "judge_fluency_or_grammar_affects_understanding":
+                    None,
 
                 "judge_error_meaning":
                     False,
@@ -1797,6 +2161,9 @@ def judge_batch(
                 "judge_error_fluency":
                     False,
 
+                "judge_failed_dimensions":
+                    "",
+
                 "judge_reason":
                     "JSON_PARSE_FAILED",
             })
@@ -1805,7 +2172,7 @@ def judge_batch(
 
 
 # ============================================================
-# Result summary
+# Report tables
 # ============================================================
 
 def build_report_tables(
@@ -2072,10 +2439,6 @@ def main():
             full_report_file
         )
 
-    # ========================================================
-    # Header
-    # ========================================================
-
     print(
         "=" * 110
     )
@@ -2085,7 +2448,7 @@ def main():
     )
 
     print(
-        "STEP 14E-2 - QWEN3-8B QUALITY REVIEW"
+        "STEP 14E-2 V5 - STRUCTURED QWEN3-8B REVIEW"
     )
 
     print(
@@ -2106,26 +2469,6 @@ def main():
         "Mode:",
         args.mode
     )
-
-    print(
-        "\nInput:"
-    )
-
-    print(
-        input_file
-    )
-
-    print(
-        "\nModel:"
-    )
-
-    print(
-        model_path
-    )
-
-    # ========================================================
-    # Validate inputs
-    # ========================================================
 
     if not input_file.exists():
 
@@ -2148,13 +2491,8 @@ def main():
         raise RuntimeError(
             "\nFinal output already exists:\n"
             f"{output_file}\n\n"
-            "Use --overwrite only if you "
-            "intentionally want to rebuild it."
+            "Use --overwrite if rebuilding intentionally."
         )
-
-    # ========================================================
-    # Overwrite handling
-    # ========================================================
 
     if args.overwrite:
 
@@ -2172,13 +2510,11 @@ def main():
                 path.unlink()
 
     # ========================================================
-    # Load frozen review input
+    # Frozen input
     # ========================================================
 
-    review_df = (
-        pd.read_parquet(
-            input_file
-        )
+    review_df = pd.read_parquet(
+        input_file
     )
 
     required = {
@@ -2209,7 +2545,7 @@ def main():
     if missing:
 
         raise RuntimeError(
-            "Review input missing columns: "
+            "Missing columns: "
             f"{sorted(missing)}"
         )
 
@@ -2222,7 +2558,7 @@ def main():
     ):
 
         raise RuntimeError(
-            "Duplicate review_id in input."
+            "Duplicate review_id."
         )
 
     print(
@@ -2245,49 +2581,31 @@ def main():
     )
 
     # ========================================================
-    # Select mode input
+    # Mode selection
     # ========================================================
 
     if args.mode == "calibration":
 
         selected_df = (
             build_calibration_subset(
+
                 review_df=
                     review_df,
 
                 calibration_size=
-                    args
-                    .calibration_size,
+                    args.calibration_size,
 
                 calibration_risk_size=
-                    args
-                    .calibration_risk_size,
+                    args.calibration_risk_size,
 
                 seed=
-                    args
-                    .seed,
+                    args.seed,
             )
         )
 
         selected_df.to_parquet(
             calibration_input_file,
             index=False,
-        )
-
-        print(
-            "\nCalibration composition:"
-        )
-
-        print(
-            selected_df
-            .groupby(
-                [
-                    "review_group",
-                    "source_dataset",
-                ]
-            )
-            .size()
-            .to_string()
         )
 
     else:
@@ -2305,17 +2623,17 @@ def main():
         len(
             selected_df
         )
-
     )
-    # ============================================================
-    # Prompt length diagnostics
-    # ============================================================
+
+    # ========================================================
+    # Prompt preflight BEFORE loading 8B model
+    # ========================================================
 
     print(
-        "\nChecking judge prompt lengths..."
+        "\nLoading tokenizer for prompt preflight..."
     )
 
-    diagnostic_tokenizer = (
+    preflight_tokenizer = (
         AutoTokenizer
         .from_pretrained(
             str(
@@ -2326,74 +2644,31 @@ def main():
         )
     )
 
-    prompt_lengths = []
-
-    for _, row in selected_df.iterrows():
-        prompt = render_prompt(
-            diagnostic_tokenizer,
-            row,
-        )
-
-        ids = diagnostic_tokenizer(
-            prompt,
-            add_special_tokens=False,
-        )["input_ids"]
-
-        prompt_lengths.append(
-            len(ids)
-        )
-
-    print(
-        "Prompt tokens min:",
-        min(prompt_lengths)
+    check_prompt_lengths(
+        preflight_tokenizer,
+        selected_df,
+        args.max_input_tokens,
     )
 
-    print(
-        "Prompt tokens mean:",
-        f"{sum(prompt_lengths) / len(prompt_lengths):.2f}"
-    )
-
-    print(
-        "Prompt tokens max:",
-        max(prompt_lengths)
-    )
-
-    print(
-        "Configured max_input_tokens:",
-        args.max_input_tokens
-    )
-
-    if (
-            max(prompt_lengths)
-            >
-            args.max_input_tokens
-    ):
-        raise RuntimeError(
-            "\nPrompt preflight failed: "
-            "at least one judge input would be truncated."
-        )
-
-    del diagnostic_tokenizer
+    del preflight_tokenizer
 
     # ========================================================
     # Existing checkpoint
     # ========================================================
 
-    completed = (
-        load_checkpoint(
-            checkpoint_file
-        )
+    completed = load_checkpoint(
+        checkpoint_file
     )
 
     print(
-        "\nExisting checkpoint rows:",
+        "\nValid checkpoint rows:",
         len(
             completed
         )
     )
 
     # ========================================================
-    # Reuse calibration in full mode
+    # Reuse V5 calibration only
     # ========================================================
 
     reused_calibration = 0
@@ -2404,13 +2679,11 @@ def main():
         args.reuse_calibration
     ):
 
-        reusable = (
-            load_calibration_reuse(
-                calibration_results_file
-            )
+        reusable = load_calibration_reuse(
+            calibration_results_file
         )
 
-        selected_ids = set(
+        valid_ids = set(
             selected_df[
                 "review_id"
             ]
@@ -2425,8 +2698,9 @@ def main():
             if (
                 review_id
                 not in
-                selected_ids
+                valid_ids
             ):
+
                 continue
 
             if (
@@ -2434,6 +2708,7 @@ def main():
                 in
                 completed
             ):
+
                 continue
 
             completed[
@@ -2446,10 +2721,6 @@ def main():
             "Calibration rows reused:",
             reused_calibration
         )
-
-    # ========================================================
-    # Pending rows
-    # ========================================================
 
     completed_ids = set(
         completed.keys()
@@ -2479,7 +2750,7 @@ def main():
     )
 
     # ========================================================
-    # Judge pending rows
+    # Inference
     # ========================================================
 
     if len(
@@ -2497,15 +2768,11 @@ def main():
             pending_df
         )
 
-        batch_number = 0
-
         for start in range(
             0,
             total_pending,
             args.batch_size,
         ):
-
-            batch_number += 1
 
             batch = (
                 pending_df
@@ -2530,16 +2797,13 @@ def main():
                     tokenizer,
 
                 max_input_tokens=
-                    args
-                    .max_input_tokens,
+                    args.max_input_tokens,
 
                 max_new_tokens=
-                    args
-                    .max_new_tokens,
+                    args.max_new_tokens,
 
                 parse_retries=
-                    args
-                    .parse_retries,
+                    args.parse_retries,
             )
 
             append_checkpoint_records(
@@ -2563,19 +2827,23 @@ def main():
             )
 
             parse_success_count = sum(
+
                 bool(
                     record[
                         "judge_parse_success"
                     ]
                 )
+
                 for record
                 in records
             )
 
             labels = Counter(
+
                 record[
                     "judge_label"
                 ]
+
                 for record
                 in records
             )
@@ -2583,7 +2851,8 @@ def main():
             print(
                 f"{done}/{total_pending} "
                 f"| parse "
-                f"{parse_success_count}/{len(records)} "
+                f"{parse_success_count}/"
+                f"{len(records)} "
                 f"| {dict(labels)}"
             )
 
@@ -2595,12 +2864,12 @@ def main():
         torch.cuda.empty_cache()
 
     # ========================================================
-    # Assemble final result
+    # Assemble results
     # ========================================================
 
     result_records = []
 
-    missing_result_ids = []
+    missing_ids = []
 
     for review_id in (
         selected_df[
@@ -2609,16 +2878,13 @@ def main():
         .astype(str)
     ):
 
-        record = (
-            completed
-            .get(
-                review_id
-            )
+        record = completed.get(
+            review_id
         )
 
         if record is None:
 
-            missing_result_ids.append(
+            missing_ids.append(
                 review_id
             )
 
@@ -2628,19 +2894,17 @@ def main():
             record
         )
 
-    if missing_result_ids:
+    if missing_ids:
 
         raise RuntimeError(
-            "\nMissing judge results.\n"
-            f"Count: {len(missing_result_ids)}\n"
-            f"Examples: {missing_result_ids[:10]}"
+            "\nMissing judge records.\n"
+            f"Count: {len(missing_ids)}"
         )
 
     judge_df = pd.DataFrame(
         result_records
     )
 
-    # Avoid duplicated metadata columns.
     judge_columns = [
 
         column
@@ -2648,46 +2912,27 @@ def main():
         for column
         in judge_df.columns
 
-        if column
-        ==
-        "review_id"
-
-        or
-        column.startswith(
-            "judge_"
+        if (
+            column
+            ==
+            "review_id"
+            or
+            column.startswith(
+                "judge_"
+            )
         )
     ]
 
-    judge_df = (
-        judge_df[
-            judge_columns
-        ]
-        .copy()
+    judge_df = judge_df[
+        judge_columns
+    ].copy()
+
+    result_df = selected_df.merge(
+        judge_df,
+        on="review_id",
+        how="left",
+        validate="one_to_one",
     )
-
-    result_df = (
-        selected_df
-        .merge(
-            judge_df,
-            on="review_id",
-            how="left",
-            validate="one_to_one",
-        )
-    )
-
-    if (
-        len(
-            result_df
-        )
-        !=
-        len(
-            selected_df
-        )
-    ):
-
-        raise RuntimeError(
-            "Final result size mismatch."
-        )
 
     # ========================================================
     # Reports
@@ -2725,23 +2970,21 @@ def main():
         100
     )
 
-    semantic_equivalent_count = int(
-        (
-            result_df[
-                "judge_label"
+    semantic_usable = int(
+        result_df[
+            "judge_label"
+        ]
+        .isin(
+            [
+                "PASS",
+                "MINOR",
             ]
-            .isin(
-                [
-                    "PASS",
-                    "MINOR",
-                ]
-            )
         )
         .sum()
     )
 
-    semantic_equivalent_rate = (
-        semantic_equivalent_count
+    semantic_usable_rate = (
+        semantic_usable
         /
         max(
             len(
@@ -2753,15 +2996,13 @@ def main():
         100
     )
 
-    auto_part = (
+    auto_part = result_df[
         result_df[
-            result_df[
-                "review_group"
-            ]
-            ==
-            "AUTO_ACCEPT_AUDIT"
+            "review_group"
         ]
-    )
+        ==
+        "AUTO_ACCEPT_AUDIT"
+    ]
 
     auto_fail_count = int(
         (
@@ -2788,7 +3029,7 @@ def main():
     )
 
     # ========================================================
-    # Save final result
+    # Save
     # ========================================================
 
     result_df.to_parquet(
@@ -2803,22 +3044,19 @@ def main():
     )
 
     label_report_file = (
-        output_file
-        .parent
+        output_file.parent
         /
         "label_report_v1.csv"
     )
 
     group_report_file = (
-        output_file
-        .parent
+        output_file.parent
         /
         "review_group_report_v1.csv"
     )
 
     source_report_file = (
-        output_file
-        .parent
+        output_file.parent
         /
         "source_report_v1.csv"
     )
@@ -2841,18 +3079,10 @@ def main():
         encoding="utf-8-sig",
     )
 
-    # ========================================================
-    # JSON report
-    # ========================================================
-
     label_counts = {
 
-        str(
-            key
-        ):
-            int(
-                value
-            )
+        str(key):
+            int(value)
 
         for (
             key,
@@ -2884,20 +3114,16 @@ def main():
         "judge_model":
             JUDGE_MODEL_NAME,
 
-        "judge_model_path":
-            str(
-                model_path
-            ),
-
-        "input_file":
-            str(
-                input_file
+        "judge_policy":
+            (
+                "Structured semantic dimensions "
+                "with deterministic Python label mapping."
             ),
 
         "selected_rows":
             int(
                 len(
-                    selected_df
+                    result_df
                 )
             ),
 
@@ -2910,72 +3136,30 @@ def main():
 
             "max_input_tokens":
                 int(
-                    args
-                    .max_input_tokens
+                    args.max_input_tokens
                 ),
 
             "max_new_tokens":
                 int(
-                    args
-                    .max_new_tokens
+                    args.max_new_tokens
                 ),
-
-            "do_sample":
-                False,
-
-            "num_beams":
-                1,
 
             "parse_retries":
                 int(
-                    args
-                    .parse_retries
+                    args.parse_retries
                 ),
+
+            "silent_truncation":
+                False,
         },
 
-        "calibration": {
-
-            "calibration_size":
-                (
-                    int(
-                        args
-                        .calibration_size
-                    )
-                    if args.mode
-                    ==
-                    "calibration"
-                    else None
-                ),
-
-            "calibration_risk_size":
-                (
-                    int(
-                        args
-                        .calibration_risk_size
-                    )
-                    if args.mode
-                    ==
-                    "calibration"
-                    else None
-                ),
-
-            "seed":
-                int(
-                    args.seed
-                ),
-
-            "reused_in_full":
-                int(
-                    reused_calibration
-                ),
-        },
+        "labels":
+            label_counts,
 
         "parse": {
 
             "success":
-                int(
-                    parse_success
-                ),
+                parse_success,
 
             "total":
                 int(
@@ -2990,19 +3174,14 @@ def main():
                 ),
         },
 
-        "labels":
-            label_counts,
-
-        "semantic_equivalent": {
+        "semantic_usable": {
 
             "pass_plus_minor":
-                int(
-                    semantic_equivalent_count
-                ),
+                semantic_usable,
 
             "percent":
                 float(
-                    semantic_equivalent_rate
+                    semantic_usable_rate
                 ),
         },
 
@@ -3016,9 +3195,7 @@ def main():
                 ),
 
             "fail":
-                int(
-                    auto_fail_count
-                ),
+                auto_fail_count,
 
             "fail_percent":
                 float(
@@ -3026,38 +3203,10 @@ def main():
                 ),
         },
 
-        "outputs": {
-
-            "result_parquet":
-                str(
-                    output_file
-                ),
-
-            "result_csv":
-                str(
-                    output_csv
-                ),
-
-            "checkpoint":
-                str(
-                    checkpoint_file
-                ),
-
-            "label_report":
-                str(
-                    label_report_file
-                ),
-
-            "group_report":
-                str(
-                    group_report_file
-                ),
-
-            "source_report":
-                str(
-                    source_report_file
-                ),
-        },
+        "calibration_reused":
+            int(
+                reused_calibration
+            ),
 
         "created_at_utc":
             datetime.now(
@@ -3066,12 +3215,12 @@ def main():
 
         "status":
             (
-                "CALIBRATION_COMPLETE_REVIEW_REQUIRED"
+                "V5_CALIBRATION_COMPLETE"
                 if args.mode
                 ==
                 "calibration"
                 else
-                "FULL_QWEN_REVIEW_COMPLETE"
+                "V5_FULL_REVIEW_COMPLETE"
             ),
     }
 
@@ -3098,7 +3247,7 @@ def main():
     )
 
     print(
-        "STEP 14E-2 RESULT"
+        "STEP 14E-2 V5 RESULT"
     )
 
     print(
@@ -3174,8 +3323,8 @@ def main():
     )
 
     print(
-        semantic_equivalent_count,
-        f"({semantic_equivalent_rate:.2f}%)"
+        semantic_usable,
+        f"({semantic_usable_rate:.2f}%)"
     )
 
     print(
@@ -3194,22 +3343,6 @@ def main():
         auto_fail_count,
         f"({auto_fail_rate:.2f}%)"
     )
-
-    if args.mode == "calibration":
-
-        print("\n")
-        print(
-            "IMPORTANT:"
-        )
-
-        print(
-            "Calibration completed."
-        )
-
-        print(
-            "Inspect label distribution and "
-            "sample judgments before running full mode."
-        )
 
     print(
         "\nOutput:"

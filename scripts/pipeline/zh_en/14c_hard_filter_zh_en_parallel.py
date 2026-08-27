@@ -33,7 +33,13 @@ MAX_ZH_CJK = 250
 # Chinese may legitimately contain English names,
 # acronyms, model names, URLs, etc., so threshold is looser.
 MIN_EN_LATIN_RATIO = 0.70
-MIN_ZH_CJK_RATIO = 0.45
+
+# Chinese mixed-script sentences are NOT hard rejected.
+# Proper nouns, product names, organizations and technical
+# terms can legitimately contain many Latin characters.
+#
+# Mixed-script risk is handled in Step 14D instead.
+MIN_ZH_CJK_RATIO = None
 
 # Approximate cross-language length relationship:
 #
@@ -321,11 +327,11 @@ def get_rejection_reason(
         return "EN_LOW_LATIN_RATIO"
 
     if (
-        zh_cjk_ratio
-        <
-        MIN_ZH_CJK_RATIO
+            en_latin_ratio
+            <
+            MIN_EN_LATIN_RATIO
     ):
-        return "ZH_LOW_CJK_RATIO"
+        return "EN_LOW_LATIN_RATIO"
 
     # --------------------------------------------------------
     # Very broad bilingual length ratio
@@ -1057,8 +1063,14 @@ def main():
                 MIN_EN_LATIN_RATIO,
 
             "min_zh_cjk_ratio":
-                MIN_ZH_CJK_RATIO,
+                None,
 
+            "zh_mixed_script_policy":
+                (
+                    "Not hard rejected. "
+                    "Handled as MIXED_SCRIPT_RISK "
+                    "in Step 14D."
+                ),
             "min_zh_cjk_per_en_word":
                 MIN_ZH_CJK_PER_EN_WORD,
 

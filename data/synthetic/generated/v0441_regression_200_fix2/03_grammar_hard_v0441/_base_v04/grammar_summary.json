@@ -1,0 +1,25 @@
+{
+  "validator_version": "0.4",
+  "input": "data\\synthetic\\generated\\v0441_regression_200_fix2\\02_hard_semantic_v0441\\hard_accepted.jsonl",
+  "total": 200,
+  "accepted": 194,
+  "rejected": 6,
+  "accept_rate": 0.97,
+  "rejected_by_language": {
+    "ru": 6
+  },
+  "reject_reasons": {
+    "RU_AGREEMENT_OR_TENSE": 6
+  },
+  "verb_distribution": {
+    "COME": 34,
+    "GO": 34,
+    "ARRIVE": 24,
+    "WANT": 18,
+    "FIND": 18,
+    "READ": 18,
+    "DRINK": 17,
+    "BUY": 17,
+    "EAT": 17
+  }
+}

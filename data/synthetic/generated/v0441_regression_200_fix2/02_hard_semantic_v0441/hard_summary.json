@@ -1,0 +1,9 @@
+{
+  "validator_version": "0.4.4.1",
+  "input": "data\\synthetic\\generated\\v0441_regression_200_fix2\\01_compatibility\\compatibility_accepted.jsonl",
+  "total": 200,
+  "accepted": 200,
+  "rejected": 0,
+  "accept_rate": 1.0,
+  "reject_reasons": {}
+}

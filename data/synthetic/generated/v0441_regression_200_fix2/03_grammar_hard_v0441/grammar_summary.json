@@ -1,0 +1,14 @@
+{
+  "validator_version": "0.4.4.1",
+  "input": "data\\synthetic\\generated\\v0441_regression_200_fix2\\02_hard_semantic_v0441\\hard_accepted.jsonl",
+  "total": 200,
+  "accepted": 200,
+  "rejected": 0,
+  "accept_rate": 1.0,
+  "base_v04_rejected": 6,
+  "habitual_motion_samples": 9,
+  "habitual_motion_accepted": 9,
+  "habitual_motion_accept_rate": 1.0,
+  "reject_reasons": {},
+  "rejected_by_language": {}
+}

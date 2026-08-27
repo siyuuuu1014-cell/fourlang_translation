@@ -24,9 +24,9 @@ from transformers import (
 # Versions
 # ============================================================
 
-STEP_VERSION = "14E2_V5"
+STEP_VERSION = "14E2_V5_1"
 
-PROMPT_VERSION = "ZH_EN_JUDGE_V5_STRUCTURED_FINAL"
+PROMPT_VERSION = "ZH_EN_JUDGE_V5_1_STRUCTURED_FINAL"
 
 JUDGE_MODEL_NAME = "Qwen3-8B"
 
@@ -630,8 +630,23 @@ Schema:
   "minor_semantic_issue": false,
   "fluency_or_grammar_affects_understanding": false,
   "reason": "brief evidence-based reason"
+      Important English idiom interpretation:
+    
+    Expressions such as "be based out of X" normally mean
+    "be based in / operate from X".
+    
+    Do not interpret "out of X" in this construction as
+    "outside X".
+    
+    For example:
+    
+    "an employee based out of New York City"
+    
+    means an employee whose working base is New York City,
+    not an employee located outside New York City.
 }
 """.strip()
+
 
 
 def build_user_prompt(

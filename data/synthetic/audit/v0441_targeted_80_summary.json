@@ -1,0 +1,40 @@
+{
+  "source_rows": 200,
+  "requested": 80,
+  "selected": 80,
+  "seed": 2056,
+  "available_groups": {
+    "ARRIVE": 24,
+    "CLOCK": 30,
+    "HABITUAL_COME_LOCAL": 3,
+    "HABITUAL_COME_TRAVEL": 3,
+    "HABITUAL_GO_LOCAL": 2,
+    "HABITUAL_GO_TRAVEL": 1,
+    "OTHER": 75,
+    "PLANNED_COME": 28,
+    "PLANNED_GO": 31,
+    "WHERE_PLACE": 3
+  },
+  "selected_groups": {
+    "PLANNED_COME": 19,
+    "PLANNED_GO": 17,
+    "CLOCK": 17,
+    "ARRIVE": 15,
+    "HABITUAL_COME_LOCAL": 3,
+    "HABITUAL_COME_TRAVEL": 3,
+    "WHERE_PLACE": 3,
+    "HABITUAL_GO_LOCAL": 2,
+    "HABITUAL_GO_TRAVEL": 1
+  },
+  "quotas": {
+    "HABITUAL_GO_LOCAL": 8,
+    "HABITUAL_GO_TRAVEL": 8,
+    "HABITUAL_COME_LOCAL": 8,
+    "HABITUAL_COME_TRAVEL": 8,
+    "PLANNED_GO": 10,
+    "PLANNED_COME": 10,
+    "ARRIVE": 10,
+    "CLOCK": 10,
+    "WHERE_PLACE": 8
+  }
+}

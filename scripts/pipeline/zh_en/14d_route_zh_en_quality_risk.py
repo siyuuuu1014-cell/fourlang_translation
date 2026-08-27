@@ -41,36 +41,64 @@ REPEATED_PUNCT_RE = re.compile(
 # Negation lexicons
 # ============================================================
 
-EN_NEGATIONS = [
+EN_NEGATION_PATTERNS = [
 
-    "not",
-    "no",
-    "never",
-    "none",
-    "nothing",
-    "nobody",
-    "neither",
-    "nor",
-    "without",
-    "cannot",
-    "can't",
-    "won't",
-    "isn't",
-    "aren't",
-    "wasn't",
-    "weren't",
-    "don't",
-    "doesn't",
-    "didn't",
-    "haven't",
-    "hasn't",
-    "hadn't",
-    "shouldn't",
-    "wouldn't",
-    "couldn't",
-    "mustn't",
+    r"\bnot\b",
+    r"\bno\b",
+    r"\bnever\b",
+    r"\bnone\b",
+    r"\bnothing\b",
+    r"\bnobody\b",
+    r"\bneither\b",
+    r"\bnor\b",
+    r"\bwithout\b",
+
+    r"\bcannot\b",
+
+    r"\bcan't\b",
+    r"\bwon't\b",
+
+    r"\bisn't\b",
+    r"\baren't\b",
+    r"\bwasn't\b",
+    r"\bweren't\b",
+
+    r"\bdon't\b",
+    r"\bdoesn't\b",
+    r"\bdidn't\b",
+
+    r"\bhaven't\b",
+    r"\bhasn't\b",
+    r"\bhadn't\b",
+
+    r"\bshouldn't\b",
+    r"\bwouldn't\b",
+    r"\bcouldn't\b",
+    r"\bmustn't\b",
 ]
 
+
+def has_english_negation(
+    text: str,
+) -> bool:
+
+    text = (
+        str(text)
+        .lower()
+    )
+
+    return any(
+
+        re.search(
+            pattern,
+            text,
+        )
+
+        is not None
+
+        for pattern
+        in EN_NEGATION_PATTERNS
+    )
 ZH_NEGATIONS = [
 
     "不",
@@ -237,24 +265,6 @@ def extract_emails(
     ))
 
 
-def has_english_negation(
-    text: str,
-) -> bool:
-
-    text = (
-        str(
-            text
-        )
-        .lower()
-    )
-
-    for token in EN_NEGATIONS:
-
-        if token in text:
-
-            return True
-
-    return False
 
 
 def has_chinese_negation(

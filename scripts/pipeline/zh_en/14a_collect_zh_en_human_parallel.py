@@ -20,7 +20,7 @@ import pandas as pd
 # Source definitions
 # ============================================================
 
-SSOURCES = {
+SOURCES = {
 
     "tatoeba": {
 

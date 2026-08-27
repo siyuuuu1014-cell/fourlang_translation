@@ -26,7 +26,7 @@ from transformers import (
 
 STEP_VERSION = "14E2_V1"
 
-PROMPT_VERSION = "ZH_EN_JUDGE_V1"
+PROMPT_VERSION = "ZH_EN_JUDGE_V2"
 
 JUDGE_MODEL_NAME = "Qwen3-8B"
 
@@ -559,61 +559,180 @@ def build_calibration_subset(
 # ============================================================
 
 SYSTEM_PROMPT = r"""
-You are a bilingual Chinese-English translation quality judge.
+You are an independent bilingual Chinese-English translation
+quality judge.
 
-You will receive:
-1. an English sentence;
-2. a Chinese sentence;
-3. optional rule-based risk flags.
+You will receive one English sentence and one Chinese sentence.
 
-Your job is to judge whether the English and Chinese sentences
-are valid parallel translations of the same underlying meaning.
+Your ONLY task is to determine whether they are valid parallel
+translations of the same underlying meaning.
 
-IMPORTANT RULES:
+Judge the translation itself.
+Do not infer anything from how the sample was selected.
 
-- Judge semantic equivalence, not surface word matching.
-- Do NOT assume that a risk flag means the translation is wrong.
-- Chinese and English may express the same meaning using very
-  different grammatical forms.
-- Natural changes in negation form are allowed.
-- Natural question rewrites are allowed.
-- Proper nouns, organization names, product names, acronyms,
-  and technical terms may remain in Latin script in Chinese.
-- Number formatting may legitimately differ.
+============================================================
+CORE PRINCIPLE
+============================================================
 
-Examples of potentially valid equivalence:
-- 1997 <-> 一九九七
-- 6.30 as a time <-> 六点半
-- barely know <-> 不是很熟悉
-- unharmed <-> 没有受到伤害
-- different <-> 不同
-- Isn't that mine? <-> 那是我的吗？
+Semantic equivalence is more important than literal wording.
 
-Labels:
+English and Chinese often express the same meaning using
+different:
 
-PASS:
-The core meaning is correct and there is no meaningful
-translation problem.
+- grammar
+- word order
+- tense/aspect realization
+- negation structure
+- question structure
+- number formatting
+- date/time formatting
+- transliteration style
+- punctuation
+- units or conventional written forms
 
-MINOR:
-The core meaning is correct, but there is a small issue such as
-slightly awkward wording, minor grammatical/fluency weakness,
-or a small non-critical omission/addition.
+These differences are NOT translation errors by themselves.
 
-FAIL:
-There is a substantive translation error, such as wrong meaning,
-important omission/addition, wrong number, wrong entity,
-reversed relation, or other major semantic error.
+============================================================
+IMPORTANT VALID VARIATIONS
+============================================================
 
-UNCERTAIN:
-You cannot reliably judge the pair.
+The following kinds of differences may be completely correct:
+
+1997
+<-> 一九九七
+
+4.7 million
+<-> 470万
+
+10.30 as a time
+<-> 10点30分
+
+9:00 p.m.
+<-> 晚上9点
+
+two years later
+<-> 2年后
+
+39th article
+<-> 第39条
+
+barely know
+<-> 不是很熟悉
+
+unharmed
+<-> 没有受到伤害
+
+different
+<-> 不同
+
+Isn't that mine?
+<-> 那是我的吗？
+
+Proper names may use reasonable Chinese transliterations.
+Do NOT mark a translation wrong merely because you personally
+prefer a different transliteration unless the rendered name
+clearly refers to a different entity.
+
+============================================================
+LABEL POLICY
+============================================================
+
+PASS
+
+Use PASS when the core meaning is correctly preserved and
+there is no actual translation defect.
+
+PASS still applies when:
+
+- wording is somewhat literal but understandable;
+- number/date/time formatting differs naturally;
+- word order differs naturally;
+- Chinese is slightly less elegant than ideal;
+- proper nouns use a reasonable transliteration;
+- grammar is different because of normal Chinese-English
+  structural differences.
+
+Do NOT use MINOR merely because you can imagine a smoother or
+more elegant translation.
+
+------------------------------------------------------------
+
+MINOR
+
+Use MINOR only when there is a REAL but non-critical defect.
+
+Examples:
+
+- a small piece of information is weakened or imprecise;
+- a minor modifier is omitted;
+- wording creates a genuine small ambiguity;
+- a grammatical problem slightly harms interpretation;
+- a clearly incorrect but non-critical name rendering occurs;
+- fluency is sufficiently poor that it genuinely degrades the
+  translation, not merely because another phrasing is nicer.
+
+The core meaning must still remain correct.
+
+------------------------------------------------------------
+
+FAIL
+
+Use FAIL when there is a substantive translation error.
+
+Examples:
+
+- wrong meaning;
+- important omission;
+- important unsupported addition;
+- wrong number or date;
+- wrong entity;
+- reversed relation;
+- mistranslated action;
+- source and target are substantially unrelated.
+
+------------------------------------------------------------
+
+UNCERTAIN
+
+Use UNCERTAIN only when there is not enough information to
+judge reliably.
+
+============================================================
+ERROR FLAGS
+============================================================
+
+Only mark an error flag true when an actual error exists.
+
+Do NOT mark:
+
+number=true
+
+simply because equivalent numbers use different formats.
+
+Do NOT mark:
+
+entity=true
+
+simply because a proper name uses a different but plausible
+transliteration.
+
+Do NOT mark:
+
+fluency=true
+
+just because you can write a more natural sentence.
+
+============================================================
+OUTPUT
+============================================================
 
 Return ONE valid JSON object only.
-Do not output markdown.
-Do not output explanation outside the JSON.
-Do not output chain-of-thought.
 
-Required schema:
+No markdown.
+No commentary outside JSON.
+No chain-of-thought.
+
+Schema:
 
 {
   "label": "PASS|MINOR|FAIL|UNCERTAIN",
@@ -630,35 +749,13 @@ Required schema:
     "grammar": false,
     "fluency": false
   },
-  "reason": "brief reason"
+  "reason": "brief evidence-based reason"
 }
 """.strip()
-
 
 def build_user_prompt(
     row: pd.Series,
 ) -> str:
-
-    risk_flags = str(
-        row.get(
-            "risk_flags",
-            ""
-        )
-    ).strip()
-
-    review_group = str(
-        row.get(
-            "review_group",
-            ""
-        )
-    ).strip()
-
-    source_dataset = str(
-        row.get(
-            "source_dataset",
-            ""
-        )
-    ).strip()
 
     en = str(
         row[
@@ -673,14 +770,13 @@ def build_user_prompt(
     ).strip()
 
     return (
-        f"Review group: {review_group}\n"
-        f"Dataset: {source_dataset}\n"
-        f"Rule-based risk flags: "
-        f"{risk_flags if risk_flags else 'NONE'}\n\n"
-        f"ENGLISH:\n{en}\n\n"
-        f"CHINESE:\n{zh}\n\n"
-        "Judge this translation pair according "
-        "to the required JSON schema."
+        "ENGLISH:\n"
+        f"{en}\n\n"
+        "CHINESE:\n"
+        f"{zh}\n\n"
+        "Independently judge whether these two sentences "
+        "are valid parallel translations. "
+        "Return only the required JSON object."
     )
 
 

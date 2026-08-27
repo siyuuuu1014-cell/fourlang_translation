@@ -1,0 +1,59 @@
+{
+  "version": "0.4.4.1",
+  "description": "Destination-sensitive Russian habitual motion lexicalization.",
+  "destination_classes": {
+    "local": [
+      "BANK",
+      "HOSPITAL",
+      "SCHOOL",
+      "OFFICE",
+      "HOTEL",
+      "RESTAURANT"
+    ],
+    "travel": [
+      "AIRPORT",
+      "STATION",
+      "TASHKENT",
+      "BEIJING",
+      "MOSCOW"
+    ]
+  },
+  "verbs": {
+    "GO": {
+      "local": {
+        "1sg": "хожу",
+        "2sg": "ходишь",
+        "3sg": "ходит",
+        "1pl": "ходим",
+        "2pl": "ходите",
+        "3pl": "ходят"
+      },
+      "travel": {
+        "1sg": "езжу",
+        "2sg": "ездишь",
+        "3sg": "ездит",
+        "1pl": "ездим",
+        "2pl": "ездите",
+        "3pl": "ездят"
+      }
+    },
+    "COME": {
+      "local": {
+        "1sg": "прихожу",
+        "2sg": "приходишь",
+        "3sg": "приходит",
+        "1pl": "приходим",
+        "2pl": "приходите",
+        "3pl": "приходят"
+      },
+      "travel": {
+        "1sg": "приезжаю",
+        "2sg": "приезжаешь",
+        "3sg": "приезжает",
+        "1pl": "приезжаем",
+        "2pl": "приезжаете",
+        "3pl": "приезжают"
+      }
+    }
+  }
+}

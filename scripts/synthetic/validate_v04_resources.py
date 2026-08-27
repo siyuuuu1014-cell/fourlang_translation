@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from collections import Counter, defaultdict
+from collections import Counter
 from pathlib import Path
 from typing import Any
 
@@ -75,6 +75,10 @@ class ResourceValidationError(Exception):
     pass
 
 
+# ============================================================
+# IO
+# ============================================================
+
 def load_json(path: Path) -> Any:
     if not path.exists():
         raise ResourceValidationError(
@@ -138,6 +142,36 @@ def require(
         errors.append(message)
 
 
+# ============================================================
+# General helpers
+# ============================================================
+
+def is_enabled(item: dict) -> bool:
+    """
+    Resource is enabled by default.
+
+    meta.enabled = false means planned / disabled.
+    """
+
+    meta = item.get(
+        "meta",
+        {},
+    )
+
+    if not isinstance(
+        meta,
+        dict,
+    ):
+        return True
+
+    return bool(
+        meta.get(
+            "enabled",
+            True,
+        )
+    )
+
+
 def semantic_classes_of(
     concept: dict,
 ) -> set[str]:
@@ -146,16 +180,27 @@ def semantic_classes_of(
         "semantic_classes"
     )
 
+    # Backward-compatible fallback
     if classes is None:
         single = concept.get(
             "semantic_class"
         )
 
         if single:
-            classes = [single]
+            classes = [
+                single
+            ]
 
     if not classes:
         return set()
+
+    if isinstance(
+        classes,
+        str,
+    ):
+        classes = [
+            classes
+        ]
 
     return {
         str(x)
@@ -163,44 +208,76 @@ def semantic_classes_of(
     }
 
 
+# ============================================================
+# Concepts
+# ============================================================
+
 def validate_concepts(
     concepts: list[dict],
     errors: list[str],
     warnings: list[str],
 ) -> dict[str, dict]:
 
-    index: dict[str, dict] = {}
+    index: dict[
+        str,
+        dict,
+    ] = {}
+
     type_counter = Counter()
 
     for i, concept in enumerate(
         concepts,
         start=1,
     ):
-        cid = concept.get("id")
+
+        cid = concept.get(
+            "id"
+        )
+
         ctype = concept.get(
             "concept_type"
         )
 
         require(
-            isinstance(cid, str)
-            and bool(cid.strip()),
-            f"Concept line {i}: missing valid id.",
+            isinstance(
+                cid,
+                str,
+            )
+            and bool(
+                cid.strip()
+            ),
+            (
+                f"Concept line {i}: "
+                f"missing valid id."
+            ),
             errors,
         )
 
-        if not isinstance(cid, str):
+        if not isinstance(
+            cid,
+            str,
+        ):
             continue
 
         require(
             cid not in index,
-            f"Duplicate concept id: {cid}",
+            (
+                f"Duplicate concept id: "
+                f"{cid}"
+            ),
             errors,
         )
 
-        index[cid] = concept
+        if cid in index:
+            continue
+
+        index[
+            cid
+        ] = concept
 
         require(
-            ctype in VALID_CONCEPT_TYPES,
+            ctype
+            in VALID_CONCEPT_TYPES,
             (
                 f"Concept {cid}: invalid "
                 f"concept_type={ctype!r}"
@@ -209,22 +286,54 @@ def validate_concepts(
         )
 
         if ctype:
-            type_counter[ctype] += 1
+            type_counter[
+                ctype
+            ] += 1
+
+        # ----------------------------------------------------
+        # Planned / disabled concept
+        # ----------------------------------------------------
+
+        if not is_enabled(
+            concept
+        ):
+            warnings.append(
+                (
+                    f"Planned/disabled concept: "
+                    f"{cid}"
+                )
+            )
+
+            continue
+
+        # ----------------------------------------------------
+        # Forms
+        # ----------------------------------------------------
 
         forms = concept.get(
             "forms"
         )
 
         require(
-            isinstance(forms, dict),
-            f"Concept {cid}: forms must be an object.",
+            isinstance(
+                forms,
+                dict,
+            ),
+            (
+                f"Concept {cid}: "
+                f"forms must be an object."
+            ),
             errors,
         )
 
-        if not isinstance(forms, dict):
+        if not isinstance(
+            forms,
+            dict,
+        ):
             continue
 
         for lang in LANGUAGES:
+
             require(
                 lang in forms,
                 (
@@ -234,174 +343,242 @@ def validate_concepts(
                 errors,
             )
 
-        meta = concept.get(
-            "meta",
-            {}
-        )
-
-        if meta.get(
-            "enabled",
-            True,
-        ) is False:
-            warnings.append(
-                f"Concept {cid} is disabled."
-            )
-
-        # ----------------------------------------------------
-        # Person-specific checks
-        # ----------------------------------------------------
+        # ====================================================
+        # Person
+        # ====================================================
 
         if ctype == "person":
 
             pf = concept.get(
                 "person_features",
-                {}
+                {},
             )
 
             require(
-                pf.get("person")
-                in {1, 2, 3},
+                isinstance(
+                    pf,
+                    dict,
+                ),
                 (
-                    f"Person {cid}: invalid "
-                    f"person_features.person"
+                    f"Person {cid}: "
+                    f"person_features must be object."
                 ),
                 errors,
             )
 
-            require(
-                pf.get("number")
-                in {
-                    "singular",
-                    "plural",
-                },
-                (
-                    f"Person {cid}: invalid "
-                    f"person_features.number"
-                ),
-                errors,
-            )
-
-            if isinstance(forms, dict):
-
-                ru = forms.get(
-                    "ru",
-                    {}
-                )
-
-                uz = forms.get(
-                    "uz",
-                    {}
-                )
+            if isinstance(
+                pf,
+                dict,
+            ):
 
                 require(
-                    "person_code" in ru,
+                    pf.get(
+                        "person"
+                    )
+                    in {
+                        1,
+                        2,
+                        3,
+                    },
                     (
-                        f"Person {cid}: "
-                        f"missing ru.person_code"
+                        f"Person {cid}: invalid "
+                        f"person_features.person"
                     ),
                     errors,
                 )
 
                 require(
-                    "person_code" in uz,
+                    pf.get(
+                        "number"
+                    )
+                    in {
+                        "singular",
+                        "plural",
+                    },
                     (
-                        f"Person {cid}: "
-                        f"missing uz.person_code"
+                        f"Person {cid}: invalid "
+                        f"person_features.number"
                     ),
                     errors,
                 )
 
-        # ----------------------------------------------------
-        # Verb-specific checks
-        # ----------------------------------------------------
+            ru = forms.get(
+                "ru",
+                {},
+            )
+
+            uz = forms.get(
+                "uz",
+                {},
+            )
+
+            require(
+                isinstance(
+                    ru,
+                    dict,
+                )
+                and "person_code" in ru,
+                (
+                    f"Person {cid}: "
+                    f"missing ru.person_code"
+                ),
+                errors,
+            )
+
+            require(
+                isinstance(
+                    uz,
+                    dict,
+                )
+                and "person_code" in uz,
+                (
+                    f"Person {cid}: "
+                    f"missing uz.person_code"
+                ),
+                errors,
+            )
+
+        # ====================================================
+        # Verb
+        # ====================================================
 
         if ctype == "verb":
 
             features = concept.get(
                 "features",
-                {}
+                {},
             )
 
             require(
-                features.get(
-                    "transitivity"
-                )
-                in {
-                    "transitive",
-                    "intransitive",
-                    "ambitransitive",
-                    "modal",
-                },
+                isinstance(
+                    features,
+                    dict,
+                ),
                 (
-                    f"Verb {cid}: invalid or missing "
-                    f"features.transitivity"
+                    f"Verb {cid}: "
+                    f"features must be object."
                 ),
                 errors,
             )
 
+            if isinstance(
+                features,
+                dict,
+            ):
+
+                require(
+                    features.get(
+                        "transitivity"
+                    )
+                    in {
+                        "transitive",
+                        "intransitive",
+                        "ambitransitive",
+                        "modal",
+                    },
+                    (
+                        f"Verb {cid}: invalid "
+                        f"or missing "
+                        f"features.transitivity"
+                    ),
+                    errors,
+                )
+
+            # English
             en = forms.get(
                 "en",
-                {}
+                {},
             )
 
             require(
-                "base" in en,
-                f"Verb {cid}: missing en.base",
+                isinstance(
+                    en,
+                    dict,
+                )
+                and "base" in en,
+                (
+                    f"Verb {cid}: "
+                    f"missing en.base"
+                ),
                 errors,
             )
 
+            # Chinese
             zh = forms.get(
                 "zh",
-                {}
+                {},
             )
 
             require(
-                "base" in zh,
-                f"Verb {cid}: missing zh.base",
+                isinstance(
+                    zh,
+                    dict,
+                )
+                and "base" in zh,
+                (
+                    f"Verb {cid}: "
+                    f"missing zh.base"
+                ),
                 errors,
             )
 
+            # Russian
             ru = forms.get(
                 "ru",
-                {}
+                {},
             )
 
             require(
-                "infinitive" in ru,
-                f"Verb {cid}: missing ru.infinitive",
+                isinstance(
+                    ru,
+                    dict,
+                )
+                and "infinitive" in ru,
+                (
+                    f"Verb {cid}: "
+                    f"missing ru.infinitive"
+                ),
                 errors,
             )
 
+            # Uzbek
             uz = forms.get(
                 "uz",
-                {}
+                {},
             )
 
             require(
-                (
+                isinstance(
+                    uz,
+                    dict,
+                )
+                and (
                     "base" in uz
-                    or
-                    "lemma" in uz
+                    or "lemma" in uz
                 ),
                 (
-                    f"Verb {cid}: missing "
-                    f"uz.base/uz.lemma"
+                    f"Verb {cid}: "
+                    f"missing uz.base/uz.lemma"
                 ),
                 errors,
             )
 
-        # ----------------------------------------------------
-        # Object checks
-        # ----------------------------------------------------
+        # ====================================================
+        # Object
+        # ====================================================
 
         if ctype == "object":
 
-            classes = semantic_classes_of(
-                concept
+            classes = (
+                semantic_classes_of(
+                    concept
+                )
             )
 
             require(
-                bool(classes),
+                bool(
+                    classes
+                ),
                 (
                     f"Object {cid}: "
                     f"no semantic_classes."
@@ -409,60 +586,87 @@ def validate_concepts(
                 errors,
             )
 
-        # ----------------------------------------------------
-        # Place checks
-        # ----------------------------------------------------
+        # ====================================================
+        # Place
+        # ====================================================
 
         if ctype == "place":
 
+            classes = (
+                semantic_classes_of(
+                    concept
+                )
+            )
+
             require(
-                (
-                    "PLACE"
-                    in semantic_classes_of(
-                        concept
-                    )
-                ),
+                "PLACE" in classes,
                 (
                     f"Place {cid}: "
-                    f"must include semantic class PLACE."
+                    f"must include "
+                    f"semantic class PLACE."
                 ),
                 errors,
             )
 
-        # ----------------------------------------------------
-        # Time checks
-        # ----------------------------------------------------
+        # ====================================================
+        # Time
+        # ====================================================
 
         if ctype == "time":
 
             tf = concept.get(
                 "time_features",
-                {}
+                {},
             )
 
-            tense_hint = tf.get(
-                "tense_hint"
+            require(
+                isinstance(
+                    tf,
+                    dict,
+                ),
+                (
+                    f"Time {cid}: "
+                    f"time_features must "
+                    f"be object."
+                ),
+                errors,
             )
 
-            if tense_hint is not None:
+            if isinstance(
+                tf,
+                dict,
+            ):
 
-                require(
-                    tense_hint
-                    in VALID_TENSES,
-                    (
-                        f"Time {cid}: invalid "
-                        f"tense_hint={tense_hint!r}"
-                    ),
-                    errors,
+                tense_hint = tf.get(
+                    "tense_hint"
                 )
+
+                if tense_hint is not None:
+
+                    require(
+                        tense_hint
+                        in VALID_TENSES,
+                        (
+                            f"Time {cid}: "
+                            f"invalid tense_hint="
+                            f"{tense_hint!r}"
+                        ),
+                        errors,
+                    )
 
     print(
         "Concept types:",
-        dict(type_counter),
+        dict(
+            type_counter
+        ),
     )
 
     return index
 
+
+# ============================================================
+# Semantic classes
+# ============================================================
 
 def collect_known_semantic_classes(
     concepts: list[dict],
@@ -472,11 +676,12 @@ def collect_known_semantic_classes(
     known = set(
         compat.get(
             "semantic_classes",
-            {}
+            {},
         ).keys()
     )
 
     for concept in concepts:
+
         known.update(
             semantic_classes_of(
                 concept
@@ -486,11 +691,16 @@ def collect_known_semantic_classes(
     return known
 
 
+# ============================================================
+# Compatibility
+# ============================================================
+
 def validate_compatibility(
     compat: dict,
     concept_index: dict[str, dict],
     known_classes: set[str],
     errors: list[str],
+    warnings: list[str],
 ) -> None:
 
     unknown_policy = compat.get(
@@ -506,14 +716,15 @@ def validate_compatibility(
         },
         (
             "semantic_compatibility_v04.json: "
-            "unknown_policy must be reject/warn/allow"
+            "unknown_policy must be "
+            "reject/warn/allow"
         ),
         errors,
     )
 
     verb_rules = compat.get(
         "verb_rules",
-        {}
+        {},
     )
 
     require(
@@ -521,36 +732,85 @@ def validate_compatibility(
             verb_rules,
             dict,
         ),
-        "verb_rules must be an object.",
+        (
+            "verb_rules must "
+            "be an object."
+        ),
         errors,
     )
 
-    for verb_id, rules in verb_rules.items():
+    if not isinstance(
+        verb_rules,
+        dict,
+    ):
+        return
+
+    # ========================================================
+    # Verb compatibility rules
+    # ========================================================
+
+    for verb_id, rules in (
+        verb_rules.items()
+    ):
+
+        # ----------------------------------------------------
+        # Future/planned verb
+        # ----------------------------------------------------
+
+        if verb_id not in concept_index:
+
+            warnings.append(
+                (
+                    "Planned compatibility rule "
+                    "references unavailable verb: "
+                    f"{verb_id}"
+                )
+            )
+
+            # Do not validate internal compatibility
+            # against a concept that does not exist yet.
+            continue
+
+        verb_concept = (
+            concept_index[
+                verb_id
+            ]
+        )
+
+        # ----------------------------------------------------
+        # Existing but disabled verb
+        # ----------------------------------------------------
+
+        if not is_enabled(
+            verb_concept
+        ):
+
+            warnings.append(
+                (
+                    "Compatibility rule references "
+                    "disabled verb: "
+                    f"{verb_id}"
+                )
+            )
+
+            continue
+
+        # ----------------------------------------------------
+        # Existing active verb must really be verb
+        # ----------------------------------------------------
 
         require(
-            verb_id in concept_index,
+            verb_concept.get(
+                "concept_type"
+            )
+            == "verb",
             (
-                f"Compatibility rule references "
-                f"missing verb: {verb_id}"
+                f"Compatibility rule "
+                f"{verb_id}: "
+                f"concept is not verb."
             ),
             errors,
         )
-
-        if verb_id in concept_index:
-
-            require(
-                concept_index[
-                    verb_id
-                ].get(
-                    "concept_type"
-                )
-                == "verb",
-                (
-                    f"Compatibility rule {verb_id}: "
-                    f"concept is not verb."
-                ),
-                errors,
-            )
 
         if not isinstance(
             rules,
@@ -559,28 +819,37 @@ def validate_compatibility(
             errors.append(
                 (
                     f"Compatibility rule "
-                    f"{verb_id} must be object."
+                    f"{verb_id} "
+                    f"must be object."
                 )
             )
+
             continue
 
-        for slot_name, rule in rules.items():
+        for slot_name, rule in (
+            rules.items()
+        ):
 
             if not isinstance(
                 rule,
                 dict,
             ):
+
                 errors.append(
                     (
-                        f"{verb_id}.{slot_name}: "
+                        f"{verb_id}."
+                        f"{slot_name}: "
                         f"rule must be object."
                     )
                 )
+
                 continue
 
-            allowed_classes = rule.get(
-                "allowed_classes",
-                [],
+            allowed_classes = (
+                rule.get(
+                    "allowed_classes",
+                    [],
+                )
             )
 
             require(
@@ -589,22 +858,38 @@ def validate_compatibility(
                     list,
                 ),
                 (
-                    f"{verb_id}.{slot_name}: "
-                    f"allowed_classes must be list."
+                    f"{verb_id}."
+                    f"{slot_name}: "
+                    f"allowed_classes "
+                    f"must be list."
                 ),
                 errors,
             )
 
-            for cls in allowed_classes:
+            if not isinstance(
+                allowed_classes,
+                list,
+            ):
+                continue
+
+            for cls in (
+                allowed_classes
+            ):
 
                 require(
                     cls in known_classes,
                     (
-                        f"{verb_id}.{slot_name}: "
-                        f"unknown semantic class {cls}"
+                        f"{verb_id}."
+                        f"{slot_name}: "
+                        f"unknown semantic "
+                        f"class {cls}"
                     ),
                     errors,
                 )
+
+    # ========================================================
+    # Explicit forbidden pairs
+    # ========================================================
 
     forbidden = compat.get(
         "explicit_forbidden",
@@ -616,51 +901,105 @@ def validate_compatibility(
             forbidden,
             list,
         ),
-        "explicit_forbidden must be a list.",
+        (
+            "explicit_forbidden "
+            "must be a list."
+        ),
         errors,
     )
 
-    if isinstance(
+    if not isinstance(
         forbidden,
         list,
     ):
-        for item in forbidden:
+        return
 
-            if not isinstance(
-                item,
-                dict,
-            ):
-                errors.append(
-                    "Invalid explicit_forbidden item."
+    for item in forbidden:
+
+        if not isinstance(
+            item,
+            dict,
+        ):
+
+            errors.append(
+                (
+                    "Invalid "
+                    "explicit_forbidden item."
                 )
-                continue
-
-            verb_id = item.get(
-                "verb"
             )
 
-            obj_id = item.get(
-                "object"
-            )
+            continue
 
-            require(
-                verb_id in concept_index,
+        verb_id = item.get(
+            "verb"
+        )
+
+        obj_id = item.get(
+            "object"
+        )
+
+        # ----------------------------------------------------
+        # Planned missing verb
+        # ----------------------------------------------------
+
+        if verb_id not in concept_index:
+
+            warnings.append(
                 (
-                    f"Forbidden rule missing verb: "
+                    "Planned forbidden rule "
+                    "references unavailable verb: "
                     f"{verb_id}"
-                ),
-                errors,
+                )
             )
 
-            require(
-                obj_id in concept_index,
+        else:
+
+            concept = (
+                concept_index[
+                    verb_id
+                ]
+            )
+
+            if (
+                is_enabled(
+                    concept
+                )
+                and concept.get(
+                    "concept_type"
+                )
+                != "verb"
+            ):
+
+                errors.append(
+                    (
+                        "Forbidden rule verb "
+                        f"{verb_id} "
+                        "is not a verb concept."
+                    )
+                )
+
+        # ----------------------------------------------------
+        # Planned missing object
+        # ----------------------------------------------------
+
+        if (
+            obj_id is not None
+            and obj_id
+            not in concept_index
+        ):
+
+            warnings.append(
                 (
-                    f"Forbidden rule missing object: "
+                    "Planned forbidden rule "
+                    "references unavailable object: "
                     f"{obj_id}"
-                ),
-                errors,
+                )
             )
 
+
+# ============================================================
+# Frames
+# ============================================================
 
 def validate_frames(
     frames_data: dict,
@@ -668,11 +1007,15 @@ def validate_frames(
     known_classes: set[str],
     enabled_scenarios: set[str],
     errors: list[str],
-) -> None:
+    warnings: list[str],
+) -> tuple[
+    int,
+    int,
+]:
 
     frames = frames_data.get(
         "frames",
-        []
+        [],
     )
 
     require(
@@ -680,11 +1023,26 @@ def validate_frames(
             frames,
             list,
         ),
-        "frames must be a list.",
+        (
+            "frames must "
+            "be a list."
+        ),
         errors,
     )
 
+    if not isinstance(
+        frames,
+        list,
+    ):
+        return (
+            0,
+            0,
+        )
+
     frame_ids = set()
+
+    active_count = 0
+    disabled_count = 0
 
     for frame in frames:
 
@@ -692,9 +1050,14 @@ def validate_frames(
             frame,
             dict,
         ):
+
             errors.append(
-                "Frame entry must be object."
+                (
+                    "Frame entry "
+                    "must be object."
+                )
             )
+
             continue
 
         fid = frame.get(
@@ -706,8 +1069,13 @@ def validate_frames(
                 fid,
                 str,
             )
-            and bool(fid.strip()),
-            "Frame missing valid id.",
+            and bool(
+                fid.strip()
+            ),
+            (
+                "Frame missing "
+                "valid id."
+            ),
             errors,
         )
 
@@ -719,13 +1087,48 @@ def validate_frames(
 
         require(
             fid not in frame_ids,
-            f"Duplicate frame id: {fid}",
+            (
+                f"Duplicate frame id: "
+                f"{fid}"
+            ),
             errors,
         )
+
+        if fid in frame_ids:
+            continue
 
         frame_ids.add(
             fid
         )
+
+        # ----------------------------------------------------
+        # Disabled / planned frame
+        # ----------------------------------------------------
+
+        if not is_enabled(
+            frame
+        ):
+
+            disabled_count += 1
+
+            warnings.append(
+                (
+                    f"Planned/disabled frame: "
+                    f"{fid}"
+                )
+            )
+
+            # IMPORTANT:
+            # Do not validate missing fixed concepts,
+            # because planned frame may depend on future
+            # V0.4 concepts.
+            continue
+
+        active_count += 1
+
+        # ----------------------------------------------------
+        # Weight
+        # ----------------------------------------------------
 
         weight = frame.get(
             "weight",
@@ -737,6 +1140,10 @@ def validate_frames(
                 weight,
                 (int, float),
             )
+            and not isinstance(
+                weight,
+                bool,
+            )
             and weight > 0,
             (
                 f"Frame {fid}: "
@@ -745,24 +1152,57 @@ def validate_frames(
             errors,
         )
 
-        for scenario in frame.get(
-            "scenario_tags",
-            [],
+        # ----------------------------------------------------
+        # Scenario tags
+        # ----------------------------------------------------
+
+        scenario_tags = (
+            frame.get(
+                "scenario_tags",
+                [],
+            )
+        )
+
+        require(
+            isinstance(
+                scenario_tags,
+                list,
+            ),
+            (
+                f"Frame {fid}: "
+                f"scenario_tags "
+                f"must be list."
+            ),
+            errors,
+        )
+
+        if isinstance(
+            scenario_tags,
+            list,
         ):
 
-            require(
-                scenario
-                in enabled_scenarios,
-                (
-                    f"Frame {fid}: unknown "
-                    f"scenario {scenario}"
-                ),
-                errors,
-            )
+            for scenario in (
+                scenario_tags
+            ):
+
+                require(
+                    scenario
+                    in enabled_scenarios,
+                    (
+                        f"Frame {fid}: "
+                        f"unknown scenario "
+                        f"{scenario}"
+                    ),
+                    errors,
+                )
+
+        # ----------------------------------------------------
+        # Slots
+        # ----------------------------------------------------
 
         slots = frame.get(
             "slots",
-            {}
+            {},
         )
 
         require(
@@ -771,8 +1211,8 @@ def validate_frames(
                 dict,
             ),
             (
-                f"Frame {fid}: slots "
-                f"must be object."
+                f"Frame {fid}: "
+                f"slots must be object."
             ),
             errors,
         )
@@ -783,19 +1223,28 @@ def validate_frames(
         ):
             continue
 
-        for slot_name, slot in slots.items():
+        for slot_name, slot in (
+            slots.items()
+        ):
 
             if not isinstance(
                 slot,
                 dict,
             ):
+
                 errors.append(
                     (
                         f"Frame {fid} slot "
-                        f"{slot_name}: must be object."
+                        f"{slot_name}: "
+                        f"must be object."
                     )
                 )
+
                 continue
+
+            # ================================================
+            # Fixed concept
+            # ================================================
 
             fixed_id = slot.get(
                 "fixed_concept_id"
@@ -808,59 +1257,176 @@ def validate_frames(
                     in concept_index,
                     (
                         f"Frame {fid} slot "
-                        f"{slot_name}: missing "
-                        f"fixed concept {fixed_id}"
+                        f"{slot_name}: "
+                        f"missing fixed concept "
+                        f"{fixed_id}"
                     ),
                     errors,
                 )
 
-            for ctype in slot.get(
-                "concept_types",
-                [],
-            ):
+                if fixed_id in concept_index:
+
+                    fixed_concept = (
+                        concept_index[
+                            fixed_id
+                        ]
+                    )
+
+                    require(
+                        is_enabled(
+                            fixed_concept
+                        ),
+                        (
+                            f"Frame {fid} slot "
+                            f"{slot_name}: "
+                            f"fixed concept "
+                            f"{fixed_id} "
+                            f"is disabled."
+                        ),
+                        errors,
+                    )
+
+            # ================================================
+            # Concept types
+            # ================================================
+
+            concept_types = (
+                slot.get(
+                    "concept_types",
+                    [],
+                )
+            )
+
+            if concept_types:
 
                 require(
-                    ctype
-                    in VALID_CONCEPT_TYPES,
+                    isinstance(
+                        concept_types,
+                        list,
+                    ),
                     (
                         f"Frame {fid} slot "
-                        f"{slot_name}: invalid "
-                        f"concept_type {ctype}"
+                        f"{slot_name}: "
+                        f"concept_types "
+                        f"must be list."
                     ),
                     errors,
                 )
 
-            for cls in slot.get(
-                "semantic_classes",
-                [],
+                if isinstance(
+                    concept_types,
+                    list,
+                ):
+
+                    for ctype in (
+                        concept_types
+                    ):
+
+                        require(
+                            ctype
+                            in VALID_CONCEPT_TYPES,
+                            (
+                                f"Frame {fid} slot "
+                                f"{slot_name}: "
+                                f"invalid concept_type "
+                                f"{ctype}"
+                            ),
+                            errors,
+                        )
+
+            # ================================================
+            # Semantic classes
+            # ================================================
+
+            semantic_classes = (
+                slot.get(
+                    "semantic_classes",
+                    [],
+                )
+            )
+
+            if isinstance(
+                semantic_classes,
+                str,
+            ):
+                semantic_classes = [
+                    semantic_classes
+                ]
+
+            require(
+                isinstance(
+                    semantic_classes,
+                    list,
+                ),
+                (
+                    f"Frame {fid} slot "
+                    f"{slot_name}: "
+                    f"semantic_classes "
+                    f"must be list."
+                ),
+                errors,
+            )
+
+            if isinstance(
+                semantic_classes,
+                list,
             ):
 
-                require(
-                    cls in known_classes,
-                    (
-                        f"Frame {fid} slot "
-                        f"{slot_name}: unknown "
-                        f"semantic class {cls}"
-                    ),
-                    errors,
-                )
+                for cls in (
+                    semantic_classes
+                ):
+
+                    require(
+                        cls in known_classes,
+                        (
+                            f"Frame {fid} slot "
+                            f"{slot_name}: "
+                            f"unknown semantic "
+                            f"class {cls}"
+                        ),
+                        errors,
+                    )
+
+            # ================================================
+            # Case role
+            # ================================================
 
             case_role = slot.get(
                 "case_role",
                 {},
             )
 
+            if case_role:
+
+                require(
+                    isinstance(
+                        case_role,
+                        dict,
+                    ),
+                    (
+                        f"Frame {fid} slot "
+                        f"{slot_name}: "
+                        f"case_role "
+                        f"must be object."
+                    ),
+                    errors,
+                )
+
             if isinstance(
                 case_role,
                 dict,
             ):
 
-                ru_role = case_role.get(
-                    "ru"
+                ru_role = (
+                    case_role.get(
+                        "ru"
+                    )
                 )
 
-                uz_role = case_role.get(
-                    "uz"
+                uz_role = (
+                    case_role.get(
+                        "uz"
+                    )
                 )
 
                 if ru_role is not None:
@@ -870,8 +1436,9 @@ def validate_frames(
                         in VALID_RU_CASE_ROLES,
                         (
                             f"Frame {fid} slot "
-                            f"{slot_name}: invalid "
-                            f"RU role {ru_role}"
+                            f"{slot_name}: "
+                            f"invalid RU role "
+                            f"{ru_role}"
                         ),
                         errors,
                     )
@@ -883,8 +1450,9 @@ def validate_frames(
                         in VALID_UZ_CASE_ROLES,
                         (
                             f"Frame {fid} slot "
-                            f"{slot_name}: invalid "
-                            f"UZ role {uz_role}"
+                            f"{slot_name}: "
+                            f"invalid UZ role "
+                            f"{uz_role}"
                         ),
                         errors,
                     )
@@ -895,20 +1463,71 @@ def validate_frames(
 
         templates = frame.get(
             "render_template",
-            {}
+            {},
         )
 
-        for lang in LANGUAGES:
+        require(
+            isinstance(
+                templates,
+                dict,
+            ),
+            (
+                f"Frame {fid}: "
+                f"render_template "
+                f"must be object."
+            ),
+            errors,
+        )
 
-            require(
-                lang in templates,
-                (
-                    f"Frame {fid}: missing "
-                    f"render_template.{lang}"
-                ),
-                errors,
-            )
+        if isinstance(
+            templates,
+            dict,
+        ):
 
+            for lang in LANGUAGES:
+
+                require(
+                    lang in templates,
+                    (
+                        f"Frame {fid}: "
+                        f"missing "
+                        f"render_template.{lang}"
+                    ),
+                    errors,
+                )
+
+                if lang in templates:
+
+                    require(
+                        isinstance(
+                            templates[
+                                lang
+                            ],
+                            str,
+                        )
+                        and bool(
+                            templates[
+                                lang
+                            ].strip()
+                        ),
+                        (
+                            f"Frame {fid}: "
+                            f"invalid "
+                            f"render_template."
+                            f"{lang}"
+                        ),
+                        errors,
+                    )
+
+    return (
+        active_count,
+        disabled_count,
+    )
+
+
+# ============================================================
+# Generation policy
+# ============================================================
 
 def validate_policy(
     policy: dict,
@@ -926,7 +1545,8 @@ def validate_policy(
         langs == LANGUAGES,
         (
             "generation_policy languages "
-            "must be exactly zh/en/ru/uz."
+            "must be exactly "
+            "zh/en/ru/uz."
         ),
         errors,
     )
@@ -939,129 +1559,232 @@ def validate_policy(
     )
 
     require(
-        bool(scenarios),
-        "No enabled scenarios.",
-        errors,
-    )
-
-    scenario_weights = policy.get(
-        "scenario_weights",
-        {}
-    )
-
-    require(
-        set(
-            scenario_weights.keys()
-        )
-        == scenarios,
+        bool(
+            scenarios
+        ),
         (
-            "scenario_weights keys must match "
-            "enabled_scenarios."
+            "No enabled scenarios."
         ),
         errors,
     )
 
-    if scenario_weights:
+    # ========================================================
+    # Scenario weights
+    # ========================================================
 
-        total = sum(
-            float(v)
-            for v in scenario_weights.values()
+    scenario_weights = (
+        policy.get(
+            "scenario_weights",
+            {},
         )
+    )
+
+    require(
+        isinstance(
+            scenario_weights,
+            dict,
+        ),
+        (
+            "scenario_weights "
+            "must be object."
+        ),
+        errors,
+    )
+
+    if isinstance(
+        scenario_weights,
+        dict,
+    ):
 
         require(
-            abs(total - 1.0) < 1e-6,
+            set(
+                scenario_weights.keys()
+            )
+            == scenarios,
             (
-                "scenario_weights must sum "
-                f"to 1.0, got {total}"
+                "scenario_weights keys "
+                "must match "
+                "enabled_scenarios."
             ),
             errors,
         )
+
+        if scenario_weights:
+
+            total = sum(
+                float(v)
+                for v
+                in scenario_weights.values()
+            )
+
+            require(
+                abs(
+                    total - 1.0
+                )
+                < 1e-6,
+                (
+                    "scenario_weights "
+                    "must sum to 1.0, "
+                    f"got {total}"
+                ),
+                errors,
+            )
+
+    # ========================================================
+    # Polarity weights
+    # ========================================================
 
     polarity = policy.get(
         "polarity_weights",
-        {}
+        {},
     )
 
     require(
-        set(
-            polarity.keys()
-        )
-        == VALID_POLARITIES,
+        isinstance(
+            polarity,
+            dict,
+        ),
         (
-            "polarity_weights must contain "
-            "pos and neg."
+            "polarity_weights "
+            "must be object."
         ),
         errors,
     )
 
-    if polarity:
-
-        total = sum(
-            float(v)
-            for v in polarity.values()
-        )
+    if isinstance(
+        polarity,
+        dict,
+    ):
 
         require(
-            abs(total - 1.0) < 1e-6,
+            set(
+                polarity.keys()
+            )
+            == VALID_POLARITIES,
             (
-                "polarity_weights must sum "
-                f"to 1.0, got {total}"
+                "polarity_weights must "
+                "contain exactly "
+                "pos and neg."
             ),
             errors,
         )
+
+        if polarity:
+
+            total = sum(
+                float(v)
+                for v
+                in polarity.values()
+            )
+
+            require(
+                abs(
+                    total - 1.0
+                )
+                < 1e-6,
+                (
+                    "polarity_weights "
+                    "must sum to 1.0, "
+                    f"got {total}"
+                ),
+                errors,
+            )
+
+    # ========================================================
+    # Tense weights
+    # ========================================================
 
     tense = policy.get(
         "tense_weights",
-        {}
+        {},
     )
 
     require(
-        set(
-            tense.keys()
-        )
-        == VALID_TENSES,
+        isinstance(
+            tense,
+            dict,
+        ),
         (
-            "tense_weights must contain "
-            "present and future."
+            "tense_weights "
+            "must be object."
         ),
         errors,
     )
 
-    if tense:
-
-        total = sum(
-            float(v)
-            for v in tense.values()
-        )
+    if isinstance(
+        tense,
+        dict,
+    ):
 
         require(
-            abs(total - 1.0) < 1e-6,
+            set(
+                tense.keys()
+            )
+            == VALID_TENSES,
             (
-                "tense_weights must sum "
-                f"to 1.0, got {total}"
+                "tense_weights "
+                "must contain exactly "
+                "present and future."
             ),
             errors,
         )
 
+        if tense:
+
+            total = sum(
+                float(v)
+                for v
+                in tense.values()
+            )
+
+            require(
+                abs(
+                    total - 1.0
+                )
+                < 1e-6,
+                (
+                    "tense_weights "
+                    "must sum to 1.0, "
+                    f"got {total}"
+                ),
+                errors,
+            )
+
     return scenarios
 
+
+# ============================================================
+# Main
+# ============================================================
 
 def main() -> None:
 
     print(
         "=" * 80
     )
+
     print(
         "V0.4 RESOURCE VALIDATOR"
     )
+
     print(
         "=" * 80
     )
 
-    errors: list[str] = []
-    warnings: list[str] = []
+    errors: list[
+        str
+    ] = []
+
+    warnings: list[
+        str
+    ] = []
+
+    # ========================================================
+    # Load
+    # ========================================================
 
     try:
+
         policy = load_json(
             POLICY_FILE
         )
@@ -1079,14 +1802,24 @@ def main() -> None:
         )
 
     except ResourceValidationError as exc:
+
         print()
+
         print(
             "FATAL:"
         )
+
         print(
             exc
         )
-        raise SystemExit(1)
+
+        raise SystemExit(
+            1
+        )
+
+    # ========================================================
+    # Validate policy
+    # ========================================================
 
     enabled_scenarios = (
         validate_policy(
@@ -1094,6 +1827,10 @@ def main() -> None:
             errors,
         )
     )
+
+    # ========================================================
+    # Validate concepts
+    # ========================================================
 
     concept_index = (
         validate_concepts(
@@ -1103,6 +1840,10 @@ def main() -> None:
         )
     )
 
+    # ========================================================
+    # Semantic classes
+    # ========================================================
+
     known_classes = (
         collect_known_semantic_classes(
             concepts,
@@ -1110,35 +1851,72 @@ def main() -> None:
         )
     )
 
+    # ========================================================
+    # Compatibility
+    # ========================================================
+
     validate_compatibility(
         compat,
         concept_index,
         known_classes,
         errors,
+        warnings,
     )
 
-    validate_frames(
+    # ========================================================
+    # Frames
+    # ========================================================
+
+    (
+        active_frame_count,
+        disabled_frame_count,
+    ) = validate_frames(
         frames,
         concept_index,
         known_classes,
         enabled_scenarios,
         errors,
+        warnings,
     )
+
+    all_frames = frames.get(
+        "frames",
+        [],
+    )
+
+    # ========================================================
+    # Summary
+    # ========================================================
 
     print()
+
     print(
         "Concepts:",
-        len(concepts),
+        len(
+            concepts
+        ),
     )
 
     print(
-        "Frames:",
+        "Frames defined:",
         len(
-            frames.get(
-                "frames",
-                [],
-            )
-        ),
+            all_frames
+        )
+        if isinstance(
+            all_frames,
+            list,
+        )
+        else 0,
+    )
+
+    print(
+        "Frames active:",
+        active_frame_count,
+    )
+
+    print(
+        "Frames planned/disabled:",
+        disabled_frame_count,
     )
 
     print(
@@ -1162,46 +1940,76 @@ def main() -> None:
         ),
     )
 
+    # ========================================================
+    # Warnings
+    # ========================================================
+
     if warnings:
 
         print()
+
         print(
             "WARNINGS"
         )
+
         print(
             "-" * 80
         )
 
         for warning in warnings:
+
             print(
                 "WARN:",
                 warning
             )
 
+    # ========================================================
+    # Errors
+    # ========================================================
+
     if errors:
 
         print()
+
         print(
             "ERRORS"
         )
+
         print(
             "-" * 80
         )
 
         for error in errors:
+
             print(
                 "ERROR:",
                 error
             )
 
         print()
+
+        print(
+            "=" * 80
+        )
+
         print(
             "RESOURCE VALIDATION FAILED"
         )
 
-        raise SystemExit(1)
+        print(
+            "=" * 80
+        )
+
+        raise SystemExit(
+            1
+        )
+
+    # ========================================================
+    # Pass
+    # ========================================================
 
     print()
+
     print(
         "=" * 80
     )

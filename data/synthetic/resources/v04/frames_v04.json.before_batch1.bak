@@ -583,12 +583,11 @@
         "uz": "{subject} {object} {verb}."
       },
       "meta": {
-        "enabled": true,
-        "version_added": "0.4",
-        "status": "active",
-        "version_modified": "0.4",
-        "batch_activated": "0.4-batch1"
-      }
+      "enabled": false,
+      "version_added": "0.4",
+      "status": "planned",
+      "disabled_reason": "WANT concept not added yet"
+    }
     },
     {
       "id": "NEED_OBJECT",
@@ -640,12 +639,11 @@
         "uz": "{subject} {object} {verb}."
       },
       "meta": {
-        "enabled": false,
-        "version_added": "0.4",
-        "status": "planned",
-        "disabled_reason": "NEED requires dedicated Russian/Uzbek predicative rendering.",
-        "version_modified": "0.4"
-      }
+      "enabled": false,
+      "version_added": "0.4",
+      "status": "planned",
+      "disabled_reason": "NEED concept not added yet"
+    }
     },
     {
       "id": "WHERE_PLACE",

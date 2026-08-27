@@ -1,0 +1,103 @@
+{
+  "seed": 2045,
+  "source_samples": 1000,
+  "selected_samples": 150,
+  "target_samples": 150,
+  "requested_group_targets": {
+    "COME": 30,
+    "ARRIVE": 30,
+    "WANT": 30,
+    "GO": 8,
+    "BUY": 8,
+    "FIND": 8,
+    "EAT": 7,
+    "DRINK": 7,
+    "READ": 7,
+    "__WHERE_PLACE__": 15
+  },
+  "actual_group_counts": {
+    "__WHERE_PLACE__": 15,
+    "ARRIVE": 30,
+    "COME": 30,
+    "FIND": 8,
+    "WANT": 30,
+    "GO": 8,
+    "DRINK": 7,
+    "BUY": 8,
+    "EAT": 7,
+    "READ": 7
+  },
+  "verb_distribution": {
+    "ARRIVE": 30,
+    "COME": 30,
+    "WANT": 30,
+    "FIND": 8,
+    "GO": 8,
+    "BUY": 8,
+    "DRINK": 7,
+    "EAT": 7,
+    "READ": 7
+  },
+  "frame_distribution": {
+    "MOTION_CLOCK": 52,
+    "WANT_OBJECT": 30,
+    "TRANSITIVE_TIME": 20,
+    "WHERE_PLACE": 15,
+    "TRANSITIVE_CLOCK": 12,
+    "MOTION_TIME": 10,
+    "TRANSITIVE": 5,
+    "MOTION_DESTINATION": 3,
+    "INTRANSITIVE_TIME": 2,
+    "INTRANSITIVE": 1
+  },
+  "scenario_distribution": {
+    "travel": 36,
+    "daily": 30,
+    "transport": 24,
+    "hotel": 15,
+    "shopping": 12,
+    "restaurant": 11,
+    "medical": 9,
+    "work_study": 8,
+    "communication": 5
+  },
+  "tense_distribution": {
+    "present": 86,
+    "future": 64
+  },
+  "polarity_distribution": {
+    "pos": 100,
+    "neg": 50
+  },
+  "subject_distribution": {
+    "PERSON_SHE": 26,
+    "PERSON_YOU": 25,
+    "PERSON_WE": 24,
+    "PERSON_I": 20,
+    "PERSON_THEY": 20,
+    "PERSON_HE": 20
+  },
+  "object_distribution": {
+    "BOOK": 13,
+    "FOOD": 13,
+    "COFFEE": 10,
+    "WATER": 9,
+    "PHONE": 7,
+    "MEDICINE": 6,
+    "PASSPORT": 5,
+    "TICKET": 4
+  },
+  "destination_distribution": {
+    "TASHKENT": 8,
+    "RESTAURANT": 8,
+    "MOSCOW": 7,
+    "HOTEL": 7,
+    "BEIJING": 6,
+    "STATION": 6,
+    "SCHOOL": 6,
+    "HOSPITAL": 5,
+    "AIRPORT": 4,
+    "OFFICE": 4,
+    "BANK": 4
+  }
+}

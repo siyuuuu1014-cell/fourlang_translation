@@ -1,0 +1,16 @@
+{
+  "source_rows": 10000,
+  "find_rows": 1391,
+  "sampled": 100,
+  "seed": 2032,
+  "distribution": {
+    "('future', 'neg', 'no_clock')": 8,
+    "('future', 'neg', 'clock')": 14,
+    "('present', 'neg', 'clock')": 12,
+    "('future', 'pos', 'clock')": 20,
+    "('present', 'pos', 'clock')": 18,
+    "('future', 'pos', 'no_clock')": 11,
+    "('present', 'pos', 'no_clock')": 7,
+    "('present', 'neg', 'no_clock')": 10
+  }
+}

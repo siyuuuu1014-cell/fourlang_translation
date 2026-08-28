@@ -385,7 +385,8 @@ def evaluate_validation_loss(
             "labels"
         ]
 
-        with torch.cuda.amp.autocast(
+        with torch.amp.autocast(
+            "cuda",
             enabled=use_amp
         ):
 
@@ -1141,7 +1142,7 @@ def run_direction(
             model_path,
             local_files_only=True,
             use_safetensors=True,
-            torch_dtype=torch.float16,
+            dtype=torch.float32,
         )
         .to(
             device
@@ -1215,7 +1216,8 @@ def run_direction(
     )
 
     scaler = (
-        torch.cuda.amp.GradScaler(
+        torch.amp.GradScaler(
+            "cuda",
             enabled=use_amp
         )
     )
@@ -1322,7 +1324,7 @@ def run_direction(
                 checkpoint_model_dir,
                 local_files_only=True,
                 use_safetensors=True,
-                torch_dtype=torch.float16,
+                dtype=torch.float32,
             )
             .to(
                 device

@@ -313,7 +313,7 @@ def load_candidate(
         )
 
         model = (
-            M2M100ForConditionalGeneration
+            AutoModelForSeq2SeqLM
             .from_pretrained(
                 str(model_path),
                 torch_dtype=torch.float16,

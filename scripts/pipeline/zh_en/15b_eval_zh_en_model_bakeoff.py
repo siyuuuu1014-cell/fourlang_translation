@@ -318,6 +318,7 @@ def load_candidate(
                 str(model_path),
                 torch_dtype=torch.float16,
                 local_files_only=True,
+                use_safetensors=True,
             )
             .to("cuda")
         )

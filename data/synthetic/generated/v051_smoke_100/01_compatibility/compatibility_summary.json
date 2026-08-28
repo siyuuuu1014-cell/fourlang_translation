@@ -1,0 +1,29 @@
+{
+  "validator_version": "0.5.1",
+  "input": "data\\synthetic\\generated\\v051_smoke_100\\semantic_v051_raw.jsonl",
+  "total": 100,
+  "frozen_core_rows": 80,
+  "new_rows": 20,
+  "accepted": 100,
+  "rejected": 0,
+  "accept_rate": 1.0,
+  "warning_rows": 0,
+  "reject_reasons": {},
+  "new_frame_distribution": {
+    "SEE_OBJECT": 10,
+    "TAKE_OBJECT": 10
+  },
+  "new_verb_distribution": {
+    "SEE": 10,
+    "TAKE": 10
+  },
+  "new_object_distribution": {
+    "ROOM": 5,
+    "LUGGAGE": 4,
+    "CHARGER": 2,
+    "MONEY": 3,
+    "TABLE": 3,
+    "ID_CARD": 2,
+    "CLOTHES": 1
+  }
+}

@@ -1,0 +1,122 @@
+{
+  "version": "0.5.0-batch1",
+  "inherits": "../v04/semantic_compatibility_v04.json",
+  "generation_enabled": false,
+  "semantic_classes": {
+    "PORTABLE_OBJECT": [
+      "LUGGAGE"
+    ],
+    "IDENTITY_DOCUMENT": [
+      "ID_CARD"
+    ],
+    "MONEY": [
+      "MONEY"
+    ],
+    "DEVICE_ACCESSORY": [
+      "CHARGER"
+    ],
+    "CLOTHING": [
+      "CLOTHES"
+    ],
+    "INFORMATION_OBJECT": [
+      "ADDRESS"
+    ],
+    "ROOM_OBJECT": [
+      "ROOM"
+    ],
+    "FURNITURE": [
+      "TABLE"
+    ],
+    "LOCAL_PLACE": [
+      "PHARMACY",
+      "SUPERMARKET",
+      "SHOP",
+      "CAFE",
+      "POLICE_STATION",
+      "CITY_CENTER",
+      "TOILET"
+    ],
+    "TRANSPORT_PLACE": [
+      "BUS_STOP",
+      "SUBWAY_STATION"
+    ]
+  },
+  "verb_rules": {
+    "NEED": {
+      "object_classes": [
+        "PORTABLE_OBJECT",
+        "IDENTITY_DOCUMENT",
+        "MONEY",
+        "DEVICE_ACCESSORY",
+        "CLOTHING",
+        "INFORMATION_OBJECT"
+      ]
+    },
+    "SEE": {
+      "object_classes": [
+        "PORTABLE_OBJECT",
+        "IDENTITY_DOCUMENT",
+        "DEVICE_ACCESSORY",
+        "FURNITURE",
+        "ROOM_OBJECT"
+      ]
+    },
+    "CALL": {
+      "requires_person": true
+    },
+    "WAIT": {
+      "allows_person": true,
+      "allows_place": true
+    },
+    "GIVE": {
+      "object_classes": [
+        "PORTABLE_OBJECT",
+        "IDENTITY_DOCUMENT",
+        "MONEY",
+        "DEVICE_ACCESSORY"
+      ],
+      "requires_person": true
+    },
+    "TAKE": {
+      "object_classes": [
+        "PORTABLE_OBJECT",
+        "IDENTITY_DOCUMENT",
+        "MONEY",
+        "DEVICE_ACCESSORY",
+        "CLOTHING"
+      ]
+    },
+    "BRING": {
+      "object_classes": [
+        "PORTABLE_OBJECT",
+        "IDENTITY_DOCUMENT",
+        "DEVICE_ACCESSORY",
+        "CLOTHING"
+      ],
+      "destination_classes": [
+        "LOCAL_PLACE",
+        "TRANSPORT_PLACE"
+      ]
+    },
+    "LOSE": {
+      "object_classes": [
+        "PORTABLE_OBJECT",
+        "IDENTITY_DOCUMENT",
+        "MONEY",
+        "DEVICE_ACCESSORY"
+      ]
+    },
+    "LEAVE": {
+      "place_classes": [
+        "LOCAL_PLACE",
+        "TRANSPORT_PLACE"
+      ]
+    },
+    "RETURN": {
+      "destination_classes": [
+        "LOCAL_PLACE",
+        "TRANSPORT_PLACE"
+      ]
+    }
+  }
+}

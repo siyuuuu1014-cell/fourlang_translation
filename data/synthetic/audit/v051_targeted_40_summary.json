@@ -1,0 +1,47 @@
+{
+  "version": "0.5.1",
+  "source": "D:\\dev\\projects\\fourlang_translation\\data\\synthetic\\generated\\v051_smoke_100\\03_grammar_hard\\grammar_accepted.jsonl",
+  "seed": 2061,
+  "source_rows": 100,
+  "new_available": 20,
+  "old_available": 80,
+  "selected": 40,
+  "selected_new": 20,
+  "selected_old": 20,
+  "new_verb_distribution": {
+    "SEE": 10,
+    "TAKE": 10
+  },
+  "new_tense_distribution": {
+    "future": 11,
+    "present": 9
+  },
+  "new_polarity_distribution": {
+    "pos": 12,
+    "neg": 8
+  },
+  "old_frame_distribution": {
+    "MOTION_TIME": 4,
+    "TRANSITIVE_CLOCK": 2,
+    "MOTION_DESTINATION": 4,
+    "TRANSITIVE_TIME": 4,
+    "WANT_OBJECT": 1,
+    "MOTION_CLOCK": 1,
+    "TRANSITIVE": 1,
+    "INTRANSITIVE": 1,
+    "INTRANSITIVE_TIME": 1,
+    "WHERE_PLACE": 1
+  },
+  "old_verb_distribution": {
+    "COME": 5,
+    "EAT": 1,
+    "GO": 4,
+    "FIND": 1,
+    "BUY": 3,
+    "WANT": 1,
+    "ARRIVE": 2,
+    "READ": 1,
+    "DRINK": 1,
+    "NO_VERB": 1
+  }
+}

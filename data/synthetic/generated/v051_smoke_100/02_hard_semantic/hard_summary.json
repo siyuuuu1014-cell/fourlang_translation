@@ -1,0 +1,13 @@
+{
+  "validator_version": "0.5.1",
+  "input": "data\\synthetic\\generated\\v051_smoke_100\\01_compatibility\\compatibility_accepted.jsonl",
+  "total": 100,
+  "frozen_core_rows": 80,
+  "new_rows": 20,
+  "accepted": 100,
+  "rejected": 0,
+  "accept_rate": 1.0,
+  "new_accepted": 20,
+  "new_rejected": 0,
+  "reject_reasons": {}
+}

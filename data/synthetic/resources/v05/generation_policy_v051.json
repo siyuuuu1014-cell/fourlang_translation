@@ -1,0 +1,105 @@
+{
+  "version": "0.5.1",
+  "inherits": "generation_policy_v05.json",
+
+  "synthetic_core": "0.4.4.1",
+
+  "batch": "Batch-1A",
+
+  "generation_enabled": true,
+
+  "enabled_new_verbs": [
+    "SEE",
+    "TAKE"
+  ],
+
+  "disabled_new_verbs": {
+    "LOSE": {
+      "reason": "resultative/change-of-state semantics not yet modeled",
+      "status": "renderer_ready_generation_blocked"
+    },
+
+    "CALL": {
+      "reason": "argument case realization not implemented"
+    },
+
+    "WAIT": {
+      "reason": "case-governed realization not implemented"
+    },
+
+    "GIVE": {
+      "reason": "ditransitive realization not implemented"
+    },
+
+    "BRING": {
+      "reason": "transitive destination realization not implemented"
+    },
+
+    "RETURN": {
+      "reason": "motion realization not implemented"
+    },
+
+    "NEED": {
+      "reason": "language-specific need construction not implemented"
+    },
+
+    "LEAVE": {
+      "reason": "motion realization not implemented"
+    }
+  },
+
+  "enabled_new_frames": [
+    "SEE_OBJECT",
+    "TAKE_OBJECT"
+  ],
+
+  "disabled_new_frames": [
+    "LOSE_OBJECT",
+    "NEED_OBJECT",
+    "CALL_PERSON",
+    "WAIT_PERSON",
+    "WAIT_AT_PLACE",
+    "GIVE_OBJECT_PERSON",
+    "BRING_OBJECT_DESTINATION",
+    "LEAVE_PLACE",
+    "RETURN_PLACE",
+    "WHERE_OBJECT",
+    "WHERE_PERSON"
+  ],
+
+  "allowed_tenses": {
+    "SEE": [
+      "present",
+      "future"
+    ],
+
+    "TAKE": [
+      "present",
+      "future"
+    ]
+  },
+
+  "allowed_polarities": {
+    "SEE": [
+      "pos",
+      "neg"
+    ],
+
+    "TAKE": [
+      "pos",
+      "neg"
+    ]
+  },
+
+  "semantic_guards": {
+    "LOSE": {
+      "generation_allowed": false,
+      "blocked_until": "resultative_or_past_event_model"
+    }
+  },
+
+  "pilot": {
+    "initial_samples": 100,
+    "seed": 2060
+  }
+}

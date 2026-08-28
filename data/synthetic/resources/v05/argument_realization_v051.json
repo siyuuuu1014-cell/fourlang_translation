@@ -1,0 +1,107 @@
+{
+  "version": "0.5.1",
+  "description": "Subject pronouns and object case realization for V0.5.1 Batch-1A.",
+
+  "subjects": {
+    "PERSON_I": {
+      "person_code": "1sg",
+      "zh": "我",
+      "en": "I",
+      "ru": "Я",
+      "uz": "Men"
+    },
+    "PERSON_YOU": {
+      "person_code": "2sg",
+      "zh": "你",
+      "en": "You",
+      "ru": "Ты",
+      "uz": "Sen"
+    },
+    "PERSON_HE": {
+      "person_code": "3sg",
+      "zh": "他",
+      "en": "He",
+      "ru": "Он",
+      "uz": "U"
+    },
+    "PERSON_SHE": {
+      "person_code": "3sg",
+      "zh": "她",
+      "en": "She",
+      "ru": "Она",
+      "uz": "U"
+    },
+    "PERSON_WE": {
+      "person_code": "1pl",
+      "zh": "我们",
+      "en": "We",
+      "ru": "Мы",
+      "uz": "Biz"
+    },
+    "PERSON_THEY": {
+      "person_code": "3pl",
+      "zh": "他们",
+      "en": "They",
+      "ru": "Они",
+      "uz": "Ular"
+    }
+  },
+
+  "objects": {
+    "ID_CARD": {
+      "zh": "身份证",
+      "en": "the ID card",
+      "ru_acc": "удостоверение личности",
+      "uz_acc": "shaxsiy guvohnomani"
+    },
+
+    "MONEY": {
+      "zh": "钱",
+      "en": "money",
+      "ru_acc": "деньги",
+      "uz_acc": "pulni"
+    },
+
+    "LUGGAGE": {
+      "zh": "行李",
+      "en": "the luggage",
+      "ru_acc": "багаж",
+      "uz_acc": "bagajni"
+    },
+
+    "CHARGER": {
+      "zh": "充电器",
+      "en": "the charger",
+      "ru_acc": "зарядное устройство",
+      "uz_acc": "quvvatlagichni"
+    },
+
+    "CLOTHES": {
+      "zh": "衣服",
+      "en": "clothes",
+      "ru_acc": "одежду",
+      "uz_acc": "kiyimni"
+    },
+
+    "ADDRESS": {
+      "zh": "地址",
+      "en": "the address",
+      "ru_acc": "адрес",
+      "uz_acc": "manzilni"
+    },
+
+    "ROOM": {
+      "zh": "房间",
+      "en": "the room",
+      "ru_acc": "комнату",
+      "uz_acc": "xonani"
+    },
+
+    "TABLE": {
+      "zh": "桌子",
+      "en": "the table",
+      "ru_acc": "стол",
+      "uz_acc": "stolni"
+    }
+  }
+}

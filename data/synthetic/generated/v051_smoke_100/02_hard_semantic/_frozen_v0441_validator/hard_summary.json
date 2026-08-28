@@ -1,0 +1,9 @@
+{
+  "validator_version": "0.4.4.1",
+  "input": "data\\synthetic\\generated\\v051_smoke_100\\02_hard_semantic\\_frozen_core_input.jsonl",
+  "total": 80,
+  "accepted": 80,
+  "rejected": 0,
+  "accept_rate": 1.0,
+  "reject_reasons": {}
+}

@@ -1,0 +1,345 @@
+{
+  "version": "0.5.0-batch1",
+  "inherits": "../v04/frames_v04.json",
+  "generation_enabled": false,
+  "frames": [
+    {
+      "id": "NEED_OBJECT",
+      "generation_enabled": false,
+      "scenario_tags": [
+        "daily",
+        "travel",
+        "medical",
+        "shopping"
+      ],
+      "slots": [
+        {
+          "name": "subject",
+          "type": "person",
+          "required": true
+        },
+        {
+          "name": "verb",
+          "type": "verb",
+          "required": true,
+          "fixed": "NEED"
+        },
+        {
+          "name": "object",
+          "type": "object",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "SEE_OBJECT",
+      "generation_enabled": false,
+      "scenario_tags": [
+        "daily",
+        "travel",
+        "work_study"
+      ],
+      "slots": [
+        {
+          "name": "subject",
+          "type": "person",
+          "required": true
+        },
+        {
+          "name": "verb",
+          "type": "verb",
+          "required": true,
+          "fixed": "SEE"
+        },
+        {
+          "name": "object",
+          "type": "object",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "CALL_PERSON",
+      "generation_enabled": false,
+      "scenario_tags": [
+        "communication",
+        "daily",
+        "travel"
+      ],
+      "slots": [
+        {
+          "name": "subject",
+          "type": "person",
+          "required": true
+        },
+        {
+          "name": "verb",
+          "type": "verb",
+          "required": true,
+          "fixed": "CALL"
+        },
+        {
+          "name": "person",
+          "type": "person",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "WAIT_PERSON",
+      "generation_enabled": false,
+      "scenario_tags": [
+        "daily",
+        "travel",
+        "transport"
+      ],
+      "slots": [
+        {
+          "name": "subject",
+          "type": "person",
+          "required": true
+        },
+        {
+          "name": "verb",
+          "type": "verb",
+          "required": true,
+          "fixed": "WAIT"
+        },
+        {
+          "name": "person",
+          "type": "person",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "WAIT_AT_PLACE",
+      "generation_enabled": false,
+      "scenario_tags": [
+        "travel",
+        "transport",
+        "hotel"
+      ],
+      "slots": [
+        {
+          "name": "subject",
+          "type": "person",
+          "required": true
+        },
+        {
+          "name": "verb",
+          "type": "verb",
+          "required": true,
+          "fixed": "WAIT"
+        },
+        {
+          "name": "place",
+          "type": "place",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "GIVE_OBJECT_PERSON",
+      "generation_enabled": false,
+      "scenario_tags": [
+        "daily",
+        "hotel",
+        "restaurant"
+      ],
+      "slots": [
+        {
+          "name": "subject",
+          "type": "person",
+          "required": true
+        },
+        {
+          "name": "verb",
+          "type": "verb",
+          "required": true,
+          "fixed": "GIVE"
+        },
+        {
+          "name": "object",
+          "type": "object",
+          "required": true
+        },
+        {
+          "name": "person",
+          "type": "person",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "TAKE_OBJECT",
+      "generation_enabled": false,
+      "scenario_tags": [
+        "daily",
+        "travel",
+        "shopping"
+      ],
+      "slots": [
+        {
+          "name": "subject",
+          "type": "person",
+          "required": true
+        },
+        {
+          "name": "verb",
+          "type": "verb",
+          "required": true,
+          "fixed": "TAKE"
+        },
+        {
+          "name": "object",
+          "type": "object",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "BRING_OBJECT_DESTINATION",
+      "generation_enabled": false,
+      "scenario_tags": [
+        "daily",
+        "travel",
+        "hotel"
+      ],
+      "slots": [
+        {
+          "name": "subject",
+          "type": "person",
+          "required": true
+        },
+        {
+          "name": "verb",
+          "type": "verb",
+          "required": true,
+          "fixed": "BRING"
+        },
+        {
+          "name": "object",
+          "type": "object",
+          "required": true
+        },
+        {
+          "name": "destination",
+          "type": "place",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "LOSE_OBJECT",
+      "generation_enabled": false,
+      "scenario_tags": [
+        "daily",
+        "travel"
+      ],
+      "slots": [
+        {
+          "name": "subject",
+          "type": "person",
+          "required": true
+        },
+        {
+          "name": "verb",
+          "type": "verb",
+          "required": true,
+          "fixed": "LOSE"
+        },
+        {
+          "name": "object",
+          "type": "object",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "LEAVE_PLACE",
+      "generation_enabled": false,
+      "scenario_tags": [
+        "travel",
+        "transport",
+        "daily"
+      ],
+      "slots": [
+        {
+          "name": "subject",
+          "type": "person",
+          "required": true
+        },
+        {
+          "name": "verb",
+          "type": "verb",
+          "required": true,
+          "fixed": "LEAVE"
+        },
+        {
+          "name": "place",
+          "type": "place",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "RETURN_PLACE",
+      "generation_enabled": false,
+      "scenario_tags": [
+        "travel",
+        "daily"
+      ],
+      "slots": [
+        {
+          "name": "subject",
+          "type": "person",
+          "required": true
+        },
+        {
+          "name": "verb",
+          "type": "verb",
+          "required": true,
+          "fixed": "RETURN"
+        },
+        {
+          "name": "destination",
+          "type": "place",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "WHERE_OBJECT",
+      "generation_enabled": false,
+      "scenario_tags": [
+        "daily",
+        "travel",
+        "hotel"
+      ],
+      "slots": [
+        {
+          "name": "object",
+          "type": "object",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "WHERE_PERSON",
+      "generation_enabled": false,
+      "scenario_tags": [
+        "daily",
+        "travel",
+        "communication"
+      ],
+      "slots": [
+        {
+          "name": "person",
+          "type": "person",
+          "required": true
+        }
+      ]
+    }
+  ]
+}

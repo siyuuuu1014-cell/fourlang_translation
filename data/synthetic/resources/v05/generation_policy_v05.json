@@ -1,0 +1,36 @@
+{
+  "version": "0.5.0-batch1",
+  "inherits": "../v04/generation_policy_v044.json",
+  "generation_enabled": false,
+  "activation_policy": {
+    "new_concepts": "disabled_until_renderer_ready",
+    "new_verbs": "disabled_until_morphology_regression",
+    "new_frames": "disabled_until_frame_regression",
+    "promotion_sequence": [
+      "resource_validation",
+      "renderer_unit_tests",
+      "frame_unit_tests",
+      "compatibility_validation",
+      "100_sample_smoke",
+      "500_sample_pilot",
+      "qwen_targeted_audit"
+    ]
+  },
+  "scenario_targets": {
+    "daily": 0.18,
+    "travel": 0.18,
+    "transport": 0.12,
+    "shopping": 0.12,
+    "hotel": 0.1,
+    "restaurant": 0.08,
+    "medical": 0.08,
+    "communication": 0.08,
+    "work_study": 0.06
+  },
+  "coverage_limits": {
+    "max_single_verb_ratio": 0.12,
+    "max_single_frame_ratio": 0.12,
+    "max_single_object_ratio": 0.08,
+    "max_single_place_ratio": 0.08
+  }
+}

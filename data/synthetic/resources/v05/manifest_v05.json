@@ -1,0 +1,16 @@
+{
+  "version": "0.5.0-batch1",
+  "resource_phase": "coverage_expansion_batch1",
+  "inherits": {
+    "synthetic_core": "0.4.4.1",
+    "concepts": "../v04/concepts_v044.jsonl",
+    "frames": "../v04/frames_v04.json",
+    "compatibility": "../v04/semantic_compatibility_v04.json",
+    "generation_policy": "../v04/generation_policy_v044.json"
+  },
+  "design": {
+    "type": "delta_resource_package",
+    "generator_enabled": false,
+    "reason": "Build and validate resource coverage before implementing V0.5 renderer."
+  }
+}

@@ -1,0 +1,224 @@
+{
+  "version": "0.5.1",
+  "description": "Batch-1A realization policies for SEE, TAKE and LOSE.",
+  "enabled_verbs": [
+    "SEE",
+    "TAKE",
+    "LOSE"
+  ],
+
+  "verbs": {
+    "SEE": {
+      "semantic_type": "simple_transitive",
+
+      "zh": {
+        "present_positive": "看见",
+        "present_negative": "没看见",
+        "future_positive": "会看见",
+        "future_negative": "不会看见"
+      },
+
+      "en": {
+        "lemma": "see",
+        "present": {
+          "1sg": "see",
+          "2sg": "see",
+          "3sg": "sees",
+          "1pl": "see",
+          "2pl": "see",
+          "3pl": "see"
+        },
+        "future": "will see",
+        "present_negative": {
+          "1sg": "do not see",
+          "2sg": "do not see",
+          "3sg": "does not see",
+          "1pl": "do not see",
+          "2pl": "do not see",
+          "3pl": "do not see"
+        },
+        "future_negative": "will not see"
+      },
+
+      "ru": {
+        "present": {
+          "1sg": "вижу",
+          "2sg": "видишь",
+          "3sg": "видит",
+          "1pl": "видим",
+          "2pl": "видите",
+          "3pl": "видят"
+        },
+        "future": {
+          "1sg": "увижу",
+          "2sg": "увидишь",
+          "3sg": "увидит",
+          "1pl": "увидим",
+          "2pl": "увидите",
+          "3pl": "увидят"
+        }
+      },
+
+      "uz": {
+        "present_future": {
+          "1sg": "ko'raman",
+          "2sg": "ko'rasan",
+          "3sg": "ko'radi",
+          "1pl": "ko'ramiz",
+          "2pl": "ko'rasiz",
+          "3pl": "ko'radilar"
+        },
+        "negative": {
+          "1sg": "ko'rmayman",
+          "2sg": "ko'rmaysan",
+          "3sg": "ko'rmaydi",
+          "1pl": "ko'rmaymiz",
+          "2pl": "ko'rmaysiz",
+          "3pl": "ko'rmaydilar"
+        }
+      }
+    },
+
+    "TAKE": {
+      "semantic_type": "simple_transitive",
+
+      "zh": {
+        "present_positive": "拿",
+        "present_negative": "不拿",
+        "future_positive": "会拿",
+        "future_negative": "不会拿"
+      },
+
+      "en": {
+        "lemma": "take",
+        "present": {
+          "1sg": "take",
+          "2sg": "take",
+          "3sg": "takes",
+          "1pl": "take",
+          "2pl": "take",
+          "3pl": "take"
+        },
+        "future": "will take",
+        "present_negative": {
+          "1sg": "do not take",
+          "2sg": "do not take",
+          "3sg": "does not take",
+          "1pl": "do not take",
+          "2pl": "do not take",
+          "3pl": "do not take"
+        },
+        "future_negative": "will not take"
+      },
+
+      "ru": {
+        "present": {
+          "1sg": "беру",
+          "2sg": "берёшь",
+          "3sg": "берёт",
+          "1pl": "берём",
+          "2pl": "берёте",
+          "3pl": "берут"
+        },
+        "future": {
+          "1sg": "возьму",
+          "2sg": "возьмёшь",
+          "3sg": "возьмёт",
+          "1pl": "возьмём",
+          "2pl": "возьмёте",
+          "3pl": "возьмут"
+        }
+      },
+
+      "uz": {
+        "present_future": {
+          "1sg": "olaman",
+          "2sg": "olasan",
+          "3sg": "oladi",
+          "1pl": "olamiz",
+          "2pl": "olasiz",
+          "3pl": "oladilar"
+        },
+        "negative": {
+          "1sg": "olmayman",
+          "2sg": "olmaysan",
+          "3sg": "olmaydi",
+          "1pl": "olmaymiz",
+          "2pl": "olmaysiz",
+          "3pl": "olmaydilar"
+        }
+      }
+    },
+
+    "LOSE": {
+      "semantic_type": "simple_transitive",
+
+      "zh": {
+        "present_positive": "丢了",
+        "present_negative": "没丢",
+        "future_positive": "会丢",
+        "future_negative": "不会丢"
+      },
+
+      "en": {
+        "lemma": "lose",
+        "present": {
+          "1sg": "lose",
+          "2sg": "lose",
+          "3sg": "loses",
+          "1pl": "lose",
+          "2pl": "lose",
+          "3pl": "lose"
+        },
+        "future": "will lose",
+        "present_negative": {
+          "1sg": "do not lose",
+          "2sg": "do not lose",
+          "3sg": "does not lose",
+          "1pl": "do not lose",
+          "2pl": "do not lose",
+          "3pl": "do not lose"
+        },
+        "future_negative": "will not lose"
+      },
+
+      "ru": {
+        "present": {
+          "1sg": "теряю",
+          "2sg": "теряешь",
+          "3sg": "теряет",
+          "1pl": "теряем",
+          "2pl": "теряете",
+          "3pl": "теряют"
+        },
+        "future": {
+          "1sg": "потеряю",
+          "2sg": "потеряешь",
+          "3sg": "потеряет",
+          "1pl": "потеряем",
+          "2pl": "потеряете",
+          "3pl": "потеряют"
+        }
+      },
+
+      "uz": {
+        "present_future": {
+          "1sg": "yo'qotaman",
+          "2sg": "yo'qotasan",
+          "3sg": "yo'qotadi",
+          "1pl": "yo'qotamiz",
+          "2pl": "yo'qotasiz",
+          "3pl": "yo'qotadilar"
+        },
+        "negative": {
+          "1sg": "yo'qotmayman",
+          "2sg": "yo'qotmaysan",
+          "3sg": "yo'qotmaydi",
+          "1pl": "yo'qotmaymiz",
+          "2pl": "yo'qotmaysiz",
+          "3pl": "yo'qotmaydilar"
+        }
+      }
+    }
+  }
+}

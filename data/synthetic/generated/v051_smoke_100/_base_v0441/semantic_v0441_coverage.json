@@ -1,0 +1,184 @@
+{
+  "samples": 80,
+  "counts": {
+    "scenario": {
+      "daily": 16,
+      "travel": 16,
+      "shopping": 12,
+      "restaurant": 8,
+      "transport": 8,
+      "hotel": 8,
+      "medical": 4,
+      "work_study": 4,
+      "communication": 4
+    },
+    "frame": {
+      "TRANSITIVE": 12,
+      "TRANSITIVE_CLOCK": 12,
+      "MOTION_CLOCK": 11,
+      "MOTION_DESTINATION": 10,
+      "TRANSITIVE_TIME": 10,
+      "MOTION_TIME": 10,
+      "WANT_OBJECT": 7,
+      "INTRANSITIVE_TIME": 4,
+      "WHERE_PLACE": 2,
+      "INTRANSITIVE": 2
+    },
+    "verb": {
+      "COME": 14,
+      "GO": 14,
+      "ARRIVE": 9,
+      "BUY": 8,
+      "EAT": 7,
+      "WANT": 7,
+      "DRINK": 7,
+      "FIND": 6,
+      "READ": 6
+    },
+    "subject": {
+      "PERSON_SHE": 16,
+      "PERSON_I": 15,
+      "PERSON_HE": 14,
+      "PERSON_YOU": 12,
+      "PERSON_WE": 11,
+      "PERSON_THEY": 10
+    },
+    "object": {
+      "BOOK": 9,
+      "FOOD": 8,
+      "COFFEE": 8,
+      "WATER": 6,
+      "PHONE": 4,
+      "TICKET": 3,
+      "MEDICINE": 2,
+      "PASSPORT": 1
+    },
+    "destination": {
+      "TASHKENT": 5,
+      "HOTEL": 5,
+      "RESTAURANT": 4,
+      "BEIJING": 4,
+      "AIRPORT": 3,
+      "SCHOOL": 2,
+      "BANK": 2,
+      "MOSCOW": 2,
+      "STATION": 2,
+      "HOSPITAL": 1,
+      "OFFICE": 1
+    },
+    "time": {
+      "TIME_TOMORROW": 39,
+      "TIME_NEXT_WEEK": 4,
+      "TIME_EVERY_DAY": 2,
+      "TIME_TODAY": 1,
+      "TIME_NOW": 1
+    },
+    "tense": {
+      "future": 61,
+      "present": 17,
+      "NONE": 2
+    },
+    "polarity": {
+      "pos": 52,
+      "neg": 28
+    }
+  },
+  "ratios": {
+    "scenario": {
+      "restaurant": 0.1,
+      "daily": 0.2,
+      "medical": 0.05,
+      "shopping": 0.15,
+      "work_study": 0.05,
+      "travel": 0.2,
+      "transport": 0.1,
+      "communication": 0.05,
+      "hotel": 0.1
+    },
+    "frame": {
+      "WHERE_PLACE": 0.025,
+      "TRANSITIVE": 0.15,
+      "MOTION_DESTINATION": 0.125,
+      "TRANSITIVE_TIME": 0.125,
+      "INTRANSITIVE_TIME": 0.05,
+      "WANT_OBJECT": 0.0875,
+      "TRANSITIVE_CLOCK": 0.15,
+      "MOTION_TIME": 0.125,
+      "MOTION_CLOCK": 0.1375,
+      "INTRANSITIVE": 0.025
+    },
+    "verb": {
+      "EAT": 0.0875,
+      "ARRIVE": 0.1125,
+      "FIND": 0.075,
+      "COME": 0.175,
+      "BUY": 0.1,
+      "WANT": 0.0875,
+      "READ": 0.075,
+      "GO": 0.175,
+      "DRINK": 0.0875
+    },
+    "subject": {
+      "PERSON_I": 0.1875,
+      "PERSON_WE": 0.1375,
+      "PERSON_HE": 0.175,
+      "PERSON_THEY": 0.125,
+      "PERSON_SHE": 0.2,
+      "PERSON_YOU": 0.15
+    },
+    "object": {
+      "FOOD": 0.1,
+      "PHONE": 0.05,
+      "BOOK": 0.1125,
+      "MEDICINE": 0.025,
+      "PASSPORT": 0.0125,
+      "TICKET": 0.0375,
+      "COFFEE": 0.1,
+      "WATER": 0.075
+    },
+    "destination": {
+      "RESTAURANT": 0.05,
+      "AIRPORT": 0.0375,
+      "TASHKENT": 0.0625,
+      "HOTEL": 0.0625,
+      "SCHOOL": 0.025,
+      "BANK": 0.025,
+      "MOSCOW": 0.025,
+      "BEIJING": 0.05,
+      "STATION": 0.025,
+      "HOSPITAL": 0.0125,
+      "OFFICE": 0.0125
+    },
+    "time": {
+      "TIME_NEXT_WEEK": 0.05,
+      "TIME_TOMORROW": 0.4875,
+      "TIME_EVERY_DAY": 0.025,
+      "TIME_TODAY": 0.0125,
+      "TIME_NOW": 0.0125
+    },
+    "tense": {
+      "NONE": 0.025,
+      "present": 0.2125,
+      "future": 0.7625
+    },
+    "polarity": {
+      "pos": 0.65,
+      "neg": 0.35
+    }
+  },
+  "coverage_constraint_violations": [
+    {
+      "type": "verb",
+      "id": "COME",
+      "ratio": 0.175,
+      "max_ratio": 0.15
+    },
+    {
+      "type": "verb",
+      "id": "GO",
+      "ratio": 0.175,
+      "max_ratio": 0.15
+    }
+  ],
+  "note": "Coverage constraint violations during a 100-sample smoke test are diagnostic only and do not automatically invalidate the corpus."
+}

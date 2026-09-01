@@ -28,7 +28,15 @@ Thumbs.db
 credentials.json
 
 # Model weights and training checkpoints (GitHub rejects files over 100 MB)
-models/
+# ============================================================
+# Model artifacts
+# ============================================================
+
+# Ignore large model files / frozen model directories
+models/*
+!models/model_registry.json
+# Keep the model registry under Git
+!models/model_registry.json
 checkpoints/
 checkpoint-*/
 *.bin
@@ -70,7 +78,9 @@ data/.hf_datasets_cache/
 .hf_datasets_cache/
 
 # Model weights
-models/
+# Ignore model artifacts, but keep registry config in Git
+models/*
+!models/model_registry.json
 checkpoints/
 
 # Large generated results
@@ -91,7 +101,9 @@ data/.hf_datasets_cache/
 .hf_datasets_cache/
 
 # Model / checkpoint
-models/
+# Ignore model artifacts, but keep registry config in Git
+models/*
+!models/model_registry.json
 checkpoints/
 
 *.safetensors

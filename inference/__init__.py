@@ -1,13 +1,29 @@
-"""Inference utilities for the four-language translation project."""
-
-from .engine import SUPPORTED_DIRECTIONS, SUPPORTED_LANGUAGES, TranslationEngine
-from .loader import DEFAULT_MODEL_PATH, LoadedModel, load_translation_model
+from __future__ import annotations
 
 __all__ = [
-    "DEFAULT_MODEL_PATH",
-    "LoadedModel",
-    "SUPPORTED_DIRECTIONS",
-    "SUPPORTED_LANGUAGES",
-    "TranslationEngine",
-    "load_translation_model",
+    "TranslatorEngine",
+    "ModelRegistry",
+    "ModelSpec",
 ]
+
+
+def __getattr__(name: str):
+    if name == "TranslatorEngine":
+        from .engine import TranslatorEngine
+        return TranslatorEngine
+
+    if name in {
+        "ModelRegistry",
+        "ModelSpec",
+    }:
+        from .registry import (
+            ModelRegistry,
+            ModelSpec,
+        )
+
+        return {
+            "ModelRegistry": ModelRegistry,
+            "ModelSpec": ModelSpec,
+        }[name]
+
+    raise AttributeError(name)

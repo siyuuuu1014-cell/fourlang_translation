@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "models": {
+    "en_zh": {
+      "model_name": "en_zh_specialist_v1",
+      "architecture": "marian",
+      "path": "models/final_specialists/en_zh_v1",
+      "source_lang": "en",
+      "target_lang": "zh",
+      "status": "ready",
+      "generation": {
+        "num_beams": 4,
+        "max_new_tokens": 128,
+        "do_sample": false
+      }
+    },
+    "en_uz": {
+      "model_name": "en_uz_small100_exp2_v1",
+      "architecture": "small100",
+      "path": "models/final_specialists/en_uz_small100_v1",
+      "source_lang": "en",
+      "target_lang": "uz",
+      "status": "ready",
+      "generation": {
+        "num_beams": 5,
+        "max_new_tokens": 256,
+        "do_sample": false
+      }
+    },
+    "uz_en": {
+      "model_name": "uz_en_small100_exp2_v1",
+      "architecture": "small100",
+      "path": "models/final_specialists/en_uz_small100_v1",
+      "source_lang": "uz",
+      "target_lang": "en",
+      "status": "ready",
+      "generation": {
+        "num_beams": 5,
+        "max_new_tokens": 256,
+        "do_sample": false
+      }
+    }
+  }
+}

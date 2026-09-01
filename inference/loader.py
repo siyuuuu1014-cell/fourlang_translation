@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import importlib.util
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 import torch
+import transformers
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
 
@@ -24,6 +26,7 @@ class LoadedModel:
     device: torch.device
     model_path: str
     adapter_path: str | None
+    tokenizer_kind: str = "m2m100"
 
 
 def _resolve_source(value: str | Path) -> str:
@@ -60,6 +63,57 @@ def _select_dtype(device: torch.device, requested: str) -> torch.dtype | None:
     }[requested]
 
 
+def _load_tokenizer(model_source: str, adapter_source: str | None) -> tuple[Any, str]:
+    """Load the tokenizer required by the model family.
+
+    SMaLL-100 ships a custom tokenizer whose target-language prefix is part of
+    the encoder input. Its bundled tokenizer_config.json incorrectly names the
+    standard M2M100 tokenizer, so AutoTokenizer cannot be used for that model.
+    """
+
+    model_dir = Path(model_source)
+    small100_module = model_dir / "tokenization_small100.py"
+    if small100_module.is_file():
+        spec = importlib.util.spec_from_file_location(
+            "fourlang_inference_small100_tokenizer",
+            small100_module,
+        )
+        if spec is None or spec.loader is None:
+            raise RuntimeError(f"Cannot load SMaLL-100 tokenizer from {small100_module}")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        # Construct directly because this checkpoint's tokenizer_config.json
+        # incorrectly declares M2M100Tokenizer and from_pretrained emits a
+        # misleading class-mismatch warning.
+        tokenizer = module.SMALL100Tokenizer(
+            vocab_file=str(model_dir / "vocab.json"),
+            spm_file=str(model_dir / "sentencepiece.bpe.model"),
+            tgt_lang="en",
+            model_max_length=1024,
+        )
+        return tokenizer, "small100"
+
+    tokenizer_source = model_source
+    if adapter_source and Path(adapter_source).is_dir():
+        if (Path(adapter_source) / "tokenizer_config.json").exists():
+            tokenizer_source = adapter_source
+    tokenizer = AutoTokenizer.from_pretrained(tokenizer_source)
+    tokenizer_name = type(tokenizer).__name__.lower()
+    tokenizer_kind = "marian" if "marian" in tokenizer_name else "m2m100"
+    return tokenizer, tokenizer_kind
+
+
+def _dtype_argument_name() -> str:
+    """Use the current Transformers spelling without breaking the pinned version."""
+
+    version_parts = transformers.__version__.split(".")[:2]
+    try:
+        major_minor = tuple(int(part) for part in version_parts)
+    except ValueError:
+        major_minor = (4, 46)
+    return "dtype" if major_minor >= (4, 56) else "torch_dtype"
+
+
 def load_translation_model(
     model_path: str | Path = DEFAULT_MODEL_PATH,
     *,
@@ -85,16 +139,10 @@ def load_translation_model(
     runtime_device = _select_device(device)
     runtime_dtype = _select_dtype(runtime_device, dtype)
 
-    # Prefer adapter tokenizer files when supplied; fall back to the base model.
-    tokenizer_source = model_source
-    if adapter_source and Path(adapter_source).is_dir():
-        if (Path(adapter_source) / "tokenizer_config.json").exists():
-            tokenizer_source = adapter_source
-
-    tokenizer = AutoTokenizer.from_pretrained(tokenizer_source)
+    tokenizer, tokenizer_kind = _load_tokenizer(model_source, adapter_source)
     load_kwargs: dict[str, Any] = {"low_cpu_mem_usage": True}
     if runtime_dtype is not None:
-        load_kwargs["torch_dtype"] = runtime_dtype
+        load_kwargs[_dtype_argument_name()] = runtime_dtype
     model = AutoModelForSeq2SeqLM.from_pretrained(model_source, **load_kwargs)
     if adapter_source:
         try:
@@ -113,4 +161,5 @@ def load_translation_model(
         device=runtime_device,
         model_path=str(model_path),
         adapter_path=str(adapter_path) if adapter_path else None,
+        tokenizer_kind=tokenizer_kind,
     )

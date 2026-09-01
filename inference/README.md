@@ -16,6 +16,9 @@ models/small100
 或 Hugging Face model ID。加载 LoRA 时，用 `--adapter-path` 指定现有 adapter，并用
 `--model-path` 明确指定它对应的基础模型。
 
+完整模型推理不要求安装 PEFT；只有传入 `--adapter-path` 加载 LoRA 时才需要
+`peft==0.13.2`。
+
 ## 单次翻译
 
 在项目根目录运行：

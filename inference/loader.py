@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import Any
 
 import torch
-from peft import PeftModel
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
 
@@ -98,6 +97,12 @@ def load_translation_model(
         load_kwargs["torch_dtype"] = runtime_dtype
     model = AutoModelForSeq2SeqLM.from_pretrained(model_source, **load_kwargs)
     if adapter_source:
+        try:
+            from peft import PeftModel
+        except ImportError as exc:
+            raise RuntimeError(
+                "Loading --adapter-path requires PEFT; install it with: pip install peft==0.13.2"
+            ) from exc
         model = PeftModel.from_pretrained(model, adapter_source)
 
     model = model.to(runtime_device).eval()

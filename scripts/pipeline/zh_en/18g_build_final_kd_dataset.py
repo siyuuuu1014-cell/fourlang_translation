@@ -1145,6 +1145,10 @@ def main():
 
     decision_df = pd.DataFrame(
         decision_rows
+    ).rename(
+        columns={
+            "reason": "routing_rejection_reason",
+        }
     )
 
     work = pd.concat(
@@ -1158,6 +1162,19 @@ def main():
         ],
         axis=1,
     )
+
+    if not work.columns.is_unique:
+        duplicate_columns = (
+            work.columns[
+                work.columns.duplicated()
+            ]
+            .tolist()
+        )
+
+        raise RuntimeError(
+            "Duplicate columns detected after routing merge: "
+            f"{duplicate_columns}"
+        )
 
     # Normalize all text needed for audits.
     work[
@@ -1257,7 +1274,7 @@ def main():
             reasons.append(
                 str(
                     row.get(
-                        "reason",
+                        "routing_rejection_reason",
                         "ROUTING_REJECT",
                     )
                 )
@@ -1708,6 +1725,32 @@ def main():
             if c in rejected.columns
         ]
     )
+
+    if not final_save.columns.is_unique:
+        duplicate_columns = (
+            final_save.columns[
+                final_save.columns.duplicated()
+            ]
+            .tolist()
+        )
+
+        raise RuntimeError(
+            "Duplicate columns detected in final KD dataset: "
+            f"{duplicate_columns}"
+        )
+
+    if not rejected_save.columns.is_unique:
+        duplicate_columns = (
+            rejected_save.columns[
+                rejected_save.columns.duplicated()
+            ]
+            .tolist()
+        )
+
+        raise RuntimeError(
+            "Duplicate columns detected in rejected KD dataset: "
+            f"{duplicate_columns}"
+        )
 
     final_save.to_parquet(
         final_path,

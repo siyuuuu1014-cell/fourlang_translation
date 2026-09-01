@@ -476,6 +476,117 @@ def main():
             )
 
     # --------------------------------------------------------
+    # Remove KD rows that exactly duplicate Human Replay supervision.
+    #
+    # IMPORTANT:
+    # - Human Replay must remain unchanged so Exp2 preserves the Exp1
+    #   human-data distribution.
+    # - Step18G already guarantees KD-internal source-target uniqueness.
+    # - teacher_equals_human_reference only detects equality with the
+    #   *same candidate's* human reference. A KD target can still match
+    #   another Human Replay row with the same source-target pair.
+    # --------------------------------------------------------
+
+    exact_key_cols = [
+        "direction",
+        "source_text",
+        "target_text",
+    ]
+
+    human_internal_duplicate_rows = int(
+        human[
+            exact_key_cols
+        ]
+        .duplicated(
+            keep=False
+        )
+        .sum()
+    )
+
+    kd_internal_duplicate_rows_before_cross_filter = int(
+        kd[
+            exact_key_cols
+        ]
+        .duplicated(
+            keep=False
+        )
+        .sum()
+    )
+
+    human_exact_keys = (
+        human[
+            exact_key_cols
+        ]
+        .drop_duplicates()
+        .assign(
+            _human_exact_overlap=True
+        )
+    )
+
+    kd = kd.merge(
+        human_exact_keys,
+        on=exact_key_cols,
+        how="left",
+        validate="many_to_one",
+    )
+
+    kd_cross_human_duplicate_mask = (
+        kd[
+            "_human_exact_overlap"
+        ]
+        .fillna(False)
+        .astype(bool)
+    )
+
+    kd_cross_human_duplicate_rows = int(
+        kd_cross_human_duplicate_mask.sum()
+    )
+
+    kd = kd.loc[
+        ~kd_cross_human_duplicate_mask
+    ].copy()
+
+    kd = kd.drop(
+        columns=[
+            "_human_exact_overlap"
+        ]
+    )
+
+    kd_internal_duplicate_rows_after_cross_filter = int(
+        kd[
+            exact_key_cols
+        ]
+        .duplicated(
+            keep=False
+        )
+        .sum()
+    )
+
+    print(
+        "\\nExact-supervision overlap audit:"
+    )
+
+    print(
+        "Human internal duplicate rows (preserved):",
+        human_internal_duplicate_rows,
+    )
+
+    print(
+        "KD internal duplicate rows before cross filter:",
+        kd_internal_duplicate_rows_before_cross_filter,
+    )
+
+    print(
+        "KD rows exactly overlapping Human Replay (excluded):",
+        kd_cross_human_duplicate_rows,
+    )
+
+    print(
+        "KD internal duplicate rows after cross filter:",
+        kd_internal_duplicate_rows_after_cross_filter,
+    )
+
+    # --------------------------------------------------------
     # Assertions before combining
     # --------------------------------------------------------
 
@@ -573,6 +684,31 @@ def main():
             )
             .all()
         ),
+        "kd_internal_exact_duplicates_zero": (
+            kd_internal_duplicate_rows_after_cross_filter
+            ==
+            0
+        ),
+        "kd_cross_human_exact_duplicates_removed": (
+            not (
+                kd[
+                    exact_key_cols
+                ]
+                .merge(
+                    human[
+                        exact_key_cols
+                    ]
+                    .drop_duplicates(),
+                    on=exact_key_cols,
+                    how="inner",
+                )
+                .shape[
+                    0
+                ]
+                >
+                0
+            )
+        ),
         "kd_reference_matches_excluded": (
             (
                 args.keep_teacher_equals_reference
@@ -652,21 +788,36 @@ def main():
         ignore_index=True,
     )
 
-    # Human and KD can share a source sentence. That is intentional.
-    # Exact source-target duplicates across origins are NOT allowed because
-    # teacher==human targets were excluded above.
-    exact_duplicate_mask = combined[
-        [
-            "direction",
-            "source_text",
-            "target_text",
+    # Human Replay is intentionally preserved exactly as Exp1 saw it.
+    # Therefore Human-internal duplicates, if any, are allowed and reported.
+    # What is forbidden is:
+    #   1. KD-internal exact duplicates
+    #   2. exact Human-vs-KD supervision overlap
+    #
+    # The cross-origin overlap was already removed above.
+
+    human_keys_after = (
+        human[
+            exact_key_cols
         ]
-    ].duplicated(
-        keep=False
+        .drop_duplicates()
     )
 
-    exact_duplicate_rows = int(
-        exact_duplicate_mask.sum()
+    kd_keys_after = (
+        kd[
+            exact_key_cols
+        ]
+        .drop_duplicates()
+    )
+
+    cross_origin_exact_duplicate_rows = int(
+        human_keys_after.merge(
+            kd_keys_after,
+            on=exact_key_cols,
+            how="inner",
+        ).shape[
+            0
+        ]
     )
 
     assertions.update(
@@ -706,8 +857,13 @@ def main():
                 )
                 .all()
             ),
-            "combined_no_exact_source_target_duplicates": (
-                exact_duplicate_rows
+            "combined_no_cross_origin_exact_duplicates": (
+                cross_origin_exact_duplicate_rows
+                ==
+                0
+            ),
+            "combined_kd_internal_exact_duplicates_zero": (
+                kd_internal_duplicate_rows_after_cross_filter
                 ==
                 0
             ),
@@ -816,6 +972,18 @@ def main():
             ),
             "teacher_equals_human_reference_rows": int(
                 teacher_equals_reference_count
+            ),
+            "human_internal_duplicate_rows_preserved": int(
+                human_internal_duplicate_rows
+            ),
+            "kd_internal_duplicate_rows_before_cross_filter": int(
+                kd_internal_duplicate_rows_before_cross_filter
+            ),
+            "kd_cross_human_exact_duplicate_rows_excluded": int(
+                kd_cross_human_duplicate_rows
+            ),
+            "kd_internal_duplicate_rows_after_cross_filter": int(
+                kd_internal_duplicate_rows_after_cross_filter
             ),
             "selected_kd_rows": int(
                 kd_rows
@@ -932,6 +1100,14 @@ def main():
     print(
         "Teacher == human reference:",
         teacher_equals_reference_count,
+    )
+    print(
+        "Human internal duplicate rows preserved:",
+        human_internal_duplicate_rows,
+    )
+    print(
+        "KD rows overlapping Human Replay excluded:",
+        kd_cross_human_duplicate_rows,
     )
     print("Selected KD rows:", kd_rows)
     print("Combined rows:", total_rows)

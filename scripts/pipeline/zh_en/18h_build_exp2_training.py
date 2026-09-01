@@ -372,6 +372,12 @@ def main():
         .astype(bool)
     ].copy()
 
+    approved_kd_input_rows = int(
+        len(
+            kd_selected
+        )
+    )
+
     teacher_equals_reference_count = int(
         kd_selected[
             "teacher_equals_human_reference"
@@ -389,6 +395,12 @@ def main():
             .fillna(False)
             .astype(bool)
         ].copy()
+
+    kd_rows_after_reference_filter = int(
+        len(
+            kd_selected
+        )
+    )
 
     kd = pd.DataFrame(
         {
@@ -709,25 +721,26 @@ def main():
                 0
             )
         ),
-        "kd_reference_matches_excluded": (
+        "kd_reference_filter_count_correct": (
+            kd_rows_after_reference_filter
+            ==
             (
-                args.keep_teacher_equals_reference
-            )
-            or
-            (
-                len(kd)
-                ==
-                len(
-                    kd_raw.loc[
-                        kd_raw[
-                            "approved_for_kd"
-                        ]
-                        .fillna(False)
-                        .astype(bool)
-                    ]
-                )
+                approved_kd_input_rows
                 -
-                teacher_equals_reference_count
+                (
+                    0
+                    if args.keep_teacher_equals_reference
+                    else teacher_equals_reference_count
+                )
+            )
+        ),
+        "kd_final_count_matches_all_filters": (
+            len(kd)
+            ==
+            (
+                kd_rows_after_reference_filter
+                -
+                kd_cross_human_duplicate_rows
             )
         ),
     }
@@ -970,8 +983,14 @@ def main():
                     kd_raw
                 )
             ),
+            "approved_kd_input_rows": int(
+                approved_kd_input_rows
+            ),
             "teacher_equals_human_reference_rows": int(
                 teacher_equals_reference_count
+            ),
+            "kd_rows_after_reference_filter": int(
+                kd_rows_after_reference_filter
             ),
             "human_internal_duplicate_rows_preserved": int(
                 human_internal_duplicate_rows
@@ -1097,9 +1116,14 @@ def main():
 
     print("\nHuman Replay rows:", human_rows)
     print("Final KD input rows:", len(kd_raw))
+    print("Approved KD input rows:", approved_kd_input_rows)
     print(
         "Teacher == human reference:",
         teacher_equals_reference_count,
+    )
+    print(
+        "KD rows after teacher==human filter:",
+        kd_rows_after_reference_filter,
     )
     print(
         "Human internal duplicate rows preserved:",

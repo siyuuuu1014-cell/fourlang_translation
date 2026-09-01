@@ -766,6 +766,12 @@ def main():
     # --------------------------------------------------------
 
     # Align all metadata columns.
+    #
+    # IMPORTANT:
+    # Never fill a missing metadata column with "" blindly. Some KD-only
+    # columns (for example teacher_disagreement_score) are numeric. Filling
+    # Human Replay with "" would force the combined dtype to object and make
+    # PyArrow fail during parquet serialization.
     all_columns = list(
         dict.fromkeys(
             list(human.columns)
@@ -776,14 +782,10 @@ def main():
 
     for col in all_columns:
         if col not in human.columns:
-            human[col] = (
-                ""
-            )
+            human[col] = pd.NA
 
         if col not in kd.columns:
-            kd[col] = (
-                ""
-            )
+            kd[col] = pd.NA
 
     human = human[
         all_columns
@@ -793,6 +795,47 @@ def main():
         all_columns
     ].copy()
 
+    # Explicit parquet-safe schema for the training artifact.
+    numeric_columns = [
+        "training_weight",
+        "quality_score",
+        "teacher_disagreement_score",
+    ]
+
+    string_columns = [
+        "training_id",
+        "direction",
+        "source_text",
+        "target_text",
+        "training_origin",
+        "selected_teacher",
+        "target_origin",
+        "source_candidate_id",
+        "source_dataset",
+        "quality_tier",
+        "risk_flags",
+        "pair_id",
+        "split_group_id",
+        "decision_source_final",
+        "qwen_winner",
+        "calibration_band",
+    ]
+
+    for frame_name, frame in [
+        ("human", human),
+        ("kd", kd),
+    ]:
+        for col in numeric_columns:
+            if col in frame.columns:
+                frame[col] = pd.to_numeric(
+                    frame[col],
+                    errors="coerce",
+                ).astype("Float64")
+
+        for col in string_columns:
+            if col in frame.columns:
+                frame[col] = frame[col].astype("string")
+
     combined = pd.concat(
         [
             human,
@@ -800,6 +843,35 @@ def main():
         ],
         ignore_index=True,
     )
+
+    # Re-assert schema after concat because pandas may widen nullable dtypes.
+    for col in numeric_columns:
+        if col in combined.columns:
+            combined[col] = pd.to_numeric(
+                combined[col],
+                errors="coerce",
+            ).astype("Float64")
+
+    for col in string_columns:
+        if col in combined.columns:
+            combined[col] = combined[col].astype("string")
+
+    print("\nParquet schema audit:")
+
+    schema_cols = [
+        "training_weight",
+        "quality_score",
+        "teacher_disagreement_score",
+        "training_origin",
+        "selected_teacher",
+        "target_origin",
+    ]
+
+    for col in schema_cols:
+        if col in combined.columns:
+            print(
+                f"{col}: {combined[col].dtype}"
+            )
 
     # Human Replay is intentionally preserved exactly as Exp1 saw it.
     # Therefore Human-internal duplicates, if any, are allowed and reported.
@@ -910,6 +982,46 @@ def main():
         )
 
     # --------------------------------------------------------
+    # Final serialization schema assertions
+    # --------------------------------------------------------
+
+    expected_numeric_dtypes = {
+        "training_weight",
+        "quality_score",
+        "teacher_disagreement_score",
+    }
+
+    parquet_schema_assertions = {}
+
+    for col in expected_numeric_dtypes:
+        if col in combined.columns:
+            parquet_schema_assertions[
+                f"{col}_numeric"
+            ] = pd.api.types.is_numeric_dtype(
+                combined[col].dtype
+            )
+
+    assertions.update(
+        parquet_schema_assertions
+    )
+
+    failed = [
+        key
+        for key, value
+        in assertions.items()
+        if not bool(value)
+    ]
+
+    if failed:
+        raise RuntimeError(
+            "STEP18H parquet-schema assertion failure:\n"
+            +
+            "\n".join(
+                failed
+            )
+        )
+
+    # --------------------------------------------------------
     # Save
     # --------------------------------------------------------
 
@@ -960,6 +1072,18 @@ def main():
             ),
         },
         "policy": {
+            "parquet_schema": {
+                "numeric_columns": [
+                    col
+                    for col in numeric_columns
+                    if col in combined.columns
+                ],
+                "string_columns": [
+                    col
+                    for col in string_columns
+                    if col in combined.columns
+                ],
+            },
             "human_training_weight": (
                 1.0
             ),

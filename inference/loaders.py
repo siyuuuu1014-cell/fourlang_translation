@@ -140,17 +140,32 @@ def load_translation_model(
             )
         )
 
-        tokenizer = (
-            tokenizer_cls
-            .from_pretrained(
-                str(
-                    spec.path
-                ),
-                tgt_lang=(
-                    spec.target_lang
-                ),
-                local_files_only=True,
+        vocab_file = (
+                spec.path
+                / "vocab.json"
+        )
+
+        spm_file = (
+                spec.path
+                / "sentencepiece.bpe.model"
+        )
+
+        if not vocab_file.exists():
+            raise FileNotFoundError(
+                "SMaLL-100 vocab file not found:\n"
+                f"{vocab_file}"
             )
+
+        if not spm_file.exists():
+            raise FileNotFoundError(
+                "SMaLL-100 SentencePiece model not found:\n"
+                f"{spm_file}"
+            )
+
+        tokenizer = tokenizer_cls(
+            vocab_file=str(vocab_file),
+            spm_file=str(spm_file),
+            tgt_lang=spec.target_lang,
         )
 
         model = (

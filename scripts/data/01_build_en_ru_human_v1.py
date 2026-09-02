@@ -57,12 +57,43 @@ def read_parallel(en_path: Path, ru_path: Path) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def write_bidirectional_jsonl(df: pd.DataFrame, path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open('w', encoding='utf-8', newline='\n') as handle:
+        for row in df.itertuples(index=False):
+            records = (
+                {
+                    'src_lang': 'en',
+                    'tgt_lang': 'ru',
+                    'src_text': row.en,
+                    'tgt_text': row.ru,
+                    'pair_id': row.pair_id,
+                    'source_corpus': row.source_corpus,
+                },
+                {
+                    'src_lang': 'ru',
+                    'tgt_lang': 'en',
+                    'src_text': row.ru,
+                    'tgt_text': row.en,
+                    'pair_id': row.pair_id,
+                    'source_corpus': row.source_corpus,
+                },
+            )
+            for record in records:
+                handle.write(json.dumps(record, ensure_ascii=False) + '\n')
+
+
 def main():
+    raise SystemExit(
+        "This legacy builder is retired because it labeled unjudged rows as approved. "
+        "Use scripts/pipeline/run_direction.py en_ru --profile server instead."
+    )
     ap = argparse.ArgumentParser()
     ap.add_argument('--en-file', default='data/raw/en_ru/news_commentary.en')
     ap.add_argument('--ru-file', default='data/raw/en_ru/news_commentary.ru')
     ap.add_argument('--approved-size', type=int, default=70000)
     ap.add_argument('--validation-size', type=int, default=3000)
+    ap.add_argument('--test-size', type=int, default=3000)
     ap.add_argument('--seed', type=int, default=2026)
     args = ap.parse_args()
 
@@ -98,18 +129,32 @@ def main():
     df = df.sample(frac=1.0, random_state=args.seed).reset_index(drop=True)
     approved_n = min(args.approved_size, len(df))
     approved = df.iloc[:approved_n].copy()
-    if len(approved) <= args.validation_size:
-        raise RuntimeError(f'Only {len(approved)} approved pairs; validation_size={args.validation_size} is too large.')
+    reserved = args.validation_size + args.test_size
+    if len(approved) <= reserved:
+        raise RuntimeError(
+            f'Only {len(approved)} approved pairs; validation_size + test_size '
+            f'is {reserved}.'
+        )
 
     approved_path = approved_dir / 'en_ru_human_approved_v1.parquet'
     approved.to_parquet(approved_path, index=False)
     validation = approved.iloc[:args.validation_size].copy()
-    train = approved.iloc[args.validation_size:].copy()
+    test = approved.iloc[args.validation_size:reserved].copy()
+    train = approved.iloc[reserved:].copy()
 
     train_path = split_dir / 'train_pairs_v1.parquet'
     val_path = split_dir / 'validation_pairs_v1.parquet'
+    test_path = split_dir / 'test_pairs_v1.parquet'
     train.to_parquet(train_path, index=False)
     validation.to_parquet(val_path, index=False)
+    test.to_parquet(test_path, index=False)
+
+    train_jsonl = split_dir / 'train.jsonl'
+    validation_jsonl = split_dir / 'validation.jsonl'
+    test_jsonl = split_dir / 'test.jsonl'
+    write_bidirectional_jsonl(train, train_jsonl)
+    write_bidirectional_jsonl(validation, validation_jsonl)
+    write_bidirectional_jsonl(test, test_jsonl)
 
     report = {
         'pair': 'en_ru',
@@ -121,11 +166,16 @@ def main():
         'approved_rows': len(approved),
         'train_rows': len(train),
         'validation_rows': len(validation),
+        'test_rows': len(test),
         'paths': {
             'clean': str(clean_path.relative_to(root)),
             'approved': str(approved_path.relative_to(root)),
             'train': str(train_path.relative_to(root)),
             'validation': str(val_path.relative_to(root)),
+            'test': str(test_path.relative_to(root)),
+            'train_jsonl': str(train_jsonl.relative_to(root)),
+            'validation_jsonl': str(validation_jsonl.relative_to(root)),
+            'test_jsonl': str(test_jsonl.relative_to(root)),
         },
         'notes': [
             'FLORES and Tatoeba are not included in this training split.',

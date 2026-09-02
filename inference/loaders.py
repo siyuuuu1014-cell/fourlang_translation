@@ -7,10 +7,12 @@ from pathlib import Path
 from typing import Any
 
 import torch
+import transformers
 from transformers import (
     AutoModelForSeq2SeqLM,
     AutoTokenizer,
     M2M100ForConditionalGeneration,
+    M2M100Tokenizer,
 )
 
 from .registry import ModelSpec
@@ -33,7 +35,11 @@ def _common_model_kwargs(
     }
 
     if device.type == "cuda":
-        kwargs["dtype"] = torch.float16
+        try:
+            version = tuple(int(part) for part in transformers.__version__.split(".")[:2])
+        except ValueError:
+            version = (4, 46)
+        kwargs["dtype" if version >= (4, 56) else "torch_dtype"] = torch.float16
 
     return kwargs
 
@@ -131,6 +137,14 @@ def load_translation_model(
                     device
                 ),
             )
+        )
+
+    elif spec.architecture == "m2m100":
+        tokenizer = M2M100Tokenizer.from_pretrained(
+            str(spec.path), local_files_only=True
+        )
+        model = M2M100ForConditionalGeneration.from_pretrained(
+            str(spec.path), **_common_model_kwargs(device)
         )
 
     elif spec.architecture == "small100":

@@ -1,0 +1,220 @@
+[pipeline]
+schema_version = 2
+direction = "en_ru"
+description = "Commercial-safe, model-selected EN-RU full-finetuning distillation pipeline."
+
+[[stages]]
+id = "validate_config"
+name = "Validate paths, commercial licenses, and protected benchmark policy"
+runtime = "student"
+command = ["scripts/pipeline_v2/data_flow.py", "validate", "--config", "configs/directions/en_ru.toml"]
+requires = ["configs/directions/en_ru.toml"]
+produces = ["reports/pipeline/en_ru/config_validation.json"]
+
+[[stages]]
+id = "build_candidates"
+name = "Normalize and deduplicate News Commentary into candidate data"
+runtime = "student"
+command = ["scripts/pipeline_v2/data_flow.py", "candidates", "--config", "configs/directions/en_ru.toml"]
+requires = ["data/raw/en_ru/news_commentary.en", "data/raw/en_ru/news_commentary.ru"]
+produces = ["data/pipeline_v2/en_ru/candidates.parquet", "reports/pipeline/en_ru/candidates.json"]
+
+[[stages]]
+id = "rule_filter"
+name = "Apply deterministic pair-level rules without calling data approved"
+runtime = "student"
+command = ["scripts/pipeline_v2/data_flow.py", "rules", "--config", "configs/directions/en_ru.toml"]
+requires = ["data/pipeline_v2/en_ru/candidates.parquet"]
+produces = ["data/pipeline_v2/en_ru/rule_pass.parquet", "reports/pipeline/en_ru/rules.json"]
+
+[[stages]]
+id = "judge_calibration"
+name = "Run Qwen semantic Judge on a deterministic calibration sample"
+runtime = "judge"
+command = ["scripts/pipeline_v2/qwen_judge.py", "human", "--config", "configs/directions/en_ru.toml", "--calibration"]
+requires = ["data/pipeline_v2/en_ru/rule_pass.parquet"]
+produces = ["data/pipeline_v2/en_ru/judge_calibration.parquet"]
+
+[[stages]]
+id = "calibrate_judge_policy"
+name = "Freeze EN-RU Judge thresholds from calibration output"
+runtime = "student"
+command = ["scripts/pipeline_v2/data_flow.py", "calibrate", "--config", "configs/directions/en_ru.toml", "--mode", "human"]
+requires = ["data/pipeline_v2/en_ru/judge_calibration.parquet"]
+produces = ["reports/pipeline/en_ru/human_judge_policy.json"]
+
+[[stages]]
+id = "judge_human_data"
+name = "Judge all rule-passing human pairs with the frozen policy"
+runtime = "judge"
+command = ["scripts/pipeline_v2/qwen_judge.py", "human", "--config", "configs/directions/en_ru.toml"]
+requires = ["data/pipeline_v2/en_ru/rule_pass.parquet", "reports/pipeline/en_ru/human_judge_policy.json"]
+produces = ["data/pipeline_v2/en_ru/human_judged.parquet"]
+
+[[stages]]
+id = "build_approved"
+name = "Build approved data only from explicit Judge decisions"
+runtime = "student"
+command = ["scripts/pipeline_v2/data_flow.py", "approve", "--config", "configs/directions/en_ru.toml"]
+requires = ["data/pipeline_v2/en_ru/human_judged.parquet", "reports/pipeline/en_ru/human_judge_policy.json"]
+produces = ["data/approved/en_ru/v1/approved_pairs.parquet", "reports/pipeline/en_ru/approved.json"]
+
+[[stages]]
+id = "build_frozen_split"
+name = "Create leakage-safe human train/validation/test splits"
+runtime = "student"
+command = ["scripts/pipeline_v2/data_flow.py", "split", "--config", "configs/directions/en_ru.toml"]
+requires = ["data/approved/en_ru/v1/approved_pairs.parquet"]
+produces = ["data/splits/en_ru/v1/train.jsonl", "data/splits/en_ru/v1/validation.jsonl", "data/splits/en_ru/v1/test.jsonl", "reports/pipeline/en_ru/split.json"]
+
+[[stages]]
+id = "build_protected_benchmarks"
+name = "Download and freeze FLORES/Tatoeba evaluation data outside training"
+runtime = "student"
+command = ["scripts/pipeline_v2/build_benchmarks.py", "--config", "configs/directions/en_ru.toml"]
+requires = ["configs/directions/en_ru.toml"]
+produces = ["data/benchmark/en_ru/flores_devtest.parquet", "data/benchmark/en_ru/tatoeba_test.parquet", "reports/pipeline/en_ru/benchmarks.json"]
+
+[[stages]]
+id = "prepare_model_candidates"
+name = "Materialize every commercially eligible model candidate in the Hugging Face cache"
+runtime = "student"
+command = ["scripts/pipeline_v2/prepare_models.py", "--config", "configs/directions/en_ru.toml"]
+requires = ["configs/directions/en_ru.toml"]
+produces = ["reports/pipeline/en_ru/model_inventory.json"]
+
+[[stages]]
+id = "student_bakeoff"
+name = "Benchmark every commercially eligible Student candidate"
+runtime = "student"
+command = ["scripts/pipeline_v2/seq2seq_flow.py", "bakeoff", "--role", "student", "--config", "configs/directions/en_ru.toml"]
+requires = ["data/benchmark/en_ru/flores_devtest.parquet", "data/benchmark/en_ru/tatoeba_test.parquet", "reports/pipeline/en_ru/model_inventory.json"]
+produces = ["results/model_selection/en_ru/student_scores.json"]
+
+[[stages]]
+id = "select_student"
+name = "Select Student from measured bidirectional quality"
+runtime = "student"
+command = ["scripts/pipeline_v2/select_model.py", "--role", "student", "--config", "configs/directions/en_ru.toml"]
+requires = ["results/model_selection/en_ru/student_scores.json"]
+produces = ["results/model_selection/en_ru/selected_student.json"]
+
+[[stages]]
+id = "teacher_bakeoff"
+name = "Benchmark every commercially eligible Teacher candidate"
+runtime = "student"
+command = ["scripts/pipeline_v2/seq2seq_flow.py", "bakeoff", "--role", "teacher", "--config", "configs/directions/en_ru.toml"]
+requires = ["data/benchmark/en_ru/flores_devtest.parquet", "data/benchmark/en_ru/tatoeba_test.parquet", "reports/pipeline/en_ru/model_inventory.json"]
+produces = ["results/model_selection/en_ru/teacher_scores.json"]
+
+[[stages]]
+id = "select_teacher"
+name = "Select Teacher from measured bidirectional quality"
+runtime = "student"
+command = ["scripts/pipeline_v2/select_model.py", "--role", "teacher", "--config", "configs/directions/en_ru.toml"]
+requires = ["results/model_selection/en_ru/teacher_scores.json"]
+produces = ["results/model_selection/en_ru/selected_teacher.json"]
+
+[[stages]]
+id = "train_exp1"
+name = "Full-finetune selected Student on approved human data"
+runtime = "student"
+command = ["scripts/pipeline_v2/seq2seq_flow.py", "train", "--experiment", "exp1", "--config", "configs/directions/en_ru.toml"]
+requires = ["results/model_selection/en_ru/selected_student.json", "data/splits/en_ru/v1/train.jsonl", "data/splits/en_ru/v1/validation.jsonl"]
+produces = ["results/student/en_ru/exp1/best_model/config.json", "results/student/en_ru/exp1/train_report.json"]
+
+[[stages]]
+id = "evaluate_exp1"
+name = "Evaluate Exp1 on protected FLORES and Tatoeba"
+runtime = "student"
+command = ["scripts/pipeline_v2/seq2seq_flow.py", "evaluate", "--experiment", "exp1", "--config", "configs/directions/en_ru.toml"]
+requires = ["results/student/en_ru/exp1/best_model/config.json", "data/benchmark/en_ru/flores_devtest.parquet", "data/benchmark/en_ru/tatoeba_test.parquet"]
+produces = ["results/evaluation/en_ru/exp1/metrics.json"]
+
+[[stages]]
+id = "prepare_kd_candidates"
+name = "Create bidirectional KD sources excluding protected benchmarks"
+runtime = "student"
+command = ["scripts/pipeline_v2/data_flow.py", "kd_candidates", "--config", "configs/directions/en_ru.toml"]
+requires = ["data/splits/en_ru/v1/train.jsonl", "data/benchmark/en_ru/flores_devtest.parquet", "data/benchmark/en_ru/tatoeba_test.parquet"]
+produces = ["data/pipeline_v2/en_ru/kd_candidates.jsonl", "reports/pipeline/en_ru/kd_candidates.json"]
+
+[[stages]]
+id = "generate_teacher"
+name = "Generate translations with selected Teacher"
+runtime = "student"
+command = ["scripts/pipeline_v2/seq2seq_flow.py", "generate_teacher", "--config", "configs/directions/en_ru.toml"]
+requires = ["results/model_selection/en_ru/selected_teacher.json", "data/pipeline_v2/en_ru/kd_candidates.jsonl"]
+produces = ["data/pipeline_v2/en_ru/teacher_generated.parquet"]
+
+[[stages]]
+id = "judge_teacher_calibration"
+name = "Calibrate Qwen Judge for Teacher output"
+runtime = "judge"
+command = ["scripts/pipeline_v2/qwen_judge.py", "teacher", "--config", "configs/directions/en_ru.toml", "--calibration"]
+requires = ["data/pipeline_v2/en_ru/teacher_generated.parquet"]
+produces = ["data/pipeline_v2/en_ru/teacher_judge_calibration.parquet"]
+
+[[stages]]
+id = "calibrate_teacher_policy"
+name = "Freeze Teacher acceptance thresholds"
+runtime = "student"
+command = ["scripts/pipeline_v2/data_flow.py", "calibrate", "--config", "configs/directions/en_ru.toml", "--mode", "teacher"]
+requires = ["data/pipeline_v2/en_ru/teacher_judge_calibration.parquet"]
+produces = ["reports/pipeline/en_ru/teacher_judge_policy.json"]
+
+[[stages]]
+id = "judge_teacher"
+name = "Judge every generated Teacher translation"
+runtime = "judge"
+command = ["scripts/pipeline_v2/qwen_judge.py", "teacher", "--config", "configs/directions/en_ru.toml"]
+requires = ["data/pipeline_v2/en_ru/teacher_generated.parquet", "reports/pipeline/en_ru/teacher_judge_policy.json"]
+produces = ["data/pipeline_v2/en_ru/teacher_judged.parquet"]
+
+[[stages]]
+id = "build_kd_dataset"
+name = "Build weighted KD data from Judge-approved Teacher output"
+runtime = "student"
+command = ["scripts/pipeline_v2/data_flow.py", "kd_dataset", "--config", "configs/directions/en_ru.toml"]
+requires = ["data/pipeline_v2/en_ru/teacher_judged.parquet", "data/splits/en_ru/v1/train.jsonl", "reports/pipeline/en_ru/teacher_judge_policy.json"]
+produces = ["data/distillation/en_ru/v1/train.jsonl", "data/distillation/en_ru/v1/validation.jsonl", "reports/pipeline/en_ru/kd_dataset.json"]
+
+[[stages]]
+id = "train_exp2"
+name = "Full-finetune Exp1 with approved Teacher KD and human replay"
+runtime = "student"
+command = ["scripts/pipeline_v2/seq2seq_flow.py", "train", "--experiment", "exp2", "--config", "configs/directions/en_ru.toml"]
+requires = ["results/student/en_ru/exp1/best_model/config.json", "data/distillation/en_ru/v1/train.jsonl", "data/distillation/en_ru/v1/validation.jsonl"]
+produces = ["results/student/en_ru/exp2/best_model/config.json", "results/student/en_ru/exp2/train_report.json"]
+
+[[stages]]
+id = "evaluate_exp2"
+name = "Evaluate Exp2 on protected benchmarks"
+runtime = "student"
+command = ["scripts/pipeline_v2/seq2seq_flow.py", "evaluate", "--experiment", "exp2", "--config", "configs/directions/en_ru.toml"]
+requires = ["results/student/en_ru/exp2/best_model/config.json", "data/benchmark/en_ru/flores_devtest.parquet", "data/benchmark/en_ru/tatoeba_test.parquet"]
+produces = ["results/evaluation/en_ru/exp2/metrics.json"]
+
+[[stages]]
+id = "promotion_gate"
+name = "Require Exp2 to match or beat Exp1 in both directions"
+runtime = "student"
+command = ["scripts/evaluation/check_promotion_gate.py", "--baseline", "results/evaluation/en_ru/exp1/metrics.json", "--candidate", "results/evaluation/en_ru/exp2/metrics.json", "--directions", "en-ru", "ru-en", "--output", "results/evaluation/en_ru/promotion_gate.json"]
+requires = ["results/evaluation/en_ru/exp1/metrics.json", "results/evaluation/en_ru/exp2/metrics.json"]
+produces = ["results/evaluation/en_ru/promotion_gate.json"]
+
+[[stages]]
+id = "freeze"
+name = "Freeze accepted full model and update registry"
+runtime = "student"
+command = ["scripts/pipeline_v2/seq2seq_flow.py", "freeze", "--config", "configs/directions/en_ru.toml"]
+requires = ["results/student/en_ru/exp2/best_model/config.json", "results/evaluation/en_ru/promotion_gate.json", "models/model_registry.json"]
+produces = ["models/final_specialists/en_ru_v1/model_card.json"]
+
+[[stages]]
+id = "verify_registry"
+name = "Validate registry after promotion"
+runtime = "student"
+command = ["scripts/inference/check_registry.py"]
+requires = ["models/model_registry.json", "models/final_specialists/en_ru_v1/model_card.json"]
+produces = ["models/final_specialists/en_ru_v1/model_card.json"]

@@ -1,0 +1,21 @@
+schema_version = 1
+
+[profiles.local]
+student_python = ".venv/Scripts/python.exe"
+judge_python = ".venv/Scripts/python.exe"
+
+[profiles.local.env]
+FOURLANG_BASE_MODEL_PATH = "models/small100"
+FOURLANG_MODEL_ROOT = "models"
+FOURLANG_QWEN_MODEL_PATH = "models/Qwen3-8B"
+HF_HOME = ".hf-cache"
+
+[profiles.server]
+student_python = "/root/autodl-tmp/venvs/small100_student/bin/python"
+judge_python = "/root/autodl-tmp/venvs/qwen3_judge/bin/python"
+
+[profiles.server.env]
+FOURLANG_BASE_MODEL_PATH = "/root/autodl-tmp/models/small100"
+FOURLANG_MODEL_ROOT = "/root/autodl-tmp/models"
+FOURLANG_QWEN_MODEL_PATH = "/root/autodl-tmp/models/Qwen3-8B"
+HF_HOME = "/root/autodl-tmp/huggingface"

@@ -121,6 +121,57 @@ def save(rows: list[dict[str, Any]], path: Path) -> None:
     )
 
 
+def render_prompt(tokenizer: Any, mode: str, record: dict[str, Any]) -> str:
+    source = str(record.get("src_text", record.get("source_text", "")))
+    target = str(record.get("teacher_text", record.get("target_text", "")))
+    src_lang = str(record.get("src_lang", record.get("source_lang", "")))
+    tgt_lang = str(record.get("tgt_lang", record.get("target_lang", "")))
+    return tokenizer.apply_chat_template(
+        [
+            {
+                "role": "user",
+                "content": prompt(mode, src_lang, tgt_lang, source, target),
+            }
+        ],
+        tokenize=False,
+        add_generation_prompt=True,
+        enable_thinking=False,
+    )
+
+
+@torch.inference_mode()
+def generate_batch(
+    model: Any,
+    tokenizer: Any,
+    rendered_prompts: list[str],
+    *,
+    max_input_tokens: int,
+    max_new_tokens: int,
+) -> list[str]:
+    inputs = tokenizer(
+        rendered_prompts,
+        return_tensors="pt",
+        padding=True,
+        truncation=True,
+        max_length=max_input_tokens,
+    ).to(model.device)
+    prompt_length = int(inputs["input_ids"].shape[1])
+    generated = model.generate(
+        **inputs,
+        do_sample=False,
+        use_cache=True,
+        max_new_tokens=max_new_tokens,
+        pad_token_id=tokenizer.pad_token_id,
+        eos_token_id=tokenizer.eos_token_id,
+    )
+    return [
+        text.strip()
+        for text in tokenizer.batch_decode(
+            generated[:, prompt_length:], skip_special_tokens=True
+        )
+    ]
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Config-driven Qwen translation Judge."
@@ -182,6 +233,9 @@ def main() -> None:
     tokenizer = AutoTokenizer.from_pretrained(
         model_path, local_files_only=True, trust_remote_code=True
     )
+    tokenizer.padding_side = "left"
+    if tokenizer.pad_token_id is None:
+        tokenizer.pad_token_id = tokenizer.eos_token_id
     model = AutoModelForCausalLM.from_pretrained(
         model_path,
         local_files_only=True,
@@ -189,40 +243,54 @@ def main() -> None:
         torch_dtype=torch.float16,
         device_map="auto",
     ).eval()
-    for index, row in enumerate(pending.itertuples(index=False), 1):
-        record = row._asdict()
-        source = str(record.get("src_text", record.get("source_text", "")))
-        target = str(record.get("teacher_text", record.get("target_text", "")))
-        src_lang = str(record.get("src_lang", record.get("source_lang", "")))
-        tgt_lang = str(record.get("tgt_lang", record.get("target_lang", "")))
-        rendered = tokenizer.apply_chat_template(
-            [
-                {
-                    "role": "user",
-                    "content": prompt(args.mode, src_lang, tgt_lang, source, target),
-                }
-            ],
-            tokenize=False,
-            add_generation_prompt=True,
-            enable_thinking=False,
-        )
-        inputs = tokenizer(rendered, return_tensors="pt").to(model.device)
-        with torch.inference_mode():
-            generated = model.generate(
-                **inputs,
-                do_sample=False,
-                max_new_tokens=int(config["judge"]["max_new_tokens"]),
+    model.generation_config.do_sample = False
+    model.generation_config.temperature = None
+    model.generation_config.top_p = None
+    model.generation_config.top_k = None
+    pending_records = pending.to_dict("records")
+    initial_batch_size = int(config["judge"]["batch_size"])
+    if initial_batch_size < 1:
+        raise ValueError("judge.batch_size must be at least 1.")
+    current_batch_size = initial_batch_size
+    max_input_tokens = int(config["judge"].get("max_input_tokens", 1536))
+    max_new_tokens = int(config["judge"]["max_new_tokens"])
+    processed = 0
+    last_saved = 0
+    print(
+        f"pending={len(pending_records)} initial_batch_size={initial_batch_size} "
+        f"max_input_tokens={max_input_tokens}"
+    )
+    while processed < len(pending_records):
+        batch = pending_records[processed : processed + current_batch_size]
+        rendered = [render_prompt(tokenizer, args.mode, record) for record in batch]
+        try:
+            answers = generate_batch(
+                model,
+                tokenizer,
+                rendered,
+                max_input_tokens=max_input_tokens,
+                max_new_tokens=max_new_tokens,
             )
-        answer = tokenizer.decode(
-            generated[0, inputs["input_ids"].shape[1] :], skip_special_tokens=True
-        )
-        record.update(parse_result(answer, teacher=args.mode == "teacher"))
-        record["judge_schema_version"] = JUDGE_SCHEMA_VERSION
-        record["judge_raw"] = answer[:2000]
-        result.append(record)
-        if index % 100 == 0:
+        except torch.cuda.OutOfMemoryError:
+            torch.cuda.empty_cache()
+            if current_batch_size == 1:
+                raise
+            current_batch_size = max(1, current_batch_size // 2)
+            print(f"CUDA OOM: reducing batch_size to {current_batch_size}")
+            continue
+        for record, answer in zip(batch, answers, strict=True):
+            record.update(parse_result(answer, teacher=args.mode == "teacher"))
+            record["judge_schema_version"] = JUDGE_SCHEMA_VERSION
+            record["judge_raw"] = answer[:2000]
+            result.append(record)
+        processed += len(batch)
+        if processed - last_saved >= 100 or processed == len(pending_records):
             save(result, output_path)
-            print(f"judged {index}/{len(pending)}")
+            last_saved = processed
+            print(
+                f"judged {processed}/{len(pending_records)} "
+                f"batch_size={current_batch_size}"
+            )
     save(result, output_path)
 
 

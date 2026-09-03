@@ -31,6 +31,10 @@ Hugging Face 缓存位于 `/root/autodl-tmp`。权重、缓存、候选数据、
 
 流程不调用 `train_lora.py`，也不生成 adapter。
 
+Qwen Judge 使用方向配置中的批量大小。EN-RU 从 32 开始批量推理；V100 显存不足时按
+32→16→8→4→2→1 自动减半。每约 100 条原子写入 Parquet，重新运行时按 `judge_id`
+跳过已成功审核的数据。
+
 ## 商业许可证门禁
 
 EN-RU 当前候选只包含声明允许商业使用的模型：MADLAD（Apache-2.0）、M2M100（MIT）、

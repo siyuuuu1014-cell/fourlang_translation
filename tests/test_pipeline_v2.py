@@ -102,6 +102,10 @@ class PipelineV2Tests(unittest.TestCase):
         self.assertTrue(accepted["judge_parse_ok"])
         self.assertEqual(accepted["teacher_usefulness"], "HIGH")
 
+    def test_qwen_judge_restores_original_batch_size(self) -> None:
+        self.assertEqual(self.config["judge"]["batch_size"], 32)
+        self.assertEqual(self.config["judge"]["max_input_tokens"], 1536)
+
 
 if __name__ == "__main__":
     unittest.main()

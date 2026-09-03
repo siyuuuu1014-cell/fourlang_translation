@@ -38,7 +38,8 @@ tatoeba = "data/benchmark/en_ru/tatoeba_test.parquet"
 model_path = "${FOURLANG_QWEN_MODEL_PATH}"
 auto_accept_audit_pairs = 500
 teacher_calibration_pairs = 500
-batch_size = 1
+batch_size = 32
+max_input_tokens = 1536
 max_new_tokens = 256
 
 [distillation]

@@ -144,6 +144,12 @@ class PipelineV2Tests(unittest.TestCase):
         self.assertEqual(training["exp1"]["learning_rate"], 3e-5)
         self.assertEqual(training["exp2"]["epochs"], 2)
         self.assertEqual(training["exp2"]["learning_rate"], 5e-6)
+        self.assertEqual(training["batch_size"], 16)
+        self.assertEqual(training["gradient_accumulation_steps"], 2)
+        self.assertFalse(training["gradient_checkpointing"])
+
+    def test_small100_is_the_explicit_measured_student_choice(self) -> None:
+        self.assertEqual(self.config["selection"]["student_override"], "small100")
 
 
 if __name__ == "__main__":

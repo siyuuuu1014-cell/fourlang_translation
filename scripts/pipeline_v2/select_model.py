@@ -39,10 +39,18 @@ def main() -> None:
     candidates = commercial_candidates(config, args.role)
     eligible = {item["id"] for item in candidates}
     directions = [f"{source}-{target}", f"{target}-{source}"]
+    override = str(
+        config["selection"].get(f"{args.role}_override", "")
+    ).strip() or None
+    if override is not None and override not in eligible:
+        raise RuntimeError(
+            f"Configured {args.role}_override {override!r} is not an eligible candidate."
+        )
+    required_candidates = {override} if override is not None else eligible
     failures = {
         candidate_id: result
         for candidate_id, result in scores["candidates"].items()
-        if candidate_id in eligible and result.get("status") == "error"
+        if candidate_id in required_candidates and result.get("status") == "error"
     }
     if failures:
         details = "; ".join(
@@ -75,7 +83,13 @@ def main() -> None:
                 f"No eligible measured {args.role} candidate for {direction}."
             )
         ranked.sort(reverse=True)
-        winner = ranked[0][2]
+        ranked_ids = {item[2] for item in ranked}
+        if override is not None and override not in ranked_ids:
+            raise RuntimeError(
+                f"Configured {args.role}_override {override!r} has no complete "
+                f"measurement for {direction}."
+            )
+        winner = override or ranked[0][2]
         selected[direction] = {
             "candidate_id": winner,
             "candidate": candidate_by_id(config, args.role, winner),
@@ -93,11 +107,17 @@ def main() -> None:
             config["selection"]["share_multilingual_student_when_same_candidate_wins"]
         )
     )
+    selection_policy = (
+        f"explicit measured {args.role} override: {override}"
+        if override is not None
+        else "maximize metrics independently for each direction on selection-only benchmarks"
+    )
     payload = {
         "schema_version": 2,
         "role": args.role,
         "directions": selected,
-        "selection_policy": "maximize metrics independently for each direction on selection-only benchmarks",
+        "selection_policy": selection_policy,
+        "configured_override": override,
         "ranking": rankings,
         "training_layout": "shared_bidirectional" if shared else "separate_directional",
         "license_metadata_verified_during_prepare": True,

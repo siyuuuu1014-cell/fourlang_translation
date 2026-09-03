@@ -22,7 +22,7 @@ Hugging Face 缓存位于 `/root/autodl-tmp`。权重、缓存、候选数据、
 6. 依据明确结论构建 GOLD/SILVER/BRONZE approved 数据；
 7. 从方向配置指定的质量层中按固定种子取数，再按 pair、英语文本、俄语文本及所有保护基准构建互斥切分；EN-RU Exp1 明确使用 61,216 对 GOLD+SILVER，另留 3,000 对验证和 3,000 对内部测试；
 8. 核验 Hub 模型卡许可证和固定 revision，然后在 FLORES dev 上海选；
-9. EN→RU 与 RU→EN 分别选择最强 Student 和 Teacher；同一多语言 Student 双向获胜时训练一个共享双向模型；
+9. EN→RU 与 RU→EN 分别完成 Student 和 Teacher 实测；EN-RU 根据速度约束显式采用实测过的 SMaLL-100 Student，Teacher 仍按两个方向独立选择；同一多语言 Student 用于双向时训练一个共享双向模型；
 10. 对 Student 做全参数 Exp1 人工数据微调，再仅在最终基准上评估；
 11. Teacher 双向生成；Qwen 先审计固定 500 条，再全审 Teacher 输出；
 12. 只接纳 `PASS + HIGH/MEDIUM usefulness`，按 usefulness 加权并混入保留原质量权重的 human replay；
@@ -31,8 +31,8 @@ Hugging Face 缓存位于 `/root/autodl-tmp`。权重、缓存、候选数据、
 
 流程不调用 `train_lora.py`，也不生成 adapter。
 
-EN-RU 保留 M2M100-1.2B 全参数训练。受 V100 32GB 显存约束，物理 batch 为 2、梯度累积为 16，
-有效 batch 仍为 32；Exp1 为 3 个 epoch、学习率 3e-5，Exp2 为 2 个 epoch、学习率 5e-6。
+EN-RU 在完整 bake-off 后根据用户确认的训练时长约束采用 SMaLL-100 全参数训练。物理 batch 为 16、
+梯度累积为 2，有效 batch 为 32；Exp1 为 3 个 epoch、学习率 3e-5，Exp2 为 2 个 epoch、学习率 5e-6。
 训练启用动态 padding、按长度分组、4 个数据加载进程及 CUDA fused AdamW。训练开始时会打印真实样本数、
 有效 batch 和预计优化步数，避免再次因隐式使用全部 approved 数据而产生数十小时的意外训练。
 

@@ -85,7 +85,7 @@ produces = ["results/model_selection/en_ru/student_scores.json"]
 
 [[stages]]
 id = "select_student"
-name = "Select the strongest Student independently for EN-RU and RU-EN"
+name = "Apply the explicit measured Student choice for shared EN-RU training"
 runtime = "student"
 command = ["scripts/pipeline_v2/select_model.py", "--role", "student", "--config", "configs/directions/en_ru.toml"]
 requires = ["results/model_selection/en_ru/student_scores.json"]

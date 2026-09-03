@@ -54,14 +54,14 @@ teacher_high_weight = 1.0
 teacher_medium_weight = 0.8
 
 [training]
-batch_size = 2
-gradient_accumulation_steps = 16
+batch_size = 16
+gradient_accumulation_steps = 2
 weight_decay = 0.01
 warmup_ratio = 0.05
 max_source_length = 256
 max_target_length = 256
 early_stopping_patience = 1
-gradient_checkpointing = true
+gradient_checkpointing = false
 group_by_length = true
 dataloader_num_workers = 4
 optim = "adamw_torch_fused"
@@ -77,6 +77,7 @@ learning_rate = 0.000005
 [selection]
 primary_metric = "chrf2"
 secondary_metric = "bleu"
+student_override = "small100"
 require_both_directions = true
 max_student_parameters = 1300000000
 select_each_direction_independently = true

@@ -400,8 +400,13 @@ def approve(config: dict[str, Any]) -> None:
                     raise RuntimeError(
                         f"Missing independent second review for {pair_id}"
                     )
+                second_label = (
+                    str(second_map[pair_id].get("judge_label", "UNCERTAIN")).upper()
+                    if bool(second_map[pair_id].get("judge_parse_ok", False))
+                    else "UNCERTAIN"
+                )
                 status, tier, weight = _resolve_second(
-                    str(second_map[pair_id]["judge_label"]).upper()
+                    second_label
                 )
                 source = "QWEN_SECOND_REVIEW"
         row.update(

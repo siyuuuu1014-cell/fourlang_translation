@@ -13,7 +13,7 @@ from scripts.pipeline_v2.data_flow import (
     rule_reasons,
     stratified_auto_accept_audit,
 )
-from scripts.pipeline_v2.qwen_judge import judge_id, parse_result
+from scripts.pipeline_v2.qwen_judge import judge_id, parse_result, second_review_mask
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -105,6 +105,15 @@ class PipelineV2Tests(unittest.TestCase):
     def test_qwen_judge_restores_original_batch_size(self) -> None:
         self.assertEqual(self.config["judge"]["batch_size"], 32)
         self.assertEqual(self.config["judge"]["max_input_tokens"], 1536)
+
+    def test_parse_failures_are_sent_to_independent_second_review(self) -> None:
+        frame = pd.DataFrame(
+            {
+                "judge_parse_ok": [False, True, True, True],
+                "judge_label": ["UNCERTAIN", "FAIL", "UNCERTAIN", "PASS"],
+            }
+        )
+        self.assertEqual(second_review_mask(frame).tolist(), [True, True, True, False])
 
 
 if __name__ == "__main__":

@@ -114,6 +114,12 @@ def judge_id(row: dict[str, Any]) -> str:
     return f"{row['pair_id']}:{row.get('src_lang', row.get('source_lang'))}:{row.get('tgt_lang', row.get('target_lang'))}"
 
 
+def second_review_mask(frame: pd.DataFrame) -> pd.Series:
+    return (~frame["judge_parse_ok"].fillna(False).astype(bool)) | frame[
+        "judge_label"
+    ].fillna("UNCERTAIN").astype(str).str.upper().isin(["FAIL", "UNCERTAIN"])
+
+
 def save(rows: list[dict[str, Any]], path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     pd.DataFrame(rows).drop_duplicates("judge_id", keep="last").to_parquet(
@@ -185,9 +191,7 @@ def main() -> None:
     source_path, output_path = io_paths(config, args.mode, args.calibration)
     frame = pd.read_parquet(source_path)
     if args.mode == "human_second":
-        frame = frame[
-            (frame["judge_parse_ok"]) & frame["judge_label"].isin(["FAIL", "UNCERTAIN"])
-        ].copy()
+        frame = frame[second_review_mask(frame)].copy()
     if args.calibration:
         count = min(int(config["judge"]["teacher_calibration_pairs"]), len(frame))
         frame = frame.sample(

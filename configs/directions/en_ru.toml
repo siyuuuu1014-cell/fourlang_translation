@@ -13,6 +13,11 @@ target_file = "data/raw/en_ru/news_commentary.ru"
 corpus = "News-Commentary"
 validation_pairs = 3000
 test_pairs = 3000
+# Exp1 intentionally uses a deterministic GOLD+SILVER subset instead of every
+# approved pair.  This is direction-specific so other language pairs can choose
+# a different evidence-based size.
+train_pairs = 61216
+training_tiers = ["GOLD", "SILVER"]
 max_characters = 1000
 max_length_ratio = 4.0
 
@@ -49,16 +54,25 @@ teacher_high_weight = 1.0
 teacher_medium_weight = 0.8
 
 [training]
-epochs = 3
 batch_size = 2
 gradient_accumulation_steps = 16
-learning_rate = 0.00005
 weight_decay = 0.01
 warmup_ratio = 0.05
 max_source_length = 256
 max_target_length = 256
 early_stopping_patience = 1
 gradient_checkpointing = true
+group_by_length = true
+dataloader_num_workers = 4
+optim = "adamw_torch_fused"
+
+[training.exp1]
+epochs = 3
+learning_rate = 0.00003
+
+[training.exp2]
+epochs = 2
+learning_rate = 0.000005
 
 [selection]
 primary_metric = "chrf2"

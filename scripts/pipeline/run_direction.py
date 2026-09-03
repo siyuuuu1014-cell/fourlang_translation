@@ -144,11 +144,17 @@ class DirectionPipeline:
 
         command = self._render_command(stage)
         code_files = sorted((PROJECT_ROOT / "scripts" / "pipeline_v2").glob("*.py"))
+        command_config_files = []
+        for value in command[1:]:
+            candidate = _resolve(PROJECT_ROOT, value)
+            if candidate.suffix.lower() == ".toml" and candidate.is_file():
+                command_config_files.append(candidate)
         code_files.extend(
             [
                 PROJECT_ROOT / "scripts" / "pipeline" / "run_direction.py",
                 self.manifest_path,
                 self.runtime_config_path,
+                *command_config_files,
             ]
         )
         payload = {

@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import gc
 import json
+import math
 import shutil
 import sys
 import time
@@ -341,6 +342,7 @@ def train_model(
     destination: Path,
     config: dict,
     *,
+    experiment: str,
     shared: bool = False,
 ) -> dict[str, Any]:
     runtime_candidate = {**candidate, "path": source_model}
@@ -369,15 +371,35 @@ def train_model(
         / "checkpoints"
         / ("shared" if shared else f"{source}_{target}")
     )
-    settings = config["training"]
+    common_settings = {
+        key: value
+        for key, value in config["training"].items()
+        if not isinstance(value, dict)
+    }
+    experiment_settings = config["training"].get(experiment)
+    if not isinstance(experiment_settings, dict):
+        raise KeyError(f"Missing training.{experiment} configuration.")
+    settings = {**common_settings, **experiment_settings}
     seed = int(config["direction"]["seed"])
     set_seed(seed)
+    physical_batch = int(settings["batch_size"])
+    accumulation = int(settings["gradient_accumulation_steps"])
+    epochs = float(settings["epochs"])
+    planned_steps = math.ceil(len(train_data) / (physical_batch * accumulation))
+    planned_steps = math.ceil(planned_steps * epochs)
+    print(
+        "Training plan: "
+        f"experiment={experiment} samples={len(train_data)} epochs={epochs:g} "
+        f"physical_batch={physical_batch} accumulation={accumulation} "
+        f"effective_batch={physical_batch * accumulation} "
+        f"planned_optimizer_steps={planned_steps}"
+    )
     arguments = Seq2SeqTrainingArguments(
         output_dir=str(checkpoint_dir),
-        num_train_epochs=float(settings["epochs"]),
-        per_device_train_batch_size=int(settings["batch_size"]),
-        per_device_eval_batch_size=int(settings["batch_size"]),
-        gradient_accumulation_steps=int(settings["gradient_accumulation_steps"]),
+        num_train_epochs=epochs,
+        per_device_train_batch_size=physical_batch,
+        per_device_eval_batch_size=physical_batch,
+        gradient_accumulation_steps=accumulation,
         learning_rate=float(settings["learning_rate"]),
         weight_decay=float(settings["weight_decay"]),
         warmup_ratio=float(settings["warmup_ratio"]),
@@ -393,6 +415,9 @@ def train_model(
         seed=seed,
         data_seed=seed,
         gradient_checkpointing=bool(settings.get("gradient_checkpointing", False)),
+        group_by_length=bool(settings.get("group_by_length", False)),
+        dataloader_num_workers=int(settings.get("dataloader_num_workers", 0)),
+        optim=str(settings.get("optim", "adamw_torch")),
     )
     trainer = WeightedTrainer(
         model=model,
@@ -425,6 +450,13 @@ def train_model(
         "seconds": time.time() - started,
         "model": str(destination),
         "seed": seed,
+        "epochs": epochs,
+        "physical_batch_size": physical_batch,
+        "gradient_accumulation_steps": accumulation,
+        "effective_batch_size": physical_batch * accumulation,
+        "planned_optimizer_steps": planned_steps,
+        "learning_rate": float(settings["learning_rate"]),
+        "optimizer": str(settings.get("optim", "adamw_torch")),
     }
 
 
@@ -465,6 +497,7 @@ def train(config: dict, experiment: str) -> None:
                 validation_rows,
                 root / "best_model" / "shared",
                 config,
+                experiment=experiment,
                 shared=True,
             )
         )
@@ -494,6 +527,7 @@ def train(config: dict, experiment: str) -> None:
                     validation_rows,
                     root / "best_model" / f"{source}_{target}",
                     config,
+                    experiment=experiment,
                 )
             )
     artifact_names = ["shared"] if shared else [f"{left}_{right}", f"{right}_{left}"]

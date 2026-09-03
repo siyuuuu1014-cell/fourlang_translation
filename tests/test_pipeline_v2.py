@@ -11,6 +11,7 @@ from scripts.pipeline_v2.data_flow import (
     pair_hash,
     rule_assessment,
     rule_reasons,
+    select_split_pool,
     stratified_auto_accept_audit,
 )
 from scripts.pipeline_v2.qwen_judge import judge_id, parse_result, second_review_mask
@@ -114,6 +115,35 @@ class PipelineV2Tests(unittest.TestCase):
             }
         )
         self.assertEqual(second_review_mask(frame).tolist(), [True, True, True, False])
+
+    def test_exp1_pool_has_explicit_size_and_quality_tiers(self) -> None:
+        settings = self.config["data"]
+        required = (
+            settings["train_pairs"]
+            + settings["validation_pairs"]
+            + settings["test_pairs"]
+        )
+        frame = pd.DataFrame(
+            {
+                "pair_id": [f"pair-{index}" for index in range(required + 20)],
+                "quality_tier": ["GOLD"] * 10
+                + ["SILVER"] * (required + 10),
+            }
+        )
+        selected, report = select_split_pool(frame, settings, seed=2026)
+        self.assertEqual(len(selected), required)
+        self.assertEqual(set(selected["quality_tier"]), {"GOLD", "SILVER"})
+        self.assertEqual(report["configured_train_pairs"], 61216)
+
+    def test_training_preserves_effective_batch_and_experiment_schedule(self) -> None:
+        training = self.config["training"]
+        self.assertEqual(
+            training["batch_size"] * training["gradient_accumulation_steps"], 32
+        )
+        self.assertEqual(training["exp1"]["epochs"], 3)
+        self.assertEqual(training["exp1"]["learning_rate"], 3e-5)
+        self.assertEqual(training["exp2"]["epochs"], 2)
+        self.assertEqual(training["exp2"]["learning_rate"], 5e-6)
 
 
 if __name__ == "__main__":

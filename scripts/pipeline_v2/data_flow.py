@@ -469,6 +469,47 @@ def write_directional(
     )
 
 
+def select_split_pool(
+    frame: pd.DataFrame, settings: dict[str, Any], seed: int
+) -> tuple[pd.DataFrame, dict[str, Any]]:
+    """Select the explicitly configured, deterministic human-data pool."""
+    configured_tiers = [
+        str(value).upper() for value in settings.get("training_tiers", [])
+    ]
+    unknown_tiers = sorted(set(configured_tiers) - set(QUALITY_WEIGHTS))
+    if unknown_tiers:
+        raise ValueError(f"Unknown data.training_tiers: {unknown_tiers}")
+    eligible = (
+        frame[frame["quality_tier"].isin(configured_tiers)].copy()
+        if configured_tiers
+        else frame.copy()
+    )
+    eligible = eligible.sample(frac=1, random_state=seed).reset_index(drop=True)
+    validation_size = int(settings["validation_pairs"])
+    test_size = int(settings["test_pairs"])
+    configured_train_size = int(settings.get("train_pairs", 0))
+    if min(validation_size, test_size, configured_train_size) < 0:
+        raise ValueError("Configured split sizes cannot be negative.")
+    required = validation_size + test_size + configured_train_size
+    if configured_train_size > 0 and len(eligible) < required:
+        raise RuntimeError(
+            "Insufficient eligible approved pairs for requested splits: "
+            f"need {required}, found {len(eligible)}."
+        )
+    if configured_train_size == 0 and len(eligible) <= validation_size + test_size:
+        raise RuntimeError("Insufficient eligible approved pairs for requested splits.")
+    selected_size = required if configured_train_size > 0 else len(eligible)
+    selected = eligible.iloc[:selected_size].copy()
+    return selected, {
+        "approved_pairs": len(frame),
+        "eligible_pairs": len(eligible),
+        "excluded_by_tier": len(frame) - len(eligible),
+        "unused_eligible_pairs": len(eligible) - len(selected),
+        "training_tiers": configured_tiers or "ALL",
+        "configured_train_pairs": configured_train_size or "ALL_REMAINING",
+    }
+
+
 def split(config: dict[str, Any]) -> None:
     _, source, target, _ = pair_info(config)
     frame = pd.read_parquet(paths(config)["approved"])
@@ -482,19 +523,19 @@ def split(config: dict[str, Any]) -> None:
         raise RuntimeError(
             f"Protected benchmark leakage detected in {len(leaks)} approved pairs."
         )
-    frame = frame.sample(
-        frac=1, random_state=int(config["direction"]["seed"])
-    ).reset_index(drop=True)
+    frame, selection_report = select_split_pool(
+        frame, config["data"], int(config["direction"]["seed"])
+    )
     validation_size, test_size = (
         int(config["data"]["validation_pairs"]),
         int(config["data"]["test_pairs"]),
     )
-    if len(frame) <= validation_size + test_size:
-        raise RuntimeError("Insufficient approved pairs for requested splits.")
+    train_size = int(config["data"].get("train_pairs", 0))
+    train_end = validation_size + test_size + train_size if train_size else None
     parts = {
         "validation": frame.iloc[:validation_size],
         "test": frame.iloc[validation_size : validation_size + test_size],
-        "train": frame.iloc[validation_size + test_size :],
+        "train": frame.iloc[validation_size + test_size : train_end],
     }
     for column in ("pair_id", "source_text", "target_text"):
         sets = [
@@ -516,6 +557,7 @@ def split(config: dict[str, Any]) -> None:
         paths(config)["reports"] / "split.json",
         {
             **{f"{name}_pairs": len(part) for name, part in parts.items()},
+            **selection_report,
             "pair_and_side_disjoint": True,
             "protected_overlap": 0,
         },

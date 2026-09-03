@@ -20,7 +20,7 @@ Hugging Face 缓存位于 `/root/autodl-tmp`。权重、缓存、候选数据、
 4. Qwen 全审 `NEEDS_QWEN`，并对 `AUTO_ACCEPT` 做固定种子的分层 500 条抽审；
 5. 首审 `FAIL/UNCERTAIN` 进入无首审结论提示的独立二审；
 6. 依据明确结论构建 GOLD/SILVER/BRONZE approved 数据；
-7. 按 pair、英语文本、俄语文本及所有保护基准构建互斥切分；
+7. 从方向配置指定的质量层中按固定种子取数，再按 pair、英语文本、俄语文本及所有保护基准构建互斥切分；EN-RU Exp1 明确使用 61,216 对 GOLD+SILVER，另留 3,000 对验证和 3,000 对内部测试；
 8. 核验 Hub 模型卡许可证和固定 revision，然后在 FLORES dev 上海选；
 9. EN→RU 与 RU→EN 分别选择最强 Student 和 Teacher；同一多语言 Student 双向获胜时训练一个共享双向模型；
 10. 对 Student 做全参数 Exp1 人工数据微调，再仅在最终基准上评估；
@@ -30,6 +30,11 @@ Hugging Face 缓存位于 `/root/autodl-tmp`。权重、缓存、候选数据、
 14. Exp2 必须在两个方向、每一个最终基准及合并指标上均不低于 Exp1，才能安全冻结并注册为 `ready`。
 
 流程不调用 `train_lora.py`，也不生成 adapter。
+
+EN-RU 保留 M2M100-1.2B 全参数训练。受 V100 32GB 显存约束，物理 batch 为 2、梯度累积为 16，
+有效 batch 仍为 32；Exp1 为 3 个 epoch、学习率 3e-5，Exp2 为 2 个 epoch、学习率 5e-6。
+训练启用动态 padding、按长度分组、4 个数据加载进程及 CUDA fused AdamW。训练开始时会打印真实样本数、
+有效 batch 和预计优化步数，避免再次因隐式使用全部 approved 数据而产生数十小时的意外训练。
 
 Qwen Judge 使用方向配置中的批量大小。EN-RU 从 32 开始批量推理；V100 显存不足时按
 32→16→8→4→2→1 自动减半。每约 100 条原子写入 Parquet，重新运行时按 `judge_id`

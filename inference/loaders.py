@@ -115,7 +115,7 @@ def load_translation_model(
     spec: ModelSpec,
     device: torch.device,
 ) -> LoadedTranslationModel:
-    if spec.architecture == "marian":
+    if spec.architecture in {"marian", "nllb"}:
         tokenizer = (
             AutoTokenizer
             .from_pretrained(

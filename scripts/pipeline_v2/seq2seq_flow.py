@@ -87,6 +87,9 @@ def load_model(
     elif family == "m2m100":
         tokenizer = M2M100Tokenizer.from_pretrained(path, local_files_only=True)
         model = M2M100ForConditionalGeneration.from_pretrained(path, **kwargs)
+    elif family == "nllb":
+        tokenizer = AutoTokenizer.from_pretrained(path, local_files_only=True)
+        model = AutoModelForSeq2SeqLM.from_pretrained(path, **kwargs)
     else:
         tokenizer = AutoTokenizer.from_pretrained(
             path, local_files_only=True, use_fast=False
@@ -104,6 +107,7 @@ def prepare_inputs(
     target: str,
     texts: list[str],
     max_length: int,
+    config: dict | None = None,
 ):
     generation: dict[str, Any] = {}
     prepared = texts
@@ -112,6 +116,14 @@ def prepare_inputs(
     elif family == "m2m100":
         tokenizer.src_lang = source
         generation["forced_bos_token_id"] = tokenizer.get_lang_id(target)
+    elif family == "nllb":
+        if config is None:
+            raise ValueError("NLLB input preparation requires language_codes.nllb.")
+        codes = config["language_codes"]["nllb"]
+        tokenizer.src_lang = codes[source]
+        generation["forced_bos_token_id"] = tokenizer.convert_tokens_to_ids(
+            codes[target]
+        )
     elif family == "madlad":
         prepared = [f"<2{target}> {text}" for text in texts]
     encoded = tokenizer(
@@ -145,6 +157,7 @@ def translate(
             target,
             batch,
             int(config["training"]["max_source_length"]),
+            config,
         )
         encoded = {key: value.to(model.device) for key, value in encoded.items()}
         with torch.inference_mode():
@@ -165,7 +178,7 @@ def translate(
 def metrics(
     predictions: list[str], references: list[str], target: str
 ) -> dict[str, float]:
-    tokenizer = "13a"
+    tokenizer = "zh" if target == "zh" else "13a"
     return {
         "bleu": float(
             BLEU(tokenize=tokenizer).corpus_score(predictions, [references]).score
@@ -318,6 +331,10 @@ def tokenize_rows(
         elif family == "m2m100":
             tokenizer.src_lang = row_source
             tokenizer.tgt_lang = row_target
+        elif family == "nllb":
+            codes = config["language_codes"]["nllb"]
+            tokenizer.src_lang = codes[row_source]
+            tokenizer.tgt_lang = codes[row_target]
         elif family == "madlad":
             source_text = f"<2{row_target}> {source_text}"
         encoded = tokenizer(source_text, truncation=True, max_length=max_source)
@@ -379,8 +396,14 @@ def train_model(
     experiment_settings = config["training"].get(experiment)
     if not isinstance(experiment_settings, dict):
         raise KeyError(f"Missing training.{experiment} configuration.")
-    settings = {**common_settings, **experiment_settings}
-    seed = int(config["direction"]["seed"])
+    family_settings = config.get("training_by_family", {}).get(
+        candidate["family"], {}
+    )
+    settings = {**common_settings, **family_settings, **experiment_settings}
+    seed_scope = config.get("direction") or config.get("multilingual")
+    if not isinstance(seed_scope, dict) or "seed" not in seed_scope:
+        raise KeyError("Missing direction.seed or multilingual.seed configuration.")
+    seed = int(seed_scope["seed"])
     set_seed(seed)
     physical_batch = int(settings["batch_size"])
     accumulation = int(settings["gradient_accumulation_steps"])

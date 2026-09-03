@@ -72,3 +72,31 @@ CC-BY-NC 许可证不满足商业用途，因此没有进入候选配置。最�
 清单即可。方向配置必须显式填写：原始语料、FLORES 语言代码、Tatoeba 地址与后缀、
 商业合规的 Student/Teacher 候选、数据规模和部署位置。未产生模型比选结果、Judge 策略或
 promotion gate 时，后续阶段会停止，不会猜测模型或提前注册。
+
+## 四语言单模型总流水线
+
+最终部署目标是一个权重同时支持 `en`、`zh`、`uz`、`ru` 两两互译的全部 12 个方向。
+语言对级流程只负责产出经过审核的人工数据和 Teacher KD 数据，不再分别冻结成最终部署模型。
+总清单为 `configs/pipelines/fourlang.toml`，统一配置为
+`configs/multilingual/fourlang.toml`。
+
+全局 Student 候选固定为已确认的短名单：SMaLL-100、M2M100-418M 和
+NLLB-200 distilled 600M。三者必须在同一份四语言 FLORES dev 上跑完 12 个方向；选择时先最大化
+最弱方向 chrF2，再比较宏平均 chrF2 和宏平均 BLEU，避免英语高资源方向掩盖乌兹别克语等弱方向。
+
+六个无向语言对必须全部具备训练与真实验证数据：`EN-ZH`、`EN-UZ`、`EN-RU`、
+`ZH-UZ`、`ZH-RU`、`UZ-RU`。训练允许公开平行数据与经过规则/Qwen 审核的 Teacher 伪数据，
+但伪数据只允许进入训练/KD，禁止进入验证集和 FLORES 最终测试。汇总阶段按 12 个方向等量抽样；
+配置值为 0 时自动向数据最少的方向对齐，不再由最大数据集决定总训练量。
+
+查看总流程：
+
+```bash
+/root/autodl-tmp/venvs/small100_student/bin/python \
+  scripts/pipeline/run_direction.py fourlang --profile server --list
+```
+
+结构检查会把尚缺的数据写入 `reports/pipeline/fourlang/validation.json`，状态为
+`WAITING_FOR_DATA`。只有六组语言对齐备后，`aggregate_exp1` 才能构建联合数据并进入全局 bake-off。
+Exp2 必须在 12 个方向的 BLEU 和 chrF2 上逐项不低于 Exp1，之后才会把注册表的 12 个方向全部指向
+`models/final_multilingual/fourlang_v1` 同一目录。

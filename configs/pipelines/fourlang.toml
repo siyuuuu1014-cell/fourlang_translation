@@ -1,0 +1,142 @@
+[pipeline]
+schema_version = 1
+direction = "fourlang"
+description = "Train and deploy one shared model for all 12 directions among EN, ZH, UZ, and RU."
+
+[[stages]]
+id = "validate_config"
+name = "Validate the four-language, six-pair, single-model contract"
+runtime = "student"
+command = ["scripts/pipeline_v3/fourlang_flow.py", "validate", "--config", "configs/multilingual/fourlang.toml"]
+requires = []
+produces = ["reports/pipeline/fourlang/validation.json"]
+
+[[stages]]
+id = "build_benchmarks"
+name = "Freeze aligned FLORES dev and devtest for all four languages"
+runtime = "student"
+command = ["scripts/pipeline_v3/fourlang_flow.py", "benchmarks", "--config", "configs/multilingual/fourlang.toml"]
+requires = []
+produces = ["data/benchmark/fourlang/flores_dev.parquet", "data/benchmark/fourlang/flores_devtest.parquet", "reports/pipeline/fourlang/benchmarks.json"]
+
+[[stages]]
+id = "prepare_models"
+name = "Materialize the three pinned shared-Student candidates"
+runtime = "student"
+command = ["scripts/pipeline_v3/fourlang_flow.py", "prepare_models", "--config", "configs/multilingual/fourlang.toml"]
+requires = []
+produces = ["reports/pipeline/fourlang/model_inventory.json"]
+
+[[stages]]
+id = "aggregate_exp1"
+name = "Build one balanced 12-direction human training set"
+runtime = "student"
+command = ["scripts/pipeline_v3/fourlang_flow.py", "aggregate", "--experiment", "exp1", "--config", "configs/multilingual/fourlang.toml"]
+requires = [
+  "data/splits/zh_en/v1/train_bidirectional_v1.parquet",
+  "data/splits/zh_en/v1/validation_bidirectional_v1.parquet",
+  "data/splits/en_uz/v1/train_exp1_bidirectional_v1.parquet",
+  "data/splits/en_uz/v1/validation_exp1_bidirectional_v1.parquet",
+  "data/splits/en_ru/v1/train.jsonl",
+  "data/splits/en_ru/v1/validation.jsonl",
+  "data/splits/zh_uz/v1/train.jsonl",
+  "data/splits/zh_uz/v1/validation.jsonl",
+  "data/splits/zh_ru/v1/train.jsonl",
+  "data/splits/zh_ru/v1/validation.jsonl",
+  "data/splits/uz_ru/v1/train.jsonl",
+  "data/splits/uz_ru/v1/validation.jsonl",
+]
+produces = ["data/multilingual/fourlang/exp1/train.jsonl", "data/multilingual/fourlang/exp1/validation.jsonl", "reports/pipeline/fourlang/exp1_data.json"]
+
+[[stages]]
+id = "student_bakeoff"
+name = "Benchmark SMaLL-100, M2M100-418M, and NLLB-600M across all 12 directions"
+runtime = "student"
+command = ["scripts/pipeline_v3/fourlang_flow.py", "bakeoff", "--config", "configs/multilingual/fourlang.toml"]
+requires = ["data/benchmark/fourlang/flores_dev.parquet", "reports/pipeline/fourlang/model_inventory.json"]
+produces = ["results/model_selection/fourlang/student_scores.json"]
+
+[[stages]]
+id = "select_student"
+name = "Select one global Student using worst-direction then macro quality"
+runtime = "student"
+command = ["scripts/pipeline_v3/fourlang_flow.py", "select", "--config", "configs/multilingual/fourlang.toml"]
+requires = ["results/model_selection/fourlang/student_scores.json"]
+produces = ["results/model_selection/fourlang/selected_student.json"]
+
+[[stages]]
+id = "train_exp1"
+name = "Full-finetune one Student on balanced human data from all 12 directions"
+runtime = "student"
+command = ["scripts/pipeline_v3/fourlang_flow.py", "train", "--experiment", "exp1", "--config", "configs/multilingual/fourlang.toml"]
+requires = ["results/model_selection/fourlang/selected_student.json", "data/multilingual/fourlang/exp1/train.jsonl", "data/multilingual/fourlang/exp1/validation.jsonl"]
+produces = ["results/student/fourlang/exp1/model_layout.json", "results/student/fourlang/exp1/train_report.json"]
+
+[[stages]]
+id = "evaluate_exp1"
+name = "Evaluate the one Exp1 model separately on all 12 FLORES devtest directions"
+runtime = "student"
+command = ["scripts/pipeline_v3/fourlang_flow.py", "evaluate", "--experiment", "exp1", "--config", "configs/multilingual/fourlang.toml"]
+requires = ["results/student/fourlang/exp1/model_layout.json", "data/benchmark/fourlang/flores_devtest.parquet"]
+produces = ["results/evaluation/fourlang/exp1/metrics.json"]
+
+[[stages]]
+id = "aggregate_exp2"
+name = "Build one balanced 12-direction KD plus human-replay training set"
+runtime = "student"
+command = ["scripts/pipeline_v3/fourlang_flow.py", "aggregate", "--experiment", "exp2", "--config", "configs/multilingual/fourlang.toml"]
+requires = [
+  "data/distillation/zh_en/v1/18h_exp2_training/exp2_train_combined_v1.parquet",
+  "data/distillation/en_uz/v1/11a_exp2_training/exp2_train_combined_v1.parquet",
+  "data/distillation/en_ru/v1/train.jsonl",
+  "data/distillation/zh_uz/v1/train.jsonl",
+  "data/distillation/zh_ru/v1/train.jsonl",
+  "data/distillation/uz_ru/v1/train.jsonl",
+  "data/splits/zh_en/v1/validation_bidirectional_v1.parquet",
+  "data/splits/en_uz/v1/validation_exp1_bidirectional_v1.parquet",
+  "data/splits/en_ru/v1/validation.jsonl",
+  "data/splits/zh_uz/v1/validation.jsonl",
+  "data/splits/zh_ru/v1/validation.jsonl",
+  "data/splits/uz_ru/v1/validation.jsonl",
+]
+produces = ["data/multilingual/fourlang/exp2/train.jsonl", "data/multilingual/fourlang/exp2/validation.jsonl", "reports/pipeline/fourlang/exp2_data.json"]
+
+[[stages]]
+id = "train_exp2"
+name = "Continue the same Student with balanced sequence-level KD"
+runtime = "student"
+command = ["scripts/pipeline_v3/fourlang_flow.py", "train", "--experiment", "exp2", "--config", "configs/multilingual/fourlang.toml"]
+requires = ["results/student/fourlang/exp1/model_layout.json", "data/multilingual/fourlang/exp2/train.jsonl", "data/multilingual/fourlang/exp2/validation.jsonl"]
+produces = ["results/student/fourlang/exp2/model_layout.json", "results/student/fourlang/exp2/train_report.json"]
+
+[[stages]]
+id = "evaluate_exp2"
+name = "Evaluate the one Exp2 model separately on all 12 directions"
+runtime = "student"
+command = ["scripts/pipeline_v3/fourlang_flow.py", "evaluate", "--experiment", "exp2", "--config", "configs/multilingual/fourlang.toml"]
+requires = ["results/student/fourlang/exp2/model_layout.json", "data/benchmark/fourlang/flores_devtest.parquet"]
+produces = ["results/evaluation/fourlang/exp2/metrics.json"]
+
+[[stages]]
+id = "promotion_gate"
+name = "Require Exp2 to match or beat Exp1 in BLEU and chrF2 for every direction"
+runtime = "student"
+command = ["scripts/pipeline_v3/fourlang_flow.py", "gate", "--config", "configs/multilingual/fourlang.toml"]
+requires = ["results/evaluation/fourlang/exp1/metrics.json", "results/evaluation/fourlang/exp2/metrics.json"]
+produces = ["results/evaluation/fourlang/promotion_gate.json"]
+
+[[stages]]
+id = "freeze"
+name = "Atomically freeze one accepted four-language model and route all 12 directions to it"
+runtime = "student"
+command = ["scripts/pipeline_v3/fourlang_flow.py", "freeze", "--config", "configs/multilingual/fourlang.toml"]
+requires = ["results/evaluation/fourlang/promotion_gate.json", "results/student/fourlang/exp2/model_layout.json", "models/model_registry.json"]
+produces = ["models/final_multilingual/fourlang_v1/model_card.json"]
+
+[[stages]]
+id = "verify_registry"
+name = "Verify all 12 routes resolve to the single frozen model"
+runtime = "student"
+command = ["scripts/inference/check_registry.py"]
+requires = ["models/model_registry.json", "models/final_multilingual/fourlang_v1/model_card.json"]
+produces = ["models/final_multilingual/fourlang_v1/model_card.json"]

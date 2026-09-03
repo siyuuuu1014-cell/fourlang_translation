@@ -27,6 +27,13 @@ SUPPORTED_DIRECTIONS = tuple(
     if source != target
 )
 
+NLLB_LANGUAGE_CODES = {
+    "en": "eng_Latn",
+    "zh": "zho_Hans",
+    "ru": "rus_Cyrl",
+    "uz": "uzn_Latn",
+}
+
 
 def parse_direction(value: str) -> tuple[str, str]:
     normalized = (
@@ -87,6 +94,8 @@ class TranslationEngine:
         tokenizer_kind = self.loaded.tokenizer_kind
         if tokenizer_kind == "small100":
             tokenizer.tgt_lang = target
+        elif tokenizer_kind == "nllb":
+            tokenizer.src_lang = NLLB_LANGUAGE_CODES[source]
         elif tokenizer_kind != "marian":
             tokenizer.src_lang = source
 
@@ -100,7 +109,11 @@ class TranslationEngine:
             "max_new_tokens": self.max_new_tokens,
             "num_beams": self.num_beams,
         }
-        if tokenizer_kind not in {"small100", "marian"}:
+        if tokenizer_kind == "nllb":
+            generation["forced_bos_token_id"] = _language_id(
+                tokenizer, NLLB_LANGUAGE_CODES[target]
+            )
+        elif tokenizer_kind not in {"small100", "marian"}:
             generation["forced_bos_token_id"] = _language_id(tokenizer, target)
 
         if self.loaded.device.type == "cuda":
@@ -320,6 +333,8 @@ class TranslatorEngine:
             )
         elif spec.architecture == "m2m100":
             loaded.tokenizer.src_lang = spec.source_lang
+        elif spec.architecture == "nllb":
+            loaded.tokenizer.src_lang = NLLB_LANGUAGE_CODES[spec.source_lang]
 
         encoded = loaded.tokenizer(
             text,
@@ -344,6 +359,10 @@ class TranslatorEngine:
         generation = self._generation_kwargs(spec)
         if spec.architecture == "m2m100":
             generation["forced_bos_token_id"] = loaded.tokenizer.get_lang_id(spec.target_lang)
+        elif spec.architecture == "nllb":
+            generation["forced_bos_token_id"] = loaded.tokenizer.convert_tokens_to_ids(
+                NLLB_LANGUAGE_CODES[spec.target_lang]
+            )
         output_ids = loaded.model.generate(**encoded, **generation)
 
         if loaded.device.type == "cuda":

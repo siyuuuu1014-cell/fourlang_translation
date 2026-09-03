@@ -1,0 +1,119 @@
+[multilingual]
+schema_version = 1
+id = "fourlang"
+version = "v1"
+languages = ["en", "zh", "uz", "ru"]
+seed = 2026
+
+[language_codes.nllb]
+en = "eng_Latn"
+zh = "zho_Hans"
+uz = "uzn_Latn"
+ru = "rus_Cyrl"
+
+[benchmarks]
+flores_url = "https://dl.fbaipublicfiles.com/nllb/flores200_dataset.tar.gz"
+flores_dev = "data/benchmark/fourlang/flores_dev.parquet"
+flores_devtest = "data/benchmark/fourlang/flores_devtest.parquet"
+
+[balancing]
+# Zero means deterministically downsample every direction to the smallest
+# available direction.  A future explicit value may cap all directions equally.
+train_rows_per_direction = 0
+
+[training]
+batch_size = 8
+gradient_accumulation_steps = 4
+weight_decay = 0.01
+warmup_ratio = 0.05
+max_source_length = 256
+max_target_length = 256
+early_stopping_patience = 1
+gradient_checkpointing = false
+group_by_length = true
+dataloader_num_workers = 4
+optim = "adamw_torch_fused"
+
+[training.exp1]
+epochs = 3
+learning_rate = 0.00003
+
+[training.exp2]
+epochs = 2
+learning_rate = 0.000005
+
+[training_by_family.small100]
+batch_size = 16
+gradient_accumulation_steps = 2
+
+[training_by_family.m2m100]
+batch_size = 8
+gradient_accumulation_steps = 4
+
+[training_by_family.nllb]
+batch_size = 8
+gradient_accumulation_steps = 4
+
+[deployment]
+registry = "models/model_registry.json"
+destination = "models/final_multilingual/fourlang_v1"
+model_name = "fourlang_multilingual_v1"
+num_beams = 5
+max_new_tokens = 256
+
+[[student_candidates]]
+id = "small100"
+family = "small100"
+path = "${FOURLANG_MODEL_ROOT}/small100"
+repo_id = "alirezamsh/small100"
+revision = "8ab680e26a596d2e3d2d2d17ae0f68df1037328c"
+
+[[student_candidates]]
+id = "m2m100_418m"
+family = "m2m100"
+path = "${FOURLANG_MODEL_ROOT}/m2m100_418M"
+repo_id = "facebook/m2m100_418M"
+revision = "55c2e61bbf05dfb8d7abccdc3fae6fc8512fd636"
+
+[[student_candidates]]
+id = "nllb_600m"
+family = "nllb"
+path = "${FOURLANG_MODEL_ROOT}/nllb-200-distilled-600M"
+repo_id = "facebook/nllb-200-distilled-600M"
+revision = "f8d333a098d19b4fd9a8b18f94170487ad3f821d"
+
+[[pair_data]]
+pair = "en_zh"
+train = "data/splits/zh_en/v1/train_bidirectional_v1.parquet"
+validation = "data/splits/zh_en/v1/validation_bidirectional_v1.parquet"
+kd_train = "data/distillation/zh_en/v1/18h_exp2_training/exp2_train_combined_v1.parquet"
+
+[[pair_data]]
+pair = "en_uz"
+train = "data/splits/en_uz/v1/train_exp1_bidirectional_v1.parquet"
+validation = "data/splits/en_uz/v1/validation_exp1_bidirectional_v1.parquet"
+kd_train = "data/distillation/en_uz/v1/11a_exp2_training/exp2_train_combined_v1.parquet"
+
+[[pair_data]]
+pair = "en_ru"
+train = "data/splits/en_ru/v1/train.jsonl"
+validation = "data/splits/en_ru/v1/validation.jsonl"
+kd_train = "data/distillation/en_ru/v1/train.jsonl"
+
+[[pair_data]]
+pair = "zh_uz"
+train = "data/splits/zh_uz/v1/train.jsonl"
+validation = "data/splits/zh_uz/v1/validation.jsonl"
+kd_train = "data/distillation/zh_uz/v1/train.jsonl"
+
+[[pair_data]]
+pair = "zh_ru"
+train = "data/splits/zh_ru/v1/train.jsonl"
+validation = "data/splits/zh_ru/v1/validation.jsonl"
+kd_train = "data/distillation/zh_ru/v1/train.jsonl"
+
+[[pair_data]]
+pair = "uz_ru"
+train = "data/splits/uz_ru/v1/train.jsonl"
+validation = "data/splits/uz_ru/v1/validation.jsonl"
+kd_train = "data/distillation/uz_ru/v1/train.jsonl"

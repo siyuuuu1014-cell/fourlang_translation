@@ -17,6 +17,7 @@ VALID_STATUSES = {
 VALID_ARCHITECTURES = {
     "marian",
     "m2m100",
+    "pending",
     "small100",
 }
 

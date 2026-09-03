@@ -29,30 +29,51 @@ def main() -> None:
     failures = []
     for direction in args.directions:
         if direction not in baseline or direction not in candidate:
-            raise KeyError(f"Direction {direction!r} is missing from evaluation metrics.")
-        bleu_delta = float(candidate[direction]["bleu"]) - float(
-            baseline[direction]["bleu"]
+            raise KeyError(
+                f"Direction {direction!r} is missing from evaluation metrics."
+            )
+        scopes = {"aggregate": (baseline[direction], candidate[direction])}
+        baseline_benchmarks = baseline[direction].get("benchmarks", {})
+        candidate_benchmarks = candidate[direction].get("benchmarks", {})
+        if (
+            set(baseline_benchmarks) != set(candidate_benchmarks)
+            or not baseline_benchmarks
+        ):
+            raise RuntimeError(
+                f"Per-benchmark metrics are missing or mismatched for {direction}."
+            )
+        scopes.update(
+            {
+                name: (baseline_benchmarks[name], candidate_benchmarks[name])
+                for name in baseline_benchmarks
+            }
         )
-        chrf_delta = float(candidate[direction]["chrf2"]) - float(
-            baseline[direction]["chrf2"]
-        )
-        passed = bleu_delta >= args.min_bleu_delta and chrf_delta >= args.min_chrf_delta
-        row = {
-            "direction": direction,
-            "baseline_bleu": float(baseline[direction]["bleu"]),
-            "candidate_bleu": float(candidate[direction]["bleu"]),
-            "bleu_delta": bleu_delta,
-            "baseline_chrf2": float(baseline[direction]["chrf2"]),
-            "candidate_chrf2": float(candidate[direction]["chrf2"]),
-            "chrf2_delta": chrf_delta,
-            "passed": passed,
-        }
-        rows.append(row)
-        if not passed:
-            failures.append(direction)
+        for scope, (base_metrics, candidate_metrics) in scopes.items():
+            bleu_delta = float(candidate_metrics["bleu"]) - float(base_metrics["bleu"])
+            chrf_delta = float(candidate_metrics["chrf2"]) - float(
+                base_metrics["chrf2"]
+            )
+            passed = (
+                bleu_delta >= args.min_bleu_delta and chrf_delta >= args.min_chrf_delta
+            )
+            rows.append(
+                {
+                    "direction": direction,
+                    "scope": scope,
+                    "baseline_bleu": float(base_metrics["bleu"]),
+                    "candidate_bleu": float(candidate_metrics["bleu"]),
+                    "bleu_delta": bleu_delta,
+                    "baseline_chrf2": float(base_metrics["chrf2"]),
+                    "candidate_chrf2": float(candidate_metrics["chrf2"]),
+                    "chrf2_delta": chrf_delta,
+                    "passed": passed,
+                }
+            )
+            if not passed:
+                failures.append(f"{direction}/{scope}")
 
     report = {
-        "schema_version": 1,
+        "schema_version": 2,
         "status": "PASS" if not failures else "FAIL",
         "baseline": str(baseline_path),
         "candidate": str(candidate_path),
@@ -65,14 +86,13 @@ def main() -> None:
     }
     output = Path(args.output).resolve()
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+    output.write_text(
+        json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
     print(json.dumps(report, ensure_ascii=False, indent=2))
     if failures:
-        raise SystemExit(
-            "Promotion gate failed for: " + ", ".join(failures)
-        )
+        raise SystemExit("Promotion gate failed for: " + ", ".join(failures))
 
 
 if __name__ == "__main__":
     main()
-

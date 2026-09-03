@@ -11,16 +11,14 @@ seed = 2026
 source_file = "data/raw/en_ru/news_commentary.en"
 target_file = "data/raw/en_ru/news_commentary.ru"
 corpus = "News-Commentary"
-candidate_limit = 70000
 validation_pairs = 3000
 test_pairs = 3000
 max_characters = 1000
 max_length_ratio = 4.0
 
 [benchmarks]
-# Protected evaluation data: never used by human training or KD.
-flores = "data/benchmark/en_ru/flores_devtest.parquet"
-tatoeba = "data/benchmark/en_ru/tatoeba_test.parquet"
+# The model bake-off may see only FLORES dev. Final promotion may see only
+# FLORES devtest and the frozen Tatoeba sample. None may enter training or KD.
 flores_url = "https://dl.fbaipublicfiles.com/nllb/flores200_dataset.tar.gz"
 tatoeba_url = "https://object.pouta.csc.fi/OPUS-Tatoeba/v2026-07-08/moses/en-ru.txt.zip"
 tatoeba_pairs = 2000
@@ -29,15 +27,19 @@ flores_target_code = "rus_Cyrl"
 tatoeba_source_suffix = ".en"
 tatoeba_target_suffix = ".ru"
 
+[benchmarks.selection]
+flores_dev = "data/benchmark/en_ru/flores_dev.parquet"
+
+[benchmarks.final]
+flores_devtest = "data/benchmark/en_ru/flores_devtest.parquet"
+tatoeba = "data/benchmark/en_ru/tatoeba_test.parquet"
+
 [judge]
 model_path = "${FOURLANG_QWEN_MODEL_PATH}"
-calibration_pairs = 500
+auto_accept_audit_pairs = 500
+teacher_calibration_pairs = 500
 batch_size = 1
-max_new_tokens = 160
-accept_score_floor = 0.80
-accept_quantile = 0.25
-teacher_accept_score_floor = 0.85
-teacher_accept_quantile = 0.25
+max_new_tokens = 256
 
 [distillation]
 candidate_pairs_per_direction = 10000
@@ -55,12 +57,15 @@ warmup_ratio = 0.05
 max_source_length = 256
 max_target_length = 256
 early_stopping_patience = 1
+gradient_checkpointing = true
 
 [selection]
 primary_metric = "chrf2"
 secondary_metric = "bleu"
 require_both_directions = true
 max_student_parameters = 1300000000
+select_each_direction_independently = true
+share_multilingual_student_when_same_candidate_wins = true
 
 [[student_candidates]]
 id = "opus_pair"
@@ -68,12 +73,14 @@ family = "marian_pair"
 license = "mixed_apache2_ccby4"
 commercial_allowed = true
 attribution_required = true
-license_en_ru = "apache-2.0"
-license_ru_en = "cc-by-4.0"
+en_ru_license = "apache-2.0"
+ru_en_license = "cc-by-4.0"
 en_ru_path = "${FOURLANG_MODEL_ROOT}/opus-mt-en-ru"
 ru_en_path = "${FOURLANG_MODEL_ROOT}/opus-mt-ru-en"
 en_ru_repo_id = "Helsinki-NLP/opus-mt-en-ru"
 ru_en_repo_id = "Helsinki-NLP/opus-mt-ru-en"
+en_ru_revision = "bb09c99d180016eac6819df3dae68edb1690fdee"
+ru_en_revision = "fbd6dc73284f95536648512cc21d57f19191961a"
 
 [[student_candidates]]
 id = "small100"
@@ -83,6 +90,7 @@ commercial_allowed = true
 attribution_required = true
 path = "${FOURLANG_MODEL_ROOT}/small100"
 repo_id = "alirezamsh/small100"
+revision = "8ab680e26a596d2e3d2d2d17ae0f68df1037328c"
 
 [[student_candidates]]
 id = "m2m100_418m"
@@ -92,6 +100,17 @@ commercial_allowed = true
 attribution_required = true
 path = "${FOURLANG_MODEL_ROOT}/m2m100_418M"
 repo_id = "facebook/m2m100_418M"
+revision = "55c2e61bbf05dfb8d7abccdc3fae6fc8512fd636"
+
+[[student_candidates]]
+id = "m2m100_1_2b"
+family = "m2m100"
+license = "mit"
+commercial_allowed = true
+attribution_required = true
+path = "${FOURLANG_MODEL_ROOT}/m2m100_1.2B"
+repo_id = "facebook/m2m100_1.2B"
+revision = "7b36184180524c1a1bbfa37f120a608046250b98"
 
 [[teacher_candidates]]
 id = "madlad400_3b_mt"
@@ -101,6 +120,7 @@ commercial_allowed = true
 attribution_required = true
 path = "${FOURLANG_MODEL_ROOT}/madlad400-3b-mt"
 repo_id = "google/madlad400-3b-mt"
+revision = "fa184c675da0b5c9e1c8694fccd4e12e2d422094"
 
 [[teacher_candidates]]
 id = "m2m100_1_2b"
@@ -110,6 +130,7 @@ commercial_allowed = true
 attribution_required = true
 path = "${FOURLANG_MODEL_ROOT}/m2m100_1.2B"
 repo_id = "facebook/m2m100_1.2B"
+revision = "7b36184180524c1a1bbfa37f120a608046250b98"
 
 [deployment]
 registry = "models/model_registry.json"

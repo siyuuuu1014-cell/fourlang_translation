@@ -55,7 +55,7 @@
     },
     "en_ru": {
       "model_name": "en_ru_specialist_v1",
-      "architecture": "marian",
+      "architecture": "pending",
       "path": "models/final_specialists/en_ru_v1/en_ru",
       "source_lang": "en",
       "target_lang": "ru",
@@ -68,7 +68,7 @@
     },
     "ru_en": {
       "model_name": "en_ru_specialist_v1",
-      "architecture": "marian",
+      "architecture": "pending",
       "path": "models/final_specialists/en_ru_v1/ru_en",
       "source_lang": "ru",
       "target_lang": "en",

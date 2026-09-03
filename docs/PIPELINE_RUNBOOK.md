@@ -14,18 +14,20 @@ Hugging Face 缓存位于 `/root/autodl-tmp`。权重、缓存、候选数据、
 
 `configs/pipelines/en_ru.toml` 是唯一执行清单，顺序为：
 
-1. News Commentary 规范化、去重、规则过滤，产物仍叫 candidate；
-2. Qwen 对 500 条确定性样本打分并冻结该方向阈值；
-3. Qwen 审核全部 70,000 条候选，只有达到阈值的数据才能进入 approved；
-4. 按 pair_id 构建互斥的 train/validation/test；
-5. 下载并冻结 FLORES devtest 与 Tatoeba 测试集，严禁进入训练和 KD；
-6. 在相同测试集上比较全部商业合规 Student，按“双向最差 chrF++”优先自动选择；
-7. 比较全部商业合规 Teacher，使用相同规则自动选择；
-8. 对选中的 Student 做全参数 Exp1 人工数据微调；
-9. Teacher 双向生成，Qwen 再校准并审核 Teacher 输出；
-10. approved Teacher 数据与 human replay 组成带权 KD 数据；
-11. 从 Exp1 继续做全参数 Exp2 蒸馏训练；
-12. Exp2 必须在两个方向同时不低于 Exp1，才能冻结并把注册状态改为 `ready`。
+1. 先冻结基准：FLORES dev 只用于选模，FLORES devtest 与 Tatoeba 只用于最终验收；
+2. News Commentary 规范化、成对及单边去重，不做未经确认的行数截断；
+3. 规则把数据分为 `HARD_REJECT`、`NEEDS_QWEN`、`AUTO_ACCEPT`；
+4. Qwen 全审 `NEEDS_QWEN`，并对 `AUTO_ACCEPT` 做固定种子的分层 500 条抽审；
+5. 首审 `FAIL/UNCERTAIN` 进入无首审结论提示的独立二审；
+6. 依据明确结论构建 GOLD/SILVER/BRONZE approved 数据；
+7. 按 pair、英语文本、俄语文本及所有保护基准构建互斥切分；
+8. 核验 Hub 模型卡许可证和固定 revision，然后在 FLORES dev 上海选；
+9. EN→RU 与 RU→EN 分别选择最强 Student 和 Teacher；同一多语言 Student 双向获胜时训练一个共享双向模型；
+10. 对 Student 做全参数 Exp1 人工数据微调，再仅在最终基准上评估；
+11. Teacher 双向生成；Qwen 先审计固定 500 条，再全审 Teacher 输出；
+12. 只接纳 `PASS + HIGH/MEDIUM usefulness`，按 usefulness 加权并混入保留原质量权重的 human replay；
+13. 从 Exp1 继续做全参数 Exp2 序列级蒸馏训练；
+14. Exp2 必须在两个方向、每一个最终基准及合并指标上均不低于 Exp1，才能安全冻结并注册为 `ready`。
 
 流程不调用 `train_lora.py`，也不生成 adapter。
 
@@ -52,7 +54,7 @@ CC-BY-NC 许可证不满足商业用途，因此没有进入候选配置。最�
   scripts/pipeline/run_direction.py en_ru --profile server
 ```
 
-状态写入 `.fourlang/pipeline_state/en_ru.json`。相同命令、配置和产物均存在时自动跳过；
+状态写入 `.fourlang/pipeline_state/en_ru.json`。只有命令、配置、输入签名、流程代码和有效产物均未变化时才自动跳过；
 可使用 `--from`、`--until`、`--only` 和 `--force` 精确控制续跑。
 
 ## 新语言方向

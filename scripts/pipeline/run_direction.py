@@ -66,6 +66,7 @@ class DirectionPipeline:
         profiles_path: Path = DEFAULT_PROFILES,
     ) -> None:
         self.manifest_path = manifest_path.resolve()
+        self.runtime_config_path = profiles_path.resolve()
         self.manifest = _read_toml(self.manifest_path)
         self.direction = str(self.manifest["pipeline"]["direction"])
         raw_stages = self.manifest.get("stages", [])
@@ -128,12 +129,37 @@ class DirectionPipeline:
         return rendered
 
     def _fingerprint(self, stage: Stage) -> str:
+        def signature(path: Path) -> dict[str, Any]:
+            if not path.exists():
+                return {"path": str(path), "missing": True}
+            stat = path.stat()
+            item: dict[str, Any] = {
+                "path": str(path),
+                "size": stat.st_size,
+                "mtime_ns": stat.st_mtime_ns,
+            }
+            if path.is_file() and stat.st_size <= 1_000_000:
+                item["sha256"] = hashlib.sha256(path.read_bytes()).hexdigest()
+            return item
+
+        command = self._render_command(stage)
+        code_files = sorted((PROJECT_ROOT / "scripts" / "pipeline_v2").glob("*.py"))
+        code_files.extend(
+            [
+                PROJECT_ROOT / "scripts" / "pipeline" / "run_direction.py",
+                self.manifest_path,
+                self.runtime_config_path,
+            ]
+        )
         payload = {
             "profile": self.profile_name,
             "runtime": stage.runtime,
-            "command": self._render_command(stage),
-            "requires": list(stage.requires),
+            "command": command,
+            "requires": [
+                signature(_resolve(PROJECT_ROOT, value)) for value in stage.requires
+            ],
             "produces": list(stage.produces),
+            "pipeline_code": [signature(path) for path in code_files],
         }
         encoded = json.dumps(payload, sort_keys=True).encode("utf-8")
         return hashlib.sha256(encoded).hexdigest()
@@ -150,9 +176,29 @@ class DirectionPipeline:
         )
 
     def _missing(self, paths: tuple[str, ...]) -> list[Path]:
-        return [path for value in paths if not (path := _resolve(PROJECT_ROOT, value)).exists()]
+        invalid = []
+        for value in paths:
+            path = _resolve(PROJECT_ROOT, value)
+            if not path.exists() or (path.is_file() and path.stat().st_size == 0):
+                invalid.append(path)
+                continue
+            if path.suffix.lower() == ".json":
+                try:
+                    payload = json.loads(path.read_text(encoding="utf-8"))
+                    if isinstance(payload, dict) and "artifacts" in payload:
+                        artifacts = payload["artifacts"]
+                        if not isinstance(artifacts, list) or any(
+                            not _resolve(PROJECT_ROOT, str(item)).is_file()
+                            for item in artifacts
+                        ):
+                            invalid.append(path)
+                except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+                    invalid.append(path)
+        return invalid
 
-    def select(self, start: str | None, end: str | None, only: str | None) -> list[Stage]:
+    def select(
+        self, start: str | None, end: str | None, only: str | None
+    ) -> list[Stage]:
         if only:
             selected = [stage for stage in self.stages if stage.stage_id == only]
             if not selected:
@@ -182,6 +228,13 @@ class DirectionPipeline:
         state = self._load_state()
         stage_state = state.setdefault("stages", {})
         env = self._environment()
+        if not dry_run:
+            for runtime in sorted({stage.runtime for stage in stages}):
+                executable = Path(self._python_for(runtime))
+                if not executable.is_file():
+                    raise FileNotFoundError(
+                        f"Runtime {runtime!r} Python does not exist: {executable}"
+                    )
 
         for stage in stages:
             command = self._render_command(stage)
@@ -251,8 +304,12 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("direction", help="Pipeline name, for example en_ru")
     parser.add_argument("--profile", choices=("local", "server"), default="local")
-    parser.add_argument("--manifest", help="Override configs/pipelines/<direction>.toml")
-    parser.add_argument("--list", action="store_true", help="Show stages without running")
+    parser.add_argument(
+        "--manifest", help="Override configs/pipelines/<direction>.toml"
+    )
+    parser.add_argument(
+        "--list", action="store_true", help="Show stages without running"
+    )
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--force", action="store_true")
     parser.add_argument("--from", dest="start")

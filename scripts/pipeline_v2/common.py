@@ -56,16 +56,20 @@ def pair_info(config: dict[str, Any]) -> tuple[str, str, str, str]:
 
 def write_json(path: Path, payload: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text(
         json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
     )
+    temporary.replace(path)
 
 
 def read_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def candidate_by_id(config: dict[str, Any], role: str, candidate_id: str) -> dict[str, Any]:
+def candidate_by_id(
+    config: dict[str, Any], role: str, candidate_id: str
+) -> dict[str, Any]:
     key = f"{role}_candidates"
     matches = [item for item in config[key] if item["id"] == candidate_id]
     if len(matches) != 1:
@@ -83,7 +87,9 @@ def commercial_candidates(config: dict[str, Any], role: str) -> list[dict[str, A
             and str(item.get("license", "")).lower() in COMMERCIAL_LICENSES
         ]
     if not candidates:
-        raise RuntimeError(f"No commercially eligible {role} candidates are configured.")
+        raise RuntimeError(
+            f"No commercially eligible {role} candidates are configured."
+        )
     return candidates
 
 

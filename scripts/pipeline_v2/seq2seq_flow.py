@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import gc
+import hashlib
 import json
 import math
 import shutil
@@ -640,32 +641,150 @@ def generate_teacher(config: dict) -> None:
     rows = load_jsonl(
         PROJECT_ROOT / "data" / "pipeline_v2" / pair / "kd_candidates.jsonl"
     )
-    output = []
+    checkpoint_rows = int(config["distillation"].get("teacher_checkpoint_rows", 256))
+    if checkpoint_rows < 1:
+        raise ValueError("distillation.teacher_checkpoint_rows must be positive.")
+    pipeline_root = PROJECT_ROOT / "data" / "pipeline_v2" / pair
+    checkpoint_root = pipeline_root / "teacher_generation_checkpoints"
+    manifest_path = checkpoint_root / "manifest.json"
+    signature_payload = {
+        "schema_version": 1,
+        "selection": selection,
+        "max_source_length": int(config["training"]["max_source_length"]),
+        "num_beams": int(config["deployment"]["num_beams"]),
+        "max_new_tokens": int(config["deployment"]["max_new_tokens"]),
+        "checkpoint_rows": checkpoint_rows,
+    }
+    digest = hashlib.sha256(
+        json.dumps(signature_payload, sort_keys=True, ensure_ascii=False).encode("utf-8")
+    )
+    for row in rows:
+        digest.update(b"\n")
+        digest.update(
+            json.dumps(row, sort_keys=True, ensure_ascii=False).encode("utf-8")
+        )
+    signature = digest.hexdigest()
+    checkpoint_root.mkdir(parents=True, exist_ok=True)
+    manifest = {
+        **signature_payload,
+        "input_signature": signature,
+        "input_rows": len(rows),
+        "status": "running",
+    }
+    if manifest_path.is_file():
+        existing_manifest = read_json(manifest_path)
+        if existing_manifest.get("input_signature") != signature:
+            raise RuntimeError(
+                "Teacher generation checkpoint does not match the current inputs, "
+                "Teacher selection, or generation settings. Move or remove "
+                f"{checkpoint_root} before intentionally starting a new generation run."
+            )
+    else:
+        if any(checkpoint_root.glob("*.parquet")):
+            raise RuntimeError(
+                f"Teacher checkpoint shards exist without a manifest: {checkpoint_root}"
+            )
+        temporary_manifest = manifest_path.with_suffix(".json.tmp")
+        temporary_manifest.write_text(
+            json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8"
+        )
+        temporary_manifest.replace(manifest_path)
+
+    def row_key(row: dict[str, Any]) -> tuple[str, str, str]:
+        return (str(row["pair_id"]), str(row["src_lang"]), str(row["tgt_lang"]))
+
+    expected = {row_key(row): row for row in rows}
+    if len(expected) != len(rows):
+        raise RuntimeError("KD candidates contain duplicate directed pair identifiers.")
+    completed: dict[tuple[str, str, str], dict[str, Any]] = {}
+    for shard_path in sorted(checkpoint_root.glob("*.parquet")):
+        for generated_row in pd.read_parquet(shard_path).to_dict("records"):
+            key = row_key(generated_row)
+            if key not in expected:
+                raise RuntimeError(f"Checkpoint contains an unknown row: {key}")
+            if key in completed:
+                raise RuntimeError(f"Checkpoint contains a duplicate row: {key}")
+            for field in ("src_text", "reference_text"):
+                if str(generated_row[field]) != str(expected[key][field]):
+                    raise RuntimeError(
+                        f"Checkpoint input mismatch for {key} field {field}."
+                    )
+            completed[key] = generated_row
+    if completed:
+        print(
+            f"Resuming Teacher generation from {len(completed)}/{len(rows)} rows.",
+            flush=True,
+        )
+
     grouped: dict[tuple[str, str], list[dict[str, Any]]] = {}
     for row in rows:
         grouped.setdefault((row["src_lang"], row["tgt_lang"]), []).append(row)
     for (source, target), direction_rows in grouped.items():
+        chunks = [
+            direction_rows[start : start + checkpoint_rows]
+            for start in range(0, len(direction_rows), checkpoint_rows)
+        ]
+        if all(all(row_key(row) in completed for row in chunk) for chunk in chunks):
+            print(f"Teacher direction already complete: {source}-{target}", flush=True)
+            continue
         candidate = selected_for(selection, source, target)
         tokenizer, model = load_model(candidate, source, target)
-        generated = translate(
-            tokenizer,
-            model,
-            candidate["family"],
-            source,
-            target,
-            [row["src_text"] for row in direction_rows],
-            config,
-        )
-        for row, teacher_text in zip(direction_rows, generated, strict=True):
-            output.append(
+        for chunk_index, chunk in enumerate(chunks):
+            chunk_keys = [row_key(row) for row in chunk]
+            finished = [key in completed for key in chunk_keys]
+            if all(finished):
+                continue
+            if any(finished):
+                raise RuntimeError(
+                    f"Incomplete checkpoint shard boundary for {source}-{target} "
+                    f"chunk {chunk_index}."
+                )
+            generated = translate(
+                tokenizer,
+                model,
+                candidate["family"],
+                source,
+                target,
+                [row["src_text"] for row in chunk],
+                config,
+            )
+            generated_rows = [
                 {**row, "teacher_text": teacher_text, "teacher_id": candidate["id"]}
+                for row, teacher_text in zip(chunk, generated, strict=True)
+            ]
+            shard_path = checkpoint_root / (
+                f"{source}-{target}-{chunk_index:06d}.parquet"
+            )
+            temporary_shard = shard_path.with_suffix(".parquet.tmp")
+            pd.DataFrame(generated_rows).to_parquet(temporary_shard, index=False)
+            temporary_shard.replace(shard_path)
+            completed.update(
+                {row_key(generated_row): generated_row for generated_row in generated_rows}
+            )
+            print(
+                f"Teacher checkpoint: {len(completed)}/{len(rows)} rows "
+                f"({source}-{target})",
+                flush=True,
             )
         del model, tokenizer
         gc.collect()
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
-    path = PROJECT_ROOT / "data" / "pipeline_v2" / pair / "teacher_generated.parquet"
-    pd.DataFrame(output).to_parquet(path, index=False)
+    missing = [row_key(row) for row in rows if row_key(row) not in completed]
+    if missing:
+        raise RuntimeError(f"Teacher generation is incomplete: {len(missing)} rows missing.")
+    output = [completed[row_key(row)] for row in rows]
+    path = pipeline_root / "teacher_generated.parquet"
+    temporary_output = path.with_suffix(".parquet.tmp")
+    pd.DataFrame(output).to_parquet(temporary_output, index=False)
+    temporary_output.replace(path)
+    completed_manifest = {**manifest, "status": "completed", "output_rows": len(output)}
+    temporary_manifest = manifest_path.with_suffix(".json.tmp")
+    temporary_manifest.write_text(
+        json.dumps(completed_manifest, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
+    temporary_manifest.replace(manifest_path)
+    print(f"Teacher generation complete: {len(output)} rows -> {path}", flush=True)
 
 
 def freeze(config: dict) -> None:

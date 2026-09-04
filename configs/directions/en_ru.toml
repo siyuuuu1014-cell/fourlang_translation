@@ -49,6 +49,9 @@ max_new_tokens = 256
 
 [distillation]
 candidate_pairs_per_direction = 10000
+# Persist one atomic shard after this many generated rows. Interrupted Teacher
+# generation resumes from completed shards instead of restarting from zero.
+teacher_checkpoint_rows = 256
 human_weight = 1.0
 teacher_high_weight = 1.0
 teacher_medium_weight = 0.8

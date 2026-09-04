@@ -100,3 +100,8 @@ NLLB-200 distilled 600M。三者必须在同一份四语言 FLORES dev 上跑完
 `WAITING_FOR_DATA`。只有六组语言对齐备后，`aggregate_exp1` 才能构建联合数据并进入全局 bake-off。
 Exp2 必须在 12 个方向的 BLEU 和 chrF2 上逐项不低于 Exp1，之后才会把注册表的 12 个方向全部指向
 `models/final_multilingual/fourlang_v1` 同一目录。
+
+EN-RU 的 `generate_teacher` 会按 `distillation.teacher_checkpoint_rows` 写入原子分片到
+`data/pipeline_v2/en_ru/teacher_generation_checkpoints/`。同一份候选数据、Teacher 选择和生成参数下，
+重新执行该阶段会自动跳过完整分片；不需要使用 `--force` 删除断点。若有意更换输入、Teacher 或生成参数，
+必须先移走旧断点目录，流程不会把不兼容的旧结果静默混入新结果。

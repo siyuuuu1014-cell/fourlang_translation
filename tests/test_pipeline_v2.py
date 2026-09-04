@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 import os
+import json
+import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 import pandas as pd
 
@@ -15,6 +18,7 @@ from scripts.pipeline_v2.data_flow import (
     stratified_auto_accept_audit,
 )
 from scripts.pipeline_v2.qwen_judge import judge_id, parse_result, second_review_mask
+from scripts.pipeline_v2 import seq2seq_flow
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -150,6 +154,99 @@ class PipelineV2Tests(unittest.TestCase):
 
     def test_small100_is_the_explicit_measured_student_choice(self) -> None:
         self.assertEqual(self.config["selection"]["student_override"], "small100")
+
+    def test_teacher_generation_resumes_from_atomic_shards(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            candidates = root / "data/pipeline_v2/en_ru/kd_candidates.jsonl"
+            candidates.parent.mkdir(parents=True)
+            rows = [
+                {
+                    "pair_id": f"pair-{index}",
+                    "src_lang": source,
+                    "tgt_lang": target,
+                    "src_text": f"source-{index}",
+                    "reference_text": f"reference-{index}",
+                }
+                for index, (source, target) in enumerate(
+                    [("en", "ru")] * 3 + [("ru", "en")] * 2
+                )
+            ]
+            candidates.write_text(
+                "".join(json.dumps(row) + "\n" for row in rows),
+                encoding="utf-8",
+            )
+            selection_path = root / "results/model_selection/en_ru/selected_teacher.json"
+            selection_path.parent.mkdir(parents=True)
+            selection_path.write_text(
+                json.dumps(
+                    {
+                        "directions": {
+                            "en-ru": {"candidate": {"id": "teacher", "family": "fake"}},
+                            "ru-en": {"candidate": {"id": "teacher", "family": "fake"}},
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+            config = {
+                "direction": {
+                    "pair": "en_ru",
+                    "source_lang": "en",
+                    "target_lang": "ru",
+                    "version": "v1",
+                },
+                "distillation": {"teacher_checkpoint_rows": 2},
+                "training": {"max_source_length": 32},
+                "deployment": {"num_beams": 1, "max_new_tokens": 16},
+            }
+
+            def fake_translate(*args, **kwargs):
+                texts = args[5]
+                return [f"translated:{text}" for text in texts]
+
+            with (
+                patch.object(seq2seq_flow, "PROJECT_ROOT", root),
+                patch.object(seq2seq_flow, "load_model", return_value=(object(), object())),
+                patch.object(seq2seq_flow, "translate", side_effect=fake_translate),
+            ):
+                seq2seq_flow.generate_teacher(config)
+
+            output = root / "data/pipeline_v2/en_ru/teacher_generated.parquet"
+            self.assertEqual(len(pd.read_parquet(output)), len(rows))
+            shards = sorted(
+                (root / "data/pipeline_v2/en_ru/teacher_generation_checkpoints").glob(
+                    "*.parquet"
+                )
+            )
+            shards[0].unlink()
+            output.unlink()
+            with (
+                patch.object(seq2seq_flow, "PROJECT_ROOT", root),
+                patch.object(seq2seq_flow, "load_model", return_value=(object(), object())),
+                patch.object(
+                    seq2seq_flow, "translate", side_effect=fake_translate
+                ) as resumed_translate,
+            ):
+                seq2seq_flow.generate_teacher(config)
+            self.assertEqual(resumed_translate.call_count, 1)
+            resumed = pd.read_parquet(output)
+            self.assertEqual(len(resumed), len(rows))
+            self.assertEqual(
+                resumed["teacher_text"].tolist(),
+                [f"translated:source-{index}" for index in range(len(rows))],
+            )
+            output.unlink()
+            with (
+                patch.object(seq2seq_flow, "PROJECT_ROOT", root),
+                patch.object(
+                    seq2seq_flow,
+                    "load_model",
+                    side_effect=AssertionError("completed shards must skip model loading"),
+                ),
+            ):
+                seq2seq_flow.generate_teacher(config)
+            self.assertEqual(len(pd.read_parquet(output)), len(rows))
 
 
 if __name__ == "__main__":

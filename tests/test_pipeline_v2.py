@@ -33,6 +33,24 @@ class PipelineV2Tests(unittest.TestCase):
         )
         cls.config = load_config(PROJECT_ROOT / "configs/directions/en_ru.toml")
 
+    def test_generated_texts_follow_target_script_contract(self) -> None:
+        self.assertEqual(
+            seq2seq_flow.normalize_generated_texts(
+                "zh", ["這是一個測試。", "後臺資料"]
+            ),
+            ["这是一个测试。", "后台资料"],
+        )
+        self.assertEqual(
+            seq2seq_flow.normalize_generated_texts(
+                "uz", ["Бу синов гапидир.", "Ўзбекистон"]
+            ),
+            ["Bu sinov gapidir.", "O'zbekiston"],
+        )
+        self.assertEqual(
+            seq2seq_flow.normalize_generated_texts("ru", ["  Привет   мир.  "]),
+            ["Привет мир."],
+        )
+
     def test_only_commercial_candidates_are_eligible(self) -> None:
         for role in ("student", "teacher"):
             candidates = commercial_candidates(self.config, role)

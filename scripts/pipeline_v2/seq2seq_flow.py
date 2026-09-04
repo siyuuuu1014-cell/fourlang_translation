@@ -51,6 +51,9 @@ except ImportError:
 
 sys.path.insert(0, str(PROJECT_ROOT))
 from src.model_utils import load_tokenizer as load_project_tokenizer  # noqa: E402
+from scripts.pipeline_v3.language_normalization import (  # noqa: E402
+    normalize_language_text,
+)
 
 
 def resolve_model_reference(local: str, repo_id: str, revision: str) -> str:
@@ -137,6 +140,11 @@ def prepare_inputs(
     return encoded, generation
 
 
+def normalize_generated_texts(target: str, texts: list[str]) -> list[str]:
+    """Apply the target-language text contract before scoring or persistence."""
+    return [normalize_language_text(target, text) for text in texts]
+
+
 def translate(
     tokenizer: Any,
     model: Any,
@@ -169,10 +177,11 @@ def translate(
                 num_beams=int(config["deployment"]["num_beams"]),
                 max_new_tokens=int(config["deployment"]["max_new_tokens"]),
             )
-        output.extend(
+        decoded = [
             text.strip()
             for text in tokenizer.batch_decode(tokens, skip_special_tokens=True)
-        )
+        ]
+        output.extend(normalize_generated_texts(target, decoded))
     return output
 
 

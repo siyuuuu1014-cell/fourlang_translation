@@ -237,10 +237,25 @@ def evaluate_candidate(candidate: dict[str, Any], config: dict) -> dict[str, Any
     return {"status": "ok", "parameters": parameters, "metrics": all_metrics}
 
 
-def bakeoff(config: dict, role: str) -> None:
+def bakeoff(config: dict, role: str, candidate_id: str | None = None) -> None:
     pair, _, _, _ = pair_info(config)
+    candidates = commercial_candidates(config, role)
+    if candidate_id is not None:
+        candidates = [item for item in candidates if item["id"] == candidate_id]
+        if not candidates:
+            raise KeyError(
+                f"Candidate {candidate_id!r} is not eligible for the {role} bakeoff."
+            )
+    score_path = (
+        PROJECT_ROOT / "results" / "model_selection" / pair / f"{role}_scores.json"
+    )
     results: dict[str, Any] = {}
-    for candidate in commercial_candidates(config, role):
+    if candidate_id is not None and score_path.exists():
+        previous = read_json(score_path)
+        if previous.get("role") != role:
+            raise RuntimeError(f"Existing bakeoff score role does not match {role!r}.")
+        results.update(dict(previous.get("candidates", {})))
+    for candidate in candidates:
         try:
             result = evaluate_candidate(candidate, config)
             if role == "student" and result["parameters"] > int(
@@ -255,8 +270,7 @@ def bakeoff(config: dict, role: str) -> None:
             }
         results[candidate["id"]] = result
     write_json(
-        PROJECT_ROOT / "results" / "model_selection" / pair / f"{role}_scores.json",
-        {"schema_version": 1, "role": role, "candidates": results},
+        score_path, {"schema_version": 1, "role": role, "candidates": results}
     )
 
 
@@ -898,12 +912,16 @@ def main() -> None:
     parser.add_argument("--config", required=True)
     parser.add_argument("--role", choices=("student", "teacher"))
     parser.add_argument("--experiment", choices=("exp1", "exp2"))
+    parser.add_argument(
+        "--candidate-id",
+        help="For bakeoff, evaluate only this candidate and merge it into existing scores.",
+    )
     args = parser.parse_args()
     config = load_config(args.config)
     if args.action == "bakeoff":
         if not args.role:
             parser.error("bakeoff requires --role")
-        bakeoff(config, args.role)
+        bakeoff(config, args.role, args.candidate_id)
     elif args.action == "train":
         if not args.experiment:
             parser.error("train requires --experiment")

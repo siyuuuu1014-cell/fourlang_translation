@@ -60,6 +60,47 @@ class PipelineV2Tests(unittest.TestCase):
             )
             self.assertFalse(any("nllb" in item["id"].lower() for item in candidates))
 
+    def test_filtered_bakeoff_preserves_existing_candidate_scores(self) -> None:
+        config = {
+            "direction": {
+                "pair": "zh_uz",
+                "source_lang": "zh",
+                "target_lang": "uz",
+                "version": "v1",
+            }
+        }
+        existing = {
+            "schema_version": 1,
+            "role": "teacher",
+            "candidates": {"madlad": {"status": "ok", "metrics": {}}},
+        }
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            score_path = root / "results/model_selection/zh_uz/teacher_scores.json"
+            score_path.parent.mkdir(parents=True)
+            score_path.write_text(json.dumps(existing), encoding="utf-8")
+            with (
+                patch.object(seq2seq_flow, "PROJECT_ROOT", root),
+                patch.object(
+                    seq2seq_flow,
+                    "commercial_candidates",
+                    return_value=[
+                        {"id": "madlad"},
+                        {"id": "nllb", "family": "nllb"},
+                    ],
+                ),
+                patch.object(
+                    seq2seq_flow,
+                    "evaluate_candidate",
+                    return_value={"status": "ok", "metrics": {"zh-uz": {}}},
+                ) as evaluate,
+            ):
+                seq2seq_flow.bakeoff(config, "teacher", "nllb")
+            saved = json.loads(score_path.read_text(encoding="utf-8"))
+            self.assertIn("madlad", saved["candidates"])
+            self.assertIn("nllb", saved["candidates"])
+            evaluate.assert_called_once()
+
     def test_rule_filter_rejects_markup_and_length_mismatch(self) -> None:
         settings = self.config["data"]
         self.assertIn(

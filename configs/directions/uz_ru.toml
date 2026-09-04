@@ -1,0 +1,116 @@
+[pipeline]
+scope = "pair_data_only"
+
+[direction]
+schema_version = 3
+pair = "uz_ru"
+source_lang = "uz"
+target_lang = "ru"
+version = "v1"
+commercial_use = false
+seed = 2026
+
+[text_contract]
+uz_script = "latin"
+transliterate_cyrillic_to_latin = true
+
+[data]
+validation_pairs = 1500
+test_pairs = 1500
+train_pairs = 0
+training_tiers = ["GOLD", "SILVER"]
+max_characters = 1000
+max_length_ratio = 4.5
+
+[[data.corpora]]
+name = "GNOME"
+version = "v1"
+url = "https://object.pouta.csc.fi/OPUS-GNOME/v1/moses/ru-uz.txt.zip"
+local_archive = "data/raw/uz_ru/opus/GNOME-v1-ru-uz.txt.zip"
+archive_source_lang = "ru"
+archive_target_lang = "uz"
+expected_pairs = 44673
+
+[[data.corpora]]
+name = "KDE4"
+version = "v2"
+url = "https://object.pouta.csc.fi/OPUS-KDE4/v2/moses/ru-uz.txt.zip"
+local_archive = "data/raw/uz_ru/opus/KDE4-v2-ru-uz.txt.zip"
+archive_source_lang = "ru"
+archive_target_lang = "uz"
+expected_pairs = 37056
+
+[[data.corpora]]
+name = "TED2020"
+version = "v1"
+url = "https://object.pouta.csc.fi/OPUS-TED2020/v1/moses/ru-uz.txt.zip"
+local_archive = "data/raw/uz_ru/opus/TED2020-v1-ru-uz.txt.zip"
+archive_source_lang = "ru"
+archive_target_lang = "uz"
+expected_pairs = 5956
+
+[[data.corpora]]
+name = "QED"
+version = "v2.0a"
+url = "https://object.pouta.csc.fi/OPUS-QED/v2.0a/moses/ru-uz.txt.zip"
+local_archive = "data/raw/uz_ru/opus/QED-v2.0a-ru-uz.txt.zip"
+archive_source_lang = "ru"
+archive_target_lang = "uz"
+expected_pairs = 3124
+
+[benchmarks]
+flores_url = "https://dl.fbaipublicfiles.com/nllb/flores200_dataset.tar.gz"
+flores_source_code = "uzn_Latn"
+flores_target_code = "rus_Cyrl"
+
+[benchmarks.selection]
+flores_dev = "data/benchmark/uz_ru/flores_dev.parquet"
+
+[benchmarks.final]
+flores_devtest = "data/benchmark/uz_ru/flores_devtest.parquet"
+
+[judge]
+model_path = "${FOURLANG_QWEN_MODEL_PATH}"
+auto_accept_audit_pairs = 500
+teacher_calibration_pairs = 500
+batch_size = 32
+max_input_tokens = 1536
+max_new_tokens = 256
+
+[distillation]
+candidate_pairs_per_direction = 10000
+teacher_checkpoint_rows = 256
+human_weight = 1.0
+teacher_high_weight = 1.0
+teacher_medium_weight = 0.8
+
+[training]
+max_source_length = 256
+
+[selection]
+primary_metric = "chrf2"
+secondary_metric = "bleu"
+
+[[teacher_candidates]]
+id = "madlad400_3b_mt"
+family = "madlad"
+license = "apache-2.0"
+commercial_allowed = true
+attribution_required = true
+path = "${FOURLANG_MODEL_ROOT}/madlad400-3b-mt"
+repo_id = "google/madlad400-3b-mt"
+revision = "fa184c675da0b5c9e1c8694fccd4e12e2d422094"
+
+[[teacher_candidates]]
+id = "m2m100_1_2b"
+family = "m2m100"
+license = "mit"
+commercial_allowed = true
+attribution_required = true
+path = "${FOURLANG_MODEL_ROOT}/m2m100_1.2B"
+repo_id = "facebook/m2m100_1.2B"
+revision = "7b36184180524c1a1bbfa37f120a608046250b98"
+
+[deployment]
+num_beams = 5
+max_new_tokens = 256

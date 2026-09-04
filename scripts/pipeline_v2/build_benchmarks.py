@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import io
+import sys
 import tarfile
 import urllib.request
 import zipfile
@@ -10,10 +11,15 @@ from pathlib import Path
 
 import pandas as pd
 
+PROJECT_ROOT_BOOTSTRAP = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(PROJECT_ROOT_BOOTSTRAP))
+
 try:
     from .common import PROJECT_ROOT, load_config, pair_info, project_path, write_json
 except ImportError:
     from common import PROJECT_ROOT, load_config, pair_info, project_path, write_json
+
+from scripts.pipeline_v3.language_normalization import normalize_language_text  # noqa: E402
 
 
 def download(url: str) -> bytes:
@@ -90,7 +96,12 @@ def main() -> None:
         )
         if len(source_lines) != len(target_lines):
             raise RuntimeError(f"FLORES {split} source/target rows are not aligned.")
-        frame = pd.DataFrame({source: source_lines, target: target_lines})
+        frame = pd.DataFrame(
+            {
+                source: [normalize_language_text(source, text) for text in source_lines],
+                target: [normalize_language_text(target, text) for text in target_lines],
+            }
+        )
         path = project_path(path_value)
         path.parent.mkdir(parents=True, exist_ok=True)
         frame.to_parquet(path, index=False)
@@ -98,42 +109,55 @@ def main() -> None:
             "rows": len(frame),
             "path": str(path.relative_to(PROJECT_ROOT)),
         }
-    tatoeba_payload = download(benchmark["tatoeba_url"])
-    with zipfile.ZipFile(io.BytesIO(tatoeba_payload)) as archive:
-        source_lines = find_zip_lines(archive, benchmark["tatoeba_source_suffix"])
-        target_lines = find_zip_lines(archive, benchmark["tatoeba_target_suffix"])
-    if len(source_lines) != len(target_lines):
-        raise RuntimeError("Tatoeba source/target rows are not aligned.")
-    tatoeba = stable_sample(
-        pd.DataFrame({source: source_lines, target: target_lines}),
-        int(benchmark["tatoeba_pairs"]),
-    )
-    tatoeba_path = project_path(benchmark["final"]["tatoeba"])
-    tatoeba_path.parent.mkdir(parents=True, exist_ok=True)
-    tatoeba.to_parquet(tatoeba_path, index=False)
+    tatoeba_payload = None
+    tatoeba = None
+    tatoeba_path = None
+    if benchmark.get("tatoeba_url"):
+        tatoeba_payload = download(benchmark["tatoeba_url"])
+        with zipfile.ZipFile(io.BytesIO(tatoeba_payload)) as archive:
+            source_lines = find_zip_lines(archive, benchmark["tatoeba_source_suffix"])
+            target_lines = find_zip_lines(archive, benchmark["tatoeba_target_suffix"])
+        if len(source_lines) != len(target_lines):
+            raise RuntimeError("Tatoeba source/target rows are not aligned.")
+        tatoeba = stable_sample(
+            pd.DataFrame(
+                {
+                    source: [normalize_language_text(source, text) for text in source_lines],
+                    target: [normalize_language_text(target, text) for text in target_lines],
+                }
+            ),
+            int(benchmark["tatoeba_pairs"]),
+        )
+        tatoeba_path = project_path(benchmark["final"]["tatoeba"])
+        tatoeba_path.parent.mkdir(parents=True, exist_ok=True)
+        tatoeba.to_parquet(tatoeba_path, index=False)
+    source_archives = {
+        "flores": {
+            "url": benchmark["flores_url"],
+            "sha256": hashlib.sha256(flores_payload).hexdigest(),
+        }
+    }
+    if tatoeba_payload is not None:
+        source_archives["tatoeba"] = {
+            "url": benchmark["tatoeba_url"],
+            "sha256": hashlib.sha256(tatoeba_payload).hexdigest(),
+        }
+    report = {
+        "schema_version": 2,
+        "protected_from_training": True,
+        "selection_only": ["flores_dev"],
+        "final_only": list(benchmark["final"]),
+        "source_archives": source_archives,
+        **built,
+    }
+    if tatoeba is not None and tatoeba_path is not None:
+        report["tatoeba"] = {
+            "rows": len(tatoeba),
+            "path": str(tatoeba_path.relative_to(PROJECT_ROOT)),
+        }
     write_json(
         PROJECT_ROOT / "reports" / "pipeline" / pair / "benchmarks.json",
-        {
-            "schema_version": 2,
-            "protected_from_training": True,
-            "selection_only": ["flores_dev"],
-            "final_only": ["flores_devtest", "tatoeba"],
-            "source_archives": {
-                "flores": {
-                    "url": benchmark["flores_url"],
-                    "sha256": hashlib.sha256(flores_payload).hexdigest(),
-                },
-                "tatoeba": {
-                    "url": benchmark["tatoeba_url"],
-                    "sha256": hashlib.sha256(tatoeba_payload).hexdigest(),
-                },
-            },
-            **built,
-            "tatoeba": {
-                "rows": len(tatoeba),
-                "path": str(tatoeba_path.relative_to(PROJECT_ROOT)),
-            },
-        },
+        report,
     )
 
 

@@ -1,0 +1,28 @@
+[pipeline]
+schema_version = 1
+direction = "en_uz"
+description = "Freeze and verify the accepted bidirectional EN-UZ specialist."
+
+[[stages]]
+id = "freeze"
+name = "Freeze accepted EN-UZ Exp2 into the deployment model store"
+runtime = "student"
+command = ["scripts/model_management/freeze_en_uz_exp2.py"]
+requires = [
+  "results/student/small100/exp2_distillation_v1/best_model",
+]
+produces = [
+  "models/final_specialists/en_uz_small100_v1/model_card.json",
+]
+
+[[stages]]
+id = "verify_registry"
+name = "Validate registry schema and deployed paths"
+runtime = "student"
+command = ["scripts/inference/check_registry.py"]
+requires = [
+  "models/model_registry.json",
+  "models/final_specialists/en_uz_small100_v1/model_card.json",
+]
+produces = ["models/final_specialists/en_uz_small100_v1/model_card.json"]
+

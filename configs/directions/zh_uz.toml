@@ -1,0 +1,127 @@
+[pipeline]
+scope = "pair_data_only"
+
+[direction]
+schema_version = 3
+pair = "zh_uz"
+source_lang = "zh"
+target_lang = "uz"
+version = "v1"
+commercial_use = false
+seed = 2026
+
+[text_contract]
+zh_script = "simplified"
+convert_traditional_to_simplified = true
+uz_script = "latin"
+transliterate_cyrillic_to_latin = true
+
+[data]
+validation_pairs = 500
+test_pairs = 500
+train_pairs = 0
+training_tiers = ["GOLD", "SILVER"]
+max_characters = 1000
+max_length_ratio = 6.0
+
+[[data.corpora]]
+name = "Tanzil"
+version = "v1"
+url = "https://object.pouta.csc.fi/OPUS-Tanzil/v1/moses/uz-zh.txt.zip"
+local_archive = "data/raw/zh_uz/opus/Tanzil-v1-uz-zh.txt.zip"
+archive_source_lang = "uz"
+archive_target_lang = "zh"
+expected_pairs = 12473
+
+[[data.corpora]]
+name = "tldr-pages"
+version = "v2026-07-07"
+url = "https://object.pouta.csc.fi/OPUS-tldr-pages/v2026-07-07/moses/uz-zh.txt.zip"
+local_archive = "data/raw/zh_uz/opus/tldr-pages-v2026-07-07-uz-zh.txt.zip"
+archive_source_lang = "uz"
+archive_target_lang = "zh"
+expected_pairs = 1350
+
+[[data.corpora]]
+name = "TED2020"
+version = "v1"
+url = "https://object.pouta.csc.fi/OPUS-TED2020/v1/moses/uz-zh.txt.zip"
+local_archive = "data/raw/zh_uz/opus/TED2020-v1-uz-zh.txt.zip"
+archive_source_lang = "uz"
+archive_target_lang = "zh"
+expected_pairs = 780
+
+[[data.corpora]]
+name = "wikimedia"
+version = "v20260327"
+url = "https://object.pouta.csc.fi/OPUS-wikimedia/v20260327/moses/uz-zh.txt.zip"
+local_archive = "data/raw/zh_uz/opus/wikimedia-v20260327-uz-zh.txt.zip"
+archive_source_lang = "uz"
+archive_target_lang = "zh"
+expected_pairs = 715
+
+[[data.corpora]]
+name = "QED"
+version = "v2.0a"
+url = "https://object.pouta.csc.fi/OPUS-QED/v2.0a/moses/uz-zh.txt.zip"
+local_archive = "data/raw/zh_uz/opus/QED-v2.0a-uz-zh.txt.zip"
+archive_source_lang = "uz"
+archive_target_lang = "zh"
+expected_pairs = 343
+
+[benchmarks]
+flores_url = "https://dl.fbaipublicfiles.com/nllb/flores200_dataset.tar.gz"
+flores_source_code = "zho_Hans"
+flores_target_code = "uzn_Latn"
+
+[benchmarks.selection]
+flores_dev = "data/benchmark/zh_uz/flores_dev.parquet"
+
+[benchmarks.final]
+flores_devtest = "data/benchmark/zh_uz/flores_devtest.parquet"
+
+[judge]
+model_path = "${FOURLANG_QWEN_MODEL_PATH}"
+auto_accept_audit_pairs = 500
+teacher_calibration_pairs = 500
+batch_size = 32
+max_input_tokens = 1536
+max_new_tokens = 256
+
+[distillation]
+candidate_pairs_per_direction = 6000
+teacher_checkpoint_rows = 256
+human_weight = 1.0
+teacher_high_weight = 1.0
+teacher_medium_weight = 0.8
+
+[training]
+max_source_length = 256
+
+[selection]
+primary_metric = "chrf2"
+secondary_metric = "bleu"
+
+[[teacher_candidates]]
+id = "madlad400_3b_mt"
+family = "madlad"
+license = "apache-2.0"
+commercial_allowed = true
+attribution_required = true
+path = "${FOURLANG_MODEL_ROOT}/madlad400-3b-mt"
+repo_id = "google/madlad400-3b-mt"
+revision = "fa184c675da0b5c9e1c8694fccd4e12e2d422094"
+
+[[teacher_candidates]]
+id = "m2m100_1_2b"
+family = "m2m100"
+license = "mit"
+commercial_allowed = true
+attribution_required = true
+path = "${FOURLANG_MODEL_ROOT}/m2m100_1.2B"
+repo_id = "facebook/m2m100_1.2B"
+revision = "7b36184180524c1a1bbfa37f120a608046250b98"
+
+[deployment]
+num_beams = 5
+max_new_tokens = 256

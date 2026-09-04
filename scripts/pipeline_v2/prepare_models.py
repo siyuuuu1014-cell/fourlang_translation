@@ -57,16 +57,18 @@ def references(candidate: dict) -> list[tuple[str, str, str, str]]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Download only commercially eligible bake-off candidates."
+        description="Verify and download the configured bake-off candidates."
     )
     parser.add_argument("--config", required=True)
+    parser.add_argument("--role", choices=("student", "teacher"))
     args = parser.parse_args()
     config = load_config(args.config)
     pair, _, _, _ = pair_info(config)
     inventory = []
     seen: set[str] = set()
     api = HfApi()
-    for role in ("student", "teacher"):
+    roles = (args.role,) if args.role else ("student", "teacher")
+    for role in roles:
         for candidate in commercial_candidates(config, role):
             for repo_id, revision, declared_license, destination in references(candidate):
                 identity = f"{repo_id}@{revision}"
@@ -91,14 +93,16 @@ def main() -> None:
                         "resolved_path": resolved,
                         "declared_license": declared_license,
                         "verified_hub_license": actual_license,
-                        "commercial_allowed": True,
+                        "commercial_allowed": bool(
+                            candidate.get("commercial_allowed", False)
+                        ),
                     }
                 )
     write_json(
         PROJECT_ROOT / "reports" / "pipeline" / pair / "model_inventory.json",
         {
             "schema_version": 2,
-            "commercial_use": True,
+            "commercial_use": bool(config["direction"].get("commercial_use", False)),
             "models": inventory,
             "artifacts": [str(Path(item["resolved_path"]) / "config.json") for item in inventory],
         },

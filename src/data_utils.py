@@ -39,24 +39,20 @@ def tokenize_translation_dataset(
     *,
     max_source_length: int,
     max_target_length: int,
+    architecture: str = "m2m100",
 ) -> Dataset:
     def preprocess(example: dict[str, Any]) -> dict[str, list[int]]:
-        tokenizer.src_lang = example["src_lang"]
+        if architecture.lower() == "small100":
+            tokenizer.tgt_lang = example["tgt_lang"]
+        else:
+            tokenizer.src_lang = example["src_lang"]
+            tokenizer.tgt_lang = example["tgt_lang"]
         model_inputs = tokenizer(
             example["src_text"],
-            max_length=max_source_length,
-            truncation=True,
-        )
-
-        # M2M100 prefixes the current source-language token. Encoding the target
-        # with tgt_lang as src_lang makes every label start with its language ID.
-        tokenizer.src_lang = example["tgt_lang"]
-        labels = tokenizer(
-            example["tgt_text"],
+            text_target=example["tgt_text"],
             max_length=max_target_length,
             truncation=True,
         )
-        model_inputs["labels"] = labels["input_ids"]
         return model_inputs
 
     return dataset.map(

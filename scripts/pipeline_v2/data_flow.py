@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import json
 import re
+import sys
 import unicodedata
 from collections import Counter
 from datetime import datetime, timezone
@@ -11,6 +12,9 @@ from pathlib import Path
 from typing import Any
 
 import pandas as pd
+
+PROJECT_ROOT_BOOTSTRAP = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(PROJECT_ROOT_BOOTSTRAP))
 
 try:
     from .common import (
@@ -30,6 +34,10 @@ except ImportError:
         project_path,
         write_json,
     )
+
+from scripts.pipeline_v3.language_normalization import (  # noqa: E402
+    normalize_language_text,
+)
 
 QUALITY_WEIGHTS = {"GOLD": 1.0, "SILVER": 0.85, "BRONZE": 0.65}
 FIRST_LABELS = {"PASS", "MINOR", "FAIL", "UNCERTAIN"}
@@ -103,9 +111,40 @@ def validate(config: dict[str, Any]) -> None:
     errors: list[str] = []
     if source == target or pair != f"{source}_{target}":
         errors.append("direction.pair must equal <source_lang>_<target_lang>.")
-    if not config["direction"].get("commercial_use"):
-        errors.append("commercial_use must be true.")
-    for role in ("student", "teacher"):
+    data_only = config.get("pipeline", {}).get("scope") == "pair_data_only"
+    roles = ("teacher",) if data_only else ("student", "teacher")
+    contract = config.get("text_contract", {})
+    if "zh" in {source, target} and (
+        contract.get("zh_script") != "simplified"
+        or not contract.get("convert_traditional_to_simplified", False)
+    ):
+        errors.append("ZH data must be converted to Simplified Chinese.")
+    if "uz" in {source, target} and (
+        contract.get("uz_script") != "latin"
+        or not contract.get("transliterate_cyrillic_to_latin", False)
+    ):
+        errors.append("UZ data must be transliterated to Latin script.")
+    if data_only:
+        corpora = config.get("data", {}).get("corpora", [])
+        if not corpora:
+            errors.append("pair_data_only requires at least one pinned corpus.")
+        identities = []
+        archives = []
+        for corpus in corpora:
+            if {
+                str(corpus.get("archive_source_lang", "")),
+                str(corpus.get("archive_target_lang", "")),
+            } != {source, target}:
+                errors.append(
+                    f"Corpus {corpus.get('name', '?')} does not match {pair}."
+                )
+            identities.append((corpus.get("name"), corpus.get("version")))
+            archives.append(corpus.get("local_archive"))
+        if len(identities) != len(set(identities)):
+            errors.append("Pinned corpus name/version pairs must be unique.")
+        if len(archives) != len(set(archives)):
+            errors.append("Pinned corpus archive paths must be unique.")
+    for role in roles:
         candidates = commercial_candidates(config, role)
         ids = [item["id"] for item in candidates]
         if len(ids) != len(set(ids)):
@@ -139,12 +178,17 @@ def validate(config: dict[str, Any]) -> None:
         "schema_version": 3,
         "pair": pair,
         "status": "PASS" if not errors else "FAIL",
-        "commercial_use": True,
+        "commercial_use": bool(config["direction"].get("commercial_use", False)),
+        "pipeline_scope": "pair_data_only" if data_only else "specialist_training",
         "selection_policy": "independent_per_direction",
         "shared_multilingual_training": True,
-        "student_candidates": [
-            item["id"] for item in commercial_candidates(config, "student")
-        ],
+        "student_candidates": (
+            []
+            if data_only
+            else [
+                item["id"] for item in commercial_candidates(config, "student")
+            ]
+        ),
         "teacher_candidates": [
             item["id"] for item in commercial_candidates(config, "teacher")
         ],
@@ -173,8 +217,8 @@ def candidates(config: dict[str, Any]) -> None:
                 zip(left, right, strict=True), 1
             ):
                 source_text, target_text = (
-                    normalize(source_text),
-                    normalize(target_text),
+                    normalize_language_text(source, source_text),
+                    normalize_language_text(target, target_text),
                 )
                 rows.append(
                     {
@@ -206,8 +250,26 @@ def candidates(config: dict[str, Any]) -> None:
     )
 
 
+def _has_expected_script(language: str, text: str) -> bool:
+    if language == "zh":
+        return bool(re.search(r"[\u3400-\u9fff]", text))
+    if language == "uz":
+        return bool(re.search(r"[A-Za-z]", text)) and not bool(
+            re.search(r"[\u0400-\u052f]", text)
+        )
+    if language == "ru":
+        return bool(re.search(r"[\u0400-\u052f]", text))
+    if language == "en":
+        return bool(re.search(r"[A-Za-z]", text))
+    return any(character.isalpha() for character in text)
+
+
 def rule_assessment(
-    source: str, target: str, settings: dict[str, Any]
+    source: str,
+    target: str,
+    settings: dict[str, Any],
+    source_lang: str = "en",
+    target_lang: str = "ru",
 ) -> tuple[list[str], float, str]:
     flags: list[str] = []
     hard = False
@@ -239,11 +301,15 @@ def rule_assessment(
         flags.append("LOW_LETTER_RATIO")
     if re.search(r"([!?.,])\1{2,}", source + target):
         flags.append("REPEATED_PUNCT")
-    if re.findall(r"\d+(?:[.,]\d+)?", source) != re.findall(r"\d+(?:[.,]\d+)?", target):
+    if re.findall(r"\d+(?:[.,]\d+)?", source) != re.findall(
+            r"\d+(?:[.,]\d+)?", target
+    ):
         flags.append("NUMBER_MISMATCH")
-    if not re.search(r"[A-Za-z]", source):
+        if bool(settings.get("exclude_number_mismatch", False)):
+            hard = True
+    if not _has_expected_script(source_lang, source):
         flags.append("SOURCE_SCRIPT_RISK")
-    if not re.search(r"[А-Яа-яЁё]", target):
+    if not _has_expected_script(target_lang, target):
         flags.append("TARGET_SCRIPT_RISK")
     penalties = {
         "CRITICAL_LENGTH_RATIO": 40,
@@ -265,8 +331,19 @@ def rule_assessment(
     return flags, score, route
 
 
-def rule_reasons(source: str, target: str, settings: dict[str, Any]) -> list[str]:
-    return [flag.lower() for flag in rule_assessment(source, target, settings)[0]]
+def rule_reasons(
+    source: str,
+    target: str,
+    settings: dict[str, Any],
+    source_lang: str = "en",
+    target_lang: str = "ru",
+) -> list[str]:
+    return [
+        flag.lower()
+        for flag in rule_assessment(
+            source, target, settings, source_lang, target_lang
+        )[0]
+    ]
 
 
 def stratified_auto_accept_audit(
@@ -300,12 +377,17 @@ def stratified_auto_accept_audit(
 
 
 def rules(config: dict[str, Any]) -> None:
+    _, source_lang, target_lang, _ = pair_info(config)
     frame = pd.read_parquet(paths(config)["candidates"])
     protected = benchmark_sets(config)
     assessments = []
     for row in frame.itertuples(index=False):
         flags, score, route = rule_assessment(
-            row.source_text, row.target_text, config["data"]
+            row.source_text,
+            row.target_text,
+            config["data"],
+            source_lang,
+            target_lang,
         )
         if (
             row.pair_id in protected["pairs"]
@@ -629,7 +711,8 @@ def kd_dataset(config: dict[str, Any]) -> None:
     teacher_rows = []
     seen = set()
     for row in accepted.itertuples(index=False):
-        source_text, teacher_text = normalize(row.src_text), normalize(row.teacher_text)
+        source_text = normalize_language_text(row.src_lang, row.src_text)
+        teacher_text = normalize_language_text(row.tgt_lang, row.teacher_text)
         reason = ""
         if not teacher_text:
             reason = "EMPTY_TEACHER"
@@ -639,9 +722,7 @@ def kd_dataset(config: dict[str, Any]) -> None:
             teacher_text
         ) == normalized_key(row.reference_text):
             reason = "REFERENCE_COPY"
-        elif row.tgt_lang == "ru" and not re.search(r"[А-Яа-яЁё]", teacher_text):
-            reason = "TARGET_SCRIPT"
-        elif row.tgt_lang == "en" and not re.search(r"[A-Za-z]", teacher_text):
+        elif not _has_expected_script(row.tgt_lang, teacher_text):
             reason = "TARGET_SCRIPT"
         side = (
             "source" if row.src_lang == config["direction"]["source_lang"] else "target"

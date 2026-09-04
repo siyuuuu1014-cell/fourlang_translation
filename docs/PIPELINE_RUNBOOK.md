@@ -68,10 +68,34 @@ CC-BY-NC 许可证不满足商业用途，因此没有进入候选配置。最�
 
 ## 新语言方向
 
-保留 `scripts/pipeline_v2/` 不变，新增一份 `configs/directions/<pair>.toml` 和对应 pipeline
-清单即可。方向配置必须显式填写：原始语料、FLORES 语言代码、Tatoeba 地址与后缀、
-商业合规的 Student/Teacher 候选、数据规模和部署位置。未产生模型比选结果、Judge 策略或
-promotion gate 时，后续阶段会停止，不会猜测模型或提前注册。
+`ZH-UZ`、`ZH-RU`、`UZ-RU` 已分别配置为只生产数据、不训练或冻结独立模型的 18 阶段流程：
+
+- `configs/pipelines/zh_uz.toml`
+- `configs/pipelines/zh_ru.toml`
+- `configs/pipelines/uz_ru.toml`
+
+公开平行数据使用配置中固定版本的 OPUS Moses ZIP。`ZH-UZ` 使用 Tanzil、tldr-pages、
+TED2020、wikimedia 和 QED；`ZH-RU` 使用 News Commentary、TED2020 和 QED；`UZ-RU`
+使用 GNOME、KDE4、TED2020 和 QED。不接入数百万行抓取语料，也不设跨语言统一的原始行数上限。
+每个方向根据审核后实际可用数据划分，`train_pairs = 0` 表示扣除固定验证/测试集后保留全部符合质量层的数据。
+
+下载后统一完成跨语料合并、成对与单边去重。所有 `zh` 单元先由 OpenCC 转成简体中文；所有
+`uz` 单元先将乌兹别克西里尔字母转写成拉丁字母，再执行脚本门禁。规则只把有风险的行交给
+Qwen，并额外抽审 500 条低风险行；不会把全部人工语料交给 Qwen。
+
+例如查看或运行 ZH-UZ：
+
+```bash
+/root/autodl-tmp/venvs/small100_student/bin/python \
+  scripts/pipeline/run_direction.py zh_uz --profile server --list
+
+/root/autodl-tmp/venvs/small100_student/bin/python \
+  scripts/pipeline/run_direction.py zh_uz --profile server
+```
+
+另外两个方向只需把命令中的 `zh_uz` 换成 `zh_ru` 或 `uz_ru`。每条流程最终只产出
+`data/splits/<pair>/v1/` 和 `data/distillation/<pair>/v1/`，不会进入 `train_exp1`、
+`train_exp2`、freeze 或 registry。
 
 ## 四语言单模型总流水线
 
@@ -101,7 +125,7 @@ NLLB-200 distilled 600M。三者必须在同一份四语言 FLORES dev 上跑完
 Exp2 必须在 12 个方向的 BLEU 和 chrF2 上逐项不低于 Exp1，之后才会把注册表的 12 个方向全部指向
 `models/final_multilingual/fourlang_v1` 同一目录。
 
-EN-RU 的 `generate_teacher` 会按 `distillation.teacher_checkpoint_rows` 写入原子分片到
-`data/pipeline_v2/en_ru/teacher_generation_checkpoints/`。同一份候选数据、Teacher 选择和生成参数下，
+每个语言对的 `generate_teacher` 都会按 `distillation.teacher_checkpoint_rows` 写入原子分片到
+`data/pipeline_v2/<pair>/teacher_generation_checkpoints/`。同一份候选数据、Teacher 选择和生成参数下，
 重新执行该阶段会自动跳过完整分片；不需要使用 `--force` 删除断点。若有意更换输入、Teacher 或生成参数，
 必须先移走旧断点目录，流程不会把不兼容的旧结果静默混入新结果。

@@ -1,0 +1,148 @@
+[pipeline]
+schema_version = 4
+direction = "zh_uz"
+description = "Build audited ZH-UZ human and distillation data for the shared four-language model."
+
+[[stages]]
+id = "validate_config"
+name = "Validate the ZH-UZ pair-data contract"
+runtime = "student"
+command = ["scripts/pipeline_v2/data_flow.py", "validate", "--config", "configs/directions/zh_uz.toml"]
+requires = ["configs/directions/zh_uz.toml"]
+produces = ["reports/pipeline/zh_uz/config_validation.json"]
+
+[[stages]]
+id = "build_protected_benchmarks"
+name = "Freeze ZH-UZ FLORES selection and final benchmarks"
+runtime = "student"
+command = ["scripts/pipeline_v2/build_benchmarks.py", "--config", "configs/directions/zh_uz.toml"]
+requires = ["configs/directions/zh_uz.toml"]
+produces = ["data/benchmark/zh_uz/flores_dev.parquet", "data/benchmark/zh_uz/flores_devtest.parquet", "reports/pipeline/zh_uz/benchmarks.json"]
+
+[[stages]]
+id = "download_parallel_data"
+name = "Download the pinned ZH-UZ OPUS corpora"
+runtime = "student"
+command = ["scripts/pipeline_v2/opus_parallel.py", "download", "--config", "configs/directions/zh_uz.toml"]
+requires = ["configs/directions/zh_uz.toml"]
+produces = ["data/raw/zh_uz/opus/Tanzil-v1-uz-zh.txt.zip", "data/raw/zh_uz/opus/tldr-pages-v2026-07-07-uz-zh.txt.zip", "data/raw/zh_uz/opus/TED2020-v1-uz-zh.txt.zip", "data/raw/zh_uz/opus/wikimedia-v20260327-uz-zh.txt.zip", "data/raw/zh_uz/opus/QED-v2.0a-uz-zh.txt.zip", "reports/pipeline/zh_uz/opus_downloads.json"]
+
+[[stages]]
+id = "build_candidates"
+name = "Convert ZH to Simplified and UZ to Latin, merge, and deduplicate"
+runtime = "student"
+command = ["scripts/pipeline_v2/opus_parallel.py", "build", "--config", "configs/directions/zh_uz.toml"]
+requires = ["data/raw/zh_uz/opus/Tanzil-v1-uz-zh.txt.zip", "data/raw/zh_uz/opus/tldr-pages-v2026-07-07-uz-zh.txt.zip", "data/raw/zh_uz/opus/TED2020-v1-uz-zh.txt.zip", "data/raw/zh_uz/opus/wikimedia-v20260327-uz-zh.txt.zip", "data/raw/zh_uz/opus/QED-v2.0a-uz-zh.txt.zip"]
+produces = ["data/pipeline_v2/zh_uz/candidates.parquet", "reports/pipeline/zh_uz/candidates.json"]
+
+[[stages]]
+id = "rule_route"
+name = "Rule-route ZH-UZ and send only ambiguous rows plus a 500-row audit to Qwen"
+runtime = "student"
+command = ["scripts/pipeline_v2/data_flow.py", "rules", "--config", "configs/directions/zh_uz.toml"]
+requires = ["data/pipeline_v2/zh_uz/candidates.parquet", "data/benchmark/zh_uz/flores_dev.parquet", "data/benchmark/zh_uz/flores_devtest.parquet"]
+produces = ["data/pipeline_v2/zh_uz/rule_routed.parquet", "data/pipeline_v2/zh_uz/human_review_input.parquet", "reports/pipeline/zh_uz/rules.json"]
+
+[[stages]]
+id = "judge_human_data"
+name = "Judge only routed ZH-UZ human rows"
+runtime = "judge"
+command = ["scripts/pipeline_v2/qwen_judge.py", "human", "--config", "configs/directions/zh_uz.toml"]
+requires = ["data/pipeline_v2/zh_uz/human_review_input.parquet"]
+produces = ["data/pipeline_v2/zh_uz/human_judged.parquet"]
+
+[[stages]]
+id = "second_review_human"
+name = "Independently re-review only FAIL, UNCERTAIN, or unparseable rows"
+runtime = "judge"
+command = ["scripts/pipeline_v2/qwen_judge.py", "human_second", "--config", "configs/directions/zh_uz.toml"]
+requires = ["data/pipeline_v2/zh_uz/human_judged.parquet"]
+produces = ["data/pipeline_v2/zh_uz/human_second_review.parquet"]
+
+[[stages]]
+id = "build_approved"
+name = "Build explicitly approved ZH-UZ human data"
+runtime = "student"
+command = ["scripts/pipeline_v2/data_flow.py", "approve", "--config", "configs/directions/zh_uz.toml"]
+requires = ["data/pipeline_v2/zh_uz/rule_routed.parquet", "data/pipeline_v2/zh_uz/human_judged.parquet", "data/pipeline_v2/zh_uz/human_second_review.parquet"]
+produces = ["data/approved/zh_uz/v1/approved_pairs.parquet", "reports/pipeline/zh_uz/approved.json"]
+
+[[stages]]
+id = "build_frozen_split"
+name = "Create leakage-safe bidirectional ZH-UZ train, validation, and test data"
+runtime = "student"
+command = ["scripts/pipeline_v2/data_flow.py", "split", "--config", "configs/directions/zh_uz.toml"]
+requires = ["data/approved/zh_uz/v1/approved_pairs.parquet", "data/benchmark/zh_uz/flores_dev.parquet", "data/benchmark/zh_uz/flores_devtest.parquet"]
+produces = ["data/splits/zh_uz/v1/train.jsonl", "data/splits/zh_uz/v1/validation.jsonl", "data/splits/zh_uz/v1/test.jsonl", "reports/pipeline/zh_uz/split.json"]
+
+[[stages]]
+id = "prepare_teacher_candidates"
+name = "Materialize every pinned ZH-UZ Teacher candidate"
+runtime = "student"
+command = ["scripts/pipeline_v2/prepare_models.py", "--role", "teacher", "--config", "configs/directions/zh_uz.toml"]
+requires = ["configs/directions/zh_uz.toml"]
+produces = ["reports/pipeline/zh_uz/model_inventory.json"]
+
+[[stages]]
+id = "teacher_bakeoff"
+name = "Benchmark every ZH-UZ Teacher candidate on selection-only FLORES dev"
+runtime = "student"
+command = ["scripts/pipeline_v2/seq2seq_flow.py", "bakeoff", "--role", "teacher", "--config", "configs/directions/zh_uz.toml"]
+requires = ["data/benchmark/zh_uz/flores_dev.parquet", "reports/pipeline/zh_uz/model_inventory.json"]
+produces = ["results/model_selection/zh_uz/teacher_scores.json"]
+
+[[stages]]
+id = "select_teacher"
+name = "Select the strongest Teacher independently for ZH-UZ and UZ-ZH"
+runtime = "student"
+command = ["scripts/pipeline_v2/select_model.py", "--role", "teacher", "--config", "configs/directions/zh_uz.toml"]
+requires = ["results/model_selection/zh_uz/teacher_scores.json"]
+produces = ["results/model_selection/zh_uz/selected_teacher.json"]
+
+[[stages]]
+id = "prepare_kd_candidates"
+name = "Create protected-source-disjoint bidirectional ZH-UZ KD sources"
+runtime = "student"
+command = ["scripts/pipeline_v2/data_flow.py", "kd_candidates", "--config", "configs/directions/zh_uz.toml"]
+requires = ["data/splits/zh_uz/v1/train.jsonl", "data/benchmark/zh_uz/flores_dev.parquet", "data/benchmark/zh_uz/flores_devtest.parquet"]
+produces = ["data/pipeline_v2/zh_uz/kd_candidates.jsonl", "reports/pipeline/zh_uz/kd_candidates.json"]
+
+[[stages]]
+id = "generate_teacher"
+name = "Generate each ZH-UZ direction with its independently selected Teacher"
+runtime = "student"
+command = ["scripts/pipeline_v2/seq2seq_flow.py", "generate_teacher", "--config", "configs/directions/zh_uz.toml"]
+requires = ["results/model_selection/zh_uz/selected_teacher.json", "data/pipeline_v2/zh_uz/kd_candidates.jsonl"]
+produces = ["data/pipeline_v2/zh_uz/teacher_generated.parquet"]
+
+[[stages]]
+id = "judge_teacher_calibration"
+name = "Audit a deterministic 500-row ZH-UZ Teacher calibration sample"
+runtime = "judge"
+command = ["scripts/pipeline_v2/qwen_judge.py", "teacher", "--config", "configs/directions/zh_uz.toml", "--calibration"]
+requires = ["data/pipeline_v2/zh_uz/teacher_generated.parquet"]
+produces = ["data/pipeline_v2/zh_uz/teacher_judge_calibration.parquet"]
+
+[[stages]]
+id = "freeze_teacher_policy"
+name = "Freeze the ZH-UZ Teacher acceptance policy"
+runtime = "student"
+command = ["scripts/pipeline_v2/data_flow.py", "teacher_policy", "--config", "configs/directions/zh_uz.toml"]
+requires = ["data/pipeline_v2/zh_uz/teacher_judge_calibration.parquet"]
+produces = ["reports/pipeline/zh_uz/teacher_judge_policy.json"]
+
+[[stages]]
+id = "judge_teacher"
+name = "Judge generated ZH-UZ Teacher translations with the frozen schema"
+runtime = "judge"
+command = ["scripts/pipeline_v2/qwen_judge.py", "teacher", "--config", "configs/directions/zh_uz.toml"]
+requires = ["data/pipeline_v2/zh_uz/teacher_generated.parquet", "reports/pipeline/zh_uz/teacher_judge_policy.json"]
+produces = ["data/pipeline_v2/zh_uz/teacher_judged.parquet"]
+
+[[stages]]
+id = "build_kd_dataset"
+name = "Build approved ZH-UZ KD plus human replay for the shared model"
+runtime = "student"
+command = ["scripts/pipeline_v2/data_flow.py", "kd_dataset", "--config", "configs/directions/zh_uz.toml"]
+requires = ["data/pipeline_v2/zh_uz/teacher_judged.parquet", "data/splits/zh_uz/v1/train.jsonl", "reports/pipeline/zh_uz/teacher_judge_policy.json"]
+produces = ["data/distillation/zh_uz/v1/train.jsonl", "data/distillation/zh_uz/v1/validation.jsonl", "reports/pipeline/zh_uz/kd_dataset.json"]

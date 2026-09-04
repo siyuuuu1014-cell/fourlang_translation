@@ -9,6 +9,7 @@ from typing import Any, Callable
 
 from .engine import SUPPORTED_DIRECTIONS, TranslationEngine, parse_direction
 from .loader import LoadedModel, PROJECT_ROOT, load_translation_model
+from .registry import ModelRegistry
 
 
 @dataclass(frozen=True)
@@ -98,6 +99,14 @@ class ModelRouter:
         env_name = "FOURLANG_" + direction.upper().replace("-", "_") + "_MODEL_PATH"
         env_path = os.environ.get(env_name)
         explicit = [Path(env_path).expanduser()] if env_path else []
+        registry_path = self.project_root / "models" / "model_registry.json"
+        if registry_path.is_file():
+            registry = ModelRegistry(project_root=self.project_root, registry_path=registry_path)
+            registry_direction = direction.replace("-", "_")
+            if registry_direction in registry.directions():
+                spec = registry.get(registry_direction)
+                if spec.status == "ready":
+                    return spec.model_name, explicit + [spec.path]
         if direction in {"en-uz", "uz-en"}:
             return (
                 "en_uz_small100_v1",

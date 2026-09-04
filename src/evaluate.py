@@ -5,15 +5,14 @@ import csv
 import json
 import time
 from collections import defaultdict
-from pathlib import Path
 
 import sacrebleu
 import torch
 from peft import PeftModel
-from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
 from config_utils import load_config, positive_limit, project_path
 from data_utils import load_jsonl, validate_languages
+from model_utils import load_base_model, load_tokenizer, prepare_generation
 
 
 def parse_args() -> argparse.Namespace:
@@ -50,13 +49,10 @@ def main() -> None:
     validate_languages(test_dataset, cfg["data"].get("supported_languages", ["zh", "en", "ru", "uz"]))
 
     model_name = cfg["model"]["base_model"]
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    architecture = str(cfg["model"].get("architecture", "m2m100"))
+    tokenizer = load_tokenizer(model_name, architecture)
     dtype = torch.bfloat16 if torch.cuda.is_available() and torch.cuda.is_bf16_supported() else None
-    model = AutoModelForSeq2SeqLM.from_pretrained(
-        model_name,
-        torch_dtype=dtype,
-        low_cpu_mem_usage=True,
-    )
+    model = load_base_model(model_name, architecture, dtype=dtype)
     if args.adapter:
         model = PeftModel.from_pretrained(model, project_path(args.adapter))
 
@@ -74,7 +70,9 @@ def main() -> None:
         for example in test_dataset:
             src_lang = str(example["src_lang"])
             tgt_lang = str(example["tgt_lang"])
-            tokenizer.src_lang = src_lang
+            generation_language = prepare_generation(
+                tokenizer, architecture, src_lang, tgt_lang
+            )
             inputs = tokenizer(
                 str(example["src_text"]),
                 return_tensors="pt",
@@ -87,7 +85,7 @@ def main() -> None:
             started = time.perf_counter()
             generated = model.generate(
                 **inputs,
-                forced_bos_token_id=tokenizer.get_lang_id(tgt_lang),
+                **generation_language,
                 max_new_tokens=max_new_tokens,
                 num_beams=num_beams,
             )

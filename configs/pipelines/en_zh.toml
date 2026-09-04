@@ -1,0 +1,28 @@
+[pipeline]
+schema_version = 1
+direction = "en_zh"
+description = "Freeze and verify the accepted EN-ZH specialist."
+
+[[stages]]
+id = "freeze"
+name = "Freeze selected EN-ZH epoch into the deployment model store"
+runtime = "student"
+command = ["scripts/pipeline/zh_en/21a_freeze_en_zh_specialist.py"]
+requires = [
+  "results/specialists/en_zh/opus_mt_en_zh/exp2_kd_v2/epoch_models/epoch_1",
+]
+produces = [
+  "models/final_specialists/en_zh_v1/manifest.json",
+]
+
+[[stages]]
+id = "verify_registry"
+name = "Validate registry schema and deployed paths"
+runtime = "student"
+command = ["scripts/inference/check_registry.py"]
+requires = [
+  "models/model_registry.json",
+  "models/final_specialists/en_zh_v1/manifest.json",
+]
+produces = ["models/final_specialists/en_zh_v1/manifest.json"]
+

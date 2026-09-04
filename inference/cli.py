@@ -71,6 +71,22 @@ def build_parser():
         ),
     )
 
+    parser.add_argument(
+        "--list-directions",
+        action="store_true",
+        help="List all 12 FourLang directions, including base-model fallbacks.",
+    )
+    parser.add_argument(
+        "--list-routes",
+        action="store_true",
+        help="Show automatic specialist/fallback routing without loading weights.",
+    )
+    parser.add_argument(
+        "--pretty",
+        action="store_true",
+        help="Indent JSON produced by compatibility inspection commands.",
+    )
+
     return parser
 
 
@@ -298,6 +314,31 @@ def main():
         build_parser()
         .parse_args()
     )
+
+    if args.list_directions:
+        from .engine import SUPPORTED_DIRECTIONS
+
+        print(
+            json.dumps(
+                {"ok": True, "directions": list(SUPPORTED_DIRECTIONS)},
+                ensure_ascii=False,
+                indent=2 if args.pretty else None,
+            )
+        )
+        return
+
+    if args.list_routes:
+        from .router import ModelRouter
+
+        router = ModelRouter()
+        print(
+            json.dumps(
+                {"ok": True, "routing_mode": router.mode, "routes": router.route_manifest()},
+                ensure_ascii=False,
+                indent=2 if args.pretty else None,
+            )
+        )
+        return
 
     # Registry-only commands stay lightweight and do not import
     # torch/transformers or load any model.

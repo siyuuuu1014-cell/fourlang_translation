@@ -11,6 +11,12 @@ zh = "zho_Hans"
 uz = "uzn_Latn"
 ru = "rus_Cyrl"
 
+[text_contract]
+zh_script = "simplified"
+convert_traditional_to_simplified = true
+uz_script = "latin"
+transliterate_cyrillic_to_latin = true
+
 [benchmarks]
 flores_url = "https://dl.fbaipublicfiles.com/nllb/flores200_dataset.tar.gz"
 flores_dev = "data/benchmark/fourlang/flores_dev.parquet"

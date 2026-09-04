@@ -16,6 +16,11 @@ from scripts.pipeline_v3.fourlang_flow import (
     directions,
     normalize_rows,
 )
+from scripts.pipeline_v3.language_normalization import (
+    normalize_language_text,
+    to_simplified_chinese,
+    to_uzbek_latin,
+)
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -35,6 +40,42 @@ class FourLanguagePipelineTests(unittest.TestCase):
         )
         self.assertEqual(len(directions()), 12)
         self.assertEqual(len(set(directions())), 12)
+        self.assertEqual(self.config["language_codes"]["nllb"]["zh"], "zho_Hans")
+        self.assertEqual(self.config["language_codes"]["nllb"]["uz"], "uzn_Latn")
+
+    def test_chinese_is_converted_to_simplified(self) -> None:
+        self.assertEqual(to_simplified_chinese("繁體中文與軟體"), "繁体中文与软体")
+
+    def test_uzbek_cyrillic_is_transliterated_to_latin(self) -> None:
+        self.assertEqual(to_uzbek_latin("Ўзбекистон Республикаси"), "O'zbekiston Respublikasi")
+        self.assertNotRegex(to_uzbek_latin("Салом, дунё!"), r"[\u0400-\u052f]")
+
+    def test_language_rules_apply_only_to_the_declared_language(self) -> None:
+        russian = "Россия"
+        self.assertEqual(normalize_language_text("ru", russian), russian)
+
+    def test_normalize_rows_applies_script_contract_to_both_sides(self) -> None:
+        normalized = normalize_rows(
+            pd.DataFrame(
+                {
+                    "src_lang": ["zh", "uz"],
+                    "tgt_lang": ["uz", "zh"],
+                    "src_text": ["這是測試", "Ўзбекистон"],
+                    "tgt_text": ["Бу синов", "這是測試"],
+                }
+            ),
+            origin="script-contract",
+        )
+        self.assertEqual(normalized.loc[0, "src_text"], "这是测试")
+        self.assertEqual(normalized.loc[0, "tgt_text"], "Bu sinov")
+        self.assertEqual(normalized.loc[1, "src_text"], "O'zbekiston")
+        self.assertEqual(normalized.loc[1, "tgt_text"], "这是测试")
+        self.assertEqual(
+            normalized.attrs["script_normalization"]["zh_converted"], 2
+        )
+        self.assertEqual(
+            normalized.attrs["script_normalization"]["uz_converted"], 2
+        )
 
     def test_global_candidates_are_exactly_the_confirmed_shortlist(self) -> None:
         self.assertEqual(

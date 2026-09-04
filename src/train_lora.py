@@ -4,14 +4,11 @@ import argparse
 import json
 import os
 import random
-from pathlib import Path
 
 import numpy as np
 import torch
 from peft import LoraConfig, TaskType, get_peft_model
 from transformers import (
-    AutoModelForSeq2SeqLM,
-    AutoTokenizer,
     DataCollatorForSeq2Seq,
     Seq2SeqTrainer,
     Seq2SeqTrainingArguments,
@@ -20,6 +17,7 @@ from transformers import (
 
 from config_utils import load_config, positive_limit, project_path
 from data_utils import load_jsonl, tokenize_translation_dataset, validate_languages
+from model_utils import load_base_model, load_tokenizer
 
 
 def parse_args() -> argparse.Namespace:
@@ -66,8 +64,9 @@ def main() -> None:
     validate_languages(valid_dataset, supported_languages)
 
     model_name = cfg["model"]["base_model"]
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForSeq2SeqLM.from_pretrained(model_name, low_cpu_mem_usage=True)
+    architecture = str(cfg["model"].get("architecture", "m2m100"))
+    tokenizer = load_tokenizer(model_name, architecture)
+    model = load_base_model(model_name, architecture)
 
     lora_cfg = cfg["lora"]
     peft_config = LoraConfig(
@@ -89,12 +88,14 @@ def main() -> None:
         tokenizer,
         max_source_length=int(cfg["data"]["max_source_length"]),
         max_target_length=int(cfg["data"]["max_target_length"]),
+        architecture=architecture,
     )
     valid_tokens = tokenize_translation_dataset(
         valid_dataset,
         tokenizer,
         max_source_length=int(cfg["data"]["max_source_length"]),
         max_target_length=int(cfg["data"]["max_target_length"]),
+        architecture=architecture,
     )
 
     del train_dataset, valid_dataset
@@ -153,6 +154,7 @@ def main() -> None:
     run_metadata = {
         "config": cfg["_config_path"],
         "base_model": model_name,
+        "architecture": architecture,
         "train_samples": len(train_tokens),
         "validation_samples": len(valid_tokens),
         "cuda": use_cuda,

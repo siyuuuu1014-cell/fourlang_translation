@@ -22,11 +22,18 @@ fourlang_translation/
 
 ## Dependencies
 
-Use the existing server environment:
+The API dependencies are locked in `pyproject.toml` and `uv.lock`. Locally run:
+
+```powershell
+uv sync
+```
+
+The server keeps its existing SMaLL-100 environment. Install the locked API layer
+into that interpreter without moving model files:
 
 ```bash
-source /root/autodl-tmp/venvs/small100_student/bin/activate
-python -m pip install fastapi "uvicorn[standard]"
+uv pip install --python /root/autodl-tmp/venvs/small100_student/bin/python \
+  "fastapi==0.115.6" "uvicorn[standard]==0.34.0" "httpx==0.28.1"
 ```
 
 ## Local syntax checks

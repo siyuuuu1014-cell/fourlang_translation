@@ -31,6 +31,9 @@ from scripts.pipeline_v2.seq2seq_flow import (  # noqa: E402
     train_model,
     translate,
 )
+from scripts.pipeline_v3.language_normalization import (  # noqa: E402
+    normalize_language_text,
+)
 
 LANGUAGES = ("en", "zh", "uz", "ru")
 UNORDERED_PAIRS = (
@@ -84,8 +87,31 @@ def normalize_rows(frame: pd.DataFrame, *, origin: str) -> pd.DataFrame:
         raise ValueError(f"{origin} is missing directed columns: {sorted(missing)}")
     frame["src_lang"] = frame["src_lang"].astype(str).str.lower()
     frame["tgt_lang"] = frame["tgt_lang"].astype(str).str.lower()
-    frame["src_text"] = frame["src_text"].fillna("").astype(str).str.strip()
-    frame["tgt_text"] = frame["tgt_text"].fillna("").astype(str).str.strip()
+    source_before = frame["src_text"].fillna("").astype(str).tolist()
+    target_before = frame["tgt_text"].fillna("").astype(str).tolist()
+    frame["src_text"] = [
+        normalize_language_text(language, text)
+        for language, text in zip(
+            frame["src_lang"], source_before, strict=True
+        )
+    ]
+    frame["tgt_text"] = [
+        normalize_language_text(language, text)
+        for language, text in zip(
+            frame["tgt_lang"], target_before, strict=True
+        )
+    ]
+    normalization = Counter()
+    for language, before, after in zip(
+        frame["src_lang"], source_before, frame["src_text"], strict=True
+    ):
+        normalization[f"{language}_cells"] += 1
+        normalization[f"{language}_converted"] += before.strip() != after
+    for language, before, after in zip(
+        frame["tgt_lang"], target_before, frame["tgt_text"], strict=True
+    ):
+        normalization[f"{language}_cells"] += 1
+        normalization[f"{language}_converted"] += before.strip() != after
     frame = frame[(frame["src_text"] != "") & (frame["tgt_text"] != "")].copy()
     if "weight" in frame.columns:
         frame["weight"] = pd.to_numeric(frame["weight"], errors="coerce").fillna(1.0)
@@ -99,7 +125,7 @@ def normalize_rows(frame: pd.DataFrame, *, origin: str) -> pd.DataFrame:
     invalid = sorted(present - set(directions()))
     if invalid:
         raise ValueError(f"{origin} contains unsupported directions: {invalid}")
-    return frame[
+    result = frame[
         [
             "src_lang",
             "tgt_lang",
@@ -110,6 +136,8 @@ def normalize_rows(frame: pd.DataFrame, *, origin: str) -> pd.DataFrame:
             "origin",
         ]
     ]
+    result.attrs["script_normalization"] = dict(sorted(normalization.items()))
+    return result
 
 
 def balance_training_rows(
@@ -149,6 +177,20 @@ def validate(config: dict[str, Any]) -> None:
     errors = []
     if languages != LANGUAGES:
         errors.append(f"languages must be exactly {list(LANGUAGES)}")
+    codes = config.get("language_codes", {}).get("nllb", {})
+    if codes.get("zh") != "zho_Hans":
+        errors.append("zh must use the Simplified Chinese code zho_Hans")
+    if codes.get("uz") != "uzn_Latn":
+        errors.append("uz must use the Latin Uzbek code uzn_Latn")
+    contract = config.get("text_contract", {})
+    if contract.get("zh_script") != "simplified" or not contract.get(
+        "convert_traditional_to_simplified", False
+    ):
+        errors.append("text_contract must convert zh to Simplified Chinese")
+    if contract.get("uz_script") != "latin" or not contract.get(
+        "transliterate_cyrillic_to_latin", False
+    ):
+        errors.append("text_contract must transliterate uz to Latin script")
     pairs = [item["pair"] for item in config["pair_data"]]
     if set(pairs) != set(UNORDERED_PAIRS) or len(pairs) != len(set(pairs)):
         errors.append(f"pair_data must contain exactly {list(UNORDERED_PAIRS)}")
@@ -194,7 +236,12 @@ def build_benchmarks(config: dict[str, Any]) -> None:
         lengths = {len(value) for value in columns.values()}
         if len(lengths) != 1:
             raise RuntimeError(f"FLORES {split} is not aligned across four languages.")
-        frame = pd.DataFrame(columns)
+        frame = pd.DataFrame(
+            {
+                lang: [normalize_language_text(lang, text) for text in values]
+                for lang, values in columns.items()
+            }
+        )
         path = _path(benchmark[key])
         path.parent.mkdir(parents=True, exist_ok=True)
         frame.to_parquet(path, index=False)
@@ -205,6 +252,7 @@ def build_benchmarks(config: dict[str, Any]) -> None:
 def aggregate(config: dict[str, Any], experiment: str) -> None:
     train_field = "train" if experiment == "exp1" else "kd_train"
     train_parts, validation_parts = [], []
+    normalization_totals: Counter[str] = Counter()
     for item in config["pair_data"]:
         train_path = _path(item[train_field])
         validation_path = _path(item["validation"])
@@ -215,6 +263,7 @@ def aggregate(config: dict[str, Any], experiment: str) -> None:
         train_part = normalize_rows(
             _read_table(train_path), origin=str(train_path.relative_to(PROJECT_ROOT))
         )
+        normalization_totals.update(train_part.attrs["script_normalization"])
         expected = set(item["pair"].split("_"))
         if any(
             {row.src_lang, row.tgt_lang} != expected
@@ -225,6 +274,7 @@ def aggregate(config: dict[str, Any], experiment: str) -> None:
         validation = normalize_rows(
             _read_table(validation_path), origin=str(validation_path.relative_to(PROJECT_ROOT))
         )
+        normalization_totals.update(validation.attrs["script_normalization"])
         if any(
             {row.src_lang, row.tgt_lang} != expected
             for row in validation[["src_lang", "tgt_lang"]].itertuples(index=False)
@@ -258,6 +308,7 @@ def aggregate(config: dict[str, Any], experiment: str) -> None:
         )
     report["validation_rows"] = len(validation)
     report["experiment"] = experiment
+    report["script_normalization"] = dict(sorted(normalization_totals.items()))
     write_json(PROJECT_ROOT / f"reports/pipeline/fourlang/{experiment}_data.json", report)
 
 

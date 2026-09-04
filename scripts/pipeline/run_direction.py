@@ -147,6 +147,9 @@ class DirectionPipeline:
         code_files.extend(
             sorted((PROJECT_ROOT / "scripts" / "pipeline_v3").glob("*.py"))
         )
+        code_files.extend(
+            sorted((PROJECT_ROOT / "scripts" / "supplemental").glob("*.py"))
+        )
         command_config_files = []
         for value in command[1:]:
             candidate = _resolve(PROJECT_ROOT, value)

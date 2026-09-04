@@ -11,9 +11,9 @@ import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 try:
-    from .common import PROJECT_ROOT, load_config, pair_info
+    from .common import PROJECT_ROOT, load_config, pair_info, pipeline_namespace
 except ImportError:
-    from common import PROJECT_ROOT, load_config, pair_info
+    from common import PROJECT_ROOT, load_config, pair_info, pipeline_namespace
 
 LABELS = {"PASS", "MINOR", "FAIL", "UNCERTAIN"}
 USEFULNESS = {"HIGH", "MEDIUM", "LOW", "REJECT"}
@@ -83,9 +83,20 @@ def prompt(mode: str, src_lang: str, tgt_lang: str, source: str, target: str) ->
         else ""
     )
     extra = ', "teacher_usefulness": "HIGH|MEDIUM|LOW|REJECT"' if teacher else ""
+    language_contract = []
+    if "zh" in {src_lang, tgt_lang}:
+        language_contract.append(
+            "Chinese must be standard Simplified Mandarin, not Traditional Chinese or Cantonese."
+        )
+    if "uz" in {src_lang, tgt_lang}:
+        language_contract.append(
+            "Uzbek must use the Latin script, not Cyrillic."
+        )
+    contract_text = " ".join(language_contract)
     return f"""You are a strict bilingual translation quality auditor. {independence}
 The candidate comes from {origin}. Compare meaning, omissions, additions, fluency, language,
 names, numbers, time expressions and negation. Do not rewrite the translation.
+{contract_text}
 PASS means fully usable. MINOR means usable with a small non-substantive issue.
 FAIL means a substantive error. UNCERTAIN means it cannot be judged reliably.
 Source language: {src_lang}
@@ -99,8 +110,7 @@ Return one JSON object only:
 
 
 def io_paths(config: dict[str, Any], mode: str, calibration: bool) -> tuple[Path, Path]:
-    pair, _, _, _ = pair_info(config)
-    base = PROJECT_ROOT / "data" / "pipeline_v2" / pair
+    base = PROJECT_ROOT / "data" / "pipeline_v2" / pipeline_namespace(config)
     if mode == "human":
         return base / "human_review_input.parquet", base / "human_judged.parquet"
     if mode == "human_second":

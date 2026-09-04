@@ -54,6 +54,26 @@ def pair_info(config: dict[str, Any]) -> tuple[str, str, str, str]:
     )
 
 
+def pipeline_namespace(config: dict[str, Any]) -> str:
+    pair, _, _, _ = pair_info(config)
+    namespace = str(config.get("artifacts", {}).get("pipeline_namespace", pair))
+    if not re.fullmatch(r"[a-z0-9_]+", namespace):
+        raise ValueError(f"Invalid artifacts.pipeline_namespace: {namespace!r}")
+    return namespace
+
+
+def teacher_selection_pair(config: dict[str, Any]) -> str:
+    pair, _, _, _ = pair_info(config)
+    selection_pair = str(
+        config.get("artifacts", {}).get("teacher_selection_pair", pair)
+    )
+    if not re.fullmatch(r"[a-z0-9_]+", selection_pair):
+        raise ValueError(
+            f"Invalid artifacts.teacher_selection_pair: {selection_pair!r}"
+        )
+    return selection_pair
+
+
 def write_json(path: Path, payload: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".tmp")

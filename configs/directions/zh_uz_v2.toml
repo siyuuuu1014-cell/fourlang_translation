@@ -1,0 +1,89 @@
+[pipeline]
+scope = "supplemental_pair_data"
+
+[direction]
+schema_version = 3
+pair = "zh_uz"
+source_lang = "zh"
+target_lang = "uz"
+version = "v2"
+commercial_use = false
+seed = 2026
+
+[artifacts]
+pipeline_namespace = "zh_uz_v2"
+teacher_selection_pair = "zh_uz"
+
+[text_contract]
+zh_script = "simplified"
+zh_register = "standard_mandarin"
+convert_traditional_to_simplified = true
+reject_cantonese = true
+uz_script = "latin"
+transliterate_cyrillic_to_latin = true
+
+[supplemental]
+input_candidates = "data/supplemental_staging/pair_subsets/v1/zh_uz/cleaned_candidates.parquet"
+existing_training = ["data/approved/zh_uz/v1/approved_pairs.parquet"]
+rejected_sample_size = 200
+
+[data]
+validation_pairs = 500
+test_pairs = 500
+train_pairs = 0
+training_tiers = ["GOLD"]
+max_characters = 1000
+max_length_ratio = 6.0
+exclude_number_mismatch = true
+
+[benchmarks]
+flores_url = "https://dl.fbaipublicfiles.com/nllb/flores200_dataset.tar.gz"
+flores_source_code = "zho_Hans"
+flores_target_code = "uzn_Latn"
+
+[benchmarks.selection]
+flores_dev = "data/benchmark/zh_uz/flores_dev.parquet"
+
+[benchmarks.final]
+flores_devtest = "data/benchmark/zh_uz/flores_devtest.parquet"
+
+[language_codes.nllb]
+zh = "zho_Hans"
+uz = "uzn_Latn"
+
+[judge]
+model_path = "${FOURLANG_QWEN_MODEL_PATH}"
+force_full_human_review = true
+auto_accept_audit_pairs = 0
+teacher_calibration_pairs = 500
+batch_size = 32
+max_input_tokens = 1536
+max_new_tokens = 256
+
+[distillation]
+candidate_pairs_per_direction = 6000
+teacher_checkpoint_rows = 256
+human_weight = 1.0
+teacher_high_weight = 1.0
+teacher_medium_weight = 0.8
+
+[training]
+max_source_length = 256
+
+[selection]
+primary_metric = "chrf2"
+secondary_metric = "bleu"
+
+[[teacher_candidates]]
+id = "nllb200_3_3b"
+family = "nllb"
+license = "cc-by-nc-4.0"
+commercial_allowed = false
+attribution_required = true
+path = "${FOURLANG_MODEL_ROOT}/nllb-200-3.3B"
+repo_id = "facebook/nllb-200-3.3B"
+revision = "a2814a8c92847d0d6aaf7afc9eac24ab57f26151"
+
+[deployment]
+num_beams = 5
+max_new_tokens = 256

@@ -34,8 +34,10 @@ try:
         commercial_candidates,
         load_config,
         pair_info,
+        pipeline_namespace,
         parquet_columns,
         read_json,
+        teacher_selection_pair,
         write_json,
     )
 except ImportError:
@@ -44,8 +46,10 @@ except ImportError:
         commercial_candidates,
         load_config,
         pair_info,
+        pipeline_namespace,
         parquet_columns,
         read_json,
+        teacher_selection_pair,
         write_json,
     )
 
@@ -275,7 +279,7 @@ def bakeoff(config: dict, role: str, candidate_id: str | None = None) -> None:
 
 
 def load_selected(config: dict, role: str) -> dict[str, Any]:
-    pair, _, _, _ = pair_info(config)
+    pair = teacher_selection_pair(config) if role == "teacher" else pair_info(config)[0]
     return dict(
         read_json(
             PROJECT_ROOT
@@ -659,15 +663,16 @@ def evaluate_experiment(config: dict, experiment: str) -> None:
 
 
 def generate_teacher(config: dict) -> None:
-    pair, _, _, _ = pair_info(config)
+    _, _, _, _ = pair_info(config)
+    namespace = pipeline_namespace(config)
     selection = load_selected(config, "teacher")
     rows = load_jsonl(
-        PROJECT_ROOT / "data" / "pipeline_v2" / pair / "kd_candidates.jsonl"
+        PROJECT_ROOT / "data" / "pipeline_v2" / namespace / "kd_candidates.jsonl"
     )
     checkpoint_rows = int(config["distillation"].get("teacher_checkpoint_rows", 256))
     if checkpoint_rows < 1:
         raise ValueError("distillation.teacher_checkpoint_rows must be positive.")
-    pipeline_root = PROJECT_ROOT / "data" / "pipeline_v2" / pair
+    pipeline_root = PROJECT_ROOT / "data" / "pipeline_v2" / namespace
     checkpoint_root = pipeline_root / "teacher_generation_checkpoints"
     manifest_path = checkpoint_root / "manifest.json"
     signature_payload = {

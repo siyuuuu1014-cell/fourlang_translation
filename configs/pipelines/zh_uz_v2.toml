@@ -1,0 +1,108 @@
+[pipeline]
+schema_version = 4
+direction = "zh_uz_v2"
+description = "Build isolated, fully audited supplemental ZH-UZ v2 data with the selected NLLB Teacher."
+
+[[stages]]
+id = "validate_config"
+name = "Validate the isolated ZH-UZ v2 contract"
+runtime = "student"
+command = ["scripts/pipeline_v2/data_flow.py", "validate", "--config", "configs/directions/zh_uz_v2.toml"]
+requires = ["configs/directions/zh_uz_v2.toml"]
+produces = ["reports/pipeline/zh_uz_v2/config_validation.json"]
+
+[[stages]]
+id = "import_supplemental"
+name = "Import standard-Mandarin and Latin-Uzbek candidates without touching v1"
+runtime = "student"
+command = ["scripts/supplemental/import_pair_v2.py", "--config", "configs/directions/zh_uz_v2.toml"]
+requires = ["data/supplemental_staging/pair_subsets/v1/zh_uz/cleaned_candidates.parquet", "data/approved/zh_uz/v1/approved_pairs.parquet"]
+produces = ["data/pipeline_v2/zh_uz_v2/candidates.parquet", "reports/pipeline/zh_uz_v2/supplemental_import.json"]
+
+[[stages]]
+id = "rule_route"
+name = "Recheck hard rules and route every surviving ZH-UZ v2 pair to Qwen"
+runtime = "student"
+command = ["scripts/pipeline_v2/data_flow.py", "rules", "--config", "configs/directions/zh_uz_v2.toml"]
+requires = ["data/pipeline_v2/zh_uz_v2/candidates.parquet", "data/benchmark/zh_uz/flores_dev.parquet", "data/benchmark/zh_uz/flores_devtest.parquet"]
+produces = ["data/pipeline_v2/zh_uz_v2/rule_routed.parquet", "data/pipeline_v2/zh_uz_v2/human_review_input.parquet", "reports/pipeline/zh_uz_v2/rules.json"]
+
+[[stages]]
+id = "judge_human_data"
+name = "Judge every surviving supplemental ZH-UZ pair"
+runtime = "judge"
+command = ["scripts/pipeline_v2/qwen_judge.py", "human", "--config", "configs/directions/zh_uz_v2.toml"]
+requires = ["data/pipeline_v2/zh_uz_v2/human_review_input.parquet"]
+produces = ["data/pipeline_v2/zh_uz_v2/human_judged.parquet"]
+
+[[stages]]
+id = "second_review_human"
+name = "Independently re-review FAIL, UNCERTAIN, and unparseable v2 rows"
+runtime = "judge"
+command = ["scripts/pipeline_v2/qwen_judge.py", "human_second", "--config", "configs/directions/zh_uz_v2.toml"]
+requires = ["data/pipeline_v2/zh_uz_v2/human_judged.parquet"]
+produces = ["data/pipeline_v2/zh_uz_v2/human_second_review.parquet"]
+
+[[stages]]
+id = "build_approved"
+name = "Build explicitly approved ZH-UZ v2 human data"
+runtime = "student"
+command = ["scripts/pipeline_v2/data_flow.py", "approve", "--config", "configs/directions/zh_uz_v2.toml"]
+requires = ["data/pipeline_v2/zh_uz_v2/rule_routed.parquet", "data/pipeline_v2/zh_uz_v2/human_judged.parquet", "data/pipeline_v2/zh_uz_v2/human_second_review.parquet"]
+produces = ["data/approved/zh_uz/v2/approved_pairs.parquet", "reports/pipeline/zh_uz_v2/approved.json"]
+
+[[stages]]
+id = "build_frozen_split"
+name = "Create leakage-safe ZH-UZ v2 train, validation, and test data"
+runtime = "student"
+command = ["scripts/pipeline_v2/data_flow.py", "split", "--config", "configs/directions/zh_uz_v2.toml"]
+requires = ["data/approved/zh_uz/v2/approved_pairs.parquet", "data/benchmark/zh_uz/flores_dev.parquet", "data/benchmark/zh_uz/flores_devtest.parquet"]
+produces = ["data/splits/zh_uz/v2/train.jsonl", "data/splits/zh_uz/v2/validation.jsonl", "data/splits/zh_uz/v2/test.jsonl", "reports/pipeline/zh_uz_v2/split.json"]
+
+[[stages]]
+id = "prepare_kd_candidates"
+name = "Create protected-source-disjoint bidirectional ZH-UZ v2 KD sources"
+runtime = "student"
+command = ["scripts/pipeline_v2/data_flow.py", "kd_candidates", "--config", "configs/directions/zh_uz_v2.toml"]
+requires = ["data/splits/zh_uz/v2/train.jsonl", "data/benchmark/zh_uz/flores_dev.parquet", "data/benchmark/zh_uz/flores_devtest.parquet"]
+produces = ["data/pipeline_v2/zh_uz_v2/kd_candidates.jsonl", "reports/pipeline/zh_uz_v2/kd_candidates.json"]
+
+[[stages]]
+id = "generate_teacher"
+name = "Generate ZH-UZ v2 translations with the selected NLLB Teacher"
+runtime = "student"
+command = ["scripts/pipeline_v2/seq2seq_flow.py", "generate_teacher", "--config", "configs/directions/zh_uz_v2.toml"]
+requires = ["results/model_selection/zh_uz/selected_teacher.json", "data/pipeline_v2/zh_uz_v2/kd_candidates.jsonl"]
+produces = ["data/pipeline_v2/zh_uz_v2/teacher_generated.parquet"]
+
+[[stages]]
+id = "judge_teacher_calibration"
+name = "Audit a deterministic 500-row ZH-UZ v2 Teacher calibration sample"
+runtime = "judge"
+command = ["scripts/pipeline_v2/qwen_judge.py", "teacher", "--config", "configs/directions/zh_uz_v2.toml", "--calibration"]
+requires = ["data/pipeline_v2/zh_uz_v2/teacher_generated.parquet"]
+produces = ["data/pipeline_v2/zh_uz_v2/teacher_judge_calibration.parquet"]
+
+[[stages]]
+id = "freeze_teacher_policy"
+name = "Freeze the ZH-UZ v2 Teacher acceptance policy"
+runtime = "student"
+command = ["scripts/pipeline_v2/data_flow.py", "teacher_policy", "--config", "configs/directions/zh_uz_v2.toml"]
+requires = ["data/pipeline_v2/zh_uz_v2/teacher_judge_calibration.parquet"]
+produces = ["reports/pipeline/zh_uz_v2/teacher_judge_policy.json"]
+
+[[stages]]
+id = "judge_teacher"
+name = "Judge every generated ZH-UZ v2 Teacher translation"
+runtime = "judge"
+command = ["scripts/pipeline_v2/qwen_judge.py", "teacher", "--config", "configs/directions/zh_uz_v2.toml"]
+requires = ["data/pipeline_v2/zh_uz_v2/teacher_generated.parquet", "reports/pipeline/zh_uz_v2/teacher_judge_policy.json"]
+produces = ["data/pipeline_v2/zh_uz_v2/teacher_judged.parquet"]
+
+[[stages]]
+id = "build_kd_dataset"
+name = "Build approved ZH-UZ v2 KD plus audited human replay"
+runtime = "student"
+command = ["scripts/pipeline_v2/data_flow.py", "kd_dataset", "--config", "configs/directions/zh_uz_v2.toml"]
+requires = ["data/pipeline_v2/zh_uz_v2/teacher_judged.parquet", "data/splits/zh_uz/v2/train.jsonl", "reports/pipeline/zh_uz_v2/teacher_judge_policy.json"]
+produces = ["data/distillation/zh_uz/v2/train.jsonl", "data/distillation/zh_uz/v2/validation.jsonl", "reports/pipeline/zh_uz_v2/kd_dataset.json"]

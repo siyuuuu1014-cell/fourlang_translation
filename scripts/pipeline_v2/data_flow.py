@@ -22,6 +22,7 @@ try:
         commercial_candidates,
         load_config,
         pair_info,
+        pipeline_namespace,
         project_path,
         write_json,
     )
@@ -31,6 +32,7 @@ except ImportError:
         commercial_candidates,
         load_config,
         pair_info,
+        pipeline_namespace,
         project_path,
         write_json,
     )
@@ -59,8 +61,9 @@ def pair_hash(source: str, target: str) -> str:
 
 def paths(config: dict[str, Any]) -> dict[str, Path]:
     pair, _, _, version = pair_info(config)
-    pipeline = PROJECT_ROOT / "data" / "pipeline_v2" / pair
-    reports = PROJECT_ROOT / "reports" / "pipeline" / pair
+    namespace = pipeline_namespace(config)
+    pipeline = PROJECT_ROOT / "data" / "pipeline_v2" / namespace
+    reports = PROJECT_ROOT / "reports" / "pipeline" / namespace
     return {
         "pipeline": pipeline,
         "reports": reports,
@@ -111,7 +114,8 @@ def validate(config: dict[str, Any]) -> None:
     errors: list[str] = []
     if source == target or pair != f"{source}_{target}":
         errors.append("direction.pair must equal <source_lang>_<target_lang>.")
-    data_only = config.get("pipeline", {}).get("scope") == "pair_data_only"
+    scope = str(config.get("pipeline", {}).get("scope", ""))
+    data_only = scope in {"pair_data_only", "supplemental_pair_data"}
     roles = ("teacher",) if data_only else ("student", "teacher")
     contract = config.get("text_contract", {})
     if "zh" in {source, target} and (
@@ -124,7 +128,7 @@ def validate(config: dict[str, Any]) -> None:
         or not contract.get("transliterate_cyrillic_to_latin", False)
     ):
         errors.append("UZ data must be transliterated to Latin script.")
-    if data_only:
+    if scope == "pair_data_only":
         corpora = config.get("data", {}).get("corpora", [])
         if not corpora:
             errors.append("pair_data_only requires at least one pinned corpus.")
@@ -179,7 +183,7 @@ def validate(config: dict[str, Any]) -> None:
         "pair": pair,
         "status": "PASS" if not errors else "FAIL",
         "commercial_use": bool(config["direction"].get("commercial_use", False)),
-        "pipeline_scope": "pair_data_only" if data_only else "specialist_training",
+        "pipeline_scope": scope or "specialist_training",
         "selection_policy": "independent_per_direction",
         "shared_multilingual_training": True,
         "student_candidates": (
@@ -402,15 +406,22 @@ def rules(config: dict[str, Any]) -> None:
     frame["quality_score"] = [item[1] for item in assessments]
     frame["pipeline_route"] = [item[2] for item in assessments]
     frame.to_parquet(paths(config)["routed"], index=False)
-    needs = frame[frame["pipeline_route"] == "NEEDS_QWEN"].copy()
-    auto = frame[frame["pipeline_route"] == "AUTO_ACCEPT"].copy()
-    audit_size = min(int(config["judge"]["auto_accept_audit_pairs"]), len(auto))
-    audit = stratified_auto_accept_audit(
-        auto, audit_size, int(config["direction"]["seed"])
-    )
-    needs["qwen_review_type"] = "NEEDS_QWEN"
-    audit["qwen_review_type"] = "AUTO_ACCEPT_AUDIT"
-    review = pd.concat([needs, audit], ignore_index=True).sort_values("pair_id")
+    force_full_review = bool(config["judge"].get("force_full_human_review", False))
+    if force_full_review:
+        needs = frame[frame["pipeline_route"] != "HARD_REJECT"].copy()
+        audit = frame.head(0).copy()
+        needs["qwen_review_type"] = "FULL_REVIEW"
+        review = needs.sort_values("pair_id")
+    else:
+        needs = frame[frame["pipeline_route"] == "NEEDS_QWEN"].copy()
+        auto = frame[frame["pipeline_route"] == "AUTO_ACCEPT"].copy()
+        audit_size = min(int(config["judge"]["auto_accept_audit_pairs"]), len(auto))
+        audit = stratified_auto_accept_audit(
+            auto, audit_size, int(config["direction"]["seed"])
+        )
+        needs["qwen_review_type"] = "NEEDS_QWEN"
+        audit["qwen_review_type"] = "AUTO_ACCEPT_AUDIT"
+        review = pd.concat([needs, audit], ignore_index=True).sort_values("pair_id")
     review.to_parquet(paths(config)["human_review"], index=False)
     write_json(
         paths(config)["reports"] / "rules.json",
@@ -419,6 +430,7 @@ def rules(config: dict[str, Any]) -> None:
             "routes": dict(Counter(frame["pipeline_route"])),
             "qwen_full_review_rows": len(needs),
             "auto_accept_audit_rows": len(audit),
+            "force_full_human_review": force_full_review,
             "audit_seed": int(config["direction"]["seed"]),
             "protected_overlap_rows": int(
                 frame["rule_flags"].str.contains("PROTECTED_BENCHMARK_OVERLAP").sum()

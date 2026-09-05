@@ -38,6 +38,8 @@ def base_config(root: Path) -> dict:
             "min_zh_cjk_ratio": 0.6,
             "min_uz_latin_ratio": 0.85,
             "max_digit_ratio": 0.25,
+            "source_minimum_group_pass_rate": 0.0,
+            "source_minimum_calibration_rows": 1,
             "base_train": str(root / "base_train.jsonl"),
             "base_validation": str(root / "base_validation.jsonl"),
             "deduplicate_against": [str(root / "base_train.jsonl")],
@@ -160,18 +162,65 @@ class ZhUzV3PipelineTests(unittest.TestCase):
                 "source_record": "1",
                 "judge_parse_ok": True,
             }
-            pd.DataFrame(
+            records = [
+                {**common, "pair_id": "zh", "src_lang": "zh", "tgt_lang": "uz", "src_text": "这是自然完整的中文句子。", "judge_label": "PASS"},
+                {**common, "pair_id": "uz", "src_lang": "uz", "tgt_lang": "zh", "src_text": "Bu tabiiy va to'liq o'zbekcha gap.", "judge_label": "PASS"},
+                {**common, "pair_id": "bad", "src_lang": "zh", "tgt_lang": "uz", "src_text": "关键词 列表 碎片", "judge_label": "FAIL"},
+            ]
+            pd.DataFrame(records).to_parquet(
+                pipeline / "source_judge_calibration.parquet", index=False
+            )
+            monolingual_v3._write_jsonl(
                 [
-                    {**common, "pair_id": "zh", "src_lang": "zh", "tgt_lang": "uz", "src_text": "这是自然完整的中文句子。", "judge_label": "PASS"},
-                    {**common, "pair_id": "uz", "src_lang": "uz", "tgt_lang": "zh", "src_text": "Bu tabiiy va to'liq o'zbekcha gap.", "judge_label": "PASS"},
-                    {**common, "pair_id": "bad", "src_lang": "zh", "tgt_lang": "uz", "src_text": "关键词 列表 碎片", "judge_label": "FAIL"},
-                ]
-            ).to_parquet(pipeline / "source_judged.parquet", index=False)
+                    {
+                        key: row[key]
+                        for key in (
+                            "pair_id",
+                            "src_lang",
+                            "tgt_lang",
+                            "src_text",
+                            "reference_text",
+                            "source_corpus",
+                            "source_license",
+                            "source_record",
+                        )
+                    }
+                    for row in records
+                ],
+                pipeline / "monolingual_candidates.jsonl",
+            )
             with patch.object(monolingual_v3, "PROJECT_ROOT", root):
                 report = monolingual_v3.select_sources(config)
             rows = monolingual_v3._read_jsonl(pipeline / "kd_candidates.jsonl")
             self.assertEqual(len(rows), 2)
             self.assertTrue(report["eligible_for_teacher_generation"])
+            self.assertEqual(report["review_mode"], "stratified_calibration")
+
+    def test_select_sources_prefers_complete_full_audit(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            config = base_config(root)
+            config["monolingual_sources"] = [
+                {"id": "test", "kind": "local_jsonl", "language": "zh", "max_rows": 1}
+            ]
+            pipeline = root / "data/pipeline_v2/zh_uz_v3"
+            pipeline.mkdir(parents=True)
+            records = [
+                {"pair_id": "zh", "src_lang": "zh", "tgt_lang": "uz", "src_text": "这是自然完整的中文句子。", "reference_text": "", "source_corpus": "test", "source_license": "test", "source_record": "1"},
+                {"pair_id": "uz", "src_lang": "uz", "tgt_lang": "zh", "src_text": "Bu tabiiy va to'liq o'zbekcha gap.", "reference_text": "", "source_corpus": "test", "source_license": "test", "source_record": "2"},
+                {"pair_id": "bad", "src_lang": "zh", "tgt_lang": "uz", "src_text": "关键词 列表 碎片", "reference_text": "", "source_corpus": "test", "source_license": "test", "source_record": "3"},
+            ]
+            monolingual_v3._write_jsonl(records, pipeline / "monolingual_candidates.jsonl")
+            judged = pd.DataFrame(records)
+            judged["judge_parse_ok"] = True
+            judged["judge_label"] = ["PASS", "PASS", "FAIL"]
+            judged.to_parquet(pipeline / "source_judged.parquet", index=False)
+            with patch.object(monolingual_v3, "PROJECT_ROOT", root):
+                report = monolingual_v3.select_sources(config)
+            rows = monolingual_v3._read_jsonl(pipeline / "kd_candidates.jsonl")
+            self.assertEqual({row["pair_id"] for row in rows}, {"zh", "uz"})
+            self.assertEqual(report["review_mode"], "full")
+            self.assertTrue(report["full_review_coverage"])
 
 
 if __name__ == "__main__":

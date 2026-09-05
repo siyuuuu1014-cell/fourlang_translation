@@ -110,6 +110,8 @@ Return one JSON object only:
 The candidate comes from {origin}. Compare meaning, omissions, additions, fluency, language,
 names, numbers, time expressions and negation. Do not rewrite the translation.
 {contract_text}
+For Teacher candidates, also reject when the source itself is in the wrong language,
+is a keyword/list fragment, boilerplate, corrupted, or not a coherent natural sentence.
 PASS means fully usable. MINOR means usable with a small non-substantive issue.
 FAIL means a substantive error. UNCERTAIN means it cannot be judged reliably.
 Source language: {src_lang}
@@ -125,7 +127,11 @@ Return one JSON object only:
 def io_paths(config: dict[str, Any], mode: str, calibration: bool) -> tuple[Path, Path]:
     base = PROJECT_ROOT / "data" / "pipeline_v2" / pipeline_namespace(config)
     if mode == "source":
-        return base / "monolingual_candidates.jsonl", base / "source_judged.parquet"
+        return base / "monolingual_candidates.jsonl", base / (
+            "source_judge_calibration.parquet"
+            if calibration
+            else "source_judged.parquet"
+        )
     if mode == "human":
         return base / "human_review_input.parquet", base / "human_judged.parquet"
     if mode == "human_second":
@@ -143,6 +149,29 @@ def second_review_mask(frame: pd.DataFrame) -> pd.Series:
     return (~frame["judge_parse_ok"].fillna(False).astype(bool)) | frame[
         "judge_label"
     ].fillna("UNCERTAIN").astype(str).str.upper().isin(["FAIL", "UNCERTAIN"])
+
+
+def stratified_source_sample(
+    frame: pd.DataFrame, count: int, seed: int
+) -> pd.DataFrame:
+    if count >= len(frame):
+        return frame.sort_values("pair_id")
+    groups = list(
+        frame.groupby(["src_lang", "source_corpus"], sort=True, dropna=False).groups.items()
+    )
+    per_group = max(1, count // len(groups))
+    selected: list[Any] = []
+    for offset, (_, indices) in enumerate(groups):
+        group_indices = list(indices)
+        take = min(per_group, len(group_indices))
+        selected.extend(
+            frame.loc[group_indices].sample(n=take, random_state=seed + offset).index
+        )
+    remaining = count - len(selected)
+    if remaining > 0:
+        pool = frame.drop(index=selected)
+        selected.extend(pool.sample(n=remaining, random_state=seed + 10_000).index)
+    return frame.loc[selected].sort_values("pair_id")
 
 
 def save(rows: list[dict[str, Any]], path: Path) -> None:
@@ -227,10 +256,20 @@ def main() -> None:
     if args.mode == "human_second":
         frame = frame[second_review_mask(frame)].copy()
     if args.calibration:
-        count = min(int(config["judge"]["teacher_calibration_pairs"]), len(frame))
-        frame = frame.sample(
-            n=count, random_state=int(config["direction"]["seed"])
-        ).sort_values("pair_id")
+        count_key = (
+            "source_calibration_pairs"
+            if args.mode == "source"
+            else "teacher_calibration_pairs"
+        )
+        count = min(int(config["judge"][count_key]), len(frame))
+        if args.mode == "source":
+            frame = stratified_source_sample(
+                frame, count, int(config["direction"]["seed"])
+            )
+        else:
+            frame = frame.sample(
+                n=count, random_state=int(config["direction"]["seed"])
+            ).sort_values("pair_id")
     frame["judge_id"] = [judge_id(row) for row in frame.to_dict("records")]
     if output_path.exists() and not args.overwrite:
         existing = pd.read_parquet(output_path)

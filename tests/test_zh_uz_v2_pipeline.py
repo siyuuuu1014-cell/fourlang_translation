@@ -178,6 +178,24 @@ class ZhUzV2PipelineTests(unittest.TestCase):
         self.assertIn("keyword or entity lists", rendered)
         self.assertIn("another language", rendered)
 
+    def test_source_calibration_is_stratified_by_language_and_corpus(self) -> None:
+        frame = pd.DataFrame(
+            [
+                {
+                    "pair_id": f"{language}-{corpus}-{index}",
+                    "src_lang": language,
+                    "source_corpus": corpus,
+                }
+                for language in ("zh", "uz")
+                for corpus in ("hplt", "fineweb")
+                for index in range(20)
+            ]
+        )
+        sample = qwen_judge.stratified_source_sample(frame, 40, 2026)
+        counts = sample.groupby(["src_lang", "source_corpus"]).size()
+        self.assertEqual(len(sample), 40)
+        self.assertEqual(set(counts), {10})
+
 
 if __name__ == "__main__":
     unittest.main()

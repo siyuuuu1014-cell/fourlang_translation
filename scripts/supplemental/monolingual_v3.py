@@ -523,11 +523,66 @@ def select_sources(config: dict[str, Any]) -> dict[str, Any]:
     _validate_contract(config)
     settings = config["monolingual"]
     pipeline_root, report_root = _roots(config)
-    frame = pd.read_parquet(pipeline_root / "source_judged.parquet")
-    accepted = frame[
-        frame["judge_parse_ok"].fillna(False)
-        & (frame["judge_label"].fillna("UNCERTAIN").str.upper() == "PASS")
-    ].copy()
+    raw = _read_jsonl(pipeline_root / "monolingual_candidates.jsonl")
+    raw_ids = {str(row["pair_id"]) for row in raw}
+    full_path = pipeline_root / "source_judged.parquet"
+    calibration_path = pipeline_root / "source_judge_calibration.parquet"
+    full_coverage = False
+    if full_path.is_file():
+        full_frame = pd.read_parquet(full_path)
+        if "pair_id" in full_frame.columns:
+            full_frame = full_frame.drop_duplicates("pair_id", keep="last")
+            reviewed_ids = set(full_frame["pair_id"].astype(str))
+            full_coverage = raw_ids.issubset(reviewed_ids)
+    if full_coverage:
+        review_mode = "full"
+        frame = full_frame[full_frame["pair_id"].astype(str).isin(raw_ids)].copy()
+    elif calibration_path.is_file():
+        review_mode = "stratified_calibration"
+        frame = pd.read_parquet(calibration_path)
+    else:
+        raise RuntimeError(
+            "No complete full source audit or stratified source calibration exists. "
+            "Run qwen_judge.py source before selecting monolingual data."
+        )
+    minimum_rate = float(settings.get("source_minimum_group_pass_rate", 0.75))
+    minimum_rows = int(settings.get("source_minimum_calibration_rows", 50))
+    group_policy: dict[tuple[str, str], dict[str, Any]] = {}
+    for (language, corpus), group in frame.groupby(
+        ["src_lang", "source_corpus"], sort=True
+    ):
+        valid_pass = group["judge_parse_ok"].fillna(False) & (
+            group["judge_label"].fillna("UNCERTAIN").str.upper() == "PASS"
+        )
+        rate = float(valid_pass.mean()) if len(group) else 0.0
+        group_policy[(str(language), str(corpus))] = {
+            "review_rows": len(group),
+            "pass_rows": int(valid_pass.sum()),
+            "pass_rate": rate,
+            "eligible": (
+                True
+                if review_mode == "full"
+                else len(group) >= minimum_rows and rate >= minimum_rate
+            ),
+        }
+    audited_failures = {
+        str(row.pair_id)
+        for row in frame.itertuples(index=False)
+        if not bool(row.judge_parse_ok) or str(row.judge_label).upper() != "PASS"
+    }
+    if review_mode == "full":
+        eligible_rows = [
+            row for row in raw if str(row["pair_id"]) not in audited_failures
+        ]
+    else:
+        eligible_rows = [
+            row
+            for row in raw
+            if group_policy.get(
+                (str(row["src_lang"]), str(row["source_corpus"])), {}
+            ).get("eligible", False)
+            and str(row["pair_id"]) not in audited_failures
+        ]
     targets = {
         "zh": int(settings["target_zh_sources"]),
         "uz": int(settings["target_uz_sources"]),
@@ -535,7 +590,7 @@ def select_sources(config: dict[str, Any]) -> dict[str, Any]:
     selected: list[dict[str, Any]] = []
     available: Counter[str] = Counter()
     for language in ("zh", "uz"):
-        rows = accepted[accepted["src_lang"] == language].to_dict("records")
+        rows = [row for row in eligible_rows if row["src_lang"] == language]
         rows.sort(
             key=lambda row: hashlib.sha256(
                 f"{config['direction']['seed']}:{row['pair_id']}".encode()
@@ -572,8 +627,16 @@ def select_sources(config: dict[str, Any]) -> dict[str, Any]:
         for row in frame.itertuples(index=False)
     )
     report = {
-        "schema_version": 1,
-        "reviewed_rows": len(frame),
+        "schema_version": 2,
+        "review_mode": review_mode,
+        "review_rows": len(frame),
+        "candidate_rows": len(raw),
+        "full_review_coverage": full_coverage,
+        "selection_rule": (
+            "individual_qwen_pass"
+            if review_mode == "full"
+            else "eligible_calibrated_pool_minus_sample_failures"
+        ),
         "available_pass": dict(available),
         "selected": Counter(str(row["src_lang"]) for row in selected),
         "targets": targets,
@@ -582,6 +645,12 @@ def select_sources(config: dict[str, Any]) -> dict[str, Any]:
             f"{language}:{label}": count
             for (language, label), count in sorted(labels.items())
         },
+        "minimum_group_pass_rate": minimum_rate,
+        "group_policy": {
+            f"{language}:{corpus}": policy
+            for (language, corpus), policy in sorted(group_policy.items())
+        },
+        "final_teacher_audit_required": True,
         "eligible_for_teacher_generation": not shortages,
     }
     write_json(report_root / "source_selection.json", report)

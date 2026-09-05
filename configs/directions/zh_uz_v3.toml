@@ -25,13 +25,15 @@ transliterate_cyrillic_to_latin = true
 [monolingual]
 target_zh_sources = 20000
 target_uz_sources = 17000
-collection_target_zh_sources = 30000
-collection_target_uz_sources = 25000
+collection_target_zh_sources = 38000
+collection_target_uz_sources = 33000
 minimum_accepted_per_direction = 8000
 require_full_targets = true
 require_minimum_accepted = true
 checkpoint_rows = 250
 audit_sample_rows_per_language = 100
+source_minimum_group_pass_rate = 0.75
+source_minimum_calibration_rows = 50
 min_zh_characters = 8
 max_zh_characters = 256
 min_uz_characters = 20
@@ -79,7 +81,7 @@ quality_bins = ["10", "9"]
 max_shards = 4
 text_field = "text"
 split_documents = true
-max_rows = 17000
+max_rows = 22000
 max_documents = 100000
 license = "cc0-1.0-packaging_underlying-rights-vary"
 
@@ -92,7 +94,7 @@ quality_bins = ["10", "9"]
 max_shards = 4
 text_field = "text"
 split_documents = true
-max_rows = 14000
+max_rows = 19000
 max_documents = 100000
 license = "cc0-1.0-packaging_underlying-rights-vary"
 
@@ -106,7 +108,7 @@ split = "train"
 text_field = "text"
 split_documents = true
 min_language_score = 0.90
-max_rows = 9000
+max_rows = 13000
 max_documents = 100000
 license = "odc-by-1.0-common-crawl-terms"
 
@@ -120,7 +122,7 @@ split = "train"
 text_field = "text"
 split_documents = true
 min_language_score = 0.90
-max_rows = 8000
+max_rows = 12000
 max_documents = 100000
 license = "odc-by-1.0-common-crawl-terms"
 
@@ -167,6 +169,7 @@ uz = "uzn_Latn"
 
 [judge]
 model_path = "${FOURLANG_QWEN_MODEL_PATH}"
+source_calibration_pairs = 4000
 teacher_calibration_pairs = 1000
 batch_size = 32
 max_input_tokens = 1536

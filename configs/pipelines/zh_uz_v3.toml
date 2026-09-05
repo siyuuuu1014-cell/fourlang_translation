@@ -1,0 +1,76 @@
+[pipeline]
+schema_version = 4
+direction = "zh_uz_v3"
+description = "Collect new monolingual sources and build isolated, fully audited ZH-UZ v3 distillation data."
+
+[[stages]]
+id = "validate_config"
+name = "Validate the isolated ZH-UZ v3 monolingual contract"
+runtime = "student"
+command = ["scripts/supplemental/monolingual_v3.py", "validate", "--config", "configs/directions/zh_uz_v3.toml"]
+requires = ["configs/directions/zh_uz_v3.toml"]
+produces = ["reports/pipeline/zh_uz_v3/config_validation.json"]
+
+[[stages]]
+id = "collect_monolingual"
+name = "Collect, normalize, deduplicate, and checkpoint new Chinese and Uzbek sources"
+runtime = "student"
+command = ["scripts/supplemental/monolingual_v3.py", "collect", "--config", "configs/directions/zh_uz_v3.toml", "--extend"]
+requires = ["data/approved/zh_uz/v2/approved_pairs.parquet", "data/distillation/zh_uz/v2/train.jsonl", "data/distillation/zh_uz/v2/validation.jsonl", "data/benchmark/zh_uz/flores_dev.parquet", "data/benchmark/zh_uz/flores_devtest.parquet"]
+produces = ["data/pipeline_v2/zh_uz_v3/monolingual_candidates.jsonl", "data/pipeline_v2/zh_uz_v3/source_audit_sample.jsonl", "reports/pipeline/zh_uz_v3/monolingual_collection.json"]
+
+[[stages]]
+id = "judge_monolingual"
+name = "Judge every Chinese and Uzbek source for native-language quality"
+runtime = "judge"
+command = ["scripts/pipeline_v2/qwen_judge.py", "source", "--config", "configs/directions/zh_uz_v3.toml"]
+requires = ["data/pipeline_v2/zh_uz_v3/monolingual_candidates.jsonl"]
+produces = ["data/pipeline_v2/zh_uz_v3/source_judged.parquet"]
+
+[[stages]]
+id = "select_monolingual"
+name = "Select 20000 Chinese and 17000 Uzbek Qwen-PASS sources"
+runtime = "student"
+command = ["scripts/supplemental/monolingual_v3.py", "select_sources", "--config", "configs/directions/zh_uz_v3.toml"]
+requires = ["data/pipeline_v2/zh_uz_v3/source_judged.parquet"]
+produces = ["data/pipeline_v2/zh_uz_v3/kd_candidates.jsonl", "reports/pipeline/zh_uz_v3/source_selection.json"]
+
+[[stages]]
+id = "generate_teacher"
+name = "Generate translations for all new sources with the selected NLLB Teacher"
+runtime = "student"
+command = ["scripts/pipeline_v2/seq2seq_flow.py", "generate_teacher", "--config", "configs/directions/zh_uz_v3.toml"]
+requires = ["results/model_selection/zh_uz/selected_teacher.json", "data/pipeline_v2/zh_uz_v3/kd_candidates.jsonl"]
+produces = ["data/pipeline_v2/zh_uz_v3/teacher_generated.parquet"]
+
+[[stages]]
+id = "judge_teacher_calibration"
+name = "Audit a deterministic 1000-row v3 Teacher calibration sample"
+runtime = "judge"
+command = ["scripts/pipeline_v2/qwen_judge.py", "teacher", "--config", "configs/directions/zh_uz_v3.toml", "--calibration"]
+requires = ["data/pipeline_v2/zh_uz_v3/teacher_generated.parquet"]
+produces = ["data/pipeline_v2/zh_uz_v3/teacher_judge_calibration.parquet"]
+
+[[stages]]
+id = "freeze_teacher_policy"
+name = "Freeze the ZH-UZ v3 Teacher acceptance policy"
+runtime = "student"
+command = ["scripts/pipeline_v2/data_flow.py", "teacher_policy", "--config", "configs/directions/zh_uz_v3.toml"]
+requires = ["data/pipeline_v2/zh_uz_v3/teacher_judge_calibration.parquet"]
+produces = ["reports/pipeline/zh_uz_v3/teacher_judge_policy.json"]
+
+[[stages]]
+id = "judge_teacher"
+name = "Judge every generated ZH-UZ v3 Teacher translation"
+runtime = "judge"
+command = ["scripts/pipeline_v2/qwen_judge.py", "teacher", "--config", "configs/directions/zh_uz_v3.toml"]
+requires = ["data/pipeline_v2/zh_uz_v3/teacher_generated.parquet", "reports/pipeline/zh_uz_v3/teacher_judge_policy.json"]
+produces = ["data/pipeline_v2/zh_uz_v3/teacher_judged.parquet"]
+
+[[stages]]
+id = "build_kd_dataset"
+name = "Merge audited v3 Teacher data with the complete v2 training set"
+runtime = "student"
+command = ["scripts/supplemental/monolingual_v3.py", "finalize", "--config", "configs/directions/zh_uz_v3.toml"]
+requires = ["data/pipeline_v2/zh_uz_v3/teacher_judged.parquet", "reports/pipeline/zh_uz_v3/teacher_judge_policy.json", "data/distillation/zh_uz/v2/train.jsonl", "data/distillation/zh_uz/v2/validation.jsonl", "data/benchmark/zh_uz/flores_dev.parquet", "data/benchmark/zh_uz/flores_devtest.parquet"]
+produces = ["data/distillation/zh_uz/v3/train.jsonl", "data/distillation/zh_uz/v3/validation.jsonl", "reports/pipeline/zh_uz_v3/kd_dataset.json"]

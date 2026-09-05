@@ -1,0 +1,195 @@
+[pipeline]
+scope = "monolingual_distillation"
+
+[direction]
+schema_version = 3
+pair = "zh_uz"
+source_lang = "zh"
+target_lang = "uz"
+version = "v3"
+commercial_use = false
+seed = 2026
+
+[artifacts]
+pipeline_namespace = "zh_uz_v3"
+teacher_selection_pair = "zh_uz"
+
+[text_contract]
+zh_script = "simplified"
+zh_register = "standard_mandarin"
+convert_traditional_to_simplified = true
+reject_cantonese = true
+uz_script = "latin"
+transliterate_cyrillic_to_latin = true
+
+[monolingual]
+target_zh_sources = 20000
+target_uz_sources = 17000
+collection_target_zh_sources = 30000
+collection_target_uz_sources = 25000
+minimum_accepted_per_direction = 8000
+require_full_targets = true
+require_minimum_accepted = true
+checkpoint_rows = 250
+audit_sample_rows_per_language = 100
+min_zh_characters = 8
+max_zh_characters = 256
+min_uz_characters = 20
+max_uz_characters = 400
+min_zh_cjk_ratio = 0.60
+min_uz_latin_ratio = 0.85
+max_digit_ratio = 0.25
+base_train = "data/distillation/zh_uz/v2/train.jsonl"
+base_validation = "data/distillation/zh_uz/v2/validation.jsonl"
+deduplicate_against = [
+  "data/distillation/zh_uz/v2/train.jsonl",
+  "data/distillation/zh_uz/v2/validation.jsonl",
+]
+
+[[monolingual_sources]]
+id = "v2_bronze_zh"
+kind = "v2_bronze"
+language = "zh"
+path = "data/approved/zh_uz/v2/approved_pairs.parquet"
+text_field = "source_text"
+quality_tier = "BRONZE"
+split_documents = false
+max_rows = 6441
+max_documents = 20000
+license = "inherited_from_v2_sources"
+
+[[monolingual_sources]]
+id = "v2_bronze_uz"
+kind = "v2_bronze"
+language = "uz"
+path = "data/approved/zh_uz/v2/approved_pairs.parquet"
+text_field = "target_text"
+quality_tier = "BRONZE"
+split_documents = false
+max_rows = 6441
+max_documents = 20000
+license = "inherited_from_v2_sources"
+
+[[monolingual_sources]]
+id = "hplt3_cmn_hans"
+kind = "hplt_map"
+language = "zh"
+map_url = "https://data.hplt-project.org/three/sorted/cmn_Hans.map"
+quality_bins = ["10", "9"]
+max_shards = 4
+text_field = "text"
+split_documents = true
+max_rows = 17000
+max_documents = 100000
+license = "cc0-1.0-packaging_underlying-rights-vary"
+
+[[monolingual_sources]]
+id = "hplt3_uzn_latn"
+kind = "hplt_map"
+language = "uz"
+map_url = "https://data.hplt-project.org/three/sorted/uzn_Latn.map"
+quality_bins = ["10", "9"]
+max_shards = 4
+text_field = "text"
+split_documents = true
+max_rows = 14000
+max_documents = 100000
+license = "cc0-1.0-packaging_underlying-rights-vary"
+
+[[monolingual_sources]]
+id = "fineweb2_cmn_hani"
+kind = "hf_dataset"
+language = "zh"
+dataset_id = "HuggingFaceFW/fineweb-2"
+subset = "cmn_Hani"
+split = "train"
+text_field = "text"
+split_documents = true
+min_language_score = 0.90
+max_rows = 9000
+max_documents = 100000
+license = "odc-by-1.0-common-crawl-terms"
+
+[[monolingual_sources]]
+id = "fineweb2_uzn_latn"
+kind = "hf_dataset"
+language = "uz"
+dataset_id = "HuggingFaceFW/fineweb-2"
+subset = "uzn_Latn"
+split = "train"
+text_field = "text"
+split_documents = true
+min_language_score = 0.90
+max_rows = 8000
+max_documents = 100000
+license = "odc-by-1.0-common-crawl-terms"
+
+[[monolingual_sources]]
+id = "wikipedia_zh"
+kind = "hf_dataset"
+language = "zh"
+dataset_id = "wikimedia/wikipedia"
+subset = "20231101.zh"
+split = "train"
+text_field = "text"
+split_documents = true
+max_rows = 4000
+max_documents = 50000
+license = "cc-by-sa-3.0-and-gfdl"
+
+[[monolingual_sources]]
+id = "wikipedia_uz"
+kind = "hf_dataset"
+language = "uz"
+dataset_id = "wikimedia/wikipedia"
+subset = "20231101.uz"
+split = "train"
+text_field = "text"
+split_documents = true
+max_rows = 3000
+max_documents = 50000
+license = "cc-by-sa-3.0-and-gfdl"
+
+[benchmarks]
+flores_url = "https://dl.fbaipublicfiles.com/nllb/flores200_dataset.tar.gz"
+flores_source_code = "zho_Hans"
+flores_target_code = "uzn_Latn"
+
+[benchmarks.selection]
+flores_dev = "data/benchmark/zh_uz/flores_dev.parquet"
+
+[benchmarks.final]
+flores_devtest = "data/benchmark/zh_uz/flores_devtest.parquet"
+
+[language_codes.nllb]
+zh = "zho_Hans"
+uz = "uzn_Latn"
+
+[judge]
+model_path = "${FOURLANG_QWEN_MODEL_PATH}"
+teacher_calibration_pairs = 1000
+batch_size = 32
+max_input_tokens = 1536
+max_new_tokens = 256
+
+[distillation]
+teacher_checkpoint_rows = 256
+teacher_high_weight = 1.0
+teacher_medium_weight = 0.8
+
+[training]
+max_source_length = 256
+
+[[teacher_candidates]]
+id = "nllb200_3_3b"
+family = "nllb"
+license = "cc-by-nc-4.0"
+commercial_allowed = false
+attribution_required = true
+path = "${FOURLANG_MODEL_ROOT}/nllb-200-3.3B"
+repo_id = "facebook/nllb-200-3.3B"
+revision = "a2814a8c92847d0d6aaf7afc9eac24ab57f26151"
+
+[deployment]
+num_beams = 5
+max_new_tokens = 256

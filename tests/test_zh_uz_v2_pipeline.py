@@ -172,6 +172,12 @@ class ZhUzV2PipelineTests(unittest.TestCase):
         self.assertIn("standard Simplified Mandarin", rendered)
         self.assertIn("Uzbek must use the Latin script", rendered)
 
+    def test_qwen_source_prompt_rejects_fragments_and_wrong_language(self) -> None:
+        rendered = qwen_judge.prompt("source", "uz", "zh", "English text", "")
+        self.assertIn("Latin-script Uzbek", rendered)
+        self.assertIn("keyword or entity lists", rendered)
+        self.assertIn("another language", rendered)
+
 
 if __name__ == "__main__":
     unittest.main()

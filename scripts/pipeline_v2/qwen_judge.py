@@ -11,9 +11,9 @@ import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 try:
-    from .common import PROJECT_ROOT, load_config, pair_info, pipeline_namespace
+    from .common import PROJECT_ROOT, load_config, pipeline_namespace
 except ImportError:
-    from common import PROJECT_ROOT, load_config, pair_info, pipeline_namespace
+    from common import PROJECT_ROOT, load_config, pipeline_namespace
 
 LABELS = {"PASS", "MINOR", "FAIL", "UNCERTAIN"}
 USEFULNESS = {"HIGH", "MEDIUM", "LOW", "REJECT"}
@@ -74,6 +74,19 @@ def parse_result(text: str, *, teacher: bool = False) -> dict[str, Any]:
 
 
 def prompt(mode: str, src_lang: str, tgt_lang: str, source: str, target: str) -> str:
+    if mode == "source":
+        language_name = "Simplified Mandarin Chinese" if src_lang == "zh" else "Latin-script Uzbek"
+        return f"""You are a strict native-language corpus curator.
+Judge whether the text is a complete, coherent, natural sentence in {language_name}.
+Reject text in another language, mixed-language text, keyword or entity lists, navigation or
+SEO fragments, disclaimers and boilerplate, citation debris, corrupted text, and unnatural
+machine-translated wording. Do not correct or rewrite the text.
+PASS means fully suitable as a clean monolingual translation source.
+FAIL means unsuitable. UNCERTAIN means native-level quality cannot be established reliably.
+Language: {src_lang}
+Text: {source}
+Return one JSON object only:
+{{"label":"PASS|FAIL|UNCERTAIN","reason":"short reason"}}"""
     second = mode == "human_second"
     teacher = mode == "teacher"
     origin = "a translation Teacher" if teacher else "a human parallel corpus"
@@ -111,6 +124,8 @@ Return one JSON object only:
 
 def io_paths(config: dict[str, Any], mode: str, calibration: bool) -> tuple[Path, Path]:
     base = PROJECT_ROOT / "data" / "pipeline_v2" / pipeline_namespace(config)
+    if mode == "source":
+        return base / "monolingual_candidates.jsonl", base / "source_judged.parquet"
     if mode == "human":
         return base / "human_review_input.parquet", base / "human_judged.parquet"
     if mode == "human_second":
@@ -192,14 +207,23 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Config-driven Qwen translation Judge."
     )
-    parser.add_argument("mode", choices=("human", "human_second", "teacher"))
+    parser.add_argument(
+        "mode", choices=("source", "human", "human_second", "teacher")
+    )
     parser.add_argument("--config", required=True)
     parser.add_argument("--calibration", action="store_true")
     parser.add_argument("--overwrite", action="store_true")
     args = parser.parse_args()
     config = load_config(args.config)
     source_path, output_path = io_paths(config, args.mode, args.calibration)
-    frame = pd.read_parquet(source_path)
+    if source_path.suffix == ".jsonl":
+        frame = pd.DataFrame(
+            json.loads(line)
+            for line in source_path.read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        )
+    else:
+        frame = pd.read_parquet(source_path)
     if args.mode == "human_second":
         frame = frame[second_review_mask(frame)].copy()
     if args.calibration:
@@ -220,6 +244,12 @@ def main() -> None:
             required_columns.add("teacher_usefulness")
         if not required_columns.issubset(existing.columns):
             existing = existing.head(0)
+        else:
+            # Input pools can be refined between resumable review runs. Never
+            # retain a verdict for a row that is no longer in the current pool.
+            existing = existing[
+                existing["judge_id"].isin(set(frame["judge_id"].astype(str)))
+            ].copy()
         completed = (
             set(
                 existing.loc[

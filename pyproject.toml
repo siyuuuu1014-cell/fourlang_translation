@@ -23,6 +23,7 @@ dependencies = [
     "tqdm==4.70.0",
     "transformers==4.46.3",
     "uvicorn[standard]==0.34.0",
+    "zstandard==0.25.0",
 ]
 
 [dependency-groups]

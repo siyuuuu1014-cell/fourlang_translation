@@ -196,6 +196,46 @@ class ZhUzV3PipelineTests(unittest.TestCase):
             self.assertTrue(report["eligible_for_teacher_generation"])
             self.assertEqual(report["review_mode"], "stratified_calibration")
 
+    def test_finalize_backfills_minor_rows_only_to_direction_minimum(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "base_train.jsonl").write_text("", encoding="utf-8")
+            (root / "base_validation.jsonl").write_text("", encoding="utf-8")
+            pipeline = root / "data/pipeline_v2/zh_uz_v3"
+            pipeline.mkdir(parents=True)
+            rows = [
+                {"pair_id": "zp", "src_lang": "zh", "tgt_lang": "uz", "src_text": "这是第一条中文来源。", "teacher_text": "Bu birinchi xitoycha manba.", "judge_parse_ok": True, "judge_label": "PASS", "teacher_usefulness": "HIGH", "source_corpus": "test"},
+                {"pair_id": "zm", "src_lang": "zh", "tgt_lang": "uz", "src_text": "这是第二条中文来源。", "teacher_text": "Bu ikkinchi xitoycha manba.", "judge_parse_ok": True, "judge_label": "MINOR", "teacher_usefulness": "HIGH", "source_corpus": "test"},
+                {"pair_id": "up", "src_lang": "uz", "tgt_lang": "zh", "src_text": "Bu birinchi o'zbekcha manba.", "teacher_text": "这是第一条乌兹别克语来源。", "judge_parse_ok": True, "judge_label": "PASS", "teacher_usefulness": "HIGH", "source_corpus": "test"},
+                {"pair_id": "um", "src_lang": "uz", "tgt_lang": "zh", "src_text": "Bu ikkinchi o'zbekcha manba.", "teacher_text": "这是第二条乌兹别克语来源。", "judge_parse_ok": True, "judge_label": "MINOR", "teacher_usefulness": "MEDIUM", "source_corpus": "test"},
+            ]
+            pd.DataFrame(rows).to_parquet(pipeline / "teacher_judged.parquet", index=False)
+            config = base_config(root)
+            config["monolingual"]["minimum_accepted_per_direction"] = 2
+            config["monolingual_sources"] = [
+                {"id": "test", "kind": "local_jsonl", "language": "zh", "max_rows": 1}
+            ]
+            config["distillation"].update(
+                {
+                    "minor_backfill_to_minimum": True,
+                    "teacher_minor_high_weight": 0.5,
+                    "teacher_minor_medium_weight": 0.4,
+                }
+            )
+            with (
+                patch.object(monolingual_v3, "PROJECT_ROOT", root),
+                patch.object(monolingual_v3, "benchmark_sets", return_value={"pairs": set(), "source": set(), "target": set()}),
+            ):
+                report = monolingual_v3.finalize(config)
+            output = monolingual_v3._read_jsonl(root / "data/distillation/zh_uz/v3/train.jsonl")
+            self.assertEqual(len(output), 4)
+            self.assertEqual(report["teacher_rows_by_direction"], {"zh-uz": 2, "uz-zh": 2})
+            self.assertEqual(report["minor_backfill_rows_by_direction"], {"zh-uz": 1, "uz-zh": 1})
+            self.assertEqual(
+                {row["pair_id"]: row["weight"] for row in output},
+                {"zp": 1.0, "zm": 0.5, "up": 1.0, "um": 0.4},
+            )
+
     def test_select_sources_prefers_complete_full_audit(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

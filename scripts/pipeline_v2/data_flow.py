@@ -813,17 +813,34 @@ def kd_dataset(config: dict[str, Any]) -> None:
 
 def teacher_calibration_report(config: dict[str, Any]) -> None:
     frame = pd.read_parquet(paths(config)["teacher_calibration"])
-    valid = frame[frame["judge_parse_ok"]]
-    if len(valid) != len(frame):
-        raise RuntimeError("Teacher calibration contains unparseable Judge results.")
+    parse_ok = frame["judge_parse_ok"].fillna(False)
+    valid = frame[parse_ok]
+    if valid.empty:
+        raise RuntimeError("Teacher calibration contains no parseable Judge results.")
+    minor_backfill = bool(
+        config.get("distillation", {}).get("minor_backfill_to_minimum", False)
+    )
+    policy = "PASS and usefulness HIGH/MEDIUM; full Teacher audit required"
+    if minor_backfill:
+        policy = (
+            "Keep all PASS with usefulness HIGH/MEDIUM; for each direction below "
+            "the configured minimum, backfill deterministic MINOR HIGH/MEDIUM rows "
+            "only up to that minimum; full Teacher audit required"
+        )
     write_json(
         paths(config)["reports"] / "teacher_judge_policy.json",
         {
             "schema_version": 2,
-            "policy": "PASS and usefulness HIGH/MEDIUM; full Teacher audit required",
+            "policy": policy,
             "sample_rows": len(frame),
+            "parseable_rows": len(valid),
+            "unparseable_rows": int((~parse_ok).sum()),
             "labels": dict(Counter(valid["judge_label"])),
             "usefulness": dict(Counter(valid["teacher_usefulness"])),
+            "minor_backfill_to_minimum": minor_backfill,
+            "minimum_accepted_per_direction": int(
+                config.get("monolingual", {}).get("minimum_accepted_per_direction", 0)
+            ),
             "frozen": True,
         },
     )

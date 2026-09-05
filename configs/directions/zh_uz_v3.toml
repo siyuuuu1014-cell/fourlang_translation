@@ -179,6 +179,9 @@ max_new_tokens = 256
 teacher_checkpoint_rows = 256
 teacher_high_weight = 1.0
 teacher_medium_weight = 0.8
+minor_backfill_to_minimum = true
+teacher_minor_high_weight = 0.5
+teacher_minor_medium_weight = 0.4
 
 [training]
 max_source_length = 256

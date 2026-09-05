@@ -665,11 +665,29 @@ def finalize(config: dict[str, Any]) -> dict[str, Any]:
     pipeline_root, report_root = _roots(config)
     judged_path = pipeline_root / "teacher_judged.parquet"
     frame = pd.read_parquet(judged_path)
+    minor_backfill = bool(
+        config["distillation"].get("minor_backfill_to_minimum", False)
+    )
+    allowed_candidate_labels = ["PASS", "MINOR"] if minor_backfill else ["PASS"]
     accepted = frame[
         frame["judge_parse_ok"].fillna(False)
-        & (frame["judge_label"] == "PASS")
+        & frame["judge_label"].isin(allowed_candidate_labels)
         & frame["teacher_usefulness"].isin(["HIGH", "MEDIUM"])
     ].copy()
+    accepted["_label_priority"] = accepted["judge_label"].map(
+        {"PASS": 0, "MINOR": 1}
+    )
+    accepted["_usefulness_priority"] = accepted["teacher_usefulness"].map(
+        {"HIGH": 0, "MEDIUM": 1}
+    )
+    accepted["_tie_break"] = accepted["pair_id"].astype(str).map(
+        lambda pair_id: hashlib.sha256(
+            f"{config['direction']['seed']}:{pair_id}".encode()
+        ).hexdigest()
+    )
+    accepted = accepted.sort_values(
+        ["_label_priority", "_usefulness_priority", "_tie_break"]
+    )
     protected = benchmark_sets(config)
     base_train_path = project_path(config["monolingual"]["base_train"])
     base_validation_path = project_path(config["monolingual"]["base_validation"])
@@ -715,6 +733,17 @@ def finalize(config: dict[str, Any]) -> dict[str, Any]:
             continue
         seen.add(key)
         usefulness = str(row["teacher_usefulness"])
+        judge_label = str(row["judge_label"])
+        if judge_label == "MINOR":
+            weight_key = (
+                "teacher_minor_high_weight"
+                if usefulness == "HIGH"
+                else "teacher_minor_medium_weight"
+            )
+        else:
+            weight_key = (
+                "teacher_high_weight" if usefulness == "HIGH" else "teacher_medium_weight"
+            )
         teacher_rows.append(
             {
                 "pair_id": str(row["pair_id"]),
@@ -722,19 +751,33 @@ def finalize(config: dict[str, Any]) -> dict[str, Any]:
                 "tgt_lang": target_lang,
                 "src_text": source_text,
                 "tgt_text": teacher_text,
-                "weight": float(
-                    config["distillation"][
-                        "teacher_high_weight" if usefulness == "HIGH" else "teacher_medium_weight"
-                    ]
-                ),
+                "weight": float(config["distillation"][weight_key]),
                 "training_source": "teacher_kd_v3",
                 "teacher_usefulness": usefulness,
+                "judge_label": judge_label,
                 "teacher_id": str(row.get("teacher_id", "nllb200_3_3b")),
                 "source_corpus": str(row.get("source_corpus", "unknown")),
             }
         )
-    counts = Counter(f"{row['src_lang']}-{row['tgt_lang']}" for row in teacher_rows)
     minimum = int(config["monolingual"].get("minimum_accepted_per_direction", 0))
+    minor_backfill_counts: Counter[str] = Counter()
+    if minor_backfill:
+        policy_rows: list[dict[str, Any]] = []
+        for direction in ("zh-uz", "uz-zh"):
+            source_lang, target_lang = direction.split("-")
+            direction_rows = [
+                row
+                for row in teacher_rows
+                if row["src_lang"] == source_lang and row["tgt_lang"] == target_lang
+            ]
+            pass_rows = [row for row in direction_rows if row["judge_label"] == "PASS"]
+            minor_rows = [row for row in direction_rows if row["judge_label"] == "MINOR"]
+            needed = max(0, minimum - len(pass_rows))
+            chosen_minor = minor_rows[:needed]
+            minor_backfill_counts[direction] = len(chosen_minor)
+            policy_rows.extend(pass_rows + chosen_minor)
+        teacher_rows = policy_rows
+    counts = Counter(f"{row['src_lang']}-{row['tgt_lang']}" for row in teacher_rows)
     shortages = {
         direction: minimum - counts[direction]
         for direction in ("zh-uz", "uz-zh")
@@ -749,8 +792,11 @@ def finalize(config: dict[str, Any]) -> dict[str, Any]:
         "minimum_accepted_per_direction": minimum,
         "shortages": shortages,
         "rejections": dict(rejected),
-        "allowed_labels": ["PASS"],
+        "allowed_labels": allowed_candidate_labels,
         "allowed_usefulness": ["HIGH", "MEDIUM"],
+        "minor_backfill_to_minimum": minor_backfill,
+        "minor_backfill_rows_by_direction": dict(minor_backfill_counts),
+        "accepted_by_label": dict(Counter(row["judge_label"] for row in teacher_rows)),
         "ready_for_training": not shortages,
     }
     write_json(report_root / "kd_dataset.json", report)

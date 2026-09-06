@@ -69,6 +69,10 @@ flores_dev = "data/benchmark/uz_ru/flores_dev.parquet"
 [benchmarks.final]
 flores_devtest = "data/benchmark/uz_ru/flores_devtest.parquet"
 
+[language_codes.nllb]
+uz = "uzn_Latn"
+ru = "rus_Cyrl"
+
 [judge]
 model_path = "${FOURLANG_QWEN_MODEL_PATH}"
 auto_accept_audit_pairs = 500

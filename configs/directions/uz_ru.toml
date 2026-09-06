@@ -111,6 +111,16 @@ path = "${FOURLANG_MODEL_ROOT}/m2m100_1.2B"
 repo_id = "facebook/m2m100_1.2B"
 revision = "7b36184180524c1a1bbfa37f120a608046250b98"
 
+[[teacher_candidates]]
+id = "nllb200_3_3b"
+family = "nllb"
+license = "cc-by-nc-4.0"
+commercial_allowed = false
+attribution_required = true
+path = "${FOURLANG_MODEL_ROOT}/nllb-200-3.3B"
+repo_id = "facebook/nllb-200-3.3B"
+revision = "a2814a8c92847d0d6aaf7afc9eac24ab57f26151"
+
 [deployment]
 num_beams = 5
 max_new_tokens = 256

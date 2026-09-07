@@ -33,6 +33,8 @@ name = "Build one balanced 12-direction human training set"
 runtime = "student"
 command = ["scripts/pipeline_v3/fourlang_flow.py", "aggregate", "--experiment", "exp1", "--config", "configs/multilingual/fourlang.toml"]
 requires = [
+  "data/benchmark/fourlang/flores_dev.parquet",
+  "data/benchmark/fourlang/flores_devtest.parquet",
   "data/splits/zh_en/v1/train_bidirectional_v1.parquet",
   "data/splits/zh_en/v1/validation_bidirectional_v1.parquet",
   "data/splits/en_uz/v1/train_exp1_bidirectional_v1.parquet",
@@ -82,10 +84,13 @@ produces = ["results/evaluation/fourlang/exp1/metrics.json"]
 
 [[stages]]
 id = "aggregate_exp2"
-name = "Build one balanced 12-direction KD plus human-replay training set"
+name = "Build targeted 12-direction KD plus human replay with leakage protection"
 runtime = "student"
 command = ["scripts/pipeline_v3/fourlang_flow.py", "aggregate", "--experiment", "exp2", "--config", "configs/multilingual/fourlang.toml"]
 requires = [
+  "data/multilingual/fourlang/exp1/train.jsonl",
+  "data/benchmark/fourlang/flores_dev.parquet",
+  "data/benchmark/fourlang/flores_devtest.parquet",
   "data/distillation/zh_en/v1/18h_exp2_training/exp2_train_combined_v1.parquet",
   "data/distillation/en_uz/v1/11a_exp2_training/exp2_train_combined_v1.parquet",
   "data/distillation/en_ru/v1/train.jsonl",
@@ -103,10 +108,10 @@ produces = ["data/multilingual/fourlang/exp2/train.jsonl", "data/multilingual/fo
 
 [[stages]]
 id = "train_exp2"
-name = "Continue the same Student with balanced sequence-level KD"
+name = "Continue Exp1 with targeted KD and equal-direction validation selection"
 runtime = "student"
 command = ["scripts/pipeline_v3/fourlang_flow.py", "train", "--experiment", "exp2", "--config", "configs/multilingual/fourlang.toml"]
-requires = ["results/student/fourlang/exp1/model_layout.json", "data/multilingual/fourlang/exp2/train.jsonl", "data/multilingual/fourlang/exp2/validation.jsonl"]
+requires = ["results/student/fourlang/exp1/model_layout.json", "reports/pipeline/fourlang/exp2_data.json", "data/multilingual/fourlang/exp2/train.jsonl", "data/multilingual/fourlang/exp2/validation.jsonl"]
 produces = ["results/student/fourlang/exp2/model_layout.json", "results/student/fourlang/exp2/train_report.json"]
 
 [[stages]]

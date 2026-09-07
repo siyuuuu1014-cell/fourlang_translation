@@ -34,6 +34,10 @@ from scripts.pipeline_v2.seq2seq_flow import (  # noqa: E402
 from scripts.pipeline_v3.language_normalization import (  # noqa: E402
     normalize_language_text,
 )
+from scripts.pipeline_v3.data_safety import protect_splits  # noqa: E402
+from scripts.pipeline_v2.training_safety import (  # noqa: E402
+    file_sha256, fingerprint, model_files,
+)
 
 LANGUAGES = ("en", "zh", "uz", "ru")
 UNORDERED_PAIRS = (
@@ -176,7 +180,7 @@ def balance_training_rows(
     teacher_ratio: float | None = None,
     max_teacher_repeats: int = 3,
 ) -> tuple[pd.DataFrame, dict[str, Any]]:
-    frame = frame.copy()
+    frame = frame.drop_duplicates(["src_lang", "tgt_lang", "src_text", "tgt_text"]).copy()
     frame["direction"] = frame["src_lang"] + "-" + frame["tgt_lang"]
     counts = Counter(frame["direction"])
     missing = sorted(set(directions()) - set(counts))
@@ -207,11 +211,7 @@ def balance_training_rows(
         available = counts[direction]
         if teacher_ratio is None:
             replace = available < target
-            part = direction_frame.sample(
-                n=target,
-                replace=replace,
-                random_state=seed + index,
-            )
+            part = sample_coverage_first(direction_frame, target, seed + index)
             teacher_rows = int(
                 part["training_source"]
                 .astype(str)
@@ -238,31 +238,8 @@ def balance_training_rows(
                 raise RuntimeError(
                     f"{direction} cannot satisfy human replay target: no human rows."
                 )
-            teacher_sampling_pool = (
-                teacher_pool
-                if teacher_rows <= len(teacher_pool)
-                else pd.concat(
-                    [teacher_pool] * max_teacher_repeats,
-                    ignore_index=True,
-                )
-            )
-            sampled_teacher = (
-                teacher_sampling_pool.sample(
-                    n=teacher_rows,
-                    random_state=seed + index * 2,
-                )
-                if teacher_rows
-                else teacher_pool.iloc[0:0]
-            )
-            sampled_human = (
-                human_pool.sample(
-                    n=human_rows,
-                    replace=len(human_pool) < human_rows,
-                    random_state=seed + index * 2 + 1,
-                )
-                if human_rows
-                else human_pool.iloc[0:0]
-            )
+            sampled_teacher = sample_coverage_first(teacher_pool, teacher_rows, seed + index * 2)
+            sampled_human = sample_coverage_first(human_pool, human_rows, seed + index * 2 + 1)
             part = pd.concat([sampled_teacher, sampled_human], ignore_index=True)
             part = part.sample(frac=1, random_state=seed + index).reset_index(drop=True)
             replace = len(teacher_pool) < teacher_rows or len(human_pool) < human_rows
@@ -271,6 +248,10 @@ def balance_training_rows(
                 "human_replay": human_rows,
                 "available_teacher_rows": len(teacher_pool),
                 "available_human_rows": len(human_pool),
+                "teacher_unique_sampled": min(teacher_rows, len(teacher_pool)),
+                "human_unique_sampled": min(human_rows, len(human_pool)),
+                "teacher_max_repeats": (teacher_rows + len(teacher_pool) - 1) // len(teacher_pool) if len(teacher_pool) else 0,
+                "human_max_repeats": (human_rows + len(human_pool) - 1) // len(human_pool) if len(human_pool) else 0,
             }
         parts.append(part)
         if replace:
@@ -282,6 +263,7 @@ def balance_training_rows(
         frac=1, random_state=seed
     ).reset_index(drop=True)
     return balanced.drop(columns="direction"), {
+        "sampling_strategy": "coverage_first_cycles_v1",
         "input_rows_by_direction": dict(sorted(counts.items())),
         "target_rows_by_direction": targets,
         "balanced_rows_per_direction": (
@@ -292,6 +274,19 @@ def balance_training_rows(
         "sampled_with_replacement": sampled_with_replacement,
         "source_mix_by_direction": source_mix_by_direction,
     }
+
+
+def sample_coverage_first(pool: pd.DataFrame, size: int, seed: int) -> pd.DataFrame:
+    """Cover every available row before repeats; multiplicities differ by at most one."""
+    if size == 0:
+        return pool.iloc[:0].copy()
+    if size < 0 or pool.empty:
+        raise ValueError("Cannot sample a positive quota from an empty pool.")
+    cycles, remainder = divmod(size, len(pool))
+    parts = [pool.sample(frac=1, random_state=seed + cycle) for cycle in range(cycles)]
+    if remainder:
+        parts.append(pool.sample(n=remainder, random_state=seed + cycles))
+    return pd.concat(parts, ignore_index=True)
 
 
 def validate(config: dict[str, Any]) -> None:
@@ -413,6 +408,24 @@ def aggregate(config: dict[str, Any], experiment: str) -> None:
     train = pd.concat(train_parts, ignore_index=True).drop_duplicates(
         ["src_lang", "tgt_lang", "src_text", "tgt_text"]
     )
+    validation = pd.concat(validation_parts, ignore_index=True).drop_duplicates(
+        ["src_lang", "tgt_lang", "src_text", "tgt_text"]
+    )
+    benchmark_paths = [_path(config["benchmarks"][name])
+                       for name in ("flores_dev", "flores_devtest")]
+    protection_inputs = list(benchmark_paths)
+    previous_train = None
+    if experiment == "exp2":
+        previous_path = PROJECT_ROOT / "data/multilingual/fourlang/exp1/train.jsonl"
+        previous_train = normalize_rows(_read_table(previous_path), origin="exp1_training")
+        protection_inputs.append(previous_path)
+    train, validation, audit = protect_splits(
+        train, validation, [pd.read_parquet(path) for path in benchmark_paths],
+        LANGUAGES, previous_train,
+    )
+    remaining_directions = set(validation["src_lang"] + "-" + validation["tgt_lang"])
+    if remaining_directions != set(directions()):
+        raise RuntimeError("Protected validation must retain all 12 directions.")
     balancing = config["balancing"].get(experiment, {})
     train, report = balance_training_rows(
         train,
@@ -429,9 +442,6 @@ def aggregate(config: dict[str, Any], experiment: str) -> None:
         ),
         max_teacher_repeats=int(balancing.get("max_teacher_repeats", 3)),
     )
-    validation = pd.concat(validation_parts, ignore_index=True).drop_duplicates(
-        ["src_lang", "tgt_lang", "src_text", "tgt_text"]
-    )
     output = PROJECT_ROOT / "data/multilingual/fourlang" / experiment
     output.mkdir(parents=True, exist_ok=True)
     for name, frame in (("train", train), ("validation", validation)):
@@ -442,6 +452,16 @@ def aggregate(config: dict[str, Any], experiment: str) -> None:
     report["validation_rows"] = len(validation)
     report["experiment"] = experiment
     report["script_normalization"] = dict(sorted(normalization_totals.items()))
+    report["schema_version"] = 2
+    report["leakage_audit"] = audit
+    report["aggregation_config_fingerprint"] = fingerprint({
+        "balancing": balancing, "seed": config["multilingual"]["seed"],
+        "text_contract": config.get("text_contract", {}), "pair_data": config["pair_data"],
+    })
+    report["file_sha256"] = {
+        str(path.relative_to(PROJECT_ROOT)).replace("\\", "/"): file_sha256(path)
+        for path in [output / "train.jsonl", output / "validation.jsonl", *protection_inputs]
+    }
     write_json(PROJECT_ROOT / f"reports/pipeline/fourlang/{experiment}_data.json", report)
 
 
@@ -576,7 +596,40 @@ def _jsonl(path: Path) -> list[dict[str, Any]]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
 
+def verify_exp2_data(config: dict[str, Any]) -> None:
+    message = "Exp2 data is stale or unaudited. Re-run aggregate --experiment exp2 before training."
+    report_path = PROJECT_ROOT / "reports/pipeline/fourlang/exp2_data.json"
+    if not report_path.is_file():
+        raise RuntimeError(message)
+    report = read_json(report_path)
+    expected = fingerprint({
+        "balancing": config["balancing"].get("exp2", {}),
+        "seed": config["multilingual"]["seed"],
+        "text_contract": config.get("text_contract", {}), "pair_data": config["pair_data"],
+    })
+    hashes = report.get("file_sha256", {})
+    required = {
+        "data/multilingual/fourlang/exp2/train.jsonl",
+        "data/multilingual/fourlang/exp2/validation.jsonl",
+        "data/multilingual/fourlang/exp1/train.jsonl",
+        str(config["benchmarks"]["flores_dev"]).replace("\\", "/"),
+        str(config["benchmarks"]["flores_devtest"]).replace("\\", "/"),
+    }
+    if (report.get("schema_version") != 2 or
+        report.get("sampling_strategy") != "coverage_first_cycles_v1" or
+        report.get("aggregation_config_fingerprint") != expected or
+        report.get("leakage_audit", {}).get("protected_overlap_after") != 0 or
+        not required.issubset(hashes)):
+        raise RuntimeError(message)
+    for name, expected_hash in hashes.items():
+        path = PROJECT_ROOT / name
+        if not path.is_file() or file_sha256(path) != expected_hash:
+            raise RuntimeError(f"{message} Changed file: {name}")
+
+
 def train(config: dict[str, Any], experiment: str) -> None:
+    if experiment == "exp2":
+        verify_exp2_data(config)
     selected = read_json(PROJECT_ROOT / "results/model_selection/fourlang/selected_student.json")
     candidate = selected["candidate"]
     source_model = (
@@ -584,6 +637,8 @@ def train(config: dict[str, Any], experiment: str) -> None:
         if experiment == "exp1"
         else str(PROJECT_ROOT / "results/student/fourlang/exp1/best_model/shared")
     )
+    if experiment == "exp2":
+        model_files(Path(source_model))
     root = PROJECT_ROOT / f"results/student/fourlang/{experiment}"
     report = train_model(
         candidate,
@@ -614,6 +669,7 @@ def evaluate(config: dict[str, Any], experiment: str) -> None:
     candidate = {
         **selected["candidate"],
         "path": str(PROJECT_ROOT / f"results/student/fourlang/{experiment}/best_model/shared"),
+        "require_local_artifact": True,
     }
     frame = pd.read_parquet(_path(config["benchmarks"]["flores_devtest"]))
     tokenizer, model = load_model(candidate, "en", "zh")

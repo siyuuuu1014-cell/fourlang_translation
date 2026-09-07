@@ -8,10 +8,15 @@ import math
 import shutil
 import sys
 import time
+import importlib.metadata
+import os
+from contextlib import nullcontext
+from types import SimpleNamespace
 from pathlib import Path
 from typing import Any
 
 import pandas as pd
+import numpy as np
 import torch
 from datasets import Dataset
 from huggingface_hub import snapshot_download
@@ -27,7 +32,6 @@ from transformers import (
     Seq2SeqTrainingArguments,
     set_seed,
 )
-from transformers.trainer_utils import get_last_checkpoint
 
 try:
     from .common import (
@@ -59,6 +63,10 @@ from src.model_utils import load_tokenizer as load_project_tokenizer  # noqa: E4
 from scripts.pipeline_v3.language_normalization import (  # noqa: E402
     normalize_language_text,
 )
+from scripts.pipeline_v2.training_safety import (  # noqa: E402
+    SafeCheckpointCallback, atomic_json, bind_run, file_sha256, fingerprint,
+    latest_complete_checkpoint, model_files, model_signature,
+)
 
 
 def resolve_model_reference(local: str, repo_id: str, revision: str) -> str:
@@ -68,6 +76,10 @@ def resolve_model_reference(local: str, repo_id: str, revision: str) -> str:
 
 
 def candidate_path(candidate: dict[str, Any], source: str, target: str) -> str:
+    if candidate.get("require_local_artifact"):
+        local = candidate[f"{source}_{target}_path"] if candidate["family"] == "marian_pair" else candidate["path"]
+        model_files(Path(local))
+        return str(local)
     if candidate["family"] == "marian_pair":
         local = str(candidate[f"{source}_{target}_path"])
         return resolve_model_reference(
@@ -305,26 +317,141 @@ def load_jsonl(path: Path) -> list[dict[str, Any]]:
 
 
 class WeightedTrainer(Seq2SeqTrainer):
+    def _save_optimizer_and_scheduler(self, output_dir):
+        super()._save_optimizer_and_scheduler(output_dir)
+        scaler = getattr(self.accelerator, "scaler", None)
+        if self.args.should_save and scaler is not None:
+            torch.save(scaler.state_dict(), Path(output_dir) / "amp_scaler.pt")
+
+    def _load_optimizer_and_scheduler(self, checkpoint):
+        super()._load_optimizer_and_scheduler(checkpoint)
+        scaler = getattr(self.accelerator, "scaler", None)
+        if checkpoint and scaler is not None:
+            path = Path(checkpoint) / "amp_scaler.pt"
+            if not path.is_file():
+                raise RuntimeError(f"Mixed-precision scaler checkpoint is missing: {path}")
+            scaler.load_state_dict(torch.load(path, map_location="cpu", weights_only=True))
+
+    def _load_rng_state(self, checkpoint):
+        # Transformers 4.46 predates PyTorch's weights-only loading default.
+        # Allow only NumPy RNG array types; never disable safe loading globally.
+        numpy_core = getattr(np, "_core", None)
+        if numpy_core is None:
+            numpy_core = np.core
+        allowed = [numpy_core.multiarray._reconstruct, np.ndarray, np.dtype,
+                   type(np.dtype("uint32"))]
+        context = (torch.serialization.safe_globals(allowed)
+                   if hasattr(torch.serialization, "safe_globals") else nullcontext())
+        with context:
+            return super()._load_rng_state(checkpoint)
+
     def compute_loss(self, model, inputs, return_outputs=False, **kwargs):
+        inputs = dict(inputs)
         weights = inputs.pop("weight", None)
-        outputs = model(**inputs)
         if weights is None:
+            outputs = model(**inputs)
             loss = outputs.loss
         else:
-            labels = inputs["labels"]
+            labels = inputs.pop("labels")
+            if "decoder_input_ids" not in inputs:
+                if hasattr(model, "prepare_decoder_input_ids_from_labels"):
+                    inputs["decoder_input_ids"] = model.prepare_decoder_input_ids_from_labels(labels=labels)
+                elif model.config.model_type == "m2m_100":
+                    # M2M100/NLLB in Transformers 4.46 lacks the public helper.
+                    from transformers.models.m2m_100.modeling_m2m_100 import shift_tokens_right
+                    inputs["decoder_input_ids"] = shift_tokens_right(
+                        labels, model.config.pad_token_id, model.config.decoder_start_token_id)
+                else:
+                    raise RuntimeError(f"No verified decoder shift for {model.config.model_type}")
+            # The collator has already shifted decoder inputs. Do not compute the
+            # model's unweighted CE only to discard it and run CE a second time.
+            inputs["use_cache"] = False
+            outputs = model(**inputs)
             logits = outputs.logits
             token_loss = torch.nn.functional.cross_entropy(
-                logits.view(-1, logits.size(-1)),
-                labels.view(-1),
+                logits.reshape(-1, logits.size(-1)),
+                labels.reshape(-1),
                 ignore_index=-100,
                 reduction="none",
             ).view(labels.shape)
             mask = labels.ne(-100)
             sample_loss = (token_loss * mask).sum(1) / mask.sum(1).clamp_min(1)
-            loss = (
-                sample_loss * weights.to(sample_loss.device)
-            ).sum() / weights.sum().clamp_min(1e-8)
+            weights = weights.to(device=sample_loss.device, dtype=sample_loss.dtype)
+            loss = (sample_loss * weights).sum() / weights.sum().clamp_min(1e-8)
         return (loss, outputs) if return_outputs else loss
+
+
+def fixed_validation_groups(rows: list[dict], size: int, seed: int) -> dict[str, list[dict]]:
+    if size < 1:
+        raise ValueError("Direction validation size must be positive.")
+    groups: dict[str, dict[str, dict]] = {}
+    for row in rows:
+        direction = f"{row['src_lang']}-{row['tgt_lang']}"
+        key = fingerprint([row["src_lang"], row["tgt_lang"], row["src_text"], row["tgt_text"]])
+        groups.setdefault(direction, {})[key] = row
+    # Equal sample counts keep metric reliability comparable across directions.
+    count = min(size, *(len(group) for group in groups.values()))
+    if count < 1:
+        raise ValueError("Direction validation is empty.")
+    return {direction: [group[key] for key in sorted(group, key=lambda key: fingerprint([seed, key]))[:count]]
+            for direction, group in sorted(groups.items())}
+
+
+class DirectionAwareTrainer(WeightedTrainer):
+    """Inject equal-direction metrics before Trainer logs, early stopping and saving."""
+    direction_context = None
+    baseline_metrics = None
+
+    def evaluate_directions(self, prefix="eval") -> dict[str, float]:
+        context = self.direction_context
+        tokenizer = context["tokenizer"]
+        was_training = self.model.training
+        source_lang, target_lang = getattr(tokenizer, "src_lang", None), getattr(tokenizer, "tgt_lang", None)
+        result = {}
+        self.model.eval()
+        try:
+            with torch.inference_mode(), torch.autocast(
+                device_type="cuda", dtype=torch.float16, enabled=bool(self.args.fp16)
+            ):
+                for direction, rows in context["groups"].items():
+                    source, target = direction.split("-")
+                    print(f"Direction validation: step={self.state.global_step} {direction} n={len(rows)}", flush=True)
+                    predictions = translate(tokenizer, self.model, context["family"], source,
+                                            target, [row["src_text"] for row in rows], context["config"])
+                    values = metrics(predictions, [row["tgt_text"] for row in rows], target)
+                    data = context["tokens"][direction]
+                    total_loss = 0.0
+                    batch_size = self.args.per_device_eval_batch_size
+                    for start in range(0, len(data), batch_size):
+                        features = [dict(data[i]) for i in range(start, min(start + batch_size, len(data)))]
+                        batch = self._prepare_inputs(self.data_collator(features))
+                        batch["weight"] = torch.ones_like(batch["weight"])
+                        total_loss += float(self.compute_loss(self.model, batch)) * len(features)
+                    values["loss"] = total_loss / len(data)
+                    for key, value in values.items():
+                        result[f"{prefix}_{direction}_{key}"] = value
+                    if self.baseline_metrics:
+                        result[f"{prefix}_{direction}_chrf2_delta"] = values["chrf2"] - self.baseline_metrics[f"eval_{direction}_chrf2"]
+            for metric in ("bleu", "chrf2", "loss"):
+                result[f"{prefix}_macro_{metric}"] = sum(result[f"{prefix}_{direction}_{metric}"]
+                                                          for direction in context["groups"]) / len(context["groups"])
+            result[f"{prefix}_worst_chrf2"] = min(result[f"{prefix}_{direction}_chrf2"] for direction in context["groups"])
+            if not all(math.isfinite(value) for value in result.values()):
+                raise RuntimeError("Non-finite direction validation metric; refusing checkpoint selection.")
+            return result
+        finally:
+            if source_lang is not None:
+                tokenizer.src_lang = source_lang
+            if target_lang is not None:
+                tokenizer.tgt_lang = target_lang
+            self.model.train(was_training)
+
+    def evaluation_loop(self, *args, **kwargs):
+        output = super().evaluation_loop(*args, **kwargs)
+        if self.direction_context:
+            output.metrics.update(self.evaluate_directions(kwargs.get("metric_key_prefix", "eval")))
+            atomic_json(Path(self.args.output_dir) / f"direction_metrics_step_{self.state.global_step}.json", output.metrics)
+        return output
 
 
 def tokenize_rows(
@@ -391,27 +518,8 @@ def train_model(
     experiment: str,
     shared: bool = False,
 ) -> dict[str, Any]:
-    runtime_candidate = {**candidate, "path": source_model}
-    if candidate["family"] == "marian_pair":
-        runtime_candidate[f"{source}_{target}_path"] = source_model
-    tokenizer, model = load_model(runtime_candidate, source, target, training=True)
-    train_data = tokenize_rows(
-        train_rows,
-        tokenizer,
-        candidate["family"],
-        config,
-        None if shared else source,
-        None if shared else target,
-    )
-    validation_data = tokenize_rows(
-        validation_rows,
-        tokenizer,
-        candidate["family"],
-        config,
-        None if shared else source,
-        None if shared else target,
-    )
-    destination.parent.mkdir(parents=True, exist_ok=True)
+    if int(os.environ.get("WORLD_SIZE", "1")) != 1:
+        raise RuntimeError("Safe multilingual training currently requires a single process/GPU.")
     checkpoint_dir = (
         destination.parent.parent
         / "checkpoints"
@@ -433,7 +541,45 @@ def train_model(
     if not isinstance(seed_scope, dict) or "seed" not in seed_scope:
         raise KeyError("Missing direction.seed or multilingual.seed configuration.")
     seed = int(seed_scope["seed"])
+    directional = bool(settings.get("direction_validation_samples", 0))
+    manifest = {
+        "schema_version": 1, "experiment": experiment, "shared": shared,
+        "direction": [source, target], "family": candidate["family"], "seed": seed,
+        "settings": settings, "language_codes": config.get("language_codes", {}),
+        "decoding": config.get("deployment", {}),
+        "train_sha256": fingerprint(train_rows), "validation_sha256": fingerprint(validation_rows),
+        "source_model": str(Path(source_model).resolve()),
+        "source_artifacts": model_signature(Path(source_model)),
+        "versions": {name: importlib.metadata.version(name)
+                     for name in ("torch", "transformers", "accelerate", "datasets", "numpy")},
+        "precision": "fp16" if torch.cuda.is_available() else "fp32",
+        "implementation": {path.name: file_sha256(path) for path in (
+            Path(__file__), Path(__file__).with_name("training_safety.py"),
+            PROJECT_ROOT / "scripts/pipeline_v3/language_normalization.py")},
+    }
+    if destination.exists() and not (checkpoint_dir / "run_manifest.json").exists():
+        raise RuntimeError(f"Existing exported model has no matching run manifest: {destination}. Refusing overwrite.")
+    signature = bind_run(checkpoint_dir, manifest)
+    finished_path = checkpoint_dir / "finished.json"
+    if finished_path.exists():
+        finished = read_json(finished_path)
+        if finished["fingerprint"] != signature or finished["export_signature"] != model_signature(destination):
+            raise RuntimeError("Completed model no longer matches this run; refusing overwrite.")
+        print("This exact training run is already complete; reusing its exported model.", flush=True)
+        return finished["report"]
+    resume_checkpoint = latest_complete_checkpoint(checkpoint_dir, signature)
+    runtime_candidate = {**candidate, "path": source_model, "require_local_artifact": True}
+    if candidate["family"] == "marian_pair":
+        runtime_candidate[f"{source}_{target}_path"] = source_model
     set_seed(seed)
+    tokenizer, model = load_model(runtime_candidate, source, target, training=True)
+    # Resolve experiment-specific length settings for tokenization as well.
+    runtime_config = {**config, "training": {**config["training"], **settings}}
+    train_data = tokenize_rows(train_rows, tokenizer, candidate["family"], runtime_config,
+                               None if shared else source, None if shared else target)
+    validation_data = tokenize_rows(validation_rows, tokenizer, candidate["family"], runtime_config,
+                                    None if shared else source, None if shared else target)
+    destination.parent.mkdir(parents=True, exist_ok=True)
     physical_batch = int(settings["batch_size"])
     accumulation = int(settings["gradient_accumulation_steps"])
     epochs = float(settings["epochs"])
@@ -458,9 +604,10 @@ def train_model(
         eval_strategy="epoch",
         save_strategy="epoch",
         load_best_model_at_end=True,
-        metric_for_best_model="eval_loss",
-        greater_is_better=False,
-        save_total_limit=2,
+        metric_for_best_model="eval_macro_chrf2" if directional else "eval_loss",
+        greater_is_better=directional,
+        save_total_limit=3,
+        restore_callback_states_from_checkpoint=True,
         fp16=torch.cuda.is_available(),
         report_to=[],
         remove_unused_columns=False,
@@ -471,7 +618,7 @@ def train_model(
         dataloader_num_workers=int(settings.get("dataloader_num_workers", 0)),
         optim=str(settings.get("optim", "adamw_torch")),
     )
-    trainer = WeightedTrainer(
+    trainer = DirectionAwareTrainer(
         model=model,
         args=arguments,
         train_dataset=train_data,
@@ -480,18 +627,62 @@ def train_model(
         callbacks=[
             EarlyStoppingCallback(
                 early_stopping_patience=int(settings["early_stopping_patience"])
-            )
+            ),
+            SafeCheckpointCallback(signature, int(settings.get("checkpoint_interval_steps", 1000))),
         ],
     )
-    resume_checkpoint = (
-        get_last_checkpoint(str(checkpoint_dir)) if checkpoint_dir.is_dir() else None
-    )
+    # Our loss is already a per-example weighted mean, not token-summed loss.
+    trainer.model_accepts_loss_kwargs = False
+    if directional:
+        chosen_rows = validation_rows if shared else [row for row in validation_rows
+                      if row["src_lang"] == source and row["tgt_lang"] == target]
+        groups = fixed_validation_groups(chosen_rows, int(settings["direction_validation_samples"]), seed)
+        if config.get("multilingual"):
+            languages = config["multilingual"]["languages"]
+            expected = {f"{left}-{right}" for left in languages for right in languages if left != right}
+            if set(groups) != expected:
+                raise RuntimeError("Direction validation must contain all 12 directions.")
+        trainer.direction_context = {
+            "tokenizer": tokenizer, "family": candidate["family"], "config": runtime_config,
+            "groups": groups,
+            "tokens": {key: tokenize_rows(rows, tokenizer, candidate["family"], runtime_config)
+                       for key, rows in groups.items()},
+        }
+        subset_path = checkpoint_dir / "validation_subset.json"
+        atomic_json(subset_path, {"fingerprint": signature, "groups": groups})
+        baseline_path = checkpoint_dir / "initial_validation.json"
+        if baseline_path.exists():
+            baseline = read_json(baseline_path)
+            if baseline["fingerprint"] != signature:
+                raise RuntimeError("Initial validation belongs to a different training run.")
+        else:
+            print("Evaluating initial model on the fixed validation subset before training.", flush=True)
+            baseline = {"fingerprint": signature, "metrics": trainer.evaluate_directions()}
+            atomic_json(baseline_path, baseline)
+        trainer.baseline_metrics = baseline["metrics"]
+        set_seed(seed)
     if resume_checkpoint:
         print(f"Resuming training from checkpoint: {resume_checkpoint}", flush=True)
     else:
         print("Starting training without an existing checkpoint.", flush=True)
     started = time.time()
-    result = trainer.train(resume_from_checkpoint=resume_checkpoint)
+    resume_state = read_json(Path(resume_checkpoint) / "trainer_state.json") if resume_checkpoint else {}
+    saved_control = resume_state.get("stateful_callbacks", {}).get("TrainerControl", {})
+    control = {**saved_control.get("args", {}), **saved_control.get("attributes", {})}
+    exhausted = resume_state.get("global_step", 0) >= resume_state.get("max_steps", float("inf"))
+    if resume_checkpoint and (exhausted or control.get("should_training_stop", False)):
+        # Recover an interrupted final export without running another epoch/step.
+        best = resume_state.get("best_model_checkpoint")
+        if not best:
+            raise RuntimeError("Finished checkpoint has no evaluated best model to export.")
+        from transformers.trainer_callback import TrainerState
+        trainer.state = TrainerState.load_from_json(str(Path(resume_checkpoint) / "trainer_state.json"))
+        trainer._load_from_checkpoint(best)
+        losses = [item["loss"] for item in trainer.state.log_history if "loss" in item]
+        result = SimpleNamespace(training_loss=sum(losses) / len(losses) if losses else None)
+        print("Training already ended; recovering the best-model export.", flush=True)
+    else:
+        result = trainer.train(resume_from_checkpoint=resume_checkpoint)
     trainer.save_model(str(destination))
     tokenizer.save_pretrained(str(destination))
     if candidate["family"] == "small100":
@@ -501,11 +692,12 @@ def train_model(
                 f"SMaLL-100 tokenizer implementation is missing: {tokenizer_source}"
             )
         shutil.copy2(tokenizer_source, destination / tokenizer_source.name)
-    return {
+    report = {
         "direction": "shared_bidirectional" if shared else f"{source}-{target}",
         "train_samples": len(train_data),
         "validation_samples": len(validation_data),
-        "train_loss": float(result.training_loss),
+        "train_loss": float(result.training_loss) if result.training_loss is not None else None,
+        "train_loss_scope": "trainer_report_for_resumed_run" if resume_checkpoint else "full_run",
         "seconds": time.time() - started,
         "model": str(destination),
         "seed": seed,
@@ -517,7 +709,19 @@ def train_model(
         "learning_rate": float(settings["learning_rate"]),
         "optimizer": str(settings.get("optim", "adamw_torch")),
         "resumed_from_checkpoint": resume_checkpoint,
+        "run_fingerprint": signature,
+        "best_model_checkpoint": trainer.state.best_model_checkpoint,
+        "best_metric": trainer.state.best_metric,
+        "metric_for_best_model": arguments.metric_for_best_model,
+        "initial_validation": trainer.baseline_metrics,
+        "checkpoint_interval_steps": int(settings.get("checkpoint_interval_steps", 1000)),
+        "recovered_final_export": bool(resume_checkpoint and (exhausted or control.get("should_training_stop", False))),
     }
+    if directional and trainer.state.best_metric is not None:
+        report["best_macro_chrf2_delta"] = trainer.state.best_metric - trainer.baseline_metrics["eval_macro_chrf2"]
+    atomic_json(finished_path, {"fingerprint": signature, "report": report,
+                               "export_signature": model_signature(destination)})
+    return report
 
 
 def train(config: dict, experiment: str) -> None:

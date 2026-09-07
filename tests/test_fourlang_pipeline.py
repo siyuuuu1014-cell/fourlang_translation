@@ -317,6 +317,9 @@ class FourLanguagePipelineTests(unittest.TestCase):
         configured = {
             item["kd_train"] for item in self.config["pair_data"]
         } | {item["validation"] for item in self.config["pair_data"]}
+        configured |= {self.config["benchmarks"]["flores_dev"],
+                       self.config["benchmarks"]["flores_devtest"],
+                       "data/multilingual/fourlang/exp1/train.jsonl"}
         self.assertEqual(required, configured)
 
     def test_bakeoff_resumes_after_last_completed_candidate(self) -> None:

@@ -61,6 +61,10 @@ learning_rate = 0.00003
 [training.exp2]
 epochs = 2
 learning_rate = 0.000005
+# Save optimizer/RNG state between epoch evaluations without translating every 1000 steps.
+checkpoint_interval_steps = 1000
+# Fixed, equal-size HUMAN validation subsets; never select checkpoints on FLORES devtest.
+direction_validation_samples = 200
 
 [training_by_family.small100]
 batch_size = 16

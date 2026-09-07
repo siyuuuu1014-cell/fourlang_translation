@@ -108,9 +108,9 @@ kd_train = "data/distillation/en_ru/v1/train.jsonl"
 
 [[pair_data]]
 pair = "zh_uz"
-train = "data/splits/zh_uz/v1/train.jsonl"
-validation = "data/splits/zh_uz/v1/validation.jsonl"
-kd_train = "data/distillation/zh_uz/v1/train.jsonl"
+train = "data/splits/zh_uz/v2/train.jsonl"
+validation = "data/splits/zh_uz/v2/validation.jsonl"
+kd_train = "data/distillation/zh_uz/v3/train.jsonl"
 
 [[pair_data]]
 pair = "zh_ru"

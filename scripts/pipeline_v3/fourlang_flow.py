@@ -77,10 +77,37 @@ def normalize_rows(frame: pd.DataFrame, *, origin: str) -> pd.DataFrame:
         "source_text": "src_text",
         "target_text": "tgt_text",
         "training_weight": "weight",
+        "training_origin": "training_source",
+        "sample_weight": "weight",
+        "sample_origin": "training_source",
     }
     frame = frame.rename(
         columns={old: new for old, new in aliases.items() if new not in frame.columns}
     ).copy()
+    if ("src_lang" not in frame.columns or "tgt_lang" not in frame.columns) and (
+        "direction" in frame.columns
+    ):
+        normalized_direction = (
+            frame["direction"]
+            .fillna("")
+            .astype(str)
+            .str.strip()
+            .str.lower()
+            .str.replace("_", "-", regex=False)
+        )
+        directed = normalized_direction.str.extract(
+            r"^(?P<src_lang>[a-z]{2})-(?P<tgt_lang>[a-z]{2})$"
+        )
+        invalid_direction = directed.isna().any(axis=1)
+        if invalid_direction.any():
+            examples = sorted(set(normalized_direction[invalid_direction]))[:5]
+            raise ValueError(
+                f"{origin} contains malformed direction values: {examples}"
+            )
+        if "src_lang" not in frame.columns:
+            frame["src_lang"] = directed["src_lang"]
+        if "tgt_lang" not in frame.columns:
+            frame["tgt_lang"] = directed["tgt_lang"]
     required = {"src_lang", "tgt_lang", "src_text", "tgt_text"}
     missing = required - set(frame.columns)
     if missing:

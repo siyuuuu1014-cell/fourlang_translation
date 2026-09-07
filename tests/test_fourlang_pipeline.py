@@ -260,6 +260,47 @@ class FourLanguagePipelineTests(unittest.TestCase):
         self.assertEqual(normalized.loc[0, "tgt_lang"], "uz")
         self.assertEqual(normalized.loc[0, "weight"], 0.8)
 
+    def test_legacy_zh_en_exp2_schema_is_normalized(self) -> None:
+        normalized = normalize_rows(
+            pd.DataFrame(
+                {
+                    "direction": ["en_zh", "zh_en"],
+                    "source_text": ["hello", "你好"],
+                    "target_text": ["你好", "hello"],
+                    "training_weight": [1.0, 1.0],
+                    "training_origin": ["TEACHER_KD", "HUMAN_REPLAY"],
+                }
+            ),
+            origin="legacy-zh-en-exp2",
+        )
+        self.assertEqual(normalized["src_lang"].tolist(), ["en", "zh"])
+        self.assertEqual(normalized["tgt_lang"].tolist(), ["zh", "en"])
+        self.assertEqual(
+            normalized["training_source"].tolist(),
+            ["TEACHER_KD", "HUMAN_REPLAY"],
+        )
+
+    def test_legacy_en_uz_exp2_schema_is_normalized(self) -> None:
+        normalized = normalize_rows(
+            pd.DataFrame(
+                {
+                    "direction": ["en_uz", "uz_en"],
+                    "source_text": ["hello", "salom"],
+                    "target_text": ["salom", "hello"],
+                    "sample_weight": [0.9, 1.0],
+                    "sample_origin": ["TEACHER_KD", "HUMAN_REPLAY"],
+                }
+            ),
+            origin="legacy-en-uz-exp2",
+        )
+        self.assertEqual(normalized["src_lang"].tolist(), ["en", "uz"])
+        self.assertEqual(normalized["tgt_lang"].tolist(), ["uz", "en"])
+        self.assertEqual(normalized["weight"].tolist(), [0.9, 1.0])
+        self.assertEqual(
+            normalized["training_source"].tolist(),
+            ["TEACHER_KD", "HUMAN_REPLAY"],
+        )
+
     def test_manifest_trains_and_freezes_only_one_model(self) -> None:
         pipeline = DirectionPipeline(
             PROJECT_ROOT / "configs/pipelines/fourlang.toml", profile_name="local"

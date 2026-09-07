@@ -152,15 +152,22 @@ def balance_training_rows(
     target = configured_rows or min(counts.values())
     if target < 1:
         raise ValueError("Balanced rows per direction must be positive.")
-    if any(counts[item] < target for item in directions()):
-        short = {item: counts[item] for item in directions() if counts[item] < target}
-        raise RuntimeError(f"Directions below configured balance target {target}: {short}")
     parts = []
+    sampled_with_replacement = {}
     for index, direction in enumerate(directions()):
+        available = counts[direction]
+        replace = available < target
         part = frame[frame["direction"] == direction].sample(
-            n=target, random_state=seed + index
+            n=target,
+            replace=replace,
+            random_state=seed + index,
         )
         parts.append(part)
+        if replace:
+            sampled_with_replacement[direction] = {
+                "available_unique_rows": available,
+                "sampled_rows": target,
+            }
     balanced = pd.concat(parts, ignore_index=True).sample(
         frac=1, random_state=seed
     ).reset_index(drop=True)
@@ -169,6 +176,7 @@ def balance_training_rows(
         "balanced_rows_per_direction": target,
         "output_rows": len(balanced),
         "directions": len(directions()),
+        "sampled_with_replacement": sampled_with_replacement,
     }
 
 

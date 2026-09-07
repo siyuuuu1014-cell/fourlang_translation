@@ -119,6 +119,32 @@ class FourLanguagePipelineTests(unittest.TestCase):
         self.assertEqual(set(counts.values()), {2})
         self.assertEqual(report["output_rows"], 24)
 
+    def test_balancing_oversamples_low_resource_directions_deterministically(self) -> None:
+        rows = []
+        for direction in directions():
+            source, target = direction.split("-")
+            rows.append(
+                {
+                    "src_lang": source,
+                    "tgt_lang": target,
+                    "src_text": f"{direction}-source",
+                    "tgt_text": f"{direction}-target",
+                    "weight": 1.0,
+                    "training_source": "human_parallel",
+                    "origin": "test",
+                }
+            )
+        frame = pd.DataFrame(rows)
+
+        first, report = balance_training_rows(frame, seed=2026, configured_rows=3)
+        second, _ = balance_training_rows(frame, seed=2026, configured_rows=3)
+
+        pd.testing.assert_frame_equal(first, second)
+        counts = Counter(first["src_lang"] + "-" + first["tgt_lang"])
+        self.assertEqual(set(counts.values()), {3})
+        self.assertEqual(report["output_rows"], 36)
+        self.assertEqual(set(report["sampled_with_replacement"]), set(directions()))
+
     def test_existing_pair_kd_outputs_are_reused(self) -> None:
         pairs = {item["pair"]: item for item in self.config["pair_data"]}
         self.assertTrue(

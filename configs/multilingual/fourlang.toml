@@ -23,9 +23,9 @@ flores_dev = "data/benchmark/fourlang/flores_dev.parquet"
 flores_devtest = "data/benchmark/fourlang/flores_devtest.parquet"
 
 [balancing]
-# Zero means deterministically downsample every direction to the smallest
-# available direction.  A future explicit value may cap all directions equally.
-train_rows_per_direction = 0
+# Build a deterministic 12-direction curriculum. Directions above the target are
+# downsampled; genuinely low-resource directions are sampled with replacement.
+train_rows_per_direction = 10000
 
 [training]
 batch_size = 8

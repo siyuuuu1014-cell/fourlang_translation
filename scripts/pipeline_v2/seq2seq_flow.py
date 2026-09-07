@@ -27,6 +27,7 @@ from transformers import (
     Seq2SeqTrainingArguments,
     set_seed,
 )
+from transformers.trainer_utils import get_last_checkpoint
 
 try:
     from .common import (
@@ -482,8 +483,15 @@ def train_model(
             )
         ],
     )
+    resume_checkpoint = (
+        get_last_checkpoint(str(checkpoint_dir)) if checkpoint_dir.is_dir() else None
+    )
+    if resume_checkpoint:
+        print(f"Resuming training from checkpoint: {resume_checkpoint}", flush=True)
+    else:
+        print("Starting training without an existing checkpoint.", flush=True)
     started = time.time()
-    result = trainer.train()
+    result = trainer.train(resume_from_checkpoint=resume_checkpoint)
     trainer.save_model(str(destination))
     tokenizer.save_pretrained(str(destination))
     if candidate["family"] == "small100":
@@ -508,6 +516,7 @@ def train_model(
         "planned_optimizer_steps": planned_steps,
         "learning_rate": float(settings["learning_rate"]),
         "optimizer": str(settings.get("optim", "adamw_torch")),
+        "resumed_from_checkpoint": resume_checkpoint,
     }
 
 

@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import os
+import tempfile
 import unittest
 from collections import Counter
 from pathlib import Path
+from unittest import mock
 
 import pandas as pd
 
+from scripts.pipeline_v3 import fourlang_flow
 from scripts.pipeline.run_direction import DirectionPipeline
 from scripts.pipeline_v2.common import load_config
 from scripts.pipeline_v3.fourlang_flow import (
@@ -167,6 +170,45 @@ class FourLanguagePipelineTests(unittest.TestCase):
             item["kd_train"] for item in self.config["pair_data"]
         } | {item["validation"] for item in self.config["pair_data"]}
         self.assertEqual(required, configured)
+
+    def test_bakeoff_resumes_after_last_completed_candidate(self) -> None:
+        config = {
+            "student_candidates": [
+                {"id": "small100"},
+                {"id": "m2m100_418m"},
+                {"id": "nllb_600m"},
+            ]
+        }
+        completed = {"status": "ok", "macro_chrf2": 1.0}
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            with mock.patch.object(fourlang_flow, "PROJECT_ROOT", root):
+                with mock.patch.object(
+                    fourlang_flow,
+                    "evaluate_candidate",
+                    side_effect=[completed, KeyboardInterrupt()],
+                ) as first_evaluation:
+                    with self.assertRaises(KeyboardInterrupt):
+                        fourlang_flow.bakeoff(config)
+                self.assertEqual(first_evaluation.call_count, 2)
+
+                checkpoint = fourlang_flow.read_json(
+                    root / "results/model_selection/fourlang/student_scores.json"
+                )
+                self.assertEqual(checkpoint["candidates"], {"small100": completed})
+
+                with mock.patch.object(
+                    fourlang_flow,
+                    "evaluate_candidate",
+                    return_value=completed,
+                ) as resumed_evaluation:
+                    fourlang_flow.bakeoff(config)
+
+                resumed_ids = [
+                    call.args[1]["id"] for call in resumed_evaluation.call_args_list
+                ]
+                self.assertEqual(resumed_ids, ["m2m100_418m", "nllb_600m"])
 
 
 if __name__ == "__main__":

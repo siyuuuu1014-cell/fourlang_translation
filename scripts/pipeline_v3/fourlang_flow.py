@@ -365,17 +365,45 @@ def evaluate_candidate(config: dict[str, Any], candidate: dict[str, Any]) -> dic
 
 
 def bakeoff(config: dict[str, Any]) -> None:
-    results = {}
-    for candidate in config["student_candidates"]:
+    output_path = PROJECT_ROOT / "results/model_selection/fourlang/student_scores.json"
+    results: dict[str, Any] = {}
+    if output_path.exists():
+        checkpoint = read_json(output_path)
+        if isinstance(checkpoint, dict) and isinstance(checkpoint.get("candidates"), dict):
+            results = dict(checkpoint["candidates"])
+
+    candidates = list(config["student_candidates"])
+    configured_ids = {candidate["id"] for candidate in candidates}
+    results = {key: value for key, value in results.items() if key in configured_ids}
+
+    for index, candidate in enumerate(candidates, start=1):
+        candidate_id = candidate["id"]
+        previous = results.get(candidate_id)
+        if isinstance(previous, dict) and previous.get("status") == "ok":
+            print(
+                f"[{index}/{len(candidates)}] skipping completed candidate: {candidate_id}",
+                flush=True,
+            )
+            continue
+
+        print(
+            f"[{index}/{len(candidates)}] evaluating candidate: {candidate_id}",
+            flush=True,
+        )
         try:
-            results[candidate["id"]] = evaluate_candidate(config, candidate)
+            results[candidate_id] = evaluate_candidate(config, candidate)
         except Exception as error:
-            results[candidate["id"]] = {
+            results[candidate_id] = {
                 "status": "error",
                 "error_type": type(error).__name__,
                 "error": str(error),
             }
-    write_json(PROJECT_ROOT / "results/model_selection/fourlang/student_scores.json", {"candidates": results})
+        write_json(output_path, {"candidates": results})
+        print(
+            f"[{index}/{len(candidates)}] checkpoint saved: {candidate_id} "
+            f"({results[candidate_id]['status']})",
+            flush=True,
+        )
 
 
 def select_student(config: dict[str, Any]) -> None:

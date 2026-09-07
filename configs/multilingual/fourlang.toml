@@ -22,10 +22,24 @@ flores_url = "https://dl.fbaipublicfiles.com/nllb/flores200_dataset.tar.gz"
 flores_dev = "data/benchmark/fourlang/flores_dev.parquet"
 flores_devtest = "data/benchmark/fourlang/flores_devtest.parquet"
 
-[balancing]
-# Build a deterministic 12-direction curriculum. Directions above the target are
-# downsampled; genuinely low-resource directions are sampled with replacement.
-train_rows_per_direction = 10000
+[balancing.exp1]
+# Exp1 establishes an even multilingual base from human parallel data.
+default_rows_per_direction = 10000
+
+[balancing.exp2]
+# Exp2 focuses Teacher KD capacity on the confirmed low-resource directions while
+# retaining human replay in every direction to limit catastrophic forgetting.
+default_rows_per_direction = 10000
+teacher_ratio = 0.60
+max_teacher_repeats = 3
+
+[balancing.exp2.rows_by_direction]
+"zh-uz" = 20000
+"uz-zh" = 20000
+"uz-ru" = 17000
+"ru-uz" = 17000
+"zh-ru" = 12000
+"ru-zh" = 12000
 
 [training]
 batch_size = 8

@@ -145,6 +145,87 @@ class FourLanguagePipelineTests(unittest.TestCase):
         self.assertEqual(report["output_rows"], 36)
         self.assertEqual(set(report["sampled_with_replacement"]), set(directions()))
 
+    def test_exp2_sampling_obeys_direction_and_source_quotas(self) -> None:
+        rows = []
+        for direction in directions():
+            source, target = direction.split("-")
+            for index in range(2):
+                rows.append(
+                    {
+                        "src_lang": source,
+                        "tgt_lang": target,
+                        "src_text": f"{direction}-teacher-source-{index}",
+                        "tgt_text": f"{direction}-teacher-target-{index}",
+                        "weight": 1.0,
+                        "training_source": "teacher_kd",
+                        "origin": "test",
+                    }
+                )
+            for index in range(5):
+                rows.append(
+                    {
+                        "src_lang": source,
+                        "tgt_lang": target,
+                        "src_text": f"{direction}-human-source-{index}",
+                        "tgt_text": f"{direction}-human-target-{index}",
+                        "weight": 1.0,
+                        "training_source": "human_replay",
+                        "origin": "test",
+                    }
+                )
+
+        sampled, report = balance_training_rows(
+            pd.DataFrame(rows),
+            seed=2026,
+            configured_rows=5,
+            rows_by_direction={"zh-uz": 10},
+            teacher_ratio=0.6,
+            max_teacher_repeats=3,
+        )
+
+        counts = Counter(sampled["src_lang"] + "-" + sampled["tgt_lang"])
+        self.assertEqual(counts["zh-uz"], 10)
+        self.assertEqual({counts[item] for item in directions() if item != "zh-uz"}, {5})
+        self.assertEqual(report["source_mix_by_direction"]["zh-uz"]["teacher_kd"], 6)
+        self.assertEqual(report["source_mix_by_direction"]["zh-uz"]["human_replay"], 4)
+        teacher = sampled[
+            (sampled["src_lang"] == "zh")
+            & (sampled["tgt_lang"] == "uz")
+            & (sampled["training_source"] == "teacher_kd")
+        ]
+        self.assertLessEqual(teacher["src_text"].value_counts().max(), 3)
+
+    def test_multilingual_curriculum_sizes_are_locked(self) -> None:
+        exp1 = self.config["balancing"]["exp1"]
+        exp2 = self.config["balancing"]["exp2"]
+        self.assertEqual(exp1["default_rows_per_direction"] * 12, 120000)
+        exp2_targets = {
+            direction: exp2["rows_by_direction"].get(
+                direction, exp2["default_rows_per_direction"]
+            )
+            for direction in directions()
+        }
+        self.assertEqual(
+            exp2_targets,
+            {
+                "en-zh": 10000,
+                "en-uz": 10000,
+                "en-ru": 10000,
+                "zh-en": 10000,
+                "zh-uz": 20000,
+                "zh-ru": 12000,
+                "uz-en": 10000,
+                "uz-zh": 20000,
+                "uz-ru": 17000,
+                "ru-en": 10000,
+                "ru-zh": 12000,
+                "ru-uz": 17000,
+            },
+        )
+        self.assertEqual(sum(exp2_targets.values()), 158000)
+        self.assertEqual(exp2["teacher_ratio"], 0.6)
+        self.assertEqual(exp2["max_teacher_repeats"], 3)
+
     def test_existing_pair_kd_outputs_are_reused(self) -> None:
         pairs = {item["pair"]: item for item in self.config["pair_data"]}
         self.assertTrue(

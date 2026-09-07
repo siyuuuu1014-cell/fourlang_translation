@@ -141,7 +141,13 @@ def normalize_rows(frame: pd.DataFrame, *, origin: str) -> pd.DataFrame:
 
 
 def balance_training_rows(
-    frame: pd.DataFrame, *, seed: int, configured_rows: int = 0
+    frame: pd.DataFrame,
+    *,
+    seed: int,
+    configured_rows: int = 0,
+    rows_by_direction: dict[str, int] | None = None,
+    teacher_ratio: float | None = None,
+    max_teacher_repeats: int = 3,
 ) -> tuple[pd.DataFrame, dict[str, Any]]:
     frame = frame.copy()
     frame["direction"] = frame["src_lang"] + "-" + frame["tgt_lang"]
@@ -149,19 +155,96 @@ def balance_training_rows(
     missing = sorted(set(directions()) - set(counts))
     if missing:
         raise RuntimeError(f"Training data is missing directions: {missing}")
-    target = configured_rows or min(counts.values())
-    if target < 1:
-        raise ValueError("Balanced rows per direction must be positive.")
+    default_target = configured_rows or min(counts.values())
+    configured_targets = rows_by_direction or {}
+    invalid_targets = sorted(set(configured_targets) - set(directions()))
+    if invalid_targets:
+        raise ValueError(f"Unsupported direction sampling targets: {invalid_targets}")
+    targets = {
+        direction: int(configured_targets.get(direction, default_target))
+        for direction in directions()
+    }
+    if any(target < 1 for target in targets.values()):
+        raise ValueError("Rows per direction must be positive.")
+    if teacher_ratio is not None and not 0.0 <= teacher_ratio <= 1.0:
+        raise ValueError("Teacher ratio must be between zero and one.")
+    if max_teacher_repeats < 1:
+        raise ValueError("Maximum Teacher repeats must be positive.")
+
     parts = []
     sampled_with_replacement = {}
+    source_mix_by_direction = {}
     for index, direction in enumerate(directions()):
+        target = targets[direction]
+        direction_frame = frame[frame["direction"] == direction]
         available = counts[direction]
-        replace = available < target
-        part = frame[frame["direction"] == direction].sample(
-            n=target,
-            replace=replace,
-            random_state=seed + index,
-        )
+        if teacher_ratio is None:
+            replace = available < target
+            part = direction_frame.sample(
+                n=target,
+                replace=replace,
+                random_state=seed + index,
+            )
+            teacher_rows = int(
+                part["training_source"]
+                .astype(str)
+                .str.lower()
+                .str.contains("teacher")
+                .sum()
+            )
+        else:
+            teacher_mask = (
+                direction_frame["training_source"]
+                .astype(str)
+                .str.lower()
+                .str.contains("teacher")
+            )
+            teacher_pool = direction_frame[teacher_mask]
+            human_pool = direction_frame[~teacher_mask]
+            desired_teacher = round(target * teacher_ratio)
+            teacher_rows = min(
+                desired_teacher,
+                len(teacher_pool) * max_teacher_repeats,
+            )
+            human_rows = target - teacher_rows
+            if human_rows and human_pool.empty:
+                raise RuntimeError(
+                    f"{direction} cannot satisfy human replay target: no human rows."
+                )
+            teacher_sampling_pool = (
+                teacher_pool
+                if teacher_rows <= len(teacher_pool)
+                else pd.concat(
+                    [teacher_pool] * max_teacher_repeats,
+                    ignore_index=True,
+                )
+            )
+            sampled_teacher = (
+                teacher_sampling_pool.sample(
+                    n=teacher_rows,
+                    random_state=seed + index * 2,
+                )
+                if teacher_rows
+                else teacher_pool.iloc[0:0]
+            )
+            sampled_human = (
+                human_pool.sample(
+                    n=human_rows,
+                    replace=len(human_pool) < human_rows,
+                    random_state=seed + index * 2 + 1,
+                )
+                if human_rows
+                else human_pool.iloc[0:0]
+            )
+            part = pd.concat([sampled_teacher, sampled_human], ignore_index=True)
+            part = part.sample(frac=1, random_state=seed + index).reset_index(drop=True)
+            replace = len(teacher_pool) < teacher_rows or len(human_pool) < human_rows
+            source_mix_by_direction[direction] = {
+                "teacher_kd": teacher_rows,
+                "human_replay": human_rows,
+                "available_teacher_rows": len(teacher_pool),
+                "available_human_rows": len(human_pool),
+            }
         parts.append(part)
         if replace:
             sampled_with_replacement[direction] = {
@@ -173,10 +256,14 @@ def balance_training_rows(
     ).reset_index(drop=True)
     return balanced.drop(columns="direction"), {
         "input_rows_by_direction": dict(sorted(counts.items())),
-        "balanced_rows_per_direction": target,
+        "target_rows_by_direction": targets,
+        "balanced_rows_per_direction": (
+            next(iter(targets.values())) if len(set(targets.values())) == 1 else None
+        ),
         "output_rows": len(balanced),
         "directions": len(directions()),
         "sampled_with_replacement": sampled_with_replacement,
+        "source_mix_by_direction": source_mix_by_direction,
     }
 
 
@@ -299,10 +386,21 @@ def aggregate(config: dict[str, Any], experiment: str) -> None:
     train = pd.concat(train_parts, ignore_index=True).drop_duplicates(
         ["src_lang", "tgt_lang", "src_text", "tgt_text"]
     )
+    balancing = config["balancing"].get(experiment, {})
     train, report = balance_training_rows(
         train,
         seed=int(config["multilingual"]["seed"]),
-        configured_rows=int(config["balancing"]["train_rows_per_direction"]),
+        configured_rows=int(balancing.get("default_rows_per_direction", 0)),
+        rows_by_direction={
+            str(key): int(value)
+            for key, value in balancing.get("rows_by_direction", {}).items()
+        },
+        teacher_ratio=(
+            float(balancing["teacher_ratio"])
+            if "teacher_ratio" in balancing
+            else None
+        ),
+        max_teacher_repeats=int(balancing.get("max_teacher_repeats", 3)),
     )
     validation = pd.concat(validation_parts, ignore_index=True).drop_duplicates(
         ["src_lang", "tgt_lang", "src_text", "tgt_text"]

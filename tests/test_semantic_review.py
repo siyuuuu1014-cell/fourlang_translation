@@ -94,6 +94,20 @@ def test_resume_and_reports(tmp_path, monkeypatch):
     assert summary["pairs"] == 5
     assert summary["training_data_written"] is False
     assert not list(tmp_path.rglob("train.jsonl"))
+    # Rebatch into a separate run without regenerating any completed pair.
+    old_output = args.output
+    args.output = "reports/diagnostics/review32"
+    args.resume_from = old_output
+    args.batch_size = 32
+    monkeypatch.setattr(
+        review,
+        "make_predict",
+        lambda *a: lambda texts: pytest.fail("Imported pairs must not regenerate"),
+    )
+    review.run(args)
+    migration = review.diag.read_json(tmp_path / args.output / "migration.json")
+    assert migration["imported_pairs"] == 5
+    assert review.diag.read_json(tmp_path / args.output / "summary.json")["pairs"] == 5
     args.seed += 1
     with pytest.raises(RuntimeError, match="changed"):
         review.run(args)

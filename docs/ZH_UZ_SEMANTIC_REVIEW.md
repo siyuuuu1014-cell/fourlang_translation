@@ -21,7 +21,11 @@ tail -n 30 -f fourlang_zh_uz_semantic_review_v1.log
 ```
 
 可先添加 `--prepare-only` 做 CPU 输入检查和队列准备，然后去掉该参数执行。
-默认 batch_size=8，每批原子保存；中断后执行相同命令续跑，最多重做尚未保存的一批。
+默认 batch_size=32，每批原子保存；中断后执行相同命令续跑，最多重做尚未保存的一批。
+从旧 batch=8 的运行迁移时，先停止旧进程，再指定新 `--output`，并添加
+`--resume-from reports/diagnostics/fourlang/zh_uz_semantic_review_v1`。
+脚本校验旧块、模型及题目一致后复用已完成结果，不改写旧目录。每次续跑保留同一 resume-from 参数，旧目录不要恢复运行或删除。
+如 32 显存不足，可用新目录和较小 batch，再从该次运行目录迁移已保存结果；会保留已有原始结果。
 Ctrl+C 退出 tail 只停止看日志。没有自动重启、关机或训练。
 首次及续跑需校验本地模型文件哈希，可能暂时没有逐批进度。
 更换模型、代码、参数或输入必须换一个新的 `--output`，不覆盖原结果。

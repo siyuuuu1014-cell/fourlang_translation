@@ -246,6 +246,9 @@ def run(args):
                 "max_input_tokens": args.max_input_tokens,
                 "max_new_tokens": args.max_new_tokens,
                 "model": str(Path(args.model).resolve()),
+                "resume_from": str(diag.project_path(args.resume_from).resolve())
+                if getattr(args, "resume_from", None)
+                else None,
                 "code": {
                     str(p): diag.file_sha256(p)
                     for p in (
@@ -277,6 +280,16 @@ def run(args):
         chunks = output / "chunks"
         chunks.mkdir(exist_ok=True)
         inputs = [{**p, "src_text": prompt(p)} for p in pairs]
+        cache = {}
+        if getattr(args, "resume_from", None):
+            previous = diag.checked_output(args.resume_from).resolve()
+            if (
+                previous == output
+                or previous.is_relative_to(output)
+                or output.is_relative_to(previous)
+            ):
+                raise ValueError("Migration requires separate directories")
+            cache = import_completed(previous, output, inputs)
         raw = diag.chunk_predictions(
             chunks, inputs, chunk_signature, args.batch_size, None
         )
@@ -284,6 +297,16 @@ def run(args):
             predict = make_predict(
                 model_path, args.max_input_tokens, args.max_new_tokens
             )
+            original_predict = predict
+
+            def predict(texts):
+                missing = [t for t in texts if t not in cache]
+                generated = original_predict(missing) if missing else []
+                if len(generated) != len(missing):
+                    raise RuntimeError("Misaligned generation")
+                fresh = dict(zip(missing, generated, strict=True))
+                return [cache[t] if t in cache else fresh[t] for t in texts]
+
             raw = diag.chunk_predictions(
                 chunks, inputs, chunk_signature, args.batch_size, predict
             )
@@ -319,6 +342,72 @@ def run(args):
         diag.log(f"Review complete: {output / 'semantic_review_packet.json'}")
 
 
+def import_completed(previous, output, inputs):
+    """Read-only migration across batch sizes; validate every imported chunk."""
+    with FileLock(str(previous / ".lock"), timeout=0):
+        old = diag.read_json(previous / "manifest.json")
+        current = diag.read_json(output / "manifest.json")
+        old_model = diag.read_json(previous / "model_manifest.json")
+        current_model = diag.read_json(output / "model_manifest.json")
+        for document in (old, current, old_model, current_model):
+            if document["fingerprint"] != diag.fingerprint(document["manifest"]):
+                raise ValueError("Migration manifest checksum mismatch")
+        for key in (
+            "source",
+            "preview_hashes",
+            "selection",
+            "seed",
+            "keep_per_direction",
+            "max_input_tokens",
+            "max_new_tokens",
+            "model",
+        ):
+            if old["manifest"][key] != current["manifest"][key]:
+                raise ValueError(f"Cannot migrate changed {key}")
+        if old_model != current_model:
+            raise ValueError("Cannot migrate changed model weights")
+        signature = diag.fingerprint([old["fingerprint"], old_model["fingerprint"]])
+        size = old["manifest"]["batch_size"]
+        if type(size) is not int or size <= 0:
+            raise ValueError("Invalid previous batch size")
+        cache = {}
+        for path in sorted((previous / "chunks").glob("chunk_*.json")):
+            start = int(path.stem.split("_")[-1])
+            if start % size or start >= len(inputs) or start < 0:
+                raise ValueError("Invalid migrated chunk offset")
+            rows = inputs[start : start + size]
+            record = diag.read_json(path)
+            digest = record.pop("content_sha256", None)
+            if (
+                digest != diag.fingerprint(record)
+                or record["fingerprint"] != signature
+                or record["sample_ids"]
+                != [diag.fingerprint(diag.identity(r)) for r in rows]
+                or len(record["predictions"]) != len(rows)
+                or any(not isinstance(t, str) for t in record["predictions"])
+            ):
+                raise ValueError(f"Invalid migrated chunk: {path}")
+            cache.update(
+                {
+                    r["src_text"]: t
+                    for r, t in zip(rows, record["predictions"], strict=True)
+                }
+            )
+        diag.save_json(
+            output / "migration.json",
+            {
+                "source": str(previous),
+                "source_fingerprint": old["fingerprint"],
+                "imported_pairs": len(cache),
+                "cache_fingerprint": diag.fingerprint(cache),
+            },
+        )
+        diag.log(
+            f"Reusing {len(cache)} completed pairs; only remaining pairs need generation."
+        )
+        return cache
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--preview", default=preview.DEFAULT_OUTPUT)
@@ -326,7 +415,11 @@ def main():
     parser.add_argument("--model", default="/root/autodl-tmp/models/Qwen3-8B")
     parser.add_argument("--keep-per-direction", type=int, default=200)
     parser.add_argument("--seed", type=int, default=2026)
-    parser.add_argument("--batch-size", type=int, default=8)
+    parser.add_argument("--batch-size", type=int, default=32)
+    parser.add_argument(
+        "--resume-from",
+        help="Stopped previous review directory; import verified chunks",
+    )
     parser.add_argument("--max-input-tokens", type=int, default=4096)
     parser.add_argument("--max-new-tokens", type=int, default=256)
     parser.add_argument("--prepare-only", action="store_true")

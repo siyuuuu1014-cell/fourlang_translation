@@ -136,7 +136,28 @@ def prompt(pair):
     )
 
 
+def repair_invalid_apostrophe_escape(text):
+    """Remove only unescaped backslashes immediately before apostrophes."""
+    repaired = []
+    for index, char in enumerate(text):
+        if char == "\\" and index + 1 < len(text) and text[index + 1] == "'":
+            preceding = 0
+            for previous in reversed(repaired):
+                if previous != "\\":
+                    break
+                preceding += 1
+            if preceding % 2 == 0:
+                continue
+        repaired.append(char)
+    return "".join(repaired)
+
+
 def parse(text):
+    # Qwen occasionally emits the non-JSON escape backslash-apostrophe inside
+    # otherwise valid JSON strings (most often in Uzbek words such as o'zbek).
+    # JSON does not need apostrophes escaped, so remove only that invalid escape before
+    # failing closed on every other syntax/schema problem.
+    text = repair_invalid_apostrophe_escape(text)
     try:
         value = json.loads(text)
         if (

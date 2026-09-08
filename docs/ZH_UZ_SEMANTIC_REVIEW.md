@@ -43,3 +43,33 @@ python -m json.tool reports/diagnostics/fourlang/zh_uz_semantic_review_v1/summar
 包内每类最多 20 条，不是总体错误率估计；不能据此宣称已全量人工审核。
 待确认隔离项即使本次模型判 PASS 也不自动解除隔离候选状态。
 完成复核并明确筛选政策后，才另行生成清洗版及短程对照实验。
+
+## 二次裁决预览
+
+首轮完整运行结束后，用下面的一条命令恢复可修复的 JSON 解析失败，并对首轮
+FAIL、MINOR、仍无法解析项及每方向固定 200 条 PASS 做盲二次复审：
+
+```bash
+cd /root/autodl-tmp/fourlang_translation
+nohup env PYTHONUNBUFFERED=1 HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
+  /root/autodl-tmp/venvs/qwen3_judge/bin/python \
+  scripts/pipeline_v3/adjudicate_zh_uz_semantics.py \
+  --model /root/autodl-tmp/models/Qwen3-8B \
+  > fourlang_zh_uz_adjudication_v1.log 2>&1 &
+echo $!
+tail -n 30 -f fourlang_zh_uz_adjudication_v1.log
+```
+
+同一命令可断点续跑；每批 32 条原子保存。二次提示不包含首轮标签或理由，并要求
+错误类型、原文精确证据、译文精确证据和置信度。只有“首轮 FAIL + 二次 FAIL +
+HIGH + 证据字段有效”才进入新增隔离候选，仍不会自动删除或改写训练数据。原登记的
+隔离项保持候选状态；其他分歧进入人工复核。
+
+结果查看：
+
+```bash
+python -m json.tool reports/diagnostics/fourlang/zh_uz_semantic_adjudication_v1/summary.json
+```
+
+供人工查看的文件为同目录 `adjudication_packet.json`；完整保守预览为
+`conservative_preview.jsonl`。二次复审仍由同一模型完成，不能代替母语人工确认。

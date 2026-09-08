@@ -53,6 +53,22 @@ def test_fail_closed(raw):
     assert review.parse(raw)["label"] == "UNCERTAIN"
 
 
+def test_recovers_qwen_escaped_apostrophe():
+    parsed = review.parse(r'''{"label":"MINOR","reason":"o\'zbek spelling"}''')
+    assert parsed == {
+        "label": "MINOR",
+        "reason": "o'zbek spelling",
+        "parse_ok": True,
+    }
+
+
+def test_apostrophe_repair_preserves_valid_escaped_backslash():
+    raw = r'''{"label":"PASS","reason":"path\\'suffix"}'''
+    parsed = review.parse(raw)
+    assert parsed["parse_ok"] is True
+    assert parsed["reason"] == "path\\'suffix"
+
+
 def test_resume_and_reports(tmp_path, monkeypatch):
     monkeypatch.setattr(review.diag, "PROJECT_ROOT", tmp_path)
     rows = [row(i) for i in range(5)]

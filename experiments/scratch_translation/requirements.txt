@@ -1,0 +1,11 @@
+# Standalone runtime; do not reinstall packages into an active NLLB training environment.
+# Use a compatible CUDA wheel for your hardware if creating a separate environment.
+# Actual versions are fingerprinted at preparation/training time.
+torch>=2.4,<3
+numpy>=1.26,<3
+pandas>=2.2,<4
+pyarrow>=15
+sentencepiece>=0.2,<0.3
+sacrebleu>=2.4,<3
+opencc-python-reimplemented==0.1.7
+filelock>=3.13

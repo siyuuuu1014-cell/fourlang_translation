@@ -1,0 +1,88 @@
+[experiment]
+suite = "fourlang_scratch_v1"
+seed = 2026
+languages = ["en", "zh", "uz", "ru"]
+
+[tokenizer]
+vocab_size = 16000
+character_coverage = 0.9995
+# Train the SAME vocabulary for both arms, using HUMAN TRAINING TEXT ONLY.
+max_sentences_per_language = 100000
+
+[model]
+d_model = 384
+nhead = 6
+encoder_layers = 4
+decoder_layers = 4
+dim_feedforward = 1536
+dropout = 0.2
+max_length = 256
+
+[sampling]
+# Each sampling block draws 20k examples per direction from the FULL clean pools.
+# Coverage cycles continue across blocks; this is NOT the NLLB 158k dataset.
+rows_per_direction = 20000
+kd_ratio = 0.30
+max_teacher_repeats_per_block = 3
+
+[training]
+# Pilot starting settings, not tuned results. Both arms have the SAME budget.
+max_steps = 30000
+batch_size = 16
+gradient_accumulation_steps = 4
+learning_rate = 0.0005
+warmup_steps = 2000
+weight_decay = 0.01
+label_smoothing = 0.1
+max_grad_norm = 1.0
+checkpoint_steps = 500
+eval_steps = 1000
+log_steps = 50
+keep_checkpoints = 3
+amp = true
+
+[evaluation]
+validation_per_direction = 100
+batch_size = 16
+# Fixed greedy decoding for BOTH arms in selection and final evaluation.
+max_new_tokens = 255
+
+[benchmarks]
+dev = "data/benchmark/fourlang/flores_dev.parquet"
+test = "data/benchmark/fourlang/flores_devtest.parquet"
+
+[[pair_data]]
+pair = "en_zh"
+human = "data/splits/zh_en/v1/train_bidirectional_v1.parquet"
+validation = "data/splits/zh_en/v1/validation_bidirectional_v1.parquet"
+kd = "data/distillation/zh_en/v1/18h_exp2_training/exp2_train_combined_v1.parquet"
+
+[[pair_data]]
+pair = "en_uz"
+human = "data/splits/en_uz/v1/train_exp1_bidirectional_v1.parquet"
+validation = "data/splits/en_uz/v1/validation_exp1_bidirectional_v1.parquet"
+kd = "data/distillation/en_uz/v1/11a_exp2_training/exp2_train_combined_v1.parquet"
+
+[[pair_data]]
+pair = "en_ru"
+human = "data/splits/en_ru/v1/train.jsonl"
+validation = "data/splits/en_ru/v1/validation.jsonl"
+kd = "data/distillation/en_ru/v1/train.jsonl"
+
+[[pair_data]]
+pair = "zh_uz"
+human = "data/splits/zh_uz/v2/train.jsonl"
+validation = "data/splits/zh_uz/v2/validation.jsonl"
+kd = "data/distillation/zh_uz/v3/train.jsonl"
+
+[[pair_data]]
+pair = "zh_ru"
+human = "data/splits/zh_ru/v1/train.jsonl"
+validation = "data/splits/zh_ru/v1/validation.jsonl"
+kd = "data/distillation/zh_ru/v1/train.jsonl"
+
+[[pair_data]]
+pair = "uz_ru"
+human = "data/splits/uz_ru/v1/train.jsonl"
+validation = "data/splits/uz_ru/v1/validation.jsonl"
+kd = "data/distillation/uz_ru/v1/train.jsonl"

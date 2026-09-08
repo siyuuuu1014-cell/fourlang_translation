@@ -91,3 +91,28 @@ def test_spelled_numbers_and_protocol_are_not_automatic_errors():
     assert (
         checks.numeric_review("udp://tracker:port", "udp://tracker:port")["hints"] == []
     )
+
+
+@pytest.mark.parametrize("apostrophe", ["'", "’", "‘", "ʻ", "ʼ", "`"])
+def test_uzbek_word_prefix_is_not_grams(apostrophe):
+    text = f"9 g{apostrophe}alaba"
+    assert checks.number_evidence(text)[0]["unit"] is None
+    assert checks.numeric_review(text, "9胜")["hints"] == []
+
+
+@pytest.mark.parametrize("text", ["9g", "9 g", "9 g.", "9 g,", "9 gramm"])
+def test_real_grams_still_recognized(text):
+    assert checks.numeric_review(text, "9克")["hints"] == []
+    assert checks.number_evidence(text)[0]["unit"]["dimension"] == "mass"
+
+
+@pytest.mark.parametrize(
+    "word", ["foiz", "foizdan", "foizi", "foizga", "foizning", "foizini", "foizli"]
+)
+def test_supported_percent_inflections(word):
+    assert checks.numeric_review("3%", f"3 {word}")["hints"] == []
+    assert "number_unit_review" in checks.numeric_review("30%", f"3 {word}")["hints"]
+
+
+def test_percent_does_not_match_arbitrary_word_prefix():
+    assert checks.number_evidence("3 foizunknown")[0]["unit"] is None

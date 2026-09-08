@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "status": "ASSISTANT_RECOMMENDATIONS_PENDING_CONFIRMATION",
+  "reviewer": "assistant_initial_review_not_native_human_certification",
+  "action": "preview_only_no_deletion",
+  "source_packet_sha256": "17e644e60912a0aed5f2fdb89ae2f3fb5a0334de1a31d09e7e771ec82f9b8c10",
+  "cases": [
+    {"audit_id": "d816956c86f516b9d3fb2c5f45879a45e65a8f87625a48b365b4555934f6eebe", "reason": "核心名词错译：乌鳢变为肋骨。"},
+    {"audit_id": "097bb050d6bb26f13e52830b27ea324c4be1f95dc1202bbc65ccd53bb60410f6", "reason": "质量一目了然变为质量很好，改变评价。"},
+    {"audit_id": "ea4824df8ae62bb2ccb3c256a50a03869c4d4b680bea811b5570ea85d758b35c", "reason": "数量后的对象漏译，只剩数字和量词。"},
+    {"audit_id": "a8b3a618adb34f8aada095543371c4123b98df75155a66d325ff0016a6fba5c4", "reason": "法律标题添加源文没有的以下简称和规定。"},
+    {"audit_id": "f3f442fc6c421e93913a0df8b15b995438de7d7e6320184f5c88e29a0acd6f0d", "reason": "原文主体同仁堂漏译。"},
+    {"audit_id": "697ecd5e97e20cc98325ecfe7826527e0e4f177e0fb287aef0f881e78410c27f", "reason": "漏译剧院工作人员说的说话者归属。"},
+    {"audit_id": "2739410dfb1c9739b05d6be2fff26ce9546022b4ad1de2bc3b75d0f9a454eac4", "reason": "挥金如土变为没钱，实质语义错误。"},
+    {"audit_id": "d2c1b17a04607bed91e7f48547f895e6745c72ee58c97d68557f7ac5c7970d2f", "reason": "出版物总数误称小说总数，并出现非虚构小说类别错误。"},
+    {"audit_id": "6921cf7c207a1c78a6c76e5db30b15030a8c0545e2f62844ca2506daefa82bff", "reason": "网络被译为毁坏；训练参考同样存在问题。"},
+    {"audit_id": "ed5948975f125b7b8d5a6f673b37de9477f86acb126ffde16145e108d3f2fb73", "reason": "相识被译为知识，核心含义改变。"},
+    {"audit_id": "20c4ca06b567d6d930524a3ad95ced02f30f9bf6120064e8d57a29e264b78d28", "reason": "平方英尺变为平方米，数字未进行相应换算。"},
+    {"audit_id": "156d138dfb21e35a4426678a4c0be2fe13f13a9b8a68515a0bcbfc3b25d7af06", "reason": "中文目标含粤语而家，不符合普通话要求。"},
+    {"audit_id": "020d7b0aa74c5a28cdd3ac8adeb3a6c6e0d5cede562a3c219a8cd28d09b954a6", "reason": "中国人大网未准确保留，公开征集意见整项缺失。"}
+  ]
+}

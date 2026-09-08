@@ -48,11 +48,15 @@ UNITS = (
     (r"(?:公里|千米|kilometr\w*|km\b)", "length", "1000"),
     (r"(?:米|公尺|metr\w*|m\b)", "length", "1"),
     (r"(?:公斤|千克|kilogramm\w*|kg\b)", "mass", "1000"),
-    (r"(?:克|gramm\w*|g\b)", "mass", "1"),
+    (r"(?:克|gramm\w*|g(?![\w'’‘ʻʼ`]))", "mass", "1"),
     (r"(?:小时|小時|soat\w*)", "duration", "3600"),
     (r"(?:分钟|分鐘|daqiqa\w*)", "duration", "60"),
     (r"(?:秒|soniya\w*)", "duration", "1"),
-    (r"(?:%|％)", "percent", "1"),
+    (
+        r"(?:%|％|foiz(?:dan|ga|ni|ning|i|ini|ida|idan|li)?(?![\w'’‘ʻʼ`]))",
+        "percent",
+        "1",
+    ),
 )
 UNIT_PATTERNS = [(re.compile(r"\s*" + p, re.I), dim, Decimal(f)) for p, dim, f in UNITS]
 

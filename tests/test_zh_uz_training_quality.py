@@ -261,3 +261,84 @@ def test_mid_read_source_mutation_refused(fixture, monkeypatch):
 def test_invalid_review_budget(count):
     with pytest.raises(ValueError, match="between 1 and 100"):
         quality.build_report([], [], per_stratum=count)
+
+
+def saved_judgments(root):
+    path = root / "data/pipeline_v2/zh_uz_v2/teacher_judged.parquet"
+    path.parent.mkdir(parents=True)
+    diag.flow.pd.DataFrame(
+        [
+            {
+                "src_lang": "zh",
+                "tgt_lang": "uz",
+                "src_text": "这是第三句。",
+                "teacher_text": "Bu uchinchi gap.",
+                "judge_label": "PASS",
+                "judge_parse_ok": True,
+                "teacher_id": "test",
+                "teacher_usefulness": "HIGH",
+            }
+        ]
+    ).to_parquet(path)
+    return path
+
+
+def test_end_to_end_default_recovery_records_inputs_and_keeps_training(fixture):
+    root, args = fixture
+    judged = saved_judgments(root)
+    originals_before = {p: p.read_bytes() for p in root.rglob("*") if p.is_file()}
+    summary = quality.run(args)
+    output = root / args.output
+    recovery_report = diag.read_json(output / "metadata_recovery.json")
+    assert recovery_report["counts_current_pool_teacher_rows"]["RECOVERED"] == 1
+    assert recovery_report["input_inventory"][str(judged.resolve())]
+    assert summary["directions"]["zh-uz"]["by_label"]["PASS"]["sampled_rows"] == 2
+    assert (
+        summary["directions"]["zh-uz"]["metadata_recovery_sampled_teacher_rows"][
+            "RECOVERED"
+        ]
+        == 1
+    )
+    assert originals_before == {p: p.read_bytes() for p in originals_before}
+    manifest = diag.read_json(output / "quality_manifest.json")["manifest"]
+    assert any(
+        item["sha256"] == diag.file_sha256(judged)
+        for item in manifest["inputs"].values()
+    )
+    assert quality.run(args) == summary
+
+
+def test_missing_explicit_judgments_fail_not_silently_skip(fixture):
+    root, args = fixture
+    args.judge_metadata = ["missing_judged.parquet"]
+    with pytest.raises(FileNotFoundError, match="judge-metadata"):
+        quality.run(args)
+    assert not (root / args.output / "done.json").exists()
+
+
+def test_judgment_mutation_during_read_refuses_publication(fixture, monkeypatch):
+    root, args = fixture
+    saved_judgments(root)
+    read = quality.recovery.read_judgments
+
+    def changed(path):
+        records = read(path)
+        with path.open("ab") as stream:
+            stream.write(b"changed")
+        return records
+
+    monkeypatch.setattr(quality.recovery, "read_judgments", changed)
+    with pytest.raises(RuntimeError, match="Input changed"):
+        quality.run(args)
+    assert not (root / args.output / "done.json").exists()
+
+
+def test_newly_available_judgments_require_new_output(fixture):
+    root, args = fixture
+    quality.run(args)
+    output = root / args.output
+    packet_before = (output / "review_packet.json").read_bytes()
+    saved_judgments(root)
+    with pytest.raises(RuntimeError, match="changed"):
+        quality.run(args)
+    assert (output / "review_packet.json").read_bytes() == packet_before

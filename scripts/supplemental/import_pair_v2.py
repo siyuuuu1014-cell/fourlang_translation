@@ -24,6 +24,7 @@ from scripts.pipeline_v2.data_flow import normalized_key, pair_hash  # noqa: E40
 from scripts.pipeline_v3.language_normalization import (  # noqa: E402
     normalize_language_text,
 )
+from scripts.pipeline_v3.quality_checks import CANTONESE_PATTERN  # noqa: E402
 
 
 REQUIRED_COLUMNS = {
@@ -37,10 +38,6 @@ REQUIRED_COLUMNS = {
 # Deliberately conservative: these forms are strong signals that a Chinese sentence
 # is Cantonese rather than standard written Mandarin. Qwen still reviews every row
 # that survives this deterministic gate.
-CANTONESE_PATTERN = re.compile(
-    r"佢哋|我哋|你哋|点解|邊個|边个|幾多|几多|呢個|呢个|呢段|"
-    r"[佢嘅喺咗哋冇唔嗰咁咩啲嚟攞睇嘢乜俾噉噃]"
-)
 CYRILLIC_PATTERN = re.compile(r"[\u0400-\u052f]")
 CJK_PATTERN = re.compile(r"[\u3400-\u9fff]")
 

@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "created_date": "2026-09-08",
+  "status": "AI_DRAFT_PENDING_SOURCE_REVIEW",
+  "origin": "AI_AUTHORED_NOT_COLLECTED_USER_DATA",
+  "sources": 80,
+  "directions": 12,
+  "per_direction": 20,
+  "tasks": 240,
+  "files": {
+    "review_form.md": "5600f3b0c5738bbcbaedaa1a904190f23cfd2ba1d3ab5ad671c8f6aeb42e3b6d",
+    "source_review.md": "580f212569e27b440af6bfbf8eb048349798a17b7e960ab1a46a44fcc91f6572",
+    "sources.jsonl": "0bf6464e01bdbdd381863ce17d23f0043945355c618c2579e646ad1b3343f6d5",
+    "tasks.jsonl": "5e91088f9bd45b00171e14854e85350d9a8ef2a0b8dfd6cb1589f41683e42c33",
+    "README.md": "efabecb83d1fcf1868420e7359e9ca1e78af19404bb9eeb0e7a26015a971c5a2"
+  },
+  "training_overlap_check": "NOT_RUN",
+  "model_inference_run": false,
+  "reference_translations_provided": false,
+  "training_allowed": false,
+  "human_quality_approved": false
+}

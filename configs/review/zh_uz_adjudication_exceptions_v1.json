@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "status": "ASSISTANT_REVIEW_PENDING_NATIVE_CONFIRMATION",
+  "action": "prevent_automatic_isolation_candidate_promotion",
+  "cases": [
+    {
+      "review_id": "6842a4b96e8a6d0e84429f44997bddae2d2e7682452fe059223fcccbe5e34f41",
+      "reason": "IPA vowel symbols are legitimate linguistic notation, not wrong-language evidence."
+    },
+    {
+      "review_id": "970166a3b652d3a6604035c8beff49a567b2e4e78ee4aedf07615fa1163bf168",
+      "reason": "Technical term equivalence for head/head-tube angle is unresolved and requires domain review."
+    },
+    {
+      "review_id": "ddc748220c7e31fb817fc134c5b5e9c7bbf58f89df80eb17dc25504d1d58a822",
+      "reason": "The bilingual glossary structure can legitimately yield repeated Uzbek equivalents."
+    }
+  ]
+}

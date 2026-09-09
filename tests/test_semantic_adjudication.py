@@ -40,6 +40,12 @@ def test_selection_rechecks_recovered_pass():
     assert [r["review_id"] for r in chosen] == ["1"]
 
 
+def test_selection_always_includes_known_case():
+    rows = [pair(1, "PASS"), pair(2, "PASS")]
+    chosen = adjudicate.select(rows, 0, 2026, {"1"})
+    assert [r["review_id"] for r in chosen] == ["1"]
+
+
 def test_conservative_policy_never_applies_training_action():
     rows = [pair(1, "FAIL"), pair(2, "PASS")]
     second = [{**rows[0], "second_judgment": {

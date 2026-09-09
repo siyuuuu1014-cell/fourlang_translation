@@ -136,11 +136,13 @@ def recover(rows):
     return recovered
 
 
-def select(rows, pass_per_direction, seed):
+def select(rows, pass_per_direction, seed, known_ids=frozenset()):
     selected = {
         r["review_id"]: r
         for r in rows
-        if r["judgment"]["label"] != "PASS" or r.get("first_pass_recovered", False)
+        if r["judgment"]["label"] != "PASS"
+        or r.get("first_pass_recovered", False)
+        or bool({m["audit_id"] for m in r["members"]} & known_ids)
     }
     for direction in diag.DIRECTIONS:
         group = [
@@ -197,8 +199,8 @@ def run(args):
         raise ValueError("Use a separate output directory")
     rows, source_manifest, source_model = load_first_run(source)
     recovered = recover(rows)
-    selected = select(recovered, args.pass_per_direction, args.seed)
     known_ids = load_known_cases(cases_path)
+    selected = select(recovered, args.pass_per_direction, args.seed, known_ids)
     output.mkdir(parents=True, exist_ok=True)
     with FileLock(str(output / ".lock"), timeout=0):
         if not (output / "manifest.json").exists() and set(p.name for p in output.iterdir()) - {".lock"}:

@@ -73,3 +73,30 @@ python -m json.tool reports/diagnostics/fourlang/zh_uz_semantic_adjudication_v1/
 
 供人工查看的文件为同目录 `adjudication_packet.json`；完整保守预览为
 `conservative_preview.jsonl`。二次复审仍由同一模型完成，不能代替母语人工确认。
+
+### 修复严格证据校验并仅补审未解决项
+
+若 v1 摘要出现大量 parse failures，运行修正版。它会验证 v1 的清单、结果、分块和
+模型指纹，离线接受 PASS 多填证据以及仅标点/空格不同的证据；只补审仍未解决项与
+此前漏审的登记候选。不会重跑全部 1,885 条：
+
+```bash
+cd /root/autodl-tmp/fourlang_translation
+nohup env PYTHONUNBUFFERED=1 HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
+  /root/autodl-tmp/venvs/qwen3_judge/bin/python \
+  scripts/pipeline_v3/finalize_zh_uz_adjudication.py \
+  --model /root/autodl-tmp/models/Qwen3-8B \
+  > fourlang_zh_uz_adjudication_v2.log 2>&1 &
+echo $!
+tail -n 30 -f fourlang_zh_uz_adjudication_v2.log
+```
+
+输出在 `reports/diagnostics/fourlang/zh_uz_semantic_adjudication_v2`。查看：
+
+```bash
+python -m json.tool reports/diagnostics/fourlang/zh_uz_semantic_adjudication_v2/summary.json
+```
+
+供最终确认的文件是 `final_review_packet.json`。三个已发现的术语/格式误判被配置为
+只进入专项复核，不能因同模型双重 FAIL 自动升级为隔离候选。所有类别仍是预览，
+`training_action_applied` 始终为 false。

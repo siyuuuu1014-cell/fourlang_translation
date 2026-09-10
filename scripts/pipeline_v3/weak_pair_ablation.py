@@ -33,7 +33,12 @@ from scripts.pipeline_v3.fourlang_flow import _read_table, normalize_rows  # noq
 
 PROJECT_ROOT = PROJECT_ROOT_BOOTSTRAP
 PAIR_IDS = ("zh_uz", "uz_ru")
-TRAIN_VARIANTS = ("bidir_full", "directional_full")
+TRAIN_VARIANTS = (
+    "bidir_full",
+    "directional_full",
+    "full_weighted_60_40",
+    "full_native_lr2e6",
+)
 BASELINE_VARIANTS = ("baseline_exp1", "baseline_exp2")
 ALL_VARIANTS = BASELINE_VARIANTS + TRAIN_VARIANTS
 
@@ -69,6 +74,13 @@ def run_id(variant: str, direction: str | None = None) -> str:
             raise ValueError("directional_full requires a direction.")
         return f"directional_full__{direction.replace('-', '_')}"
     return variant
+
+
+def variant_settings(config: dict[str, Any], variant: str) -> dict[str, Any]:
+    settings = config.get("variants", {}).get(variant)
+    if not isinstance(settings, dict):
+        raise KeyError(f"Missing variants.{variant} configuration.")
+    return dict(settings)
 
 
 def prepared_root(pair_id: str, variant: str, direction: str | None = None) -> Path:
@@ -161,6 +173,65 @@ def _composition(frame: pd.DataFrame) -> dict[str, Any]:
     }
 
 
+def _effective_origin_mass(frame: pd.DataFrame) -> dict[str, dict[str, float]]:
+    working = frame.copy()
+    working["direction"] = (
+        working["src_lang"].astype(str) + "-" + working["tgt_lang"].astype(str)
+    )
+    working["origin_group"] = working["training_source"].apply(
+        lambda value: "teacher" if "teacher" in str(value).lower() else "human"
+    )
+    working["weight"] = working["weight"].fillna(1.0).astype(float)
+    result: dict[str, dict[str, float]] = {}
+    for (direction, origin), group in working.groupby(
+        ["direction", "origin_group"], sort=True
+    ):
+        result.setdefault(str(direction), {})[str(origin)] = float(
+            group["weight"].sum()
+        )
+    return result
+
+
+def _balance_teacher_mass(
+    frame: pd.DataFrame, teacher_ratio: float
+) -> tuple[pd.DataFrame, dict[str, Any]]:
+    if not 0.0 < teacher_ratio < 1.0:
+        raise ValueError("teacher_effective_ratio must be between 0 and 1.")
+    balanced = frame.copy()
+    balanced["weight"] = balanced["weight"].fillna(1.0).astype(float)
+    directions = balanced["src_lang"].astype(str) + "-" + balanced["tgt_lang"].astype(str)
+    teacher_mask = balanced["training_source"].astype(str).str.lower().str.contains(
+        "teacher"
+    )
+    multipliers: dict[str, float] = {}
+    before = _effective_origin_mass(balanced)
+    for direction in sorted(set(directions)):
+        current = directions == direction
+        teacher_mass = float(balanced.loc[current & teacher_mask, "weight"].sum())
+        human_mass = float(balanced.loc[current & ~teacher_mask, "weight"].sum())
+        if teacher_mass <= 0 or human_mass <= 0:
+            raise RuntimeError(
+                f"{direction} requires both Teacher KD and human replay for weighting."
+            )
+        multiplier = (
+            teacher_ratio * human_mass / ((1.0 - teacher_ratio) * teacher_mass)
+        )
+        balanced.loc[current & teacher_mask, "weight"] *= multiplier
+        multipliers[direction] = multiplier
+    after = _effective_origin_mass(balanced)
+    achieved = {
+        direction: masses["teacher"] / (masses["teacher"] + masses["human"])
+        for direction, masses in after.items()
+    }
+    return balanced, {
+        "target_teacher_effective_ratio": teacher_ratio,
+        "teacher_weight_multipliers": multipliers,
+        "effective_mass_before": before,
+        "effective_mass_after": after,
+        "achieved_teacher_effective_ratio": achieved,
+    }
+
+
 def validate(config: dict[str, Any]) -> dict[str, Any]:
     errors: list[str] = []
     configured = [item.get("id") for item in config.get("pairs", [])]
@@ -219,7 +290,7 @@ def prepare(
     if variant == "directional_full":
         direction = validate_direction(pair, direction)
     elif direction is not None:
-        raise ValueError("bidir_full does not accept --direction.")
+        raise ValueError(f"{variant} does not accept --direction.")
 
     source_path = project_path(pair["kd_train"])
     validation_path = project_path(pair["validation"])
@@ -256,6 +327,12 @@ def prepare(
             (validation_frame["src_lang"] == source)
             & (validation_frame["tgt_lang"] == target)
         ].copy()
+    weighting = None
+    if variant == "full_weighted_60_40":
+        settings = variant_settings(config, variant)
+        train_frame, weighting = _balance_teacher_mass(
+            train_frame, float(settings["teacher_effective_ratio"])
+        )
     if train_frame.empty or validation_frame.empty:
         raise RuntimeError(f"{pair_id} {run_id(variant, direction)} has empty data.")
 
@@ -271,6 +348,7 @@ def prepare(
             "variant": variant,
             "direction": direction,
             "training": config["training"],
+            "variant_settings": variant_settings(config, variant),
         }
     )
     report = {
@@ -281,6 +359,7 @@ def prepare(
         "run_id": run_id(variant, direction),
         "selection": "all unique eligible rows; no resampling or repetition",
         "composition": _composition(train_frame),
+        "weighting": weighting,
         "validation_rows": len(validation_frame),
         "leakage_audit": leakage,
         "config_fingerprint": config_fingerprint,
@@ -320,6 +399,7 @@ def verify_prepared(
             "variant": variant,
             "direction": direction,
             "training": config["training"],
+            "variant_settings": variant_settings(config, variant),
         }
     )
     if (
@@ -337,7 +417,7 @@ def trained_model_path(
     pair_id: str, variant: str, direction: str | None = None
 ) -> Path:
     root = artifact_root(pair_id, variant, direction) / "best_model"
-    if variant == "bidir_full":
+    if variant != "directional_full":
         return root / "shared"
     checked = str(direction).replace("-", "_")
     return root / checked
@@ -372,7 +452,7 @@ def train(
         shared = False
     else:
         if direction is not None:
-            raise ValueError("bidir_full does not accept --direction.")
+            raise ValueError(f"{variant} does not accept --direction.")
         source, target = pair["languages"]
         shared = True
     verify_prepared(config, pair_id, variant, direction)
@@ -380,6 +460,18 @@ def train(
     model_files(source_model)
     prepared = prepared_root(pair_id, variant, direction)
     destination = trained_model_path(pair_id, variant, direction)
+    runtime_config = {
+        **config,
+        "training": {
+            **config["training"],
+            "exp2": {
+                **config["training"]["exp2"],
+                "learning_rate": float(
+                    variant_settings(config, variant)["learning_rate"]
+                ),
+            },
+        },
+    }
     report = train_model(
         _candidate(config),
         str(source_model),
@@ -388,7 +480,7 @@ def train(
         _read_jsonl(prepared / "train.jsonl"),
         _read_jsonl(prepared / "validation.jsonl"),
         destination,
-        config,
+        runtime_config,
         experiment="exp2",
         shared=shared,
     )
@@ -476,7 +568,11 @@ def compare(config: dict[str, Any], pair_id: str) -> dict[str, Any]:
     baseline = read_json(baseline_path)["scores"]
     noise_floor = float(config["comparison"]["noise_floor_chrf2"])
     meaningful = float(config["comparison"]["meaningful_gain_chrf2"])
-    variants: list[tuple[str, str | None]] = [("bidir_full", None)]
+    variants: list[tuple[str, str | None]] = [
+        ("bidir_full", None),
+        ("full_weighted_60_40", None),
+        ("full_native_lr2e6", None),
+    ]
     variants.extend(("directional_full", item) for item in pair_directions(pair))
     rows: list[dict[str, Any]] = []
     winners: dict[str, Any] = {}
@@ -544,6 +640,8 @@ def status(config: dict[str, Any]) -> dict[str, Any]:
             ("baseline_exp1", None),
             ("baseline_exp2", None),
             ("bidir_full", None),
+            ("full_weighted_60_40", None),
+            ("full_native_lr2e6", None),
             *(('directional_full', item) for item in pair_directions(pair)),
         ):
             rows.append(

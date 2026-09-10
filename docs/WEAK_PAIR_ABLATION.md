@@ -95,3 +95,42 @@ python -m json.tool \
 Do not promote any artifact from this diagnostic directory. After `zh_uz` has a
 clear result, repeat the same commands for `uz_ru`; its selected baseline is
 Exp2.
+
+## Phase 1b after the initial `zh_uz` result
+
+The first full-data run contains about 71% Teacher rows and 29% human replay,
+whereas the original controlled Exp2 used 60/40. Run these two additional
+bidirectional controls; existing runs are reused and do not need to be repeated.
+
+`full_weighted_60_40` keeps every unique row but rescales Teacher row weights per
+direction so that Teacher KD contributes exactly 60% of the effective training
+loss:
+
+```bash
+$PY scripts/pipeline_v3/weak_pair_ablation.py prepare \
+  --pair zh_uz --variant full_weighted_60_40
+$PY scripts/pipeline_v3/weak_pair_ablation.py train \
+  --pair zh_uz --variant full_weighted_60_40
+$PY scripts/pipeline_v3/weak_pair_ablation.py evaluate \
+  --pair zh_uz --variant full_weighted_60_40
+```
+
+`full_native_lr2e6` preserves the natural full-data mixture and tests a smaller
+update size:
+
+```bash
+$PY scripts/pipeline_v3/weak_pair_ablation.py prepare \
+  --pair zh_uz --variant full_native_lr2e6
+$PY scripts/pipeline_v3/weak_pair_ablation.py train \
+  --pair zh_uz --variant full_native_lr2e6
+$PY scripts/pipeline_v3/weak_pair_ablation.py evaluate \
+  --pair zh_uz --variant full_native_lr2e6
+```
+
+Rebuild the comparison after both evaluations:
+
+```bash
+$PY scripts/pipeline_v3/weak_pair_ablation.py compare --pair zh_uz
+python -m json.tool \
+  results/evaluation/weak_pair_ablation/zh_uz/comparison.json
+```

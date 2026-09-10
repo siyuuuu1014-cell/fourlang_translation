@@ -48,6 +48,19 @@ max_new_tokens = 256
 noise_floor_chrf2 = 0.30
 meaningful_gain_chrf2 = 1.00
 
+[variants.bidir_full]
+learning_rate = 0.000005
+
+[variants.directional_full]
+learning_rate = 0.000005
+
+[variants.full_weighted_60_40]
+learning_rate = 0.000005
+teacher_effective_ratio = 0.60
+
+[variants.full_native_lr2e6]
+learning_rate = 0.000002
+
 [[pairs]]
 id = "zh_uz"
 languages = ["zh", "uz"]

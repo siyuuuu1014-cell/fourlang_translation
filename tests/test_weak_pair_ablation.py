@@ -37,6 +37,15 @@ def config() -> dict:
             "noise_floor_chrf2": 0.3,
             "meaningful_gain_chrf2": 1.0,
         },
+        "variants": {
+            "bidir_full": {"learning_rate": 5e-6},
+            "directional_full": {"learning_rate": 5e-6},
+            "full_weighted_60_40": {
+                "learning_rate": 5e-6,
+                "teacher_effective_ratio": 0.6,
+            },
+            "full_native_lr2e6": {"learning_rate": 2e-6},
+        },
         "pairs": [
             {
                 "id": "zh_uz",
@@ -149,6 +158,42 @@ class WeakPairAblationTests(unittest.TestCase):
         self.assertTrue(all(item["src_lang"] == "zh" for item in prepared_train))
         self.assertTrue(all(item["src_lang"] == "zh" for item in prepared_validation))
         self.assertEqual(report["direction"], "zh-uz")
+
+    def test_weighted_full_uses_all_rows_and_rebalances_loss_mass(self):
+        frame = pd.DataFrame(
+            [
+                row("zh", "uz", 1, "teacher_kd"),
+                row("zh", "uz", 2, "teacher_kd_v3"),
+                row("zh", "uz", 3, "teacher_kd_v3"),
+                row("zh", "uz", 4, "human_replay"),
+                row("uz", "zh", 5, "teacher_kd"),
+                row("uz", "zh", 6, "teacher_kd_v3"),
+                row("uz", "zh", 7, "human_replay"),
+            ]
+        )
+        frame.loc[frame["training_source"] == "teacher_kd_v3", "weight"] = 0.8
+        balanced, report = ablation._balance_teacher_mass(frame, 0.6)
+        self.assertEqual(len(balanced), len(frame))
+        for ratio in report["achieved_teacher_effective_ratio"].values():
+            self.assertAlmostEqual(ratio, 0.6)
+
+    def test_low_lr_variant_overrides_only_exp2_learning_rate(self):
+        cfg = config()
+        pair = cfg["pairs"][0]
+        prepared = [row("zh", "uz", 1), row("uz", "zh", 2)]
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source = root / pair["exp1_model"]
+            source.mkdir(parents=True)
+            with mock.patch.object(ablation, "PROJECT_ROOT", root), mock.patch.object(
+                ablation, "verify_prepared"
+            ), mock.patch.object(ablation, "model_files"), mock.patch.object(
+                ablation, "_read_jsonl", return_value=prepared
+            ), mock.patch.object(ablation, "train_model", return_value={}) as trainer:
+                ablation.train(cfg, "zh_uz", "full_native_lr2e6")
+        runtime_config = trainer.call_args.args[7]
+        self.assertEqual(runtime_config["training"]["exp2"]["learning_rate"], 2e-6)
+        self.assertEqual(cfg["training"]["exp2"]["learning_rate"], 5e-6)
 
     def test_compare_uses_selected_baseline_and_chrf_thresholds(self):
         cfg = config()

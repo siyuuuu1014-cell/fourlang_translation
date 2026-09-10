@@ -1,0 +1,71 @@
+[experiment]
+schema_version = 1
+id = "weak_pair_student_ablation_v1"
+seed = 2026
+backbone = "small100"
+
+[direction]
+seed = 2026
+
+[model]
+family = "small100"
+path = "${FOURLANG_MODEL_ROOT}/small100"
+repo_id = "alirezamsh/small100"
+revision = "8ab680e26a596d2e3d2d2d17ae0f68df1037328c"
+
+[benchmarks]
+# Use dev for every ablation decision. devtest is protected from leakage but is
+# deliberately not evaluated by this experiment.
+flores_dev = "data/benchmark/fourlang/flores_dev.parquet"
+protected_devtest = "data/benchmark/fourlang/flores_devtest.parquet"
+
+[training]
+batch_size = 16
+gradient_accumulation_steps = 2
+weight_decay = 0.01
+warmup_ratio = 0.05
+max_source_length = 256
+max_target_length = 256
+early_stopping_patience = 1
+gradient_checkpointing = false
+group_by_length = true
+dataloader_num_workers = 4
+optim = "adamw_torch_fused"
+
+# Phase 1 intentionally matches the existing Exp2 optimizer settings. Only the
+# amount/layout of data changes in this ablation.
+[training.exp2]
+epochs = 2
+learning_rate = 0.000005
+checkpoint_interval_steps = 1000
+direction_validation_samples = 200
+
+[deployment]
+num_beams = 5
+max_new_tokens = 256
+
+[comparison]
+noise_floor_chrf2 = 0.30
+meaningful_gain_chrf2 = 1.00
+
+[[pairs]]
+id = "zh_uz"
+languages = ["zh", "uz"]
+kd_quality_status = "approved"
+kd_train = "data/distillation/zh_uz/v4/train.jsonl"
+human_train = "data/splits/zh_uz/v2/train.jsonl"
+validation = "data/splits/zh_uz/v2/validation.jsonl"
+exp1_model = "results/student/pair_specialists/zh_uz/exp1/best_model/shared"
+exp2_model = "results/student/pair_specialists/zh_uz/exp2/best_model/shared"
+selected_baseline_stage = "exp1"
+
+[[pairs]]
+id = "uz_ru"
+languages = ["uz", "ru"]
+kd_quality_status = "approved"
+kd_train = "data/distillation/uz_ru/v1/train.jsonl"
+human_train = "data/splits/uz_ru/v1/train.jsonl"
+validation = "data/splits/uz_ru/v1/validation.jsonl"
+exp1_model = "results/student/pair_specialists/uz_ru/exp1/best_model/shared"
+exp2_model = "results/student/pair_specialists/uz_ru/exp2/best_model/shared"
+selected_baseline_stage = "exp2"

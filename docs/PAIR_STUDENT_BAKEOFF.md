@@ -10,7 +10,7 @@ does not train, promote, or update inference routes.
 - Selection uses only the shared four-language FLORES `dev` file. The existing
   `devtest` gate remains final evaluation evidence and must not be used to tune
   the architecture.
-- Candidates must be commercially eligible and fit the configured 1.3B
+- Candidates must be commercially eligible and fit the configured 600M
   parameter ceiling.
 - Ranking maximizes the weaker direction's chrF2, then macro chrF2, macro BLEU,
   and lower mean latency.
@@ -18,8 +18,10 @@ does not train, promote, or update inference routes.
   fixed-budget Exp1 pilot.
 - Direction-specific Marian models may be reported separately as controls but
   are not eligible under the one-bidirectional-model-per-pair contract.
-- NLLB is excluded from deployable candidates because of its non-commercial
-  license. MADLAD-3B remains a Teacher/ceiling control, not a small Student.
+- M2M100-1.2B is excluded because six routed copies do not meet the lightweight
+  deployment target. NLLB is excluded from deployable candidates because of
+  its non-commercial license. MADLAD-3B remains a Teacher/ceiling control, not
+  a small Student.
 
 ## Before running on the server
 
@@ -57,12 +59,9 @@ $PY scripts/pipeline_v3/pair_student_bakeoff.py evaluate \
 
 $PY scripts/pipeline_v3/pair_student_bakeoff.py evaluate \
   --pair zh_uz --candidate-id m2m100_418m
-
-$PY scripts/pipeline_v3/pair_student_bakeoff.py evaluate \
-  --pair zh_uz --candidate-id m2m100_1_2b
 ```
 
-Only after all candidates finish:
+Only after both candidates finish:
 
 ```bash
 $PY scripts/pipeline_v3/pair_student_bakeoff.py rank --pair zh_uz

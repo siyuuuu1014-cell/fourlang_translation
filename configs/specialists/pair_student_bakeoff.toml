@@ -8,7 +8,7 @@ commercial_use = true
 primary_metric = "minimum_direction_chrf2"
 secondary_metric = "macro_chrf2"
 tertiary_metric = "macro_bleu"
-max_student_parameters = 1300000000
+max_student_parameters = 600000000
 require_all_candidates = true
 
 [training]
@@ -37,16 +37,6 @@ attribution_required = true
 path = "${FOURLANG_MODEL_ROOT}/m2m100_418M"
 repo_id = "facebook/m2m100_418M"
 revision = "55c2e61bbf05dfb8d7abccdc3fae6fc8512fd636"
-
-[[student_candidates]]
-id = "m2m100_1_2b"
-family = "m2m100"
-license = "mit"
-commercial_allowed = true
-attribution_required = true
-path = "${FOURLANG_MODEL_ROOT}/m2m100_1.2B"
-repo_id = "facebook/m2m100_1.2B"
-revision = "7b36184180524c1a1bbfa37f120a608046250b98"
 
 # Ordered by diagnostic priority, not by language name.
 [[pairs]]

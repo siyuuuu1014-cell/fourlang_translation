@@ -1,0 +1,115 @@
+[experiment]
+schema_version = 1
+id = "six_pair_specialists"
+seed = 2026
+backbone = "small100"
+
+[direction]
+# The shared trainer reads the deterministic seed from this existing config key.
+seed = 2026
+
+[model]
+family = "small100"
+path = "${FOURLANG_MODEL_ROOT}/small100"
+repo_id = "alirezamsh/small100"
+revision = "8ab680e26a596d2e3d2d2d17ae0f68df1037328c"
+
+[benchmarks]
+flores_dev = "data/benchmark/fourlang/flores_dev.parquet"
+flores_devtest = "data/benchmark/fourlang/flores_devtest.parquet"
+
+[balancing.exp1]
+rows_per_direction = 10000
+
+[balancing.exp2]
+rows_per_direction = 10000
+teacher_ratio = 0.60
+max_teacher_repeats = 3
+
+[training]
+batch_size = 16
+gradient_accumulation_steps = 2
+weight_decay = 0.01
+warmup_ratio = 0.05
+max_source_length = 256
+max_target_length = 256
+early_stopping_patience = 1
+gradient_checkpointing = false
+group_by_length = true
+dataloader_num_workers = 4
+optim = "adamw_torch_fused"
+
+[training.exp1]
+epochs = 3
+learning_rate = 0.00003
+
+[training.exp2]
+epochs = 2
+learning_rate = 0.000005
+checkpoint_interval_steps = 1000
+direction_validation_samples = 200
+
+[deployment]
+registry = "models/model_registry.json"
+root = "models/final_pair_specialists"
+num_beams = 5
+max_new_tokens = 256
+
+[[pairs]]
+id = "en_zh"
+languages = ["en", "zh"]
+mode = "train_full"
+kd_quality_status = "approved"
+human_train = "data/splits/zh_en/v1/train_bidirectional_v1.parquet"
+validation = "data/splits/zh_en/v1/validation_bidirectional_v1.parquet"
+kd_train = "data/distillation/zh_en/v1/18h_exp2_training/exp2_train_combined_v1.parquet"
+
+[[pairs]]
+id = "en_uz"
+languages = ["en", "uz"]
+mode = "reuse_exp2"
+kd_quality_status = "approved"
+human_train = "data/splits/en_uz/v1/train_exp1_bidirectional_v1.parquet"
+validation = "data/splits/en_uz/v1/validation_exp1_bidirectional_v1.parquet"
+kd_train = "data/distillation/en_uz/v1/11a_exp2_training/exp2_train_combined_v1.parquet"
+existing_exp1 = "results/student/small100/exp1_finetune/best_model"
+existing_exp2 = "models/final_specialists/en_uz_small100_v1"
+
+[[pairs]]
+id = "en_ru"
+languages = ["en", "ru"]
+mode = "resume_exp2"
+kd_quality_status = "approved"
+human_train = "data/splits/en_ru/v1/train.jsonl"
+validation = "data/splits/en_ru/v1/validation.jsonl"
+kd_train = "data/distillation/en_ru/v1/train.jsonl"
+existing_exp1 = "results/student/en_ru/exp1/best_model/shared"
+
+[[pairs]]
+id = "zh_uz"
+languages = ["zh", "uz"]
+mode = "train_full"
+# Cleaned v4 is approved for the controlled pair-specialist baseline.
+# Native/domain review remains pending for documented protected cases.
+kd_quality_status = "approved"
+human_train = "data/splits/zh_uz/v2/train.jsonl"
+validation = "data/splits/zh_uz/v2/validation.jsonl"
+kd_train = "data/distillation/zh_uz/v4/train.jsonl"
+
+[[pairs]]
+id = "zh_ru"
+languages = ["zh", "ru"]
+mode = "train_full"
+kd_quality_status = "approved"
+human_train = "data/splits/zh_ru/v1/train.jsonl"
+validation = "data/splits/zh_ru/v1/validation.jsonl"
+kd_train = "data/distillation/zh_ru/v1/train.jsonl"
+
+[[pairs]]
+id = "uz_ru"
+languages = ["uz", "ru"]
+mode = "train_full"
+kd_quality_status = "approved"
+human_train = "data/splits/uz_ru/v1/train.jsonl"
+validation = "data/splits/uz_ru/v1/validation.jsonl"
+kd_train = "data/distillation/uz_ru/v1/train.jsonl"

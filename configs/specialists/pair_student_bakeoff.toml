@@ -1,0 +1,80 @@
+[experiment]
+schema_version = 1
+id = "pair_student_bakeoff_v1"
+seed = 2026
+commercial_use = true
+
+[selection]
+primary_metric = "minimum_direction_chrf2"
+secondary_metric = "macro_chrf2"
+tertiary_metric = "macro_bleu"
+max_student_parameters = 1300000000
+require_all_candidates = true
+
+[training]
+max_source_length = 256
+
+[deployment]
+num_beams = 5
+max_new_tokens = 256
+
+[[student_candidates]]
+id = "small100"
+family = "small100"
+license = "mit"
+commercial_allowed = true
+attribution_required = true
+path = "${FOURLANG_MODEL_ROOT}/small100"
+repo_id = "alirezamsh/small100"
+revision = "8ab680e26a596d2e3d2d2d17ae0f68df1037328c"
+
+[[student_candidates]]
+id = "m2m100_418m"
+family = "m2m100"
+license = "mit"
+commercial_allowed = true
+attribution_required = true
+path = "${FOURLANG_MODEL_ROOT}/m2m100_418M"
+repo_id = "facebook/m2m100_418M"
+revision = "55c2e61bbf05dfb8d7abccdc3fae6fc8512fd636"
+
+[[student_candidates]]
+id = "m2m100_1_2b"
+family = "m2m100"
+license = "mit"
+commercial_allowed = true
+attribution_required = true
+path = "${FOURLANG_MODEL_ROOT}/m2m100_1.2B"
+repo_id = "facebook/m2m100_1.2B"
+revision = "7b36184180524c1a1bbfa37f120a608046250b98"
+
+# Ordered by diagnostic priority, not by language name.
+[[pairs]]
+id = "zh_uz"
+languages = ["zh", "uz"]
+benchmark = "data/benchmark/fourlang/flores_dev.parquet"
+
+[[pairs]]
+id = "uz_ru"
+languages = ["uz", "ru"]
+benchmark = "data/benchmark/fourlang/flores_dev.parquet"
+
+[[pairs]]
+id = "zh_ru"
+languages = ["zh", "ru"]
+benchmark = "data/benchmark/fourlang/flores_dev.parquet"
+
+[[pairs]]
+id = "en_zh"
+languages = ["en", "zh"]
+benchmark = "data/benchmark/fourlang/flores_dev.parquet"
+
+[[pairs]]
+id = "en_uz"
+languages = ["en", "uz"]
+benchmark = "data/benchmark/fourlang/flores_dev.parquet"
+
+[[pairs]]
+id = "en_ru"
+languages = ["en", "ru"]
+benchmark = "data/benchmark/fourlang/flores_dev.parquet"

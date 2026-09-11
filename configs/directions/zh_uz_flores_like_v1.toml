@@ -1,0 +1,100 @@
+[pipeline]
+scope = "flores_like_distillation"
+
+[direction]
+schema_version = 1
+pair = "zh_uz"
+source_lang = "zh"
+target_lang = "uz"
+version = "flores_like_v1"
+commercial_use = false
+seed = 2026
+
+[artifacts]
+pipeline_namespace = "zh_uz_flores_like_v1"
+teacher_selection_pair = "zh_uz"
+
+[inputs]
+# Reuse the larger, quality-filtered v3 collection, but explicitly exclude the
+# sources already selected for v3 and every sentence already present in v4.
+candidate_pool = "data/pipeline_v2/zh_uz_v3/monolingual_collected.parquet"
+source_review = "data/pipeline_v2/zh_uz_v3/source_judged.parquet"
+previous_selected = "data/pipeline_v2/zh_uz_v3/kd_candidates.jsonl"
+existing_train = "data/distillation/zh_uz/v4/train.jsonl"
+validation = "data/splits/zh_uz/v2/validation.jsonl"
+flores_dev = "data/benchmark/fourlang/flores_dev.parquet"
+flores_devtest = "data/benchmark/fourlang/flores_devtest.parquet"
+
+[outputs]
+root = "data/distillation/zh_uz/flores_like_v1"
+report_root = "reports/experiments/zh_uz_flores_like_v1"
+teacher_pipeline_root = "data/pipeline_v2/zh_uz_flores_like_v1"
+
+[selection]
+candidate_sources_per_direction = 15000
+minimum_teacher_rows_per_direction = 8000
+near_duplicate_jaccard = 0.80
+shingle_size = 5
+require_source_qwen_pass = true
+
+# These are ceilings, not quotas. They prevent a single web source from taking
+# over while still allowing selection when the old collection stopped before
+# reaching Wikipedia.
+[selection.source_caps]
+hplt = 0.55
+fineweb = 0.40
+wikipedia = 0.25
+v2_bronze = 0.10
+other = 0.10
+
+[mixture]
+human = 0.40
+existing_kd = 0.30
+flores_like_kd = 0.30
+direction_share = 0.50
+
+[text_contract]
+zh_script = "simplified"
+convert_traditional_to_simplified = true
+uz_script = "latin"
+transliterate_cyrillic_to_latin = true
+
+[benchmarks.selection]
+flores_dev = "data/benchmark/fourlang/flores_dev.parquet"
+
+[benchmarks.final]
+flores_devtest = "data/benchmark/fourlang/flores_devtest.parquet"
+
+[language_codes.nllb]
+zh = "zho_Hans"
+uz = "uzn_Latn"
+
+[judge]
+model_path = "${FOURLANG_QWEN_MODEL_PATH}"
+source_calibration_pairs = 4000
+teacher_calibration_pairs = 1000
+batch_size = 32
+max_input_tokens = 1536
+max_new_tokens = 256
+
+[distillation]
+teacher_checkpoint_rows = 256
+teacher_high_weight = 1.0
+teacher_medium_weight = 0.8
+
+[training]
+max_source_length = 256
+
+[deployment]
+num_beams = 5
+max_new_tokens = 256
+
+[[teacher_candidates]]
+id = "nllb200_3_3b"
+family = "nllb"
+license = "cc-by-nc-4.0"
+commercial_allowed = false
+attribution_required = true
+path = "${FOURLANG_MODEL_ROOT}/nllb-200-3.3B"
+repo_id = "facebook/nllb-200-3.3B"
+revision = "a2814a8c92847d0d6aaf7afc9eac24ab57f26151"

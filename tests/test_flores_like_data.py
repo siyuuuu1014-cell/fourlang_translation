@@ -66,6 +66,8 @@ class FloresLikeDataTests(unittest.TestCase):
         )
 
         def records(source):
+            if source["language"] == "uz":
+                yield {"id": "invalid-uz", "text": "йў"}
             yield {
                 "id": source["id"],
                 "text": "新的百科句子。"
@@ -85,13 +87,23 @@ class FloresLikeDataTests(unittest.TestCase):
             ), mock.patch.object(
                 flow, "_iter_records", side_effect=records
             ), mock.patch.object(
-                flow, "quality_reason", side_effect=lambda language, text, settings: (None, text)
+                flow,
+                "quality_reason",
+                side_effect=lambda language, text, settings: (
+                    ("NORMALIZATION_ERROR", text) if text == "йў" else (None, text)
+                ),
             ):
                 report = flow.collect_extension(config)
             collected = pd.read_parquet(root / "extension.parquet")
         self.assertEqual(report["status"], "PASS")
         self.assertEqual(report["by_language"], {"uz": 1, "zh": 1})
         self.assertEqual(set(collected["src_lang"]), {"zh", "uz"})
+        self.assertEqual(
+            report["rejections"][
+                "wikipedia_flores_like_uz:NORMALIZATION_ERROR"
+            ],
+            1,
+        )
 
     def test_assemble_hits_six_effective_mass_cells(self):
         def row(src, tgt, index, origin, weight=1.0):

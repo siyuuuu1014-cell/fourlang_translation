@@ -317,11 +317,14 @@ def collect_extension(config: dict[str, Any]) -> dict[str, Any]:
                     reason, text = quality_reason(
                         language, raw_text, quality_settings
                     )
-                    key = _text_key(language, text)
-                    if reason is None and key in seen[language]:
-                        reason = "DUPLICATE_OR_PREVIOUS_SOURCE"
                     if reason is not None:
                         rejection_counts[f"{source_id}:{reason}"] += 1
+                        continue
+                    key = _text_key(language, text)
+                    if key in seen[language]:
+                        rejection_counts[
+                            f"{source_id}:DUPLICATE_OR_PREVIOUS_SOURCE"
+                        ] += 1
                         continue
                     existing_rows.append(
                         {

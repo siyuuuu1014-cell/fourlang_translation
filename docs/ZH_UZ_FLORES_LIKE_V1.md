@@ -43,17 +43,44 @@ $PY scripts/pipeline_v3/flores_like_data.py profile --config $CFG
 Expected status: `PASS`. Profiling reads FLORES dev only to derive structural
 length and sentence-feature quotas. It does not copy FLORES rows into training.
 
-## 2. Select independent source sentences
+## 2. Stage unused independent source sentences
+
+```bash
+$PY scripts/pipeline_v3/flores_like_data.py stage --config $CFG
+```
+
+This reads the unused part of the existing v3 monolingual collection, excludes
+v3-selected sources, v4, validation, FLORES dev and devtest, and applies
+near-duplicate protection. It deliberately does not reuse the old source-review
+coverage, because those reviewed rows substantially overlap the sources already
+used by v3.
+
+Expected output:
+
+```text
+data/pipeline_v2/zh_uz_flores_like_v1/monolingual_candidates.jsonl
+reports/experiments/zh_uz_flores_like_v1/source_staging.json
+```
+
+## 3. Audit the newly staged sources with Qwen
+
+```bash
+$JUDGE_PY scripts/pipeline_v2/qwen_judge.py source --config $CFG --calibration
+```
+
+After checking the calibration distribution, run the full source audit:
+
+```bash
+$JUDGE_PY scripts/pipeline_v2/qwen_judge.py source --config $CFG
+```
+
+Then make the final FLORES-shaped selection from Qwen `PASS` rows:
 
 ```bash
 $PY scripts/pipeline_v3/flores_like_data.py select --config $CFG
 ```
 
-This reads the unused part of the existing v3 monolingual collection, requires
-the earlier Qwen source review to be `PASS`, excludes v3-selected sources, v4,
-validation, FLORES dev and devtest, and applies near-duplicate protection.
-
-Expected output:
+Expected outputs:
 
 ```text
 data/distillation/zh_uz/flores_like_v1/selected_sources.jsonl
@@ -61,11 +88,11 @@ data/pipeline_v2/zh_uz_flores_like_v1/kd_candidates.jsonl
 reports/experiments/zh_uz_flores_like_v1/source_selection.json
 ```
 
-Both `zh-uz` and `uz-zh` should report `selected: 15000`. If selection is short,
-do not lower the leakage or Qwen-quality requirements. Extend the independent
-monolingual collection instead.
+Both directions should report `selected: 12000`. If selection is short, inspect
+the persisted `source_selection.json`; do not lower leakage or Qwen-quality
+requirements merely to reach the target.
 
-## 3. Generate Teacher translations
+## 4. Generate Teacher translations
 
 The generic, checkpointed Teacher implementation is reused unchanged:
 
@@ -83,7 +110,7 @@ The command is resumable. Rerun the same command after an interruption; do not
 delete checkpoint shards unless the input/configuration was intentionally
 changed.
 
-## 4. Audit Teacher output with Qwen
+## 5. Audit Teacher output with Qwen
 
 Run the small calibration first:
 
@@ -106,7 +133,7 @@ data/pipeline_v2/zh_uz_flores_like_v1/teacher_judged.parquet
 
 Only parseable `PASS` rows with usefulness `HIGH` or `MEDIUM` are eligible.
 
-## 5. Assemble the 40/30/30 dataset
+## 6. Assemble the 40/30/30 dataset
 
 ```bash
 $PY scripts/pipeline_v3/flores_like_data.py assemble --config $CFG

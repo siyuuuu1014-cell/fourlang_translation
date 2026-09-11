@@ -31,7 +31,10 @@ report_root = "reports/experiments/zh_uz_flores_like_v1"
 teacher_pipeline_root = "data/pipeline_v2/zh_uz_flores_like_v1"
 
 [selection]
-candidate_sources_per_direction = 15000
+# Stage every safe unused candidate for a fresh source audit. A zero stage limit
+# means all eligible rows; the final selection remains bounded and balanced.
+source_review_candidates_per_direction = 0
+candidate_sources_per_direction = 12000
 minimum_teacher_rows_per_direction = 8000
 near_duplicate_jaccard = 0.80
 shingle_size = 5

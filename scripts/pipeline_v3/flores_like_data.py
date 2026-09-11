@@ -228,20 +228,32 @@ def _excluded_source_keys(config: dict[str, Any]) -> dict[str, set[str]]:
     return excluded
 
 
-def select(config: dict[str, Any]) -> dict[str, Any]:
+def select(config: dict[str, Any], *, stage_only: bool = False) -> dict[str, Any]:
     validate(config)
     profile_report = profile(config)
     settings = config["selection"]
-    target = int(settings["candidate_sources_per_direction"])
+    configured_target = int(
+        settings[
+            "source_review_candidates_per_direction"
+            if stage_only
+            else "candidate_sources_per_direction"
+        ]
+    )
     seed = int(config["direction"]["seed"])
-    pool = _read(_path(config["inputs"]["candidate_pool"])).copy()
+    teacher_root = _path(config["outputs"]["teacher_pipeline_root"])
+    pool_path = (
+        _path(config["inputs"]["candidate_pool"])
+        if stage_only
+        else teacher_root / "monolingual_candidates.jsonl"
+    )
+    pool = _read(pool_path).copy()
     required = {"pair_id", "src_lang", "tgt_lang", "src_text", "source_corpus"}
     if missing := required - set(pool.columns):
         raise ValueError(f"Candidate pool is missing columns: {sorted(missing)}")
     pool = pool[pool["src_lang"].isin(LANGUAGES)].drop_duplicates("pair_id", keep="first")
 
-    if bool(settings.get("require_source_qwen_pass", True)):
-        review = _read(_path(config["inputs"]["source_review"]))
+    if not stage_only and bool(settings.get("require_source_qwen_pass", True)):
+        review = _read(teacher_root / "source_judged.parquet")
         review = review.drop_duplicates("pair_id", keep="last")
         passed = review[
             review["judge_parse_ok"].fillna(False).astype(bool)
@@ -256,7 +268,14 @@ def select(config: dict[str, Any]) -> dict[str, Any]:
     threshold = float(settings["near_duplicate_jaccard"])
     caps = {str(key): float(value) for key, value in settings["source_caps"].items()}
     selected: list[dict[str, Any]] = []
-    report: dict[str, Any] = {"schema_version": 1, "by_direction": {}, "flores_rows_selected": 0}
+    report: dict[str, Any] = {
+        "schema_version": 2,
+        "stage": "source_review_staging" if stage_only else "final_source_selection",
+        "candidate_pool": str(pool_path),
+        "by_direction": {},
+        "flores_rows_selected": 0,
+    }
+    shortages: dict[str, int] = {}
 
     for language in LANGUAGES:
         target_language = "uz" if language == "zh" else "zh"
@@ -278,8 +297,13 @@ def select(config: dict[str, Any]) -> dict[str, Any]:
             group = _source_group(row["source_corpus"])
             rows.append({**row, "src_text": normalize_language_text(language, row["src_text"]), "source_group": group, "flores_feature": _feature(text, boundaries)})
         rows.sort(key=lambda row: _stable_rank(seed, str(row["pair_id"])))
+        target = len(rows) if stage_only and configured_target == 0 else configured_target
+        target = min(target, len(rows)) if stage_only else target
         quotas = _quotas([_feature(text, boundaries) for text in dev_texts], target)
-        group_limits = {group: math.floor(target * cap) for group, cap in caps.items()}
+        group_limits = {
+            group: (target if stage_only else math.floor(target * cap))
+            for group, cap in caps.items()
+        }
         group_counts: Counter[str] = Counter()
         feature_counts: Counter[str] = Counter()
         chosen_ids: set[str] = set()
@@ -313,25 +337,43 @@ def select(config: dict[str, Any]) -> dict[str, Any]:
             "by_feature": dict(sorted(feature_counts.items())), "rejections": dict(sorted(rejected.items())),
         }
         if len(chosen_ids) < target:
-            raise RuntimeError(f"{direction} could select only {len(chosen_ids)}/{target} rows under source caps")
+            shortages[direction] = target - len(chosen_ids)
 
     selected.sort(key=lambda row: (str(row["src_lang"]), str(row["pair_id"])))
     output_root = _path(config["outputs"]["root"])
-    teacher_root = _path(config["outputs"]["teacher_pipeline_root"])
-    _write_jsonl(output_root / "selected_sources.jsonl", selected)
     teacher_rows = [
         {key: row.get(key, "") for key in ("pair_id", "src_lang", "tgt_lang", "src_text", "reference_text", "source_corpus", "source_license", "source_record")}
         for row in selected
     ]
-    _write_jsonl(teacher_root / "kd_candidates.jsonl", teacher_rows)
-    report["output"] = str(output_root / "selected_sources.jsonl")
-    report["teacher_input"] = str(teacher_root / "kd_candidates.jsonl")
+    if stage_only:
+        staged_path = teacher_root / "monolingual_candidates.jsonl"
+        _write_jsonl(staged_path, teacher_rows)
+        report["source_review_input"] = str(staged_path)
+    elif not shortages:
+        _write_jsonl(output_root / "selected_sources.jsonl", selected)
+        _write_jsonl(teacher_root / "kd_candidates.jsonl", teacher_rows)
+        report["output"] = str(output_root / "selected_sources.jsonl")
+        report["teacher_input"] = str(teacher_root / "kd_candidates.jsonl")
     report["inputs_sha256"] = {
         key: _sha256(_path(config["inputs"][key]))
         for key in ("candidate_pool", "source_review", "previous_selected", "existing_train", "validation", "flores_dev", "flores_devtest")
     }
-    write_json(_path(config["outputs"]["report_root"]) / "source_selection.json", report)
+    report["shortages"] = shortages
+    report_name = "source_staging.json" if stage_only else "source_selection.json"
+    write_json(_path(config["outputs"]["report_root"]) / report_name, report)
+    if shortages:
+        detail = ", ".join(
+            f"{direction} missing {count}" for direction, count in shortages.items()
+        )
+        raise RuntimeError(
+            "Insufficient Qwen-PASS sources under the configured source caps: "
+            f"{detail}. See {report_name}."
+        )
     return report
+
+
+def stage(config: dict[str, Any]) -> dict[str, Any]:
+    return select(config, stage_only=True)
 
 
 def _teacher_rows(config: dict[str, Any]) -> pd.DataFrame:
@@ -469,6 +511,8 @@ def status(config: dict[str, Any]) -> dict[str, Any]:
     teacher_root = _path(config["outputs"]["teacher_pipeline_root"])
     files = {
         "profile": _path(config["outputs"]["report_root"]) / "flores_profile.json",
+        "source_review_input": teacher_root / "monolingual_candidates.jsonl",
+        "source_review": teacher_root / "source_judged.parquet",
         "selected_sources": output_root / "selected_sources.jsonl",
         "teacher_input": teacher_root / "kd_candidates.jsonl",
         "teacher_generated": teacher_root / "teacher_generated.parquet",
@@ -484,11 +528,21 @@ def status(config: dict[str, Any]) -> dict[str, Any]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=("validate", "profile", "select", "assemble", "status"))
+    parser.add_argument(
+        "action",
+        choices=("validate", "profile", "stage", "select", "assemble", "status"),
+    )
     parser.add_argument("--config", default="configs/directions/zh_uz_flores_like_v1.toml")
     args = parser.parse_args()
     config = load_config(args.config)
-    payload = {"validate": validate, "profile": profile, "select": select, "assemble": assemble, "status": status}[args.action](config)
+    payload = {
+        "validate": validate,
+        "profile": profile,
+        "stage": stage,
+        "select": select,
+        "assemble": assemble,
+        "status": status,
+    }[args.action](config)
     print(json.dumps(payload, ensure_ascii=False, indent=2))
 
 

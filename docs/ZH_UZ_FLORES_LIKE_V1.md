@@ -68,7 +68,17 @@ reports/experiments/zh_uz_flores_like_v1/source_staging.json
 $JUDGE_PY scripts/pipeline_v2/qwen_judge.py source --config $CFG --calibration
 ```
 
-After checking the calibration distribution, run the full source audit:
+Build a capacity estimate from that calibration before running the expensive
+full audit:
+
+```bash
+$PY scripts/pipeline_v3/flores_like_data.py source_calibration --config $CFG
+```
+
+Continue only when `full_source_audit_recommended` is `true`. `READY` means the
+lower 95% estimate still reaches 12,000 rows; `LIKELY_READY` means the point
+estimate reaches it but the conservative estimate does not. After checking this
+report, run the full source audit:
 
 ```bash
 $JUDGE_PY scripts/pipeline_v2/qwen_judge.py source --config $CFG

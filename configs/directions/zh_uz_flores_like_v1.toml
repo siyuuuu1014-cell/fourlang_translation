@@ -44,10 +44,10 @@ require_source_qwen_pass = true
 # over while still allowing selection when the old collection stopped before
 # reaching Wikipedia.
 [selection.source_caps]
-hplt = 0.55
-fineweb = 0.40
-wikipedia = 0.25
-v2_bronze = 0.10
+hplt = 0.65
+fineweb = 0.45
+wikipedia = 0.10
+v2_bronze = 0.15
 other = 0.10
 
 [mixture]

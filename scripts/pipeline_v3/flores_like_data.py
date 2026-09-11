@@ -376,6 +376,95 @@ def stage(config: dict[str, Any]) -> dict[str, Any]:
     return select(config, stage_only=True)
 
 
+def source_calibration_report(config: dict[str, Any]) -> dict[str, Any]:
+    """Estimate final source capacity before paying for a complete Qwen audit."""
+    validate(config)
+    settings = config["selection"]
+    target = int(settings["candidate_sources_per_direction"])
+    caps = {str(key): float(value) for key, value in settings["source_caps"].items()}
+    teacher_root = _path(config["outputs"]["teacher_pipeline_root"])
+    candidates = _read(teacher_root / "monolingual_candidates.jsonl").copy()
+    calibration_path = teacher_root / "source_judge_calibration.parquet"
+    calibration = _read(calibration_path).drop_duplicates("pair_id", keep="last")
+    calibration["source_group"] = calibration["source_corpus"].map(_source_group)
+    calibration["passed"] = (
+        calibration["judge_parse_ok"].fillna(False).astype(bool)
+        & calibration["judge_label"]
+        .fillna("")
+        .astype(str)
+        .str.upper()
+        .eq("PASS")
+    )
+    candidates["source_group"] = candidates["source_corpus"].map(_source_group)
+    details: dict[str, Any] = {}
+    directions: dict[str, Any] = {}
+    for language in LANGUAGES:
+        direction = f"{language}-{'uz' if language == 'zh' else 'zh'}"
+        expected_capacity = 0.0
+        conservative_capacity = 0.0
+        for group, available in (
+            candidates[candidates["src_lang"] == language]
+            .groupby("source_group")
+            .size()
+            .items()
+        ):
+            sample = calibration[
+                (calibration["src_lang"] == language)
+                & (calibration["source_group"] == group)
+            ]
+            reviewed = len(sample)
+            passed = int(sample["passed"].sum())
+            rate = passed / reviewed if reviewed else 0.0
+            standard_error = (
+                math.sqrt(rate * (1.0 - rate) / reviewed) if reviewed else 0.0
+            )
+            conservative_rate = max(0.0, rate - 1.96 * standard_error)
+            cap = target * caps.get(str(group), caps.get("other", 0.0))
+            expected = min(float(available) * rate, cap)
+            conservative = min(float(available) * conservative_rate, cap)
+            expected_capacity += expected
+            conservative_capacity += conservative
+            details[f"{direction}|{group}"] = {
+                "available": int(available),
+                "calibration_rows": reviewed,
+                "pass_rows": passed,
+                "pass_rate": rate,
+                "conservative_pass_rate_95": conservative_rate,
+                "configured_cap_rows": int(cap),
+                "expected_usable_rows": int(expected),
+                "conservative_usable_rows": int(conservative),
+            }
+        decision = (
+            "READY"
+            if conservative_capacity >= target
+            else "LIKELY_READY"
+            if expected_capacity >= target
+            else "INSUFFICIENT_PROJECTED_CAPACITY"
+        )
+        directions[direction] = {
+            "target": target,
+            "expected_usable_rows": int(expected_capacity),
+            "conservative_usable_rows": int(conservative_capacity),
+            "decision": decision,
+        }
+    payload = {
+        "schema_version": 1,
+        "calibration": str(calibration_path),
+        "calibration_rows": len(calibration),
+        "directions": directions,
+        "groups": details,
+        "full_source_audit_recommended": all(
+            item["decision"] in {"READY", "LIKELY_READY"}
+            for item in directions.values()
+        ),
+    }
+    write_json(
+        _path(config["outputs"]["report_root"]) / "source_calibration_capacity.json",
+        payload,
+    )
+    return payload
+
+
 def _teacher_rows(config: dict[str, Any]) -> pd.DataFrame:
     teacher_path = _path(config["outputs"]["teacher_pipeline_root"]) / "teacher_judged.parquet"
     frame = _read(teacher_path)
@@ -530,7 +619,15 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "action",
-        choices=("validate", "profile", "stage", "select", "assemble", "status"),
+        choices=(
+            "validate",
+            "profile",
+            "stage",
+            "source_calibration",
+            "select",
+            "assemble",
+            "status",
+        ),
     )
     parser.add_argument("--config", default="configs/directions/zh_uz_flores_like_v1.toml")
     args = parser.parse_args()
@@ -539,6 +636,7 @@ def main() -> None:
         "validate": validate,
         "profile": profile,
         "stage": stage,
+        "source_calibration": source_calibration_report,
         "select": select,
         "assemble": assemble,
         "status": status,

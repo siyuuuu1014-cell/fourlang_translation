@@ -73,9 +73,40 @@ def parse_result(text: str, *, teacher: bool = False) -> dict[str, Any]:
     return result
 
 
-def prompt(mode: str, src_lang: str, tgt_lang: str, source: str, target: str) -> str:
+def prompt(
+    mode: str,
+    src_lang: str,
+    tgt_lang: str,
+    source: str,
+    target: str,
+    *,
+    source_policy: str = "strict_v1",
+) -> str:
     if mode == "source":
         language_name = "Simplified Mandarin Chinese" if src_lang == "zh" else "Latin-script Uzbek"
+        if source_policy == "natural_sentence_entities_allowed_v2":
+            return f"""You are a careful native-language corpus curator.
+Judge whether the text is a complete, coherent, natural sentence in {language_name}.
+Proper names, place names, organization and product names, established loanwords, Latin
+acronyms, Arabic numerals, dates, measurements, citations used inside a real sentence,
+and ordinary Unicode punctuation are allowed. For Chinese, do not reject a sentence only
+because it contains a legitimate Latin-script name or acronym. For Uzbek, do not call text
+Cyrillic unless it actually contains Cyrillic letters; Latin-script foreign names and
+historical names are allowed. Do not reject a natural encyclopedic definition merely for
+containing parenthetical information or foreign entities.
+Reject fragments, headings, keyword/entity lists, navigation, advertisements, gambling/SEO
+copy, disclaimers, citation debris without a sentence, corrupted text, substantial
+code-switching, wrong-language text, and clearly unnatural machine-translated wording.
+Judge the sentence as written; do not correct or rewrite it. PASS means fully usable as a
+translation source. FAIL requires a concrete substantive defect. UNCERTAIN means native-level
+quality genuinely cannot be established. Do not use foreign names, numbers, or punctuation
+alone as the reason for FAIL.
+Language: {src_lang}
+Text: {source}
+Return one JSON object only:
+{{"label":"PASS|FAIL|UNCERTAIN","reason":"short, concrete reason"}}"""
+        if source_policy != "strict_v1":
+            raise ValueError(f"Unsupported source Judge policy: {source_policy!r}")
         return f"""You are a strict native-language corpus curator.
 Judge whether the text is a complete, coherent, natural sentence in {language_name}.
 Reject text in another language, mixed-language text, keyword or entity lists, navigation or
@@ -181,7 +212,13 @@ def save(rows: list[dict[str, Any]], path: Path) -> None:
     )
 
 
-def render_prompt(tokenizer: Any, mode: str, record: dict[str, Any]) -> str:
+def render_prompt(
+    tokenizer: Any,
+    mode: str,
+    record: dict[str, Any],
+    *,
+    source_policy: str = "strict_v1",
+) -> str:
     source = str(record.get("src_text", record.get("source_text", "")))
     target = str(record.get("teacher_text", record.get("target_text", "")))
     src_lang = str(record.get("src_lang", record.get("source_lang", "")))
@@ -190,7 +227,14 @@ def render_prompt(tokenizer: Any, mode: str, record: dict[str, Any]) -> str:
         [
             {
                 "role": "user",
-                "content": prompt(mode, src_lang, tgt_lang, source, target),
+                "content": prompt(
+                    mode,
+                    src_lang,
+                    tgt_lang,
+                    source,
+                    target,
+                    source_policy=source_policy,
+                ),
             }
         ],
         tokenize=False,
@@ -244,6 +288,7 @@ def main() -> None:
     parser.add_argument("--overwrite", action="store_true")
     args = parser.parse_args()
     config = load_config(args.config)
+    source_policy = str(config.get("judge", {}).get("source_policy", "strict_v1"))
     source_path, output_path = io_paths(config, args.mode, args.calibration)
     if source_path.suffix == ".jsonl":
         frame = pd.DataFrame(
@@ -271,6 +316,9 @@ def main() -> None:
                 n=count, random_state=int(config["direction"]["seed"])
             ).sort_values("pair_id")
     frame["judge_id"] = [judge_id(row) for row in frame.to_dict("records")]
+    frame["judge_policy"] = (
+        source_policy if args.mode == "source" else "translation_v1"
+    )
     if output_path.exists() and not args.overwrite:
         existing = pd.read_parquet(output_path)
         required_columns = {
@@ -278,6 +326,7 @@ def main() -> None:
             "judge_parse_ok",
             "judge_label",
             "judge_schema_version",
+            "judge_policy",
         }
         if args.mode == "teacher":
             required_columns.add("teacher_usefulness")
@@ -288,6 +337,7 @@ def main() -> None:
             # retain a verdict for a row that is no longer in the current pool.
             existing = existing[
                 existing["judge_id"].isin(set(frame["judge_id"].astype(str)))
+                & existing["judge_policy"].eq(frame["judge_policy"].iloc[0])
             ].copy()
         completed = (
             set(
@@ -345,7 +395,15 @@ def main() -> None:
     )
     while processed < len(pending_records):
         batch = pending_records[processed : processed + current_batch_size]
-        rendered = [render_prompt(tokenizer, args.mode, record) for record in batch]
+        rendered = [
+            render_prompt(
+                tokenizer,
+                args.mode,
+                record,
+                source_policy=source_policy,
+            )
+            for record in batch
+        ]
         try:
             answers = generate_batch(
                 model,

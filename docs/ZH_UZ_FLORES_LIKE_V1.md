@@ -64,6 +64,12 @@ reports/experiments/zh_uz_flores_like_v1/source_staging.json
 
 ## 3. Audit the newly staged sources with Qwen
 
+This experiment uses the isolated `natural_sentence_entities_allowed_v2`
+policy. It still rejects fragments, SEO/advertising copy, wrong-language text
+and unnatural machine translation, but it does not reject an otherwise natural
+sentence merely for containing proper names, acronyms, numbers or ordinary
+Unicode punctuation. Cached source verdicts from another policy are not reused.
+
 ```bash
 $JUDGE_PY scripts/pipeline_v2/qwen_judge.py source --config $CFG --calibration
 ```

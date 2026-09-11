@@ -178,6 +178,19 @@ class ZhUzV2PipelineTests(unittest.TestCase):
         self.assertIn("keyword or entity lists", rendered)
         self.assertIn("another language", rendered)
 
+    def test_source_policy_v2_allows_legitimate_entities_and_numbers(self):
+        rendered = qwen_judge.prompt(
+            "source",
+            "uz",
+            "zh",
+            "Haan shahri 20 km uzoqlikda joylashgan.",
+            "",
+            source_policy="natural_sentence_entities_allowed_v2",
+        )
+        self.assertIn("foreign names", rendered)
+        self.assertIn("Arabic numerals", rendered)
+        self.assertIn("Do not use foreign names", rendered)
+
     def test_source_calibration_is_stratified_by_language_and_corpus(self) -> None:
         frame = pd.DataFrame(
             [

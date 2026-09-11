@@ -74,6 +74,7 @@ uz = "uzn_Latn"
 
 [judge]
 model_path = "${FOURLANG_QWEN_MODEL_PATH}"
+source_policy = "natural_sentence_entities_allowed_v2"
 source_calibration_pairs = 4000
 teacher_calibration_pairs = 1000
 batch_size = 32

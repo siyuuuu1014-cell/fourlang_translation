@@ -23,6 +23,76 @@ class FloresLikeDataTests(unittest.TestCase):
         self.assertTrue(index.matches("This is a protected benchmark sentence!"))
         self.assertFalse(index.matches("Completely unrelated words live here."))
 
+    def test_wikipedia_extension_collects_both_languages_and_checkpoints(self):
+        config = {
+            "inputs": {
+                "candidate_pool": "base.parquet",
+                "candidate_extensions": ["extension.parquet"],
+            },
+            "outputs": {"report_root": "reports"},
+            "extension": {
+                "filter_config": "filter.toml",
+                "checkpoint_rows": 1,
+                "require_full_targets": True,
+                "sources": [
+                    {
+                        "id": "wikipedia_flores_like_zh",
+                        "kind": "hf_dataset",
+                        "language": "zh",
+                        "text_field": "text",
+                        "split_documents": True,
+                        "target_rows": 1,
+                        "max_documents": 10,
+                        "license": "cc-by-sa",
+                    },
+                    {
+                        "id": "wikipedia_flores_like_uz",
+                        "kind": "hf_dataset",
+                        "language": "uz",
+                        "text_field": "text",
+                        "split_documents": True,
+                        "target_rows": 1,
+                        "max_documents": 10,
+                        "license": "cc-by-sa",
+                    },
+                ],
+            },
+        }
+        base = pd.DataFrame(
+            [
+                {"pair_id": "old-zh", "src_lang": "zh", "src_text": "旧句子"},
+                {"pair_id": "old-uz", "src_lang": "uz", "src_text": "Eski gap."},
+            ]
+        )
+
+        def records(source):
+            yield {
+                "id": source["id"],
+                "text": "新的百科句子。"
+                if source["language"] == "zh"
+                else "Yangi ensiklopediya jumlasi.",
+            }
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            base.to_parquet(root / "base.parquet")
+            with mock.patch.object(flow, "PROJECT_ROOT", root), mock.patch.object(
+                flow, "validate"
+            ), mock.patch.object(
+                flow, "load_config", return_value={"monolingual": {}}
+            ), mock.patch.object(
+                flow, "_excluded_source_keys", return_value={"zh": set(), "uz": set()}
+            ), mock.patch.object(
+                flow, "_iter_records", side_effect=records
+            ), mock.patch.object(
+                flow, "quality_reason", side_effect=lambda language, text, settings: (None, text)
+            ):
+                report = flow.collect_extension(config)
+            collected = pd.read_parquet(root / "extension.parquet")
+        self.assertEqual(report["status"], "PASS")
+        self.assertEqual(report["by_language"], {"uz": 1, "zh": 1})
+        self.assertEqual(set(collected["src_lang"]), {"zh", "uz"})
+
     def test_assemble_hits_six_effective_mass_cells(self):
         def row(src, tgt, index, origin, weight=1.0):
             return {
@@ -59,6 +129,12 @@ class FloresLikeDataTests(unittest.TestCase):
                 "shingle_size": 5,
                 "near_duplicate_jaccard": 0.8,
                 "source_caps": {"other": 1.0},
+            },
+            "extension": {
+                "sources": [
+                    {"language": "zh"},
+                    {"language": "uz"},
+                ]
             },
             "mixture": {"human": 0.4, "existing_kd": 0.3, "flores_like_kd": 0.3, "direction_share": 0.5},
             "distillation": {"teacher_high_weight": 1.0, "teacher_medium_weight": 0.8},

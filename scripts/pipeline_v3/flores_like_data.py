@@ -25,6 +25,11 @@ sys.path.insert(0, str(PROJECT_ROOT_BOOTSTRAP))
 from scripts.pipeline_v2.common import load_config, write_json  # noqa: E402
 from scripts.pipeline_v3.fourlang_flow import _read_table, normalize_rows  # noqa: E402
 from scripts.pipeline_v3.language_normalization import normalize_language_text  # noqa: E402
+from scripts.supplemental.monolingual_v3 import (  # noqa: E402
+    _iter_records,
+    _source_texts,
+    quality_reason,
+)
 
 PROJECT_ROOT = PROJECT_ROOT_BOOTSTRAP
 LANGUAGES = ("zh", "uz")
@@ -59,6 +64,13 @@ def _write_jsonl(path: Path, rows: Iterable[dict[str, Any]]) -> None:
         ),
         encoding="utf-8",
     )
+    temporary.replace(path)
+
+
+def _write_parquet(path: Path, rows: list[dict[str, Any]]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    pd.DataFrame(rows).to_parquet(temporary, index=False)
     temporary.replace(path)
 
 
@@ -154,6 +166,12 @@ def _stable_rank(seed: int, identity: str) -> str:
     return hashlib.sha256(f"{seed}:{identity}".encode()).hexdigest()
 
 
+def _extension_id(language: str, text: str) -> str:
+    return hashlib.sha256(
+        f"zh_uz_flores_like_wikipedia_v1\n{language}\n{_text_key(language, text)}".encode()
+    ).hexdigest()
+
+
 def validate(config: dict[str, Any]) -> dict[str, Any]:
     errors: list[str] = []
     if config.get("direction", {}).get("pair") != "zh_uz":
@@ -172,6 +190,12 @@ def validate(config: dict[str, Any]) -> dict[str, Any]:
         errors.append("selection.source_caps values must be in (0, 1]")
     elif sum(float(value) for value in caps.values()) < 1.0:
         errors.append("selection.source_caps must provide at least 100% total capacity")
+    extension = config.get("extension", {})
+    extension_sources = extension.get("sources", [])
+    if not extension_sources:
+        errors.append("extension.sources must contain the ZH and UZ Wikipedia sources")
+    elif {str(item.get("language")) for item in extension_sources} != set(LANGUAGES):
+        errors.append("extension.sources must contain exactly the zh and uz languages")
     output = _path(config["outputs"]["root"])
     if output.resolve() == _path(config["inputs"]["existing_train"]).parent.resolve():
         errors.append("output root must not overwrite the existing training version")
@@ -199,6 +223,172 @@ def profile(config: dict[str, Any]) -> dict[str, Any]:
     result["sha256"] = _sha256(dev_path)
     write_json(_path(config["outputs"]["report_root"]) / "flores_profile.json", result)
     return result
+
+
+def collect_extension(config: dict[str, Any]) -> dict[str, Any]:
+    """Collect new, resumable Wikipedia candidates without touching v3 data."""
+    validate(config)
+    extension = config["extension"]
+    filter_config = load_config(extension["filter_config"])
+    quality_settings = filter_config["monolingual"]
+    extension_paths = [
+        _path(value) for value in config["inputs"].get("candidate_extensions", [])
+    ]
+    if len(extension_paths) != 1:
+        raise ValueError("Exactly one inputs.candidate_extensions output is required.")
+    output = extension_paths[0]
+    state_path = output.with_suffix(".state.json")
+    existing_rows = _read(output).to_dict("records") if output.is_file() else []
+    if output.is_file() and not state_path.is_file():
+        raise RuntimeError(f"Extension data exists without resume state: {state_path}")
+
+    base_pool = _read(_path(config["inputs"]["candidate_pool"]))
+    seen = {language: set() for language in LANGUAGES}
+    for row in base_pool.itertuples(index=False):
+        language = str(row.src_lang)
+        if language in seen:
+            seen[language].add(_text_key(language, row.src_text))
+    excluded = _excluded_source_keys(config)
+    for language in LANGUAGES:
+        seen[language].update(excluded[language])
+    for row in existing_rows:
+        seen[str(row["src_lang"])].add(
+            _text_key(str(row["src_lang"]), row["src_text"])
+        )
+
+    signature_payload = {
+        "schema_version": 1,
+        "extension": extension,
+        "quality_settings": quality_settings,
+        "candidate_pool_sha256": _sha256(_path(config["inputs"]["candidate_pool"])),
+    }
+    signature = hashlib.sha256(
+        json.dumps(signature_payload, sort_keys=True, ensure_ascii=False).encode()
+    ).hexdigest()
+    state = (
+        json.loads(state_path.read_text(encoding="utf-8"))
+        if state_path.is_file()
+        else {"schema_version": 1, "signature": signature, "sources": {}}
+    )
+    if state.get("signature") != signature:
+        raise RuntimeError(
+            "Wikipedia extension configuration or base pool changed after collection "
+            f"started. Preserve {output} and use a new output version intentionally."
+        )
+
+    rejection_counts: Counter[str] = Counter()
+    checkpoint_rows = int(extension.get("checkpoint_rows", 250))
+
+    def save() -> None:
+        _write_parquet(output, existing_rows)
+        write_json(state_path, state)
+
+    for source in extension["sources"]:
+        source_id = str(source["id"])
+        language = str(source["language"])
+        target_language = "uz" if language == "zh" else "zh"
+        target = int(source["target_rows"])
+        source_state = state["sources"].setdefault(
+            source_id,
+            {"status": "running", "documents_seen": 0, "accepted": 0},
+        )
+        accepted = sum(
+            1 for row in existing_rows if str(row.get("source_corpus")) == source_id
+        )
+        source_state["accepted"] = accepted
+        if accepted >= target:
+            source_state["status"] = "completed"
+            continue
+        documents_seen = int(source_state.get("documents_seen", 0))
+        max_documents = int(source.get("max_documents", 100000))
+        print(
+            f"Collecting {source_id}: resume_documents={documents_seen} "
+            f"accepted={accepted}/{target}",
+            flush=True,
+        )
+        try:
+            for index, record in enumerate(_iter_records(source)):
+                if index < documents_seen:
+                    continue
+                source_state["documents_seen"] = index + 1
+                if index + 1 > max_documents:
+                    break
+                for raw_text in _source_texts(source, record):
+                    reason, text = quality_reason(
+                        language, raw_text, quality_settings
+                    )
+                    key = _text_key(language, text)
+                    if reason is None and key in seen[language]:
+                        reason = "DUPLICATE_OR_PREVIOUS_SOURCE"
+                    if reason is not None:
+                        rejection_counts[f"{source_id}:{reason}"] += 1
+                        continue
+                    existing_rows.append(
+                        {
+                            "pair_id": _extension_id(language, text),
+                            "src_lang": language,
+                            "tgt_lang": target_language,
+                            "src_text": text,
+                            "reference_text": "",
+                            "source_corpus": source_id,
+                            "source_license": str(source["license"]),
+                            "source_record": str(record.get("id", index)),
+                        }
+                    )
+                    seen[language].add(key)
+                    accepted += 1
+                    source_state["accepted"] = accepted
+                    if accepted % checkpoint_rows == 0:
+                        save()
+                        print(
+                            f"Wikipedia checkpoint: {source_id} {accepted}/{target}",
+                            flush=True,
+                        )
+                    if accepted >= target:
+                        break
+                if accepted >= target:
+                    break
+        except Exception as error:
+            source_state["status"] = "failed"
+            source_state["error"] = f"{type(error).__name__}: {error}"
+            save()
+            raise RuntimeError(
+                f"{source_id} collection failed; rerun the same command to resume."
+            ) from error
+        source_state["status"] = "completed" if accepted >= target else "short"
+        source_state.pop("error", None)
+        save()
+
+    counts = Counter(str(row["src_lang"]) for row in existing_rows)
+    targets = {
+        str(source["language"]): int(source["target_rows"])
+        for source in extension["sources"]
+    }
+    shortages = {
+        language: target - counts[language]
+        for language, target in targets.items()
+        if counts[language] < target
+    }
+    report = {
+        "schema_version": 1,
+        "status": "PASS" if not shortages else "SHORT",
+        "output": str(output),
+        "rows": len(existing_rows),
+        "by_language": dict(sorted(counts.items())),
+        "targets": targets,
+        "shortages": shortages,
+        "source_state": state["sources"],
+        "rejections": dict(sorted(rejection_counts.items())),
+        "output_sha256": _sha256(output),
+        "base_candidate_pool_modified": False,
+    }
+    write_json(
+        _path(config["outputs"]["report_root"]) / "wikipedia_extension.json",
+        report,
+    )
+    if shortages and bool(extension.get("require_full_targets", True)):
+        raise RuntimeError(f"Wikipedia extension targets were not met: {shortages}")
+    return report
 
 
 def _excluded_source_keys(config: dict[str, Any]) -> dict[str, set[str]]:
@@ -246,7 +436,13 @@ def select(config: dict[str, Any], *, stage_only: bool = False) -> dict[str, Any
         if stage_only
         else teacher_root / "monolingual_candidates.jsonl"
     )
-    pool = _read(pool_path).copy()
+    pool_paths = [pool_path]
+    if stage_only:
+        pool_paths.extend(
+            _path(value)
+            for value in config["inputs"].get("candidate_extensions", [])
+        )
+    pool = pd.concat([_read(path) for path in pool_paths], ignore_index=True)
     required = {"pair_id", "src_lang", "tgt_lang", "src_text", "source_corpus"}
     if missing := required - set(pool.columns):
         raise ValueError(f"Candidate pool is missing columns: {sorted(missing)}")
@@ -271,7 +467,7 @@ def select(config: dict[str, Any], *, stage_only: bool = False) -> dict[str, Any
     report: dict[str, Any] = {
         "schema_version": 2,
         "stage": "source_review_staging" if stage_only else "final_source_selection",
-        "candidate_pool": str(pool_path),
+        "candidate_pool": [str(path) for path in pool_paths],
         "by_direction": {},
         "flores_rows_selected": 0,
     }
@@ -600,6 +796,7 @@ def status(config: dict[str, Any]) -> dict[str, Any]:
     teacher_root = _path(config["outputs"]["teacher_pipeline_root"])
     files = {
         "profile": _path(config["outputs"]["report_root"]) / "flores_profile.json",
+        "wikipedia_extension": _path(config["inputs"]["candidate_extensions"][0]),
         "source_review_input": teacher_root / "monolingual_candidates.jsonl",
         "source_review": teacher_root / "source_judged.parquet",
         "selected_sources": output_root / "selected_sources.jsonl",
@@ -622,6 +819,7 @@ def main() -> None:
         choices=(
             "validate",
             "profile",
+            "extend",
             "stage",
             "source_calibration",
             "select",
@@ -635,6 +833,7 @@ def main() -> None:
     payload = {
         "validate": validate,
         "profile": profile,
+        "extend": collect_extension,
         "stage": stage,
         "source_calibration": source_calibration_report,
         "select": select,

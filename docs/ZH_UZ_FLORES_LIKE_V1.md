@@ -26,6 +26,7 @@ PY=/root/autodl-tmp/venvs/small100_student/bin/python
 JUDGE_PY=/root/autodl-tmp/venvs/qwen3_judge/bin/python
 export FOURLANG_MODEL_ROOT=/root/autodl-tmp/models
 export FOURLANG_QWEN_MODEL_PATH=/root/autodl-tmp/models/Qwen3-8B
+export HF_HOME=/root/autodl-tmp/huggingface
 CFG=configs/directions/zh_uz_flores_like_v1.toml
 ```
 
@@ -43,7 +44,27 @@ $PY scripts/pipeline_v3/flores_like_data.py profile --config $CFG
 Expected status: `PASS`. Profiling reads FLORES dev only to derive structural
 length and sentence-feature quotas. It does not copy FLORES rows into training.
 
-## 2. Stage unused independent source sentences
+## 2. Extend with independent Wikipedia sentences
+
+Collect 15,000 new Chinese and 8,000 new Uzbek Wikipedia sentences. The
+operation checkpoints every 250 accepted rows and resumes safely after a
+network or process interruption:
+
+```bash
+$PY scripts/pipeline_v3/flores_like_data.py extend --config $CFG
+```
+
+Expected report:
+
+```text
+reports/experiments/zh_uz_flores_like_v1/wikipedia_extension.json
+```
+
+The report must have `status: PASS`, `zh: 15000`, and `uz: 8000`. The source is
+the dated `wikimedia/wikipedia` 20231101 configuration; collected rows retain
+their source ID and CC BY-SA/GFDL provenance.
+
+## 3. Stage unused independent source sentences
 
 ```bash
 $PY scripts/pipeline_v3/flores_like_data.py stage --config $CFG
@@ -62,7 +83,10 @@ data/pipeline_v2/zh_uz_flores_like_v1/monolingual_candidates.jsonl
 reports/experiments/zh_uz_flores_like_v1/source_staging.json
 ```
 
-## 3. Audit the newly staged sources with Qwen
+Rerun this step after the Wikipedia extension. It merges the extension with the
+old safe remainder and rewrites only the isolated source-review input.
+
+## 4. Audit the newly staged sources with Qwen
 
 This experiment uses the isolated `natural_sentence_entities_allowed_v2`
 policy. It still rejects fragments, SEO/advertising copy, wrong-language text
@@ -108,7 +132,7 @@ Both directions should report `selected: 12000`. If selection is short, inspect
 the persisted `source_selection.json`; do not lower leakage or Qwen-quality
 requirements merely to reach the target.
 
-## 4. Generate Teacher translations
+## 5. Generate Teacher translations
 
 The generic, checkpointed Teacher implementation is reused unchanged:
 
@@ -126,7 +150,7 @@ The command is resumable. Rerun the same command after an interruption; do not
 delete checkpoint shards unless the input/configuration was intentionally
 changed.
 
-## 5. Audit Teacher output with Qwen
+## 6. Audit Teacher output with Qwen
 
 Run the small calibration first:
 
@@ -149,7 +173,7 @@ data/pipeline_v2/zh_uz_flores_like_v1/teacher_judged.parquet
 
 Only parseable `PASS` rows with usefulness `HIGH` or `MEDIUM` are eligible.
 
-## 6. Assemble the 40/30/30 dataset
+## 7. Assemble the 40/30/30 dataset
 
 ```bash
 $PY scripts/pipeline_v3/flores_like_data.py assemble --config $CFG

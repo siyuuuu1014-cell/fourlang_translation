@@ -23,7 +23,6 @@ PROJECT_ROOT_BOOTSTRAP = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT_BOOTSTRAP))
 
 from scripts.pipeline_v2.common import load_config, write_json  # noqa: E402
-from scripts.pipeline_v3.fourlang_flow import _read_table, normalize_rows  # noqa: E402
 from scripts.pipeline_v3.language_normalization import normalize_language_text  # noqa: E402
 from scripts.supplemental.monolingual_v3 import (  # noqa: E402
     _iter_records,
@@ -39,6 +38,92 @@ DIRECTIONS = ("zh-uz", "uz-zh")
 def _path(value: str | Path) -> Path:
     path = Path(value)
     return path if path.is_absolute() else PROJECT_ROOT / path
+
+
+def _read_table(path: Path) -> pd.DataFrame:
+    """Read data without importing the model-training dependency graph."""
+    suffix = path.suffix.lower()
+    if suffix == ".parquet":
+        return pd.read_parquet(path)
+    if suffix in {".jsonl", ".json"}:
+        return pd.read_json(path, lines=True)
+    if suffix == ".csv":
+        return pd.read_csv(path)
+    raise ValueError(f"Unsupported data format: {path}")
+
+
+def normalize_rows(frame: pd.DataFrame, *, origin: str) -> pd.DataFrame:
+    """Normalize the directed training schema without loading training code."""
+    aliases = {
+        "source_lang": "src_lang",
+        "target_lang": "tgt_lang",
+        "source_text": "src_text",
+        "target_text": "tgt_text",
+        "training_weight": "weight",
+        "training_origin": "training_source",
+        "sample_weight": "weight",
+        "sample_origin": "training_source",
+    }
+    frame = frame.rename(
+        columns={old: new for old, new in aliases.items() if new not in frame.columns}
+    ).copy()
+    if ("src_lang" not in frame.columns or "tgt_lang" not in frame.columns) and (
+        "direction" in frame.columns
+    ):
+        directed = (
+            frame["direction"]
+            .fillna("")
+            .astype(str)
+            .str.strip()
+            .str.lower()
+            .str.replace("_", "-", regex=False)
+            .str.extract(r"^(?P<src_lang>[a-z]{2})-(?P<tgt_lang>[a-z]{2})$")
+        )
+        if directed.isna().any(axis=1).any():
+            raise ValueError(f"{origin} contains malformed direction values")
+        if "src_lang" not in frame.columns:
+            frame["src_lang"] = directed["src_lang"]
+        if "tgt_lang" not in frame.columns:
+            frame["tgt_lang"] = directed["tgt_lang"]
+    required = {"src_lang", "tgt_lang", "src_text", "tgt_text"}
+    if missing := required - set(frame.columns):
+        raise ValueError(f"{origin} is missing directed columns: {sorted(missing)}")
+    frame["src_lang"] = frame["src_lang"].astype(str).str.lower()
+    frame["tgt_lang"] = frame["tgt_lang"].astype(str).str.lower()
+    frame["src_text"] = [
+        normalize_language_text(language, text)
+        for language, text in zip(
+            frame["src_lang"], frame["src_text"].fillna("").astype(str), strict=True
+        )
+    ]
+    frame["tgt_text"] = [
+        normalize_language_text(language, text)
+        for language, text in zip(
+            frame["tgt_lang"], frame["tgt_text"].fillna("").astype(str), strict=True
+        )
+    ]
+    frame = frame[(frame["src_text"] != "") & (frame["tgt_text"] != "")].copy()
+    frame["weight"] = (
+        pd.to_numeric(frame["weight"], errors="coerce").fillna(1.0)
+        if "weight" in frame.columns
+        else 1.0
+    )
+    frame["training_source"] = frame.get("training_source", "human_parallel")
+    frame["origin"] = origin
+    present = set(frame["src_lang"] + "-" + frame["tgt_lang"])
+    if invalid := sorted(present - set(DIRECTIONS)):
+        raise ValueError(f"{origin} contains unsupported directions: {invalid}")
+    return frame[
+        [
+            "src_lang",
+            "tgt_lang",
+            "src_text",
+            "tgt_text",
+            "weight",
+            "training_source",
+            "origin",
+        ]
+    ]
 
 
 def _read(path: Path) -> pd.DataFrame:

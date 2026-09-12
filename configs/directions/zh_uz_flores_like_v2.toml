@@ -123,6 +123,9 @@ teacher_calibration_pairs = 1000
 batch_size = 32
 max_input_tokens = 1536
 max_new_tokens = 256
+# The V100 32GB can hold Qwen3-8B in FP16. Direct placement avoids a transient
+# CPU copy under restrictive container memory limits.
+model_device = "cuda"
 
 [distillation]
 teacher_checkpoint_rows = 256

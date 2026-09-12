@@ -472,6 +472,25 @@ def main() -> None:
             frame.to_parquet(output_path, index=False)
         return
     model_path = str(config["judge"]["model_path"])
+    initial_batch_size = int(config["judge"]["batch_size"])
+    if initial_batch_size < 1:
+        raise ValueError("judge.batch_size must be at least 1.")
+    max_input_tokens = int(config["judge"].get("max_input_tokens", 1536))
+    max_new_tokens = int(config["judge"]["max_new_tokens"])
+    model_device = str(config["judge"].get("model_device", "auto")).lower()
+    if model_device == "cuda":
+        if not torch.cuda.is_available():
+            raise RuntimeError("judge.model_device=cuda but CUDA is unavailable")
+        device_map: str | dict[str, int] = {"": 0}
+    elif model_device == "auto":
+        device_map = "auto"
+    else:
+        raise ValueError("judge.model_device must be 'auto' or 'cuda'")
+    print(
+        f"pending={len(pending)} initial_batch_size={initial_batch_size} "
+        f"max_input_tokens={max_input_tokens} model_device={model_device}",
+        flush=True,
+    )
     tokenizer = AutoTokenizer.from_pretrained(
         model_path, local_files_only=True, trust_remote_code=True
     )
@@ -483,25 +502,17 @@ def main() -> None:
         local_files_only=True,
         trust_remote_code=True,
         torch_dtype=torch.float16,
-        device_map="auto",
+        device_map=device_map,
+        low_cpu_mem_usage=True,
     ).eval()
     model.generation_config.do_sample = False
     model.generation_config.temperature = None
     model.generation_config.top_p = None
     model.generation_config.top_k = None
     pending_records = pending.to_dict("records")
-    initial_batch_size = int(config["judge"]["batch_size"])
-    if initial_batch_size < 1:
-        raise ValueError("judge.batch_size must be at least 1.")
     current_batch_size = initial_batch_size
-    max_input_tokens = int(config["judge"].get("max_input_tokens", 1536))
-    max_new_tokens = int(config["judge"]["max_new_tokens"])
     processed = 0
     last_saved = 0
-    print(
-        f"pending={len(pending_records)} initial_batch_size={initial_batch_size} "
-        f"max_input_tokens={max_input_tokens}"
-    )
     while processed < len(pending_records):
         batch = pending_records[processed : processed + current_batch_size]
         rendered = [

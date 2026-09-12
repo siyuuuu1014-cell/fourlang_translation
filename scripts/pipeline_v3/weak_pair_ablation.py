@@ -38,6 +38,7 @@ TRAIN_VARIANTS = (
     "directional_full",
     "full_weighted_60_40",
     "full_native_lr2e6",
+    "flores_relaxed_8k",
 )
 BASELINE_VARIANTS = ("baseline_exp1", "baseline_exp2")
 ALL_VARIANTS = BASELINE_VARIANTS + TRAIN_VARIANTS
@@ -292,10 +293,11 @@ def prepare(
     elif direction is not None:
         raise ValueError(f"{variant} does not accept --direction.")
 
-    source_path = project_path(pair["kd_train"])
+    source_name = str(variant_settings(config, variant).get("kd_train", pair["kd_train"]))
+    source_path = project_path(source_name)
     validation_path = project_path(pair["validation"])
     human_path = project_path(pair["human_train"])
-    train_frame = normalize_rows(_read_table(source_path), origin=pair["kd_train"])
+    train_frame = normalize_rows(_read_table(source_path), origin=source_name)
     validation_frame = normalize_rows(
         _read_table(validation_path), origin=pair["validation"]
     )
@@ -572,6 +574,7 @@ def compare(config: dict[str, Any], pair_id: str) -> dict[str, Any]:
         ("bidir_full", None),
         ("full_weighted_60_40", None),
         ("full_native_lr2e6", None),
+        ("flores_relaxed_8k", None),
     ]
     variants.extend(("directional_full", item) for item in pair_directions(pair))
     rows: list[dict[str, Any]] = []
@@ -642,6 +645,7 @@ def status(config: dict[str, Any]) -> dict[str, Any]:
             ("bidir_full", None),
             ("full_weighted_60_40", None),
             ("full_native_lr2e6", None),
+            ("flores_relaxed_8k", None),
             *(('directional_full', item) for item in pair_directions(pair)),
         ):
             rows.append(

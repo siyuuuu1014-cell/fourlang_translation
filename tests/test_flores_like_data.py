@@ -232,6 +232,63 @@ class FloresLikeDataTests(unittest.TestCase):
         self.assertEqual(len(rows), 2)
         self.assertEqual(sorted(rows["weight"].tolist()), [0.5, 1.0])
 
+    def test_teacher_rows_can_build_isolated_clean_minor_ablation(self):
+        rows = []
+        for source, target in (("zh", "uz"), ("uz", "zh")):
+            for index, label, omission in (
+                (1, "PASS", False),
+                (2, "MINOR", False),
+                (3, "MINOR", True),
+            ):
+                rows.append(
+                    {
+                        "pair_id": f"{source}-{target}-{index}",
+                        "src_lang": source,
+                        "tgt_lang": target,
+                        "src_text": f"{source} source sentence {index}",
+                        "teacher_text": f"{target} target sentence {index}",
+                        "judge_parse_ok": True,
+                        "judge_label": label,
+                        "teacher_usefulness": "HIGH",
+                        "semantic_consistent": True,
+                        "omission": omission,
+                        "addition": False,
+                        "mistranslation": False,
+                        "number_error": False,
+                        "entity_error": False,
+                        "negation_error": False,
+                    }
+                )
+        config = {
+            "direction": {"version": "flores_like_relaxed_8k", "seed": 2026},
+            "outputs": {"teacher_pipeline_root": "teacher"},
+            "distillation": {
+                "teacher_high_weight": 1.0,
+                "teacher_medium_weight": 0.8,
+                "minor_acceptance_policy": "first_pass_clean",
+                "teacher_rows_per_direction": 2,
+                "teacher_minor_high_weight": 0.2,
+                "teacher_minor_medium_weight": 0.1,
+            },
+        }
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "teacher").mkdir()
+            pd.DataFrame(rows).to_parquet(
+                root / "teacher/teacher_judged.parquet", index=False
+            )
+            with mock.patch.object(flow, "PROJECT_ROOT", root):
+                selected = flow._teacher_rows(config)
+        directions = selected["src_lang"] + "-" + selected["tgt_lang"]
+        self.assertEqual(directions.value_counts().to_dict(), {"zh-uz": 2, "uz-zh": 2})
+        self.assertEqual(sorted(selected["weight"].tolist()), [0.2, 0.2, 1.0, 1.0])
+        self.assertTrue(
+            selected["training_source"].str.contains("minor_first_clean").any()
+        )
+        self.assertEqual(
+            set(selected["training_source"].map(flow._group)), {"flores_like_kd"}
+        )
+
     def test_teacher_diagnostics_breaks_down_failures_without_models(self):
         common = {
             "judge_parse_ok": True,

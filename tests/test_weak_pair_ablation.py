@@ -45,6 +45,10 @@ def config() -> dict:
                 "teacher_effective_ratio": 0.6,
             },
             "full_native_lr2e6": {"learning_rate": 2e-6},
+            "flores_relaxed_8k": {
+                "learning_rate": 5e-6,
+                "kd_train": "relaxed.jsonl",
+            },
         },
         "pairs": [
             {
@@ -158,6 +162,36 @@ class WeakPairAblationTests(unittest.TestCase):
         self.assertTrue(all(item["src_lang"] == "zh" for item in prepared_train))
         self.assertTrue(all(item["src_lang"] == "zh" for item in prepared_validation))
         self.assertEqual(report["direction"], "zh-uz")
+
+    def test_relaxed_variant_uses_its_isolated_dataset(self):
+        cfg = config()
+        relaxed = pd.DataFrame(
+            [row("zh", "uz", 30), row("uz", "zh", 31)]
+        )
+        validation = pd.DataFrame([row("zh", "uz", 10), row("uz", "zh", 11)])
+        human = pd.DataFrame([row("zh", "uz", 20), row("uz", "zh", 21)])
+        benchmark = pd.DataFrame({"zh": ["benchmark zh"], "uz": ["benchmark uz"]})
+        frames = {
+            "relaxed.jsonl": relaxed,
+            "validation.jsonl": validation,
+            "human.jsonl": human,
+        }
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            for name in frames:
+                (root / name).write_text(name)
+            benchmark.to_parquet(root / "dev.parquet")
+            benchmark.to_parquet(root / "devtest.parquet")
+
+            def read_table(path):
+                return frames[Path(path).name].copy()
+
+            with mock.patch.object(ablation, "PROJECT_ROOT", root), mock.patch.object(
+                ablation, "_read_table", side_effect=read_table
+            ):
+                report = ablation.prepare(cfg, "zh_uz", "flores_relaxed_8k")
+        self.assertEqual(report["composition"]["rows"], 2)
+        self.assertIn("relaxed.jsonl", report["file_sha256"])
 
     def test_weighted_full_uses_all_rows_and_rebalances_loss_mass(self):
         frame = pd.DataFrame(

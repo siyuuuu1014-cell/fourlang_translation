@@ -284,6 +284,16 @@ def validate(config: dict[str, Any]) -> dict[str, Any]:
     output = _path(config["outputs"]["root"])
     if output.resolve() == _path(config["inputs"]["existing_train"]).parent.resolve():
         errors.append("output root must not overwrite the existing training version")
+    minor_policy = str(
+        config.get("distillation", {}).get(
+            "minor_acceptance_policy", "second_review_pass"
+        )
+    )
+    if minor_policy not in {"second_review_pass", "first_pass_clean", "disabled"}:
+        errors.append(
+            "distillation.minor_acceptance_policy must be second_review_pass, "
+            "first_pass_clean, or disabled"
+        )
     report = {"schema_version": 1, "status": "PASS" if not errors else "FAIL", "errors": errors}
     report_path = _path(config["outputs"]["report_root"]) / "validation.json"
     write_json(report_path, report)
@@ -1067,11 +1077,17 @@ def _teacher_rows(config: dict[str, Any]) -> pd.DataFrame:
         & frame["teacher_usefulness"].fillna("").astype(str).str.upper().isin(("HIGH", "MEDIUM"))
     ].copy()
     passed["_review_route"] = "first_pass"
-    review_enabled = bool(
-        config.get("distillation", {}).get("minor_second_review_enabled", False)
+    distillation = config.get("distillation", {})
+    minor_policy = str(
+        distillation.get(
+            "minor_acceptance_policy",
+            "second_review_pass"
+            if distillation.get("minor_second_review_enabled", False)
+            else "disabled",
+        )
     )
     rescued = frame.head(0).copy()
-    if review_enabled:
+    if minor_policy == "second_review_pass":
         review_path = teacher_path.with_name("teacher_minor_second_review.parquet")
         review = _read(review_path)
         rescued = review[
@@ -1089,6 +1105,33 @@ def _teacher_rows(config: dict[str, Any]) -> pd.DataFrame:
             .eq("MINOR")
         ].copy()
         rescued["_review_route"] = "minor_second_pass"
+    elif minor_policy == "first_pass_clean":
+        rescued = frame[
+            frame["judge_parse_ok"].fillna(False).astype(bool)
+            & frame["judge_label"].fillna("").astype(str).str.upper().eq("MINOR")
+            & frame["semantic_consistent"].fillna(False).astype(bool)
+            & frame["teacher_usefulness"]
+            .fillna("")
+            .astype(str)
+            .str.upper()
+            .isin(("HIGH", "MEDIUM"))
+        ].copy()
+        for field in (
+            "omission",
+            "addition",
+            "mistranslation",
+            "number_error",
+            "entity_error",
+            "negation_error",
+        ):
+            rescued = rescued[
+                ~rescued.get(field, pd.Series(False, index=rescued.index))
+                .fillna(False)
+                .astype(bool)
+            ]
+        rescued["_review_route"] = "minor_first_clean"
+    elif minor_policy != "disabled":
+        raise ValueError(f"Unsupported MINOR acceptance policy: {minor_policy!r}")
     identity = (
         ["pair_id", "src_lang", "tgt_lang"]
         if "pair_id" in frame.columns
@@ -1097,6 +1140,33 @@ def _teacher_rows(config: dict[str, Any]) -> pd.DataFrame:
     frame = pd.concat([passed, rescued], ignore_index=True).drop_duplicates(
         identity, keep="first"
     )
+    rows_per_direction = distillation.get("teacher_rows_per_direction")
+    if rows_per_direction is not None:
+        limit = int(rows_per_direction)
+        if limit < 1:
+            raise ValueError("distillation.teacher_rows_per_direction must be positive")
+        frame["_direction"] = (
+            frame["src_lang"].astype(str) + "-" + frame["tgt_lang"].astype(str)
+        )
+        frame["_route_rank"] = frame["_review_route"].map(
+            {"first_pass": 0, "minor_second_pass": 1, "minor_first_clean": 1}
+        )
+        frame["_usefulness_rank"] = (
+            frame["teacher_usefulness"].astype(str).str.upper().map({"HIGH": 0, "MEDIUM": 1})
+        )
+        seed = int(config["direction"]["seed"])
+        frame["_stable_rank"] = [
+            _stable_rank(seed, ":".join(str(row.get(name, "")) for name in identity))
+            for row in frame.to_dict("records")
+        ]
+        frame = (
+            frame.sort_values(
+                ["_direction", "_route_rank", "_usefulness_rank", "_stable_rank"]
+            )
+            .groupby("_direction", group_keys=False)
+            .head(limit)
+            .copy()
+        )
     frame["tgt_text"] = frame["teacher_text"]
     usefulness = frame["teacher_usefulness"].astype(str).str.upper()
     first_weights = usefulness.map(
@@ -1115,7 +1185,15 @@ def _teacher_rows(config: dict[str, Any]) -> pd.DataFrame:
         frame["_review_route"].eq("first_pass"), minor_weights
     )
     version = str(config.get("direction", {}).get("version", "flores_like"))
-    frame["training_source"] = f"teacher_kd_{version}"
+    if minor_policy == "first_pass_clean":
+        frame["training_source"] = (
+            "teacher_kd_"
+            + version
+            + "_"
+            + frame["_review_route"].astype(str)
+        )
+    else:
+        frame["training_source"] = f"teacher_kd_{version}"
     return normalize_rows(frame, origin=str(teacher_path))
 
 

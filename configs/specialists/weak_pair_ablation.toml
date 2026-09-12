@@ -61,6 +61,10 @@ teacher_effective_ratio = 0.60
 [variants.full_native_lr2e6]
 learning_rate = 0.000002
 
+[variants.flores_relaxed_8k]
+learning_rate = 0.000005
+kd_train = "data/distillation/zh_uz/flores_relaxed_8k/train.jsonl"
+
 [[pairs]]
 id = "zh_uz"
 languages = ["zh", "uz"]

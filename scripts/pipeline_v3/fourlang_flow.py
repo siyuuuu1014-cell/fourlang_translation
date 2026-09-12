@@ -627,17 +627,78 @@ def verify_exp2_data(config: dict[str, Any]) -> None:
             raise RuntimeError(f"{message} Changed file: {name}")
 
 
+def verify_versioned_exp3_data(config: dict[str, Any], experiment: str) -> None:
+    """Bind Exp3 training to the reviewed, immutable dataset build."""
+    if experiment != "exp3_v2":
+        raise ValueError(f"Unsupported versioned Exp3 experiment: {experiment}")
+    message = (
+        f"{experiment} data is stale or unaudited. Re-run the versioned preview "
+        "and build before training."
+    )
+    report_path = PROJECT_ROOT / f"reports/pipeline/fourlang/{experiment}_data.json"
+    if not report_path.is_file():
+        raise RuntimeError(message)
+    report = read_json(report_path)
+    expected_config = fingerprint(
+        {
+            "balancing": config["balancing"].get(experiment, {}),
+            "seed": config["multilingual"]["seed"],
+            "text_contract": config.get("text_contract", {}),
+            "pair_data": config["pair_data"],
+        }
+    )
+    expected_paths = {
+        "train": f"data/multilingual/fourlang/{experiment}/train.jsonl",
+        "validation": f"data/multilingual/fourlang/{experiment}/validation.jsonl",
+        "manifest": f"data/multilingual/fourlang/{experiment}/manifest.json",
+    }
+    dataset = report.get("dataset", {})
+    if (
+        report.get("schema_version") != 1
+        or report.get("status") != f"{experiment.upper()}_DATA_BUILT_NOT_TRAINED"
+        or report.get("experiment") != experiment
+        or report.get("source_model")
+        != "results/student/fourlang/exp2/best_model/shared"
+        or report.get("training_started") is not False
+        or report.get("config_fingerprint") != expected_config
+        or report.get("validation", {}).get("replacement_directions") != 0
+        or report.get("validation", {}).get("protected_overlap_after") != 0
+        or report.get("validation", {}).get("train_rows") != 46000
+        or any(dataset.get(key) != value for key, value in expected_paths.items())
+    ):
+        raise RuntimeError(message)
+    hashes = dataset.get("sha256", {})
+    for key, relative in expected_paths.items():
+        path = PROJECT_ROOT / relative
+        if not path.is_file() or hashes.get(key) != file_sha256(path):
+            raise RuntimeError(f"{message} Changed file: {relative}")
+    preview_path = PROJECT_ROOT / f"reports/pipeline/fourlang/{experiment}_data_preview.json"
+    if (
+        not preview_path.is_file()
+        or report.get("preview_sha256") != file_sha256(preview_path)
+    ):
+        raise RuntimeError(f"{message} Changed preview: {preview_path}")
+
+
+def source_model_for_experiment(candidate: dict[str, Any], experiment: str) -> str:
+    if experiment == "exp1":
+        return candidate_path(candidate, "en", "zh")
+    previous = "exp1" if experiment == "exp2" else "exp2"
+    return str(
+        PROJECT_ROOT
+        / f"results/student/fourlang/{previous}/best_model/shared"
+    )
+
+
 def train(config: dict[str, Any], experiment: str) -> None:
     if experiment == "exp2":
         verify_exp2_data(config)
+    elif experiment == "exp3_v2":
+        verify_versioned_exp3_data(config, experiment)
     selected = read_json(PROJECT_ROOT / "results/model_selection/fourlang/selected_student.json")
     candidate = selected["candidate"]
-    source_model = (
-        candidate_path(candidate, "en", "zh")
-        if experiment == "exp1"
-        else str(PROJECT_ROOT / "results/student/fourlang/exp1/best_model/shared")
-    )
-    if experiment == "exp2":
+    source_model = source_model_for_experiment(candidate, experiment)
+    if experiment != "exp1":
         model_files(Path(source_model))
     root = PROJECT_ROOT / f"results/student/fourlang/{experiment}"
     report = train_model(
@@ -757,7 +818,7 @@ def main() -> None:
         choices=("validate", "benchmarks", "prepare_models", "aggregate", "bakeoff", "select", "train", "evaluate", "gate", "freeze"),
     )
     parser.add_argument("--config", default="configs/multilingual/fourlang.toml")
-    parser.add_argument("--experiment", choices=("exp1", "exp2"))
+    parser.add_argument("--experiment", choices=("exp1", "exp2", "exp3_v2"))
     args = parser.parse_args()
     config = load_config(args.config)
     if args.action == "validate":
@@ -769,6 +830,8 @@ def main() -> None:
     elif args.action == "aggregate":
         if not args.experiment:
             parser.error("aggregate requires --experiment")
+        if args.experiment == "exp3_v2":
+            parser.error("exp3_v2 must be built with build_exp3_data.py")
         aggregate(config, args.experiment)
     elif args.action == "bakeoff":
         bakeoff(config)

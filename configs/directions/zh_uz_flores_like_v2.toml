@@ -126,6 +126,7 @@ max_new_tokens = 256
 # The V100 32GB can hold Qwen3-8B in FP16. Direct placement avoids a transient
 # CPU copy under restrictive container memory limits.
 model_device = "cuda"
+second_review_load_in_8bit = true
 
 [distillation]
 teacher_checkpoint_rows = 256

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import re
 from pathlib import Path
@@ -8,7 +9,7 @@ from typing import Any
 
 import pandas as pd
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
 try:
     from .common import PROJECT_ROOT, load_config, pipeline_namespace
@@ -407,8 +408,18 @@ def main() -> None:
                 n=count, random_state=int(config["direction"]["seed"])
             ).sort_values("pair_id")
     frame["judge_id"] = [judge_id(row) for row in frame.to_dict("records")]
+    second_review_int8 = bool(
+        args.mode == "teacher_second"
+        and config.get("judge", {}).get("second_review_load_in_8bit", False)
+    )
     frame["judge_policy"] = (
-        source_policy if args.mode == "source" else "translation_v1"
+        source_policy
+        if args.mode == "source"
+        else "translation_strict_second_v1_int8"
+        if second_review_int8
+        else "translation_strict_second_v1"
+        if args.mode == "teacher_second"
+        else "translation_v1"
     )
     existing_parts: list[pd.DataFrame] = []
     if output_path.exists() and not args.overwrite:
@@ -486,9 +497,11 @@ def main() -> None:
         device_map = "auto"
     else:
         raise ValueError("judge.model_device must be 'auto' or 'cuda'")
+    load_precision = "int8" if second_review_int8 else "float16"
     print(
         f"pending={len(pending)} initial_batch_size={initial_batch_size} "
-        f"max_input_tokens={max_input_tokens} model_device={model_device}",
+        f"max_input_tokens={max_input_tokens} model_device={model_device} "
+        f"load_precision={load_precision}",
         flush=True,
     )
     tokenizer = AutoTokenizer.from_pretrained(
@@ -497,13 +510,22 @@ def main() -> None:
     tokenizer.padding_side = "left"
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token_id = tokenizer.eos_token_id
+    model_kwargs: dict[str, Any] = {
+        "local_files_only": True,
+        "trust_remote_code": True,
+        "torch_dtype": torch.float16,
+        "device_map": device_map,
+        "low_cpu_mem_usage": True,
+    }
+    if second_review_int8:
+        if importlib.util.find_spec("bitsandbytes") is None:
+            raise RuntimeError(
+                "judge.second_review_load_in_8bit requires bitsandbytes in the Judge environment"
+            )
+        model_kwargs["quantization_config"] = BitsAndBytesConfig(load_in_8bit=True)
     model = AutoModelForCausalLM.from_pretrained(
         model_path,
-        local_files_only=True,
-        trust_remote_code=True,
-        torch_dtype=torch.float16,
-        device_map=device_map,
-        low_cpu_mem_usage=True,
+        **model_kwargs,
     ).eval()
     model.generation_config.do_sample = False
     model.generation_config.temperature = None

@@ -13,6 +13,8 @@ baseline.
 - sends only first-pass `MINOR` rows without any semantic error flag to an
   independent binary second review;
 - gives rescued MINOR rows lower weights (`HIGH=0.5`, `MEDIUM=0.4`).
+- loads the independent second review in 8-bit on GPU to avoid the container's
+  transient CPU-memory limit; first-pass judgments remain unchanged.
 
 ## Environment
 
@@ -25,6 +27,13 @@ CFG=configs/directions/zh_uz_flores_like_v2.toml
 
 export FOURLANG_MODEL_ROOT=/root/autodl-tmp/models
 export FOURLANG_QWEN_MODEL_PATH=/root/autodl-tmp/models/Qwen3-8B
+```
+
+The Judge environment must provide `bitsandbytes` for the isolated 8-bit second
+review. Verify it with:
+
+```bash
+"$JUDGE_PY" -c "import bitsandbytes; print(bitsandbytes.__version__)"
 ```
 
 ## 1. Rebuild selection and reuse source judgments

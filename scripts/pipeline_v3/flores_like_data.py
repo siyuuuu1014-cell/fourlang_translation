@@ -835,6 +835,229 @@ def teacher_calibration_report(config: dict[str, Any]) -> dict[str, Any]:
     return payload
 
 
+def teacher_diagnostics_report(config: dict[str, Any]) -> dict[str, Any]:
+    """Explain calibration losses without loading either model or training code."""
+    validate(config)
+    teacher_root = _path(config["outputs"]["teacher_pipeline_root"])
+    first_path = teacher_root / "teacher_judge_calibration.parquet"
+    second_path = teacher_root / "teacher_minor_second_review_calibration.parquet"
+    first = _read(first_path).drop_duplicates("judge_id", keep="last")
+    second = _read(second_path).drop_duplicates("judge_id", keep="last")
+    minimum = int(config["selection"]["minimum_teacher_rows_per_direction"])
+    selected = int(config["selection"]["candidate_sources_per_direction"])
+    source_column = next(
+        (
+            name
+            for name in ("source_corpus", "source_group", "corpus")
+            if name in first.columns
+        ),
+        None,
+    )
+    flag_columns = (
+        "omission",
+        "addition",
+        "mistranslation",
+        "number_error",
+        "entity_error",
+        "negation_error",
+    )
+    directions: dict[str, Any] = {}
+    for direction in DIRECTIONS:
+        source, target = direction.split("-")
+        sample = first[
+            first["src_lang"].astype(str).eq(source)
+            & first["tgt_lang"].astype(str).eq(target)
+        ].copy()
+        reviewed = len(sample)
+        labels = (
+            sample["judge_label"]
+            .fillna("UNCERTAIN")
+            .astype(str)
+            .str.upper()
+            .value_counts()
+            .sort_index()
+        )
+        usefulness = (
+            sample["teacher_usefulness"]
+            .fillna("REJECT")
+            .astype(str)
+            .str.upper()
+            .value_counts()
+            .sort_index()
+        )
+        flags = {
+            name: int(
+                sample.get(name, pd.Series(False, index=sample.index))
+                .fillna(False)
+                .astype(bool)
+                .sum()
+            )
+            for name in flag_columns
+        }
+        semantic_inconsistent = int(
+            (~sample["semantic_consistent"].fillna(False).astype(bool)).sum()
+        )
+        parse_failures = int(
+            (~sample["judge_parse_ok"].fillna(False).astype(bool)).sum()
+        )
+        minor = sample[
+            sample["judge_parse_ok"].fillna(False).astype(bool)
+            & sample["judge_label"].fillna("").astype(str).str.upper().eq("MINOR")
+        ]
+        clean_minor = minor[
+            minor["semantic_consistent"].fillna(False).astype(bool)
+        ].copy()
+        for name in flag_columns:
+            clean_minor = clean_minor[
+                ~clean_minor.get(name, pd.Series(False, index=clean_minor.index))
+                .fillna(False)
+                .astype(bool)
+            ]
+        second_direction = second[
+            second["src_lang"].astype(str).eq(source)
+            & second["tgt_lang"].astype(str).eq(target)
+        ]
+        second_pass = second_direction[
+            second_direction["judge_parse_ok"].fillna(False).astype(bool)
+            & second_direction["judge_label"]
+            .fillna("")
+            .astype(str)
+            .str.upper()
+            .eq("PASS")
+            & second_direction["teacher_usefulness"]
+            .fillna("")
+            .astype(str)
+            .str.upper()
+            .isin(("HIGH", "MEDIUM"))
+            & second_direction.get(
+                "first_judge_label", pd.Series("", index=second_direction.index)
+            )
+            .fillna("")
+            .astype(str)
+            .str.upper()
+            .eq("MINOR")
+        ]
+        first_pass = int(
+            (
+                sample["judge_parse_ok"].fillna(False).astype(bool)
+                & sample["judge_label"]
+                .fillna("")
+                .astype(str)
+                .str.upper()
+                .eq("PASS")
+                & sample["teacher_usefulness"]
+                .fillna("")
+                .astype(str)
+                .str.upper()
+                .isin(("HIGH", "MEDIUM"))
+            ).sum()
+        )
+        accepted = first_pass + len(second_pass)
+        rate = accepted / reviewed if reviewed else 0.0
+        z = 1.96
+        if reviewed:
+            denominator = 1.0 + z * z / reviewed
+            center = rate + z * z / (2.0 * reviewed)
+            margin = z * math.sqrt(
+                rate * (1.0 - rate) / reviewed
+                + z * z / (4.0 * reviewed * reviewed)
+            )
+            conservative_rate = max(0.0, (center - margin) / denominator)
+        else:
+            conservative_rate = 0.0
+        required_candidates = (
+            math.ceil(minimum / conservative_rate) if conservative_rate else None
+        )
+        corpus: dict[str, Any] = {}
+        if source_column:
+            for name, group in sample.groupby(source_column, dropna=False):
+                group_labels = (
+                    group["judge_label"]
+                    .fillna("UNCERTAIN")
+                    .astype(str)
+                    .str.upper()
+                )
+                corpus[str(name)] = {
+                    "samples": len(group),
+                    "pass": int(group_labels.eq("PASS").sum()),
+                    "minor": int(group_labels.eq("MINOR").sum()),
+                    "fail": int(group_labels.eq("FAIL").sum()),
+                    "uncertain": int(group_labels.eq("UNCERTAIN").sum()),
+                    "strict_pass_rate": float(group_labels.eq("PASS").mean()),
+                }
+        reasons = (
+            sample.loc[
+                ~sample["judge_label"]
+                .fillna("")
+                .astype(str)
+                .str.upper()
+                .eq("PASS"),
+                "judge_reason",
+            ]
+            .fillna("")
+            .astype(str)
+            .str.strip()
+        )
+        directions[direction] = {
+            "samples": reviewed,
+            "labels": {str(key): int(value) for key, value in labels.items()},
+            "usefulness": {
+                str(key): int(value) for key, value in usefulness.items()
+            },
+            "error_flags": flags,
+            "semantic_inconsistent": semantic_inconsistent,
+            "parse_failures": parse_failures,
+            "minor_rows": len(minor),
+            "clean_minor_sent_to_second_review": len(clean_minor),
+            "second_review_pass": len(second_pass),
+            "second_review_salvage_rate": (
+                len(second_pass) / len(second_direction)
+                if len(second_direction)
+                else 0.0
+            ),
+            "accepted_rate": rate,
+            "conservative_accepted_rate_95": conservative_rate,
+            "selected_candidates": selected,
+            "minimum_required_rows": minimum,
+            "estimated_candidates_for_minimum": required_candidates,
+            "additional_candidates_for_minimum": (
+                max(0, required_candidates - selected)
+                if required_candidates is not None
+                else None
+            ),
+            "by_source_corpus": corpus,
+            "top_non_pass_reasons": {
+                str(key): int(value)
+                for key, value in reasons[reasons.ne("")]
+                .value_counts()
+                .head(20)
+                .items()
+            },
+        }
+    payload = {
+        "schema_version": 1,
+        "stage": "teacher_calibration_diagnostics",
+        "first_review": str(first_path),
+        "minor_second_review": str(second_path),
+        "directions": directions,
+        "recommendation": (
+            "DO_NOT_RUN_FULL_AUDIT"
+            if any(
+                item["estimated_candidates_for_minimum"] is None
+                or item["estimated_candidates_for_minimum"] > selected
+                for item in directions.values()
+            )
+            else "CAPACITY_READY"
+        ),
+    }
+    write_json(
+        _path(config["outputs"]["report_root"])
+        / "teacher_calibration_diagnostics.json",
+        payload,
+    )
+    return payload
+
+
 def _teacher_rows(config: dict[str, Any]) -> pd.DataFrame:
     teacher_path = _path(config["outputs"]["teacher_pipeline_root"]) / "teacher_judged.parquet"
     frame = _read(teacher_path)
@@ -1044,6 +1267,7 @@ def main() -> None:
             "stage",
             "source_calibration",
             "teacher_calibration",
+            "teacher_diagnostics",
             "select",
             "assemble",
             "status",
@@ -1059,6 +1283,7 @@ def main() -> None:
         "stage": stage,
         "source_calibration": source_calibration_report,
         "teacher_calibration": teacher_calibration_report,
+        "teacher_diagnostics": teacher_diagnostics_report,
         "select": select,
         "assemble": assemble,
         "status": status,

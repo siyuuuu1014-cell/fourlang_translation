@@ -232,6 +232,104 @@ class FloresLikeDataTests(unittest.TestCase):
         self.assertEqual(len(rows), 2)
         self.assertEqual(sorted(rows["weight"].tolist()), [0.5, 1.0])
 
+    def test_teacher_diagnostics_breaks_down_failures_without_models(self):
+        common = {
+            "judge_parse_ok": True,
+            "teacher_usefulness": "HIGH",
+            "semantic_consistent": True,
+            "addition": False,
+            "mistranslation": False,
+            "number_error": False,
+            "entity_error": False,
+            "negation_error": False,
+        }
+        first = pd.DataFrame(
+            [
+                {
+                    **common,
+                    "judge_id": "zh-pass",
+                    "src_lang": "zh",
+                    "tgt_lang": "uz",
+                    "source_corpus": "wikipedia",
+                    "judge_label": "PASS",
+                    "judge_reason": "",
+                    "omission": False,
+                },
+                {
+                    **common,
+                    "judge_id": "zh-minor",
+                    "src_lang": "zh",
+                    "tgt_lang": "uz",
+                    "source_corpus": "hplt",
+                    "judge_label": "MINOR",
+                    "judge_reason": "minor fluency issue",
+                    "omission": False,
+                },
+                {
+                    **common,
+                    "judge_id": "zh-fail",
+                    "src_lang": "zh",
+                    "tgt_lang": "uz",
+                    "source_corpus": "hplt",
+                    "judge_label": "FAIL",
+                    "judge_reason": "content omitted",
+                    "semantic_consistent": False,
+                    "omission": True,
+                },
+                {
+                    **common,
+                    "judge_id": "uz-pass",
+                    "src_lang": "uz",
+                    "tgt_lang": "zh",
+                    "source_corpus": "wikipedia",
+                    "judge_label": "PASS",
+                    "judge_reason": "",
+                    "omission": False,
+                },
+            ]
+        )
+        second = pd.DataFrame(
+            [
+                {
+                    **first.iloc[1].to_dict(),
+                    "first_judge_label": "MINOR",
+                    "judge_label": "PASS",
+                }
+            ]
+        )
+        config = {
+            "outputs": {
+                "teacher_pipeline_root": "teacher",
+                "report_root": "reports",
+            },
+            "selection": {
+                "minimum_teacher_rows_per_direction": 2,
+                "candidate_sources_per_direction": 4,
+            },
+        }
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "teacher").mkdir()
+            first.to_parquet(
+                root / "teacher/teacher_judge_calibration.parquet", index=False
+            )
+            second.to_parquet(
+                root / "teacher/teacher_minor_second_review_calibration.parquet",
+                index=False,
+            )
+            with mock.patch.object(flow, "PROJECT_ROOT", root), mock.patch.object(
+                flow, "validate"
+            ):
+                report = flow.teacher_diagnostics_report(config)
+            saved = root / "reports/teacher_calibration_diagnostics.json"
+            self.assertTrue(saved.is_file())
+        zh = report["directions"]["zh-uz"]
+        self.assertEqual(zh["labels"], {"FAIL": 1, "MINOR": 1, "PASS": 1})
+        self.assertEqual(zh["error_flags"]["omission"], 1)
+        self.assertEqual(zh["clean_minor_sent_to_second_review"], 1)
+        self.assertEqual(zh["second_review_pass"], 1)
+        self.assertEqual(zh["by_source_corpus"]["hplt"]["samples"], 2)
+
 
 if __name__ == "__main__":
     unittest.main()

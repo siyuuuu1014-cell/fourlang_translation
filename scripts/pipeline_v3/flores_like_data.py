@@ -664,19 +664,150 @@ def source_calibration_report(config: dict[str, Any]) -> dict[str, Any]:
     return payload
 
 
+def teacher_calibration_report(config: dict[str, Any]) -> dict[str, Any]:
+    """Project publishable Teacher capacity after strict MINOR adjudication."""
+    validate(config)
+    teacher_root = _path(config["outputs"]["teacher_pipeline_root"])
+    first_path = teacher_root / "teacher_judge_calibration.parquet"
+    second_path = teacher_root / "teacher_minor_second_review_calibration.parquet"
+    first = _read(first_path).drop_duplicates("judge_id", keep="last")
+    second = _read(second_path).drop_duplicates("judge_id", keep="last")
+    minimum = int(config["selection"]["minimum_teacher_rows_per_direction"])
+    selected = int(config["selection"]["candidate_sources_per_direction"])
+    details: dict[str, Any] = {}
+    for direction in DIRECTIONS:
+        source, target = direction.split("-")
+        sample = first[
+            first["src_lang"].astype(str).eq(source)
+            & first["tgt_lang"].astype(str).eq(target)
+        ].copy()
+        first_pass = sample[
+            sample["judge_parse_ok"].fillna(False).astype(bool)
+            & sample["judge_label"].fillna("").astype(str).str.upper().eq("PASS")
+            & sample["teacher_usefulness"]
+            .fillna("")
+            .astype(str)
+            .str.upper()
+            .isin(("HIGH", "MEDIUM"))
+        ]
+        adjudicated = second[
+            second["src_lang"].astype(str).eq(source)
+            & second["tgt_lang"].astype(str).eq(target)
+            & second["judge_parse_ok"].fillna(False).astype(bool)
+            & second["judge_label"].fillna("").astype(str).str.upper().eq("PASS")
+            & second["teacher_usefulness"]
+            .fillna("")
+            .astype(str)
+            .str.upper()
+            .isin(("HIGH", "MEDIUM"))
+            & second.get("first_judge_label", pd.Series("", index=second.index))
+            .fillna("")
+            .astype(str)
+            .str.upper()
+            .eq("MINOR")
+        ]
+        accepted_ids = set(first_pass["judge_id"].astype(str)) | set(
+            adjudicated["judge_id"].astype(str)
+        )
+        reviewed = len(sample)
+        rate = len(accepted_ids) / reviewed if reviewed else 0.0
+        if reviewed:
+            z = 1.96
+            denominator = 1.0 + z * z / reviewed
+            center = rate + z * z / (2.0 * reviewed)
+            margin = z * math.sqrt(
+                rate * (1.0 - rate) / reviewed + z * z / (4.0 * reviewed * reviewed)
+            )
+            conservative_rate = max(0.0, (center - margin) / denominator)
+        else:
+            conservative_rate = 0.0
+        projected = int(rate * selected)
+        conservative = int(conservative_rate * selected)
+        details[direction] = {
+            "samples": reviewed,
+            "first_pass": len(first_pass),
+            "minor_second_pass": len(adjudicated),
+            "accepted_total": len(accepted_ids),
+            "accepted_rate": rate,
+            "projected_accepted_rows": projected,
+            "conservative_projected_rows_95": conservative,
+            "minimum_required_rows": minimum,
+            "decision": "READY" if conservative >= minimum else "NOT_READY",
+        }
+    payload = {
+        "schema_version": 1,
+        "first_review": str(first_path),
+        "minor_second_review": str(second_path),
+        "directions": details,
+        "full_teacher_audit_recommended": all(
+            item["decision"] == "READY" for item in details.values()
+        ),
+    }
+    write_json(
+        _path(config["outputs"]["report_root"]) / "teacher_calibration_capacity.json",
+        payload,
+    )
+    return payload
+
+
 def _teacher_rows(config: dict[str, Any]) -> pd.DataFrame:
     teacher_path = _path(config["outputs"]["teacher_pipeline_root"]) / "teacher_judged.parquet"
     frame = _read(teacher_path)
-    frame = frame[
+    passed = frame[
         frame["judge_parse_ok"].fillna(False).astype(bool)
         & frame["judge_label"].fillna("").astype(str).str.upper().eq("PASS")
         & frame["teacher_usefulness"].fillna("").astype(str).str.upper().isin(("HIGH", "MEDIUM"))
     ].copy()
-    frame["tgt_text"] = frame["teacher_text"]
-    frame["weight"] = frame["teacher_usefulness"].astype(str).str.upper().map(
-        {"HIGH": float(config["distillation"]["teacher_high_weight"]), "MEDIUM": float(config["distillation"]["teacher_medium_weight"])}
+    passed["_review_route"] = "first_pass"
+    review_enabled = bool(
+        config.get("distillation", {}).get("minor_second_review_enabled", False)
     )
-    frame["training_source"] = "teacher_kd_flores_like_v1"
+    rescued = frame.head(0).copy()
+    if review_enabled:
+        review_path = teacher_path.with_name("teacher_minor_second_review.parquet")
+        review = _read(review_path)
+        rescued = review[
+            review["judge_parse_ok"].fillna(False).astype(bool)
+            & review["judge_label"].fillna("").astype(str).str.upper().eq("PASS")
+            & review["teacher_usefulness"]
+            .fillna("")
+            .astype(str)
+            .str.upper()
+            .isin(("HIGH", "MEDIUM"))
+            & review.get("first_judge_label", pd.Series("", index=review.index))
+            .fillna("")
+            .astype(str)
+            .str.upper()
+            .eq("MINOR")
+        ].copy()
+        rescued["_review_route"] = "minor_second_pass"
+    identity = (
+        ["pair_id", "src_lang", "tgt_lang"]
+        if "pair_id" in frame.columns
+        else ["src_lang", "tgt_lang", "src_text"]
+    )
+    frame = pd.concat([passed, rescued], ignore_index=True).drop_duplicates(
+        identity, keep="first"
+    )
+    frame["tgt_text"] = frame["teacher_text"]
+    usefulness = frame["teacher_usefulness"].astype(str).str.upper()
+    first_weights = usefulness.map(
+        {
+            "HIGH": float(config["distillation"]["teacher_high_weight"]),
+            "MEDIUM": float(config["distillation"]["teacher_medium_weight"]),
+        }
+    )
+    minor_weights = usefulness.map(
+        {
+            "HIGH": float(config["distillation"].get("teacher_minor_high_weight", 0.5)),
+            "MEDIUM": float(config["distillation"].get("teacher_minor_medium_weight", 0.4)),
+        }
+    )
+    frame["weight"] = first_weights.where(
+        frame["_review_route"].eq("first_pass"), minor_weights
+    )
+    version = str(config.get("direction", {}).get("version", "flores_like"))
+    frame["training_source"] = f"teacher_kd_{version}"
     return normalize_rows(frame, origin=str(teacher_path))
 
 
@@ -780,8 +911,9 @@ def assemble(config: dict[str, Any]) -> dict[str, Any]:
         f"{direction}|{group}": float(frame.loc[frame["direction"].eq(direction) & frame["mix_group"].eq(group), "weight"].sum())
         for direction in DIRECTIONS for group in target_shares
     }
+    version = str(config.get("direction", {}).get("version", "flores_like")).upper()
     report = {
-        "schema_version": 1, "status": "FLORES_LIKE_V1_BUILT_NOT_TRAINED", "rows": len(frame),
+        "schema_version": 1, "status": f"{version}_BUILT_NOT_TRAINED", "rows": len(frame),
         "new_teacher_rows": dict(sorted(new_counts.items())), "raw_mass": before,
         "weight_multipliers": multipliers, "effective_mass": after,
         "target_global_shares": {f"{direction}|{group}": share for direction in DIRECTIONS for group, share in target_shares.items()},
@@ -806,6 +938,7 @@ def status(config: dict[str, Any]) -> dict[str, Any]:
         "teacher_input": teacher_root / "kd_candidates.jsonl",
         "teacher_generated": teacher_root / "teacher_generated.parquet",
         "teacher_judged": teacher_root / "teacher_judged.parquet",
+        "teacher_minor_second_review": teacher_root / "teacher_minor_second_review.parquet",
         "train": output_root / "train.jsonl",
         "manifest": output_root / "manifest.json",
     }
@@ -825,6 +958,7 @@ def main() -> None:
             "extend",
             "stage",
             "source_calibration",
+            "teacher_calibration",
             "select",
             "assemble",
             "status",
@@ -839,6 +973,7 @@ def main() -> None:
         "extend": collect_extension,
         "stage": stage,
         "source_calibration": source_calibration_report,
+        "teacher_calibration": teacher_calibration_report,
         "select": select,
         "assemble": assemble,
         "status": status,

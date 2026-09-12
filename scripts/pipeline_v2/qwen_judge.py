@@ -20,7 +20,9 @@ USEFULNESS = {"HIGH", "MEDIUM", "LOW", "REJECT"}
 JUDGE_SCHEMA_VERSION = 2
 
 
-def parse_result(text: str, *, teacher: bool = False) -> dict[str, Any]:
+def parse_result(
+    text: str, *, teacher: bool = False, allow_minor: bool = True
+) -> dict[str, Any]:
     result: dict[str, Any] = {
         "judge_parse_ok": False,
         "judge_label": "UNCERTAIN",
@@ -43,6 +45,9 @@ def parse_result(text: str, *, teacher: bool = False) -> dict[str, Any]:
         label = str(payload["label"]).upper()
         if label not in LABELS:
             return result
+        forced_uncertain = label == "MINOR" and not allow_minor
+        if forced_uncertain:
+            label = "UNCERTAIN"
         if teacher and "teacher_usefulness" not in payload:
             return result
         usefulness = str(payload.get("teacher_usefulness", "REJECT")).upper()
@@ -52,7 +57,11 @@ def parse_result(text: str, *, teacher: bool = False) -> dict[str, Any]:
             {
                 "judge_parse_ok": True,
                 "judge_label": label,
-                "judge_reason": str(payload.get("reason", ""))[:500],
+                "judge_reason": (
+                    "strict second review returned disallowed MINOR verdict"
+                    if forced_uncertain
+                    else str(payload.get("reason", ""))[:500]
+                ),
                 "semantic_consistent": bool(
                     payload.get("semantic_consistent", label in {"PASS", "MINOR"})
                 ),
@@ -118,8 +127,8 @@ Language: {src_lang}
 Text: {source}
 Return one JSON object only:
 {{"label":"PASS|FAIL|UNCERTAIN","reason":"short reason"}}"""
-    second = mode == "human_second"
-    teacher = mode == "teacher"
+    second = mode in {"human_second", "teacher_second"}
+    teacher = mode in {"teacher", "teacher_second"}
     origin = "a translation Teacher" if teacher else "a human parallel corpus"
     independence = (
         "This is an independent second review. Ignore any possible earlier verdict. "
@@ -137,14 +146,24 @@ Return one JSON object only:
             "Uzbek must use the Latin script, not Cyrillic."
         )
     contract_text = " ".join(language_contract)
+    verdict_contract = (
+        "This is a strict adjudication of a previously borderline Teacher translation. "
+        "Return PASS only when it is accurate, complete, sufficiently natural, and safe for "
+        "knowledge-distillation training. Alternative wording alone is not an error. Return "
+        "FAIL for any concrete semantic, omission, addition, terminology, entity, number, "
+        "negation, truncation, or target-language defect. Return UNCERTAIN only when reliable "
+        "judgment is impossible. Do not return MINOR."
+        if mode == "teacher_second"
+        else "PASS means fully usable. MINOR means usable with a small non-substantive issue. "
+        "FAIL means a substantive error. UNCERTAIN means it cannot be judged reliably."
+    )
     return f"""You are a strict bilingual translation quality auditor. {independence}
 The candidate comes from {origin}. Compare meaning, omissions, additions, fluency, language,
 names, numbers, time expressions and negation. Do not rewrite the translation.
 {contract_text}
 For Teacher candidates, also reject when the source itself is in the wrong language,
 is a keyword/list fragment, boilerplate, corrupted, or not a coherent natural sentence.
-PASS means fully usable. MINOR means usable with a small non-substantive issue.
-FAIL means a substantive error. UNCERTAIN means it cannot be judged reliably.
+{verdict_contract}
 Source language: {src_lang}
 Target language: {tgt_lang}
 Source: {source}
@@ -167,6 +186,16 @@ def io_paths(config: dict[str, Any], mode: str, calibration: bool) -> tuple[Path
         return base / "human_review_input.parquet", base / "human_judged.parquet"
     if mode == "human_second":
         return base / "human_judged.parquet", base / "human_second_review.parquet"
+    if mode == "teacher_second":
+        return base / (
+            "teacher_judge_calibration.parquet"
+            if calibration
+            else "teacher_judged.parquet"
+        ), base / (
+            "teacher_minor_second_review_calibration.parquet"
+            if calibration
+            else "teacher_minor_second_review.parquet"
+        )
     return base / "teacher_generated.parquet", base / (
         "teacher_judge_calibration.parquet" if calibration else "teacher_judged.parquet"
     )
@@ -180,6 +209,65 @@ def second_review_mask(frame: pd.DataFrame) -> pd.Series:
     return (~frame["judge_parse_ok"].fillna(False).astype(bool)) | frame[
         "judge_label"
     ].fillna("UNCERTAIN").astype(str).str.upper().isin(["FAIL", "UNCERTAIN"])
+
+
+def teacher_minor_review_mask(frame: pd.DataFrame) -> pd.Series:
+    """Only send semantically clean first-pass MINOR rows to strict adjudication."""
+    mask = (
+        frame["judge_parse_ok"].fillna(False).astype(bool)
+        & frame["judge_label"].fillna("").astype(str).str.upper().eq("MINOR")
+        & frame["semantic_consistent"].fillna(False).astype(bool)
+    )
+    for field in (
+        "omission",
+        "addition",
+        "mistranslation",
+        "number_error",
+        "entity_error",
+        "negation_error",
+    ):
+        mask &= ~frame[field].fillna(False).astype(bool)
+    return mask
+
+
+def _project_path(value: str | Path) -> Path:
+    path = Path(value)
+    return path if path.is_absolute() else PROJECT_ROOT / path
+
+
+def _same_input(left: Any, right: Any) -> bool:
+    if pd.isna(left) and pd.isna(right):
+        return True
+    return str(left) == str(right)
+
+
+def reusable_judgments(
+    frame: pd.DataFrame, paths: list[Path], mode: str
+) -> pd.DataFrame:
+    """Load only judgments whose complete audited input is unchanged."""
+    expected = {
+        str(row["judge_id"]): row for row in frame.to_dict("records")
+    }
+    matched: list[dict[str, Any]] = []
+    teacher = mode == "teacher"
+    fields = ["pair_id", "src_lang", "tgt_lang", "src_text"]
+    if teacher:
+        fields.extend(["teacher_text", "teacher_id"])
+    for path in paths:
+        if not path.is_file():
+            continue
+        previous = pd.read_parquet(path)
+        if "judge_id" not in previous.columns:
+            continue
+        for row in previous.to_dict("records"):
+            current = expected.get(str(row.get("judge_id", "")))
+            if current is None:
+                continue
+            if all(_same_input(row.get(field), current.get(field)) for field in fields):
+                matched.append(row)
+    if not matched:
+        return frame.head(0).copy()
+    return pd.DataFrame(matched).drop_duplicates("judge_id", keep="last")
 
 
 def stratified_source_sample(
@@ -281,7 +369,8 @@ def main() -> None:
         description="Config-driven Qwen translation Judge."
     )
     parser.add_argument(
-        "mode", choices=("source", "human", "human_second", "teacher")
+        "mode",
+        choices=("source", "human", "human_second", "teacher", "teacher_second"),
     )
     parser.add_argument("--config", required=True)
     parser.add_argument("--calibration", action="store_true")
@@ -300,6 +389,8 @@ def main() -> None:
         frame = pd.read_parquet(source_path)
     if args.mode == "human_second":
         frame = frame[second_review_mask(frame)].copy()
+    if args.mode == "teacher_second":
+        frame = frame[teacher_minor_review_mask(frame)].copy()
     if args.calibration:
         count_key = (
             "source_calibration_pairs"
@@ -319,8 +410,26 @@ def main() -> None:
     frame["judge_policy"] = (
         source_policy if args.mode == "source" else "translation_v1"
     )
+    existing_parts: list[pd.DataFrame] = []
     if output_path.exists() and not args.overwrite:
-        existing = pd.read_parquet(output_path)
+        existing_parts.append(pd.read_parquet(output_path))
+    if not args.overwrite and args.mode in {"source", "teacher"}:
+        reuse_key = "source_judged" if args.mode == "source" else "teacher_judged"
+        configured = config.get("reuse", {}).get(reuse_key, [])
+        if isinstance(configured, (str, Path)):
+            configured = [configured]
+        reuse_paths = [_project_path(value) for value in configured]
+        if args.mode == "teacher" and not args.calibration:
+            calibration_path = output_path.with_name("teacher_judge_calibration.parquet")
+            reuse_paths.append(calibration_path)
+        reused = reusable_judgments(frame, reuse_paths, args.mode)
+        if len(reused):
+            print(f"Reusing {len(reused)} compatible {args.mode} judgments.")
+            existing_parts.insert(0, reused)
+    if existing_parts:
+        existing = pd.concat(existing_parts, ignore_index=True).drop_duplicates(
+            "judge_id", keep="last"
+        )
         required_columns = {
             "judge_id",
             "judge_parse_ok",
@@ -328,7 +437,7 @@ def main() -> None:
             "judge_schema_version",
             "judge_policy",
         }
-        if args.mode == "teacher":
+        if args.mode in {"teacher", "teacher_second"}:
             required_columns.add("teacher_usefulness")
         if not required_columns.issubset(existing.columns):
             existing = existing.head(0)
@@ -420,7 +529,16 @@ def main() -> None:
             print(f"CUDA OOM: reducing batch_size to {current_batch_size}")
             continue
         for record, answer in zip(batch, answers, strict=True):
-            record.update(parse_result(answer, teacher=args.mode == "teacher"))
+            if args.mode == "teacher_second":
+                record["first_judge_label"] = record.get("judge_label")
+                record["first_judge_reason"] = record.get("judge_reason")
+            record.update(
+                parse_result(
+                    answer,
+                    teacher=args.mode in {"teacher", "teacher_second"},
+                    allow_minor=args.mode != "teacher_second",
+                )
+            )
             record["judge_schema_version"] = JUDGE_SCHEMA_VERSION
             record["judge_raw"] = answer[:2000]
             result.append(record)

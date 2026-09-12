@@ -951,6 +951,36 @@ def generate_teacher(config: dict) -> None:
                         f"Checkpoint input mismatch for {key} field {field}."
                     )
             completed[key] = generated_row
+    configured_reuse = config.get("reuse", {}).get("teacher_generated", [])
+    if isinstance(configured_reuse, (str, Path)):
+        configured_reuse = [configured_reuse]
+    reused_count = 0
+    for configured_path in configured_reuse:
+        reuse_path = Path(configured_path)
+        if not reuse_path.is_absolute():
+            reuse_path = PROJECT_ROOT / reuse_path
+        if not reuse_path.is_file():
+            continue
+        for generated_row in pd.read_parquet(reuse_path).to_dict("records"):
+            key = row_key(generated_row)
+            if key not in expected or key in completed:
+                continue
+            candidate = selected_for(
+                selection, str(generated_row["src_lang"]), str(generated_row["tgt_lang"])
+            )
+            if str(generated_row.get("teacher_id", "")) != str(candidate["id"]):
+                continue
+            if str(generated_row.get("src_text", "")) != str(expected[key]["src_text"]):
+                continue
+            if not str(generated_row.get("teacher_text", "")).strip():
+                continue
+            completed[key] = generated_row
+            reused_count += 1
+    if reused_count:
+        print(
+            f"Reusing {reused_count}/{len(rows)} compatible Teacher translations.",
+            flush=True,
+        )
     if completed:
         print(
             f"Resuming Teacher generation from {len(completed)}/{len(rows)} rows.",
@@ -972,36 +1002,34 @@ def generate_teacher(config: dict) -> None:
         tokenizer, model = load_model(candidate, source, target)
         for chunk_index, chunk in enumerate(chunks):
             chunk_keys = [row_key(row) for row in chunk]
-            finished = [key in completed for key in chunk_keys]
-            if all(finished):
+            missing_rows = [
+                row for row, key in zip(chunk, chunk_keys, strict=True) if key not in completed
+            ]
+            if not missing_rows:
                 continue
-            if any(finished):
-                raise RuntimeError(
-                    f"Incomplete checkpoint shard boundary for {source}-{target} "
-                    f"chunk {chunk_index}."
-                )
             generated = translate(
                 tokenizer,
                 model,
                 candidate["family"],
                 source,
                 target,
-                [row["src_text"] for row in chunk],
+                [row["src_text"] for row in missing_rows],
                 config,
             )
-            generated_rows = [
+            newly_generated = [
                 {**row, "teacher_text": teacher_text, "teacher_id": candidate["id"]}
-                for row, teacher_text in zip(chunk, generated, strict=True)
+                for row, teacher_text in zip(missing_rows, generated, strict=True)
             ]
+            completed.update(
+                {row_key(generated_row): generated_row for generated_row in newly_generated}
+            )
+            generated_rows = [completed[key] for key in chunk_keys]
             shard_path = checkpoint_root / (
                 f"{source}-{target}-{chunk_index:06d}.parquet"
             )
             temporary_shard = shard_path.with_suffix(".parquet.tmp")
             pd.DataFrame(generated_rows).to_parquet(temporary_shard, index=False)
             temporary_shard.replace(shard_path)
-            completed.update(
-                {row_key(generated_row): generated_row for generated_row in generated_rows}
-            )
             print(
                 f"Teacher checkpoint: {len(completed)}/{len(rows)} rows "
                 f"({source}-{target})",

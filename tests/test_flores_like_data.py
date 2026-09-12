@@ -174,6 +174,64 @@ class FloresLikeDataTests(unittest.TestCase):
             self.assertAlmostEqual(report["effective_mass"][f"{direction}|existing_kd"], total * 0.15)
             self.assertAlmostEqual(report["effective_mass"][f"{direction}|flores_like_kd"], total * 0.15)
 
+    def test_teacher_rows_accept_only_strictly_adjudicated_minor_at_lower_weight(self):
+        first = pd.DataFrame(
+            [
+                {
+                    "pair_id": "pass",
+                    "src_lang": "zh",
+                    "tgt_lang": "uz",
+                    "src_text": "这是自然句子。",
+                    "teacher_text": "Bu tabiiy gap.",
+                    "judge_parse_ok": True,
+                    "judge_label": "PASS",
+                    "teacher_usefulness": "HIGH",
+                },
+                {
+                    "pair_id": "minor",
+                    "src_lang": "zh",
+                    "tgt_lang": "uz",
+                    "src_text": "这是另一个句子。",
+                    "teacher_text": "Bu boshqa gap.",
+                    "judge_parse_ok": True,
+                    "judge_label": "MINOR",
+                    "teacher_usefulness": "HIGH",
+                },
+            ]
+        )
+        second = pd.DataFrame(
+            [
+                {
+                    **first.iloc[1].to_dict(),
+                    "first_judge_label": "MINOR",
+                    "judge_label": "PASS",
+                    "judge_parse_ok": True,
+                }
+            ]
+        )
+        config = {
+            "direction": {"version": "flores_like_v2"},
+            "outputs": {"teacher_pipeline_root": "teacher"},
+            "distillation": {
+                "teacher_high_weight": 1.0,
+                "teacher_medium_weight": 0.8,
+                "minor_second_review_enabled": True,
+                "teacher_minor_high_weight": 0.5,
+                "teacher_minor_medium_weight": 0.4,
+            },
+        }
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "teacher").mkdir()
+            first.to_parquet(root / "teacher/teacher_judged.parquet", index=False)
+            second.to_parquet(
+                root / "teacher/teacher_minor_second_review.parquet", index=False
+            )
+            with mock.patch.object(flow, "PROJECT_ROOT", root):
+                rows = flow._teacher_rows(config)
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(sorted(rows["weight"].tolist()), [0.5, 1.0])
+
 
 if __name__ == "__main__":
     unittest.main()

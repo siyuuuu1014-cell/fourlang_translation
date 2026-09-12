@@ -17,7 +17,12 @@ from scripts.pipeline_v2.data_flow import (
     select_split_pool,
     stratified_auto_accept_audit,
 )
-from scripts.pipeline_v2.qwen_judge import judge_id, parse_result, second_review_mask
+from scripts.pipeline_v2.qwen_judge import (
+    judge_id,
+    parse_result,
+    second_review_mask,
+    teacher_minor_review_mask,
+)
 from scripts.pipeline_v2 import seq2seq_flow
 
 
@@ -179,6 +184,33 @@ class PipelineV2Tests(unittest.TestCase):
         )
         self.assertEqual(second_review_mask(frame).tolist(), [True, True, True, False])
 
+    def test_teacher_minor_review_excludes_any_flagged_semantic_error(self) -> None:
+        common = {
+            "judge_parse_ok": True,
+            "judge_label": "MINOR",
+            "semantic_consistent": True,
+            "omission": False,
+            "addition": False,
+            "mistranslation": False,
+            "number_error": False,
+            "entity_error": False,
+            "negation_error": False,
+        }
+        frame = pd.DataFrame(
+            [common, {**common, "entity_error": True}, {**common, "judge_label": "PASS"}]
+        )
+        self.assertEqual(teacher_minor_review_mask(frame).tolist(), [True, False, False])
+
+    def test_strict_teacher_second_parser_rejects_minor_verdict(self) -> None:
+        result = parse_result(
+            '{"label":"MINOR","teacher_usefulness":"HIGH"}',
+            teacher=True,
+            allow_minor=False,
+        )
+        self.assertTrue(result["judge_parse_ok"])
+        self.assertEqual(result["judge_label"], "UNCERTAIN")
+        self.assertEqual(result["teacher_usefulness"], "REJECT")
+
     def test_exp1_pool_has_explicit_size_and_quality_tiers(self) -> None:
         settings = self.config["data"]
         required = (
@@ -306,6 +338,74 @@ class PipelineV2Tests(unittest.TestCase):
             ):
                 seq2seq_flow.generate_teacher(config)
             self.assertEqual(len(pd.read_parquet(output)), len(rows))
+
+    def test_teacher_generation_reuses_compatible_previous_version_rows(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            pipeline = root / "data/pipeline_v2/en_ru_v2"
+            pipeline.mkdir(parents=True)
+            rows = [
+                {
+                    "pair_id": f"pair-{index}",
+                    "src_lang": "en",
+                    "tgt_lang": "ru",
+                    "src_text": f"source-{index}",
+                    "reference_text": "",
+                }
+                for index in range(3)
+            ]
+            (pipeline / "kd_candidates.jsonl").write_text(
+                "".join(json.dumps(row) + "\n" for row in rows), encoding="utf-8"
+            )
+            previous = root / "previous.parquet"
+            pd.DataFrame(
+                [
+                    {**rows[0], "teacher_text": "reused:source-0", "teacher_id": "teacher"},
+                    {**rows[1], "teacher_text": "wrong teacher", "teacher_id": "other"},
+                ]
+            ).to_parquet(previous, index=False)
+            selection_path = root / "results/model_selection/en_ru/selected_teacher.json"
+            selection_path.parent.mkdir(parents=True)
+            selection_path.write_text(
+                json.dumps(
+                    {
+                        "directions": {
+                            "en-ru": {
+                                "candidate": {"id": "teacher", "family": "fake"}
+                            }
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+            config = {
+                "direction": {
+                    "pair": "en_ru",
+                    "source_lang": "en",
+                    "target_lang": "ru",
+                    "version": "v2",
+                },
+                "artifacts": {"pipeline_namespace": "en_ru_v2"},
+                "reuse": {"teacher_generated": [str(previous)]},
+                "distillation": {"teacher_checkpoint_rows": 2},
+                "training": {"max_source_length": 32},
+                "deployment": {"num_beams": 1, "max_new_tokens": 16},
+            }
+
+            def fake_translate(*args, **kwargs):
+                return [f"generated:{text}" for text in args[5]]
+
+            with (
+                patch.object(seq2seq_flow, "PROJECT_ROOT", root),
+                patch.object(seq2seq_flow, "load_model", return_value=(object(), object())),
+                patch.object(seq2seq_flow, "translate", side_effect=fake_translate) as translate,
+            ):
+                seq2seq_flow.generate_teacher(config)
+
+            output = pd.read_parquet(pipeline / "teacher_generated.parquet")
+            self.assertEqual(translate.call_count, 2)
+            self.assertEqual(translate.call_args_list[0].args[5], ["source-1"])
+            self.assertEqual(output.iloc[0]["teacher_text"], "reused:source-0")
 
 
 if __name__ == "__main__":

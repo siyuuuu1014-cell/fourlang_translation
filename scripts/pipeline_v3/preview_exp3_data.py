@@ -26,30 +26,39 @@ from scripts.pipeline_v3.fourlang_flow import (  # noqa: E402
 
 DEFAULT_CONFIG = "configs/multilingual/fourlang.toml"
 DEFAULT_OUTPUT = "reports/pipeline/fourlang/exp3_data_preview.json"
+SUPPORTED_VERSIONS = ("exp3", "exp3_v2")
 
 
 def exp3_train_path(item: dict[str, Any]) -> Path:
     return _path(item.get("exp3_kd_train", item["kd_train"]))
 
 
-def checked_output(value: str | Path) -> Path:
+def preview_output(version: str) -> str:
+    if version not in SUPPORTED_VERSIONS:
+        raise ValueError(f"Unsupported Exp3 data version: {version}")
+    return f"reports/pipeline/fourlang/{version}_data_preview.json"
+
+
+def checked_output(value: str | Path, version: str = "exp3") -> Path:
     path = _path(value).resolve()
-    allowed = (PROJECT_ROOT / DEFAULT_OUTPUT).resolve()
+    allowed = (PROJECT_ROOT / preview_output(version)).resolve()
     if path != allowed:
-        raise ValueError(f"Preview output must be {DEFAULT_OUTPUT}.")
+        raise ValueError(f"Preview output must be {preview_output(version)}.")
     return path
 
 
 def prepare_data(
-    config_path: str | Path,
+    config_path: str | Path, version: str = "exp3"
 ) -> tuple[pd.DataFrame, pd.DataFrame, dict[str, Any]]:
     """Build the deterministic in-memory Exp3 mix and its preview report."""
     config = load_config(config_path)
-    balancing = config.get("balancing", {}).get("exp3")
+    if version not in SUPPORTED_VERSIONS:
+        raise ValueError(f"Unsupported Exp3 data version: {version}")
+    balancing = config.get("balancing", {}).get(version)
     if not balancing:
-        raise ValueError("Missing balancing.exp3 configuration.")
+        raise ValueError(f"Missing balancing.{version} configuration.")
     if int(balancing.get("max_teacher_repeats", 0)) != 1:
-        raise ValueError("Exp3 preview requires max_teacher_repeats = 1.")
+        raise ValueError(f"{version} preview requires max_teacher_repeats = 1.")
 
     train_parts: list[pd.DataFrame] = []
     validation_parts: list[pd.DataFrame] = []
@@ -127,11 +136,11 @@ def prepare_data(
     report = {
         "schema_version": 1,
         "status": (
-            "EXP3_DATA_PREVIEW_READY_NOT_WRITTEN"
+            f"{version.upper()}_DATA_PREVIEW_READY_NOT_WRITTEN"
             if not replacements and leakage.get("protected_overlap_after") == 0
-            else "EXP3_DATA_PREVIEW_BLOCKED"
+            else f"{version.upper()}_DATA_PREVIEW_BLOCKED"
         ),
-        "experiment": "exp3",
+        "experiment": version,
         "source_model": "results/student/fourlang/exp2/best_model/shared",
         "training_started": False,
         "training_data_written": False,
@@ -160,9 +169,11 @@ def prepare_data(
     return balanced_train, validation, report
 
 
-def run(config_path: str | Path, output_path: str | Path) -> dict[str, Any]:
-    _, _, report = prepare_data(config_path)
-    output = checked_output(output_path)
+def run(
+    config_path: str | Path, output_path: str | Path, version: str = "exp3"
+) -> dict[str, Any]:
+    _, _, report = prepare_data(config_path, version)
+    output = checked_output(output_path, version)
     output.parent.mkdir(parents=True, exist_ok=True)
     write_json(output, report)
     print(
@@ -178,9 +189,10 @@ def run(config_path: str | Path, output_path: str | Path) -> dict[str, Any]:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", default=DEFAULT_CONFIG)
-    parser.add_argument("--output", default=DEFAULT_OUTPUT)
+    parser.add_argument("--version", choices=SUPPORTED_VERSIONS, default="exp3")
+    parser.add_argument("--output")
     args = parser.parse_args()
-    run(args.config, args.output)
+    run(args.config, args.output or preview_output(args.version), args.version)
 
 
 if __name__ == "__main__":

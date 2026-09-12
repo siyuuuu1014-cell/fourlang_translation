@@ -28,19 +28,31 @@ def project_path(value: str | Path) -> Path:
     return (path if path.is_absolute() else PROJECT_ROOT / path).resolve()
 
 
-def checked_dataset_path(value: str | Path) -> Path:
+def dataset_output(version: str) -> str:
+    if version not in preview.SUPPORTED_VERSIONS:
+        raise ValueError(f"Unsupported Exp3 data version: {version}")
+    return f"data/multilingual/fourlang/{version}"
+
+
+def report_output(version: str) -> str:
+    if version not in preview.SUPPORTED_VERSIONS:
+        raise ValueError(f"Unsupported Exp3 data version: {version}")
+    return f"reports/pipeline/fourlang/{version}_data.json"
+
+
+def checked_dataset_path(value: str | Path, version: str = "exp3") -> Path:
     path = project_path(value)
-    expected = (PROJECT_ROOT / DEFAULT_DATASET).resolve()
+    expected = (PROJECT_ROOT / dataset_output(version)).resolve()
     if path != expected:
-        raise ValueError(f"Dataset output must be exactly {DEFAULT_DATASET}")
+        raise ValueError(f"Dataset output must be exactly {dataset_output(version)}")
     return path
 
 
-def checked_report_path(value: str | Path) -> Path:
+def checked_report_path(value: str | Path, version: str = "exp3") -> Path:
     path = project_path(value)
-    expected = (PROJECT_ROOT / DEFAULT_REPORT).resolve()
+    expected = (PROJECT_ROOT / report_output(version)).resolve()
     if path != expected:
-        raise ValueError(f"Report output must be exactly {DEFAULT_REPORT}")
+        raise ValueError(f"Report output must be exactly {report_output(version)}")
     return path
 
 
@@ -68,8 +80,9 @@ def preserve_json(path: Path, value) -> None:
     )
 
 
-def validate_frames(train, validation, preview_report) -> dict:
-    if preview_report.get("status") != "EXP3_DATA_PREVIEW_READY_NOT_WRITTEN":
+def validate_frames(train, validation, preview_report, version: str = "exp3") -> dict:
+    expected_status = f"{version.upper()}_DATA_PREVIEW_READY_NOT_WRITTEN"
+    if preview_report.get("status") != expected_status:
         raise ValueError("Exp3 preview is not approved for a dataset build")
     if len(train) != preview_report.get("planned_rows"):
         raise ValueError("Built train size differs from the approved preview")
@@ -102,23 +115,24 @@ def validate_frames(train, validation, preview_report) -> dict:
 
 
 def run(args) -> dict:
-    preview_path = project_path(args.preview)
+    version = args.version
+    preview_path = project_path(args.preview or preview.preview_output(version))
     if not preview_path.is_file():
         raise FileNotFoundError(preview_path)
     approved_preview = read_json(preview_path)
-    train, validation, recomputed_preview = preview.prepare_data(args.config)
+    train, validation, recomputed_preview = preview.prepare_data(args.config, version)
     if approved_preview != recomputed_preview:
         raise RuntimeError(
             "Current inputs/config no longer match exp3_data_preview.json; rerun preview first"
         )
-    validation_report = validate_frames(train, validation, approved_preview)
-    output = checked_dataset_path(args.output)
-    report_path = checked_report_path(args.report)
+    validation_report = validate_frames(train, validation, approved_preview, version)
+    output = checked_dataset_path(args.output or dataset_output(version), version)
+    report_path = checked_report_path(args.report or report_output(version), version)
     output.mkdir(parents=True, exist_ok=True)
     report_path.parent.mkdir(parents=True, exist_ok=True)
     manifest = {
         "schema_version": 1,
-        "experiment": "exp3",
+        "experiment": version,
         "source_model": approved_preview["source_model"],
         "preview_sha256": file_sha256(preview_path),
         "source_sha256": approved_preview["source_sha256"],
@@ -146,8 +160,8 @@ def run(args) -> dict:
         }
         report = {
             "schema_version": 1,
-            "status": "EXP3_DATA_BUILT_NOT_TRAINED",
-            "experiment": "exp3",
+            "status": f"{version.upper()}_DATA_BUILT_NOT_TRAINED",
+            "experiment": version,
             "source_model": approved_preview["source_model"],
             "training_started": False,
             "original_sources_modified": False,
@@ -174,7 +188,7 @@ def run(args) -> dict:
         }
         preserve_json(report_path, report)
     print(
-        f"EXP3_DATA_BUILT_NOT_TRAINED: train={len(train)} "
+        f"{version.upper()}_DATA_BUILT_NOT_TRAINED: train={len(train)} "
         f"validation={len(validation)} replacement_directions=0",
         flush=True,
     )
@@ -184,9 +198,12 @@ def run(args) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", default=DEFAULT_CONFIG)
-    parser.add_argument("--preview", default=DEFAULT_PREVIEW)
-    parser.add_argument("--output", default=DEFAULT_DATASET)
-    parser.add_argument("--report", default=DEFAULT_REPORT)
+    parser.add_argument(
+        "--version", choices=preview.SUPPORTED_VERSIONS, default="exp3"
+    )
+    parser.add_argument("--preview")
+    parser.add_argument("--output")
+    parser.add_argument("--report")
     run(parser.parse_args())
 
 

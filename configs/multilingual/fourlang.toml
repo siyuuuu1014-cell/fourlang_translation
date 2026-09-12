@@ -52,6 +52,19 @@ max_teacher_repeats = 1
 "zh-uz" = 8000
 "ru-zh" = 8000
 
+[balancing.exp3_v2]
+# Retargeted after the final Exp1-vs-Exp2 acceptance diagnostic.
+default_rows_per_direction = 2000
+teacher_ratio = 0.65
+max_teacher_repeats = 1
+
+[balancing.exp3_v2.rows_by_direction]
+"uz-zh" = 10000
+"zh-uz" = 8000
+"zh-ru" = 6000
+"uz-ru" = 4000
+"ru-uz" = 4000
+
 [training]
 batch_size = 8
 gradient_accumulation_steps = 4
@@ -79,6 +92,12 @@ direction_validation_samples = 200
 
 [training.exp3]
 # Inactive until the versioned Exp3 dataset and acceptance gate are approved.
+epochs = 1
+learning_rate = 0.000001
+checkpoint_interval_steps = 500
+direction_validation_samples = 200
+
+[training.exp3_v2]
 epochs = 1
 learning_rate = 0.000001
 checkpoint_interval_steps = 500

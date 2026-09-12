@@ -72,10 +72,15 @@ def test_build_is_immutable_and_reproducible(monkeypatch, tmp_path):
     preview_path = tmp_path / build.DEFAULT_PREVIEW
     preview_path.parent.mkdir(parents=True)
     preview_path.write_text(json.dumps(report), encoding="utf-8")
-    monkeypatch.setattr(build.preview, "prepare_data", lambda _: (train, validation, report))
+    monkeypatch.setattr(
+        build.preview,
+        "prepare_data",
+        lambda _config, _version: (train, validation, report),
+    )
     monkeypatch.setattr(build, "file_sha256", lambda path: f"hash:{Path(path).name}")
     args = Namespace(
         config="config.toml",
+        version="exp3",
         preview=build.DEFAULT_PREVIEW,
         output=build.DEFAULT_DATASET,
         report=build.DEFAULT_REPORT,

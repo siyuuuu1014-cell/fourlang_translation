@@ -27,6 +27,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--model", default=DEFAULT_MODEL)
     parser.add_argument("--output", default=DEFAULT_OUTPUT)
     parser.add_argument("--config", default="configs/multilingual/fourlang.toml")
+    parser.add_argument(
+        "--score-existing",
+        action="store_true",
+        help="Score an existing predictions file without loading the model.",
+    )
     return parser.parse_args()
 
 
@@ -45,6 +50,43 @@ def main() -> None:
         raise ValueError("Input row is missing a required field")
     if len({row["id"] for row in rows}) != len(rows):
         raise ValueError("Duplicate test IDs")
+
+    if args.score_existing:
+        results = diag.read_rows(output_path)
+        if len(results) != 110 or any(
+            not row.get("model_output_uz", "").strip() for row in results
+        ):
+            raise ValueError("Existing predictions are missing or incomplete")
+        expected = {row["id"]: row for row in rows}
+        if any(
+            row.get("source_zh") != expected.get(row.get("id"), {}).get("source_zh")
+            or row.get("reference_uz")
+            != expected.get(row.get("id"), {}).get("reference_uz")
+            for row in results
+        ):
+            raise ValueError("Existing predictions do not match the frozen test set")
+        automatic_metrics = diag.flow.metrics(
+            [row["model_output_uz"] for row in results],
+            [row["reference_uz"] for row in results],
+            "uz",
+        )
+        metrics_path = output_path.parent / "automatic_metrics.json"
+        diag.save_json(
+            metrics_path,
+            {
+                "status": "AUTOMATIC_METRICS_READY_SEMANTIC_REVIEW_PENDING",
+                "direction": "zh-uz",
+                "rows": len(results),
+                "automatic_metrics": automatic_metrics,
+                "semantic_scores": "PENDING_HUMAN_REVIEW",
+            },
+        )
+        print(
+            "ZH_UZ_EXISTING_PREDICTIONS_SCORED: "
+            f"rows={len(results)} bleu={automatic_metrics['bleu']:.4f} "
+            f"chrf2={automatic_metrics['chrf2']:.4f} metrics={metrics_path}"
+        )
+        return
 
     selected = diag.read_json(
         diag.PROJECT_ROOT / "results/model_selection/fourlang/selected_student.json"

@@ -1,0 +1,32 @@
+[pipeline]
+schema_version = 1
+id = "zh_uz_deepseek_teacher_v1"
+seed = 2026
+
+[input]
+candidates = "data/pipeline_v2/zh_uz_flores_like_v2/kd_candidates.jsonl"
+
+[output]
+root = "data/pipeline_v2/zh_uz_deepseek_teacher_v1"
+
+[pilot]
+rows_per_direction = 200
+
+[api]
+base_url = "https://api.deepseek.com"
+model = "deepseek-v4-pro"
+thinking = false
+batch_size = 10
+concurrency = 4
+timeout_seconds = 180
+max_retries = 4
+max_tokens = 4096
+temperature = 0.1
+prompt_version = "zh_uz_translation_v1"
+
+[quality]
+reject_source_copy = true
+require_arabic_numbers = true
+reject_excessive_repetition = true
+require_target_script_signal = true
+

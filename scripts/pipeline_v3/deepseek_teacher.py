@@ -315,10 +315,40 @@ def plan(config: dict[str, Any], full: bool) -> dict[str, Any]:
     }
 
 
-def generate(config: dict[str, Any], full: bool) -> dict[str, Any]:
+def with_runtime_overrides(
+    config: dict[str, Any],
+    *,
+    batch_size_override: int | None = None,
+    concurrency_override: int | None = None,
+) -> dict[str, Any]:
+    if batch_size_override is not None and batch_size_override < 1:
+        raise ValueError("batch_size_override must be at least 1")
+    if concurrency_override is not None and concurrency_override < 1:
+        raise ValueError("concurrency_override must be at least 1")
+    runtime_config = {**config, "api": dict(config["api"])}
+    if batch_size_override is not None:
+        runtime_config["api"]["batch_size"] = batch_size_override
+    if concurrency_override is not None:
+        runtime_config["api"]["concurrency"] = concurrency_override
+    return runtime_config
+
+
+def generate(
+    config: dict[str, Any],
+    full: bool,
+    *,
+    batch_size_override: int | None = None,
+    concurrency_override: int | None = None,
+) -> dict[str, Any]:
     api_key = os.environ.get("DEEPSEEK_API_KEY", "").strip()
     if not api_key:
         raise RuntimeError("DEEPSEEK_API_KEY is not set")
+    runtime_config = with_runtime_overrides(
+        config,
+        batch_size_override=batch_size_override,
+        concurrency_override=concurrency_override,
+    )
+
     input_path = project_path(config["input"]["candidates"])
     rows = read_jsonl(input_path)
     limit = None if full else int(config["pilot"]["rows_per_direction"])
@@ -337,7 +367,7 @@ def generate(config: dict[str, Any], full: bool) -> dict[str, Any]:
     completed = load_state(
         checkpoint_path, selected, manifest["generation_fingerprint"]
     )
-    batch_size = int(config["api"]["batch_size"])
+    batch_size = int(runtime_config["api"]["batch_size"])
     pending = [row for row in selected if row_key(row) not in completed]
     batches = []
     for current in DIRECTIONS:
@@ -349,16 +379,16 @@ def generate(config: dict[str, Any], full: bool) -> dict[str, Any]:
     if pending:
         print(
             f"pending={len(pending)} batches={len(batches)} "
-            f"concurrency={config['api']['concurrency']}",
+            f"concurrency={runtime_config['api']['concurrency']}",
             flush=True,
         )
     executor = concurrent.futures.ThreadPoolExecutor(
-        max_workers=int(config["api"]["concurrency"])
+        max_workers=int(runtime_config["api"]["concurrency"])
     )
     recoverable_errors: list[str] = []
     try:
         futures = {
-            executor.submit(request_batch, batch, config, api_key): batch
+            executor.submit(request_batch, batch, runtime_config, api_key): batch
             for batch in batches
         }
         for future in concurrent.futures.as_completed(futures):
@@ -454,9 +484,34 @@ def main() -> None:
         action="store_true",
         help="Explicitly generate every selected source instead of the 400-row pilot.",
     )
+    parser.add_argument(
+        "--batch-size",
+        type=int,
+        help=(
+            "Runtime request batch-size override. It preserves the existing "
+            "generation checkpoint."
+        ),
+    )
+    parser.add_argument(
+        "--concurrency",
+        type=int,
+        help=(
+            "Runtime request concurrency override. It preserves the existing "
+            "generation checkpoint."
+        ),
+    )
     args = parser.parse_args()
     config = load_config(args.config)
-    result = generate(config, args.full) if args.action == "generate" else plan(config, args.full)
+    result = (
+        generate(
+            config,
+            args.full,
+            batch_size_override=args.batch_size,
+            concurrency_override=args.concurrency,
+        )
+        if args.action == "generate"
+        else plan(config, args.full)
+    )
     print(json.dumps(result, ensure_ascii=False, indent=2))
 
 

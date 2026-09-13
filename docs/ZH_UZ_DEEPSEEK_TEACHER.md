@@ -30,6 +30,20 @@ contain ten same-direction rows and run with four workers. Completed responses
 are appended to `generations.jsonl`, so the same command resumes after network
 or process failure. Outputs are isolated under:
 
+If a few batches repeatedly fail with an incomplete/chunked network response,
+keep the same config and checkpoint but split only the pending work into single
+requests:
+
+```bash
+"$PY" scripts/pipeline_v3/deepseek_teacher.py generate \
+  --config "$CFG" \
+  --batch-size 1 \
+  --concurrency 1
+```
+
+These runtime-only overrides do not change the generation fingerprint. Existing
+completed rows are reused.
+
 ```text
 data/pipeline_v2/zh_uz_deepseek_teacher_v1/pilot/
 ```
@@ -49,4 +63,3 @@ Only after the pilot passes semantic review:
 
 `--full` is intentionally mandatory for the paid full run. It uses a separate
 checkpoint directory and cannot overwrite the pilot.
-

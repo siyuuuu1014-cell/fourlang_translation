@@ -17,6 +17,23 @@ def row(pair_id: str, source: str, target: str, text: str) -> dict:
 
 
 class DeepSeekTeacherTests(unittest.TestCase):
+    def test_runtime_transport_override_does_not_mutate_config(self):
+        config = {
+            "api": {"batch_size": 10, "concurrency": 4},
+            "quality": {"require_arabic_numbers": True},
+        }
+        runtime_config = teacher.with_runtime_overrides(
+            config, batch_size_override=1, concurrency_override=1
+        )
+
+        self.assertEqual(config["api"], {"batch_size": 10, "concurrency": 4})
+        self.assertNotEqual(runtime_config["api"], config["api"])
+
+    def test_runtime_transport_override_rejects_zero(self):
+        config = {"api": {"batch_size": 10, "concurrency": 4}}
+        with self.assertRaisesRegex(ValueError, "batch_size_override"):
+            teacher.with_runtime_overrides(config, batch_size_override=0)
+
     def test_pilot_selection_is_balanced_and_deterministic(self):
         rows = [
             row(f"zh-{index}", "zh", "uz", f"中文 {index}") for index in range(5)

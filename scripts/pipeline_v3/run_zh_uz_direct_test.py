@@ -82,6 +82,11 @@ def main() -> None:
         }
         for row, prediction in zip(rows, predictions, strict=True)
     ]
+    automatic_metrics = diag.flow.metrics(
+        predictions,
+        [row["reference_uz"] for row in rows],
+        "uz",
+    )
     output_path.parent.mkdir(parents=True, exist_ok=True)
     diag.save_jsonl(output_path, results)
     diag.save_json(
@@ -93,11 +98,21 @@ def main() -> None:
             "model": str(model_path),
             "input": str(input_path),
             "predictions": str(output_path),
+            "automatic_metrics": automatic_metrics,
+            "semantic_scores": "PENDING_HUMAN_REVIEW",
+            "metric_warning": (
+                "BLEU/chrF2 compare against one AI-authored reference and do not "
+                "determine whether a semantically valid paraphrase passes."
+            ),
             "training_started": False,
             "training_data_written": False,
         },
     )
-    print(f"ZH_UZ_DIRECT_TEST_READY: rows={len(results)} output={output_path}")
+    print(
+        "ZH_UZ_DIRECT_TEST_READY: "
+        f"rows={len(results)} bleu={automatic_metrics['bleu']:.4f} "
+        f"chrf2={automatic_metrics['chrf2']:.4f} output={output_path}"
+    )
 
 
 if __name__ == "__main__":

@@ -49,6 +49,11 @@ def config() -> dict:
                 "learning_rate": 5e-6,
                 "kd_train": "relaxed.jsonl",
             },
+            "flores_relaxed_8k_ep3": {
+                "learning_rate": 5e-6,
+                "epochs": 3,
+                "kd_train": "relaxed.jsonl",
+            },
         },
         "pairs": [
             {
@@ -227,7 +232,26 @@ class WeakPairAblationTests(unittest.TestCase):
                 ablation.train(cfg, "zh_uz", "full_native_lr2e6")
         runtime_config = trainer.call_args.args[7]
         self.assertEqual(runtime_config["training"]["exp2"]["learning_rate"], 2e-6)
+        self.assertEqual(runtime_config["training"]["exp2"]["epochs"], 2)
         self.assertEqual(cfg["training"]["exp2"]["learning_rate"], 5e-6)
+
+    def test_ep3_variant_changes_only_epoch_count(self):
+        cfg = config()
+        pair = cfg["pairs"][0]
+        prepared = [row("zh", "uz", 1), row("uz", "zh", 2)]
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / pair["exp1_model"]).mkdir(parents=True)
+            with mock.patch.object(ablation, "PROJECT_ROOT", root), mock.patch.object(
+                ablation, "verify_prepared"
+            ), mock.patch.object(ablation, "model_files"), mock.patch.object(
+                ablation, "_read_jsonl", return_value=prepared
+            ), mock.patch.object(ablation, "train_model", return_value={}) as trainer:
+                ablation.train(cfg, "zh_uz", "flores_relaxed_8k_ep3")
+        runtime_config = trainer.call_args.args[7]
+        self.assertEqual(runtime_config["training"]["exp2"]["epochs"], 3)
+        self.assertEqual(runtime_config["training"]["exp2"]["learning_rate"], 5e-6)
+        self.assertEqual(cfg["training"]["exp2"]["epochs"], 2)
 
     def test_compare_uses_selected_baseline_and_chrf_thresholds(self):
         cfg = config()

@@ -65,6 +65,11 @@ learning_rate = 0.000002
 learning_rate = 0.000005
 kd_train = "data/distillation/zh_uz/flores_relaxed_8k/train.jsonl"
 
+[variants.flores_relaxed_8k_ep3]
+learning_rate = 0.000005
+epochs = 3
+kd_train = "data/distillation/zh_uz/flores_relaxed_8k/train.jsonl"
+
 [[pairs]]
 id = "zh_uz"
 languages = ["zh", "uz"]

@@ -85,3 +85,35 @@ results/evaluation/weak_pair_ablation/zh_uz/flores_relaxed_8k.json
 
 Make the decision on FLORES `dev`. Keep `devtest` untouched until a final
 candidate has been selected.
+
+## 4. Isolated three-epoch follow-up
+
+Run this only after the two-epoch model has been evaluated. It starts again
+from the same Exp1 model and uses the same prepared source data, learning rate,
+batch size, seed, and optimizer. Only the maximum epoch count changes from two
+to three, and all artifacts remain separate.
+
+```bash
+"$PY" scripts/pipeline_v3/weak_pair_ablation.py prepare \
+  --config "$TRAIN_CFG" \
+  --pair zh_uz \
+  --variant flores_relaxed_8k_ep3
+
+"$PY" scripts/pipeline_v3/weak_pair_ablation.py train \
+  --config "$TRAIN_CFG" \
+  --pair zh_uz \
+  --variant flores_relaxed_8k_ep3
+
+"$PY" scripts/pipeline_v3/weak_pair_ablation.py evaluate \
+  --config "$TRAIN_CFG" \
+  --pair zh_uz \
+  --variant flores_relaxed_8k_ep3
+
+"$PY" scripts/pipeline_v3/weak_pair_ablation.py compare \
+  --config "$TRAIN_CFG" \
+  --pair zh_uz
+```
+
+The three-epoch model is stored under
+`results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/` and never
+overwrites the two-epoch run.

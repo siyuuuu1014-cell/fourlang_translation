@@ -39,6 +39,7 @@ TRAIN_VARIANTS = (
     "full_weighted_60_40",
     "full_native_lr2e6",
     "flores_relaxed_8k",
+    "flores_relaxed_8k_ep3",
 )
 BASELINE_VARIANTS = ("baseline_exp1", "baseline_exp2")
 ALL_VARIANTS = BASELINE_VARIANTS + TRAIN_VARIANTS
@@ -471,6 +472,11 @@ def train(
                 "learning_rate": float(
                     variant_settings(config, variant)["learning_rate"]
                 ),
+                "epochs": int(
+                    variant_settings(config, variant).get(
+                        "epochs", config["training"]["exp2"]["epochs"]
+                    )
+                ),
             },
         },
     }
@@ -575,6 +581,7 @@ def compare(config: dict[str, Any], pair_id: str) -> dict[str, Any]:
         ("full_weighted_60_40", None),
         ("full_native_lr2e6", None),
         ("flores_relaxed_8k", None),
+        ("flores_relaxed_8k_ep3", None),
     ]
     variants.extend(("directional_full", item) for item in pair_directions(pair))
     rows: list[dict[str, Any]] = []
@@ -646,6 +653,7 @@ def status(config: dict[str, Any]) -> dict[str, Any]:
             ("full_weighted_60_40", None),
             ("full_native_lr2e6", None),
             ("flores_relaxed_8k", None),
+            ("flores_relaxed_8k_ep3", None),
             *(('directional_full', item) for item in pair_directions(pair)),
         ):
             rows.append(

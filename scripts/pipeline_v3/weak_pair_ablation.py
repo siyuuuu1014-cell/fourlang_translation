@@ -112,6 +112,15 @@ def evaluation_path(pair_id: str, variant: str, direction: str | None = None) ->
     )
 
 
+def final_evaluation_path(pair_id: str) -> Path:
+    return (
+        PROJECT_ROOT
+        / "results/evaluation/weak_pair_ablation"
+        / pair_id
+        / "final_devtest.json"
+    )
+
+
 def _candidate(config: dict[str, Any], path: Path | None = None) -> dict[str, Any]:
     candidate = {
         "id": config["experiment"]["backbone"],
@@ -504,13 +513,13 @@ def train(
     return payload
 
 
-def evaluate(
+def _score_model(
     config: dict[str, Any],
-    pair_id: str,
+    pair: dict[str, Any],
     variant: str,
-    direction: str | None = None,
-) -> dict[str, Any]:
-    pair = pair_config(config, pair_id)
+    direction: str | None,
+    benchmark: pd.DataFrame,
+) -> tuple[Path, dict[str, Any]]:
     if variant == "directional_full":
         direction = validate_direction(pair, direction)
         directions = (direction,)
@@ -518,10 +527,9 @@ def evaluate(
         if direction is not None:
             raise ValueError(f"{variant} does not accept --direction.")
         directions = pair_directions(pair)
-    path = model_path(config, pair_id, variant, direction)
+    path = model_path(config, pair["id"], variant, direction)
     model_files(path)
     candidate = _candidate(config, path)
-    benchmark = pd.read_parquet(project_path(config["benchmarks"]["flores_dev"]))
     tokenizer, model = load_model(candidate, *pair["languages"])
     scores: dict[str, Any] = {}
     try:
@@ -544,6 +552,18 @@ def evaluate(
         gc.collect()
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
+    return path, scores
+
+
+def evaluate(
+    config: dict[str, Any],
+    pair_id: str,
+    variant: str,
+    direction: str | None = None,
+) -> dict[str, Any]:
+    pair = pair_config(config, pair_id)
+    benchmark = pd.read_parquet(project_path(config["benchmarks"]["flores_dev"]))
+    path, scores = _score_model(config, pair, variant, direction, benchmark)
     payload = {
         "schema_version": 1,
         "pair": pair_id,
@@ -555,6 +575,107 @@ def evaluate(
     }
     write_json(evaluation_path(pair_id, variant, direction), payload)
     return payload
+
+
+def final_evaluate(config: dict[str, Any], pair_id: str) -> dict[str, Any]:
+    """Evaluate one dev-selected candidate once on protected FLORES devtest."""
+    output = final_evaluation_path(pair_id)
+    if output.is_file():
+        return read_json(output)
+
+    pair = pair_config(config, pair_id)
+    selection = config.get("final_selection", {}).get(pair_id)
+    if not isinstance(selection, dict):
+        raise RuntimeError(f"No frozen final_selection.{pair_id} configuration.")
+    baseline_variant = str(selection.get("baseline_variant", ""))
+    candidate_variant = str(selection.get("candidate_variant", ""))
+    if baseline_variant not in BASELINE_VARIANTS:
+        raise RuntimeError(f"Invalid final baseline variant: {baseline_variant!r}.")
+    if candidate_variant not in TRAIN_VARIANTS:
+        raise RuntimeError(f"Invalid final candidate variant: {candidate_variant!r}.")
+
+    comparison_path = (
+        PROJECT_ROOT
+        / "results/evaluation/weak_pair_ablation"
+        / pair_id
+        / "comparison.json"
+    )
+    if not comparison_path.is_file():
+        raise RuntimeError(f"Run the FLORES dev comparison before finalizing {pair_id}.")
+    comparison = read_json(comparison_path)
+    if comparison.get("benchmark") != "flores_dev":
+        raise RuntimeError("Final selection evidence must come from FLORES dev.")
+    if comparison.get("baseline_variant") != baseline_variant:
+        raise RuntimeError("Frozen baseline does not match the FLORES dev comparison.")
+    winners = comparison.get("winners", {})
+    mismatches = [
+        direction
+        for direction in pair_directions(pair)
+        if winners.get(direction, {}).get("variant") != candidate_variant
+    ]
+    if mismatches:
+        raise RuntimeError(
+            f"{candidate_variant} is not the FLORES dev winner for {mismatches}."
+        )
+
+    benchmark_path = project_path(config["benchmarks"]["protected_devtest"])
+    benchmark = pd.read_parquet(benchmark_path)
+    baseline_model, baseline_scores = _score_model(
+        config, pair, baseline_variant, None, benchmark
+    )
+    candidate_model, candidate_scores = _score_model(
+        config, pair, candidate_variant, None, benchmark
+    )
+    checks = []
+    for direction in pair_directions(pair):
+        metric_checks = {
+            metric: float(candidate_scores[direction][metric])
+            >= float(baseline_scores[direction][metric])
+            for metric in ("bleu", "chrf2")
+        }
+        checks.append(
+            {
+                "direction": direction,
+                "passed": all(metric_checks.values()),
+                "metric_checks": metric_checks,
+                "baseline": baseline_scores[direction],
+                "candidate": candidate_scores[direction],
+                "delta_bleu": float(candidate_scores[direction]["bleu"])
+                - float(baseline_scores[direction]["bleu"]),
+                "delta_chrf2": float(candidate_scores[direction]["chrf2"])
+                - float(baseline_scores[direction]["chrf2"]),
+            }
+        )
+    report = {
+        "schema_version": 1,
+        "status": "PASS" if all(item["passed"] for item in checks) else "FAIL",
+        "pair": pair_id,
+        "benchmark": "flores_devtest",
+        "final_evaluation_policy": "frozen_dev_winner_evaluated_once",
+        "selection_evidence": {
+            "benchmark": "flores_dev",
+            "comparison": str(comparison_path),
+            "comparison_sha256": file_sha256(comparison_path),
+            "winner_in_both_directions": candidate_variant,
+        },
+        "benchmark_evidence": {
+            "path": str(benchmark_path),
+            "sha256": file_sha256(benchmark_path),
+        },
+        "baseline": {
+            "variant": baseline_variant,
+            "model_path": str(baseline_model),
+            "scores": baseline_scores,
+        },
+        "candidate": {
+            "variant": candidate_variant,
+            "model_path": str(candidate_model),
+            "scores": candidate_scores,
+        },
+        "directions": checks,
+    }
+    write_json(output, report)
+    return report
 
 
 def _signal(delta: float, noise_floor: float, meaningful: float) -> str:
@@ -672,7 +793,14 @@ def status(config: dict[str, Any]) -> dict[str, Any]:
                     ).is_file(),
                 }
             )
-    return {"experiment": config["experiment"]["id"], "runs": rows}
+    return {
+        "experiment": config["experiment"]["id"],
+        "runs": rows,
+        "final_devtest": {
+            pair_id: final_evaluation_path(pair_id).is_file()
+            for pair_id in config.get("final_selection", {})
+        },
+    }
 
 
 def main() -> None:
@@ -680,7 +808,16 @@ def main() -> None:
         description="Weak-pair full-data and directional student ablations."
     )
     parser.add_argument(
-        "action", choices=("validate", "status", "prepare", "train", "evaluate", "compare")
+        "action",
+        choices=(
+            "validate",
+            "status",
+            "prepare",
+            "train",
+            "evaluate",
+            "compare",
+            "final_evaluate",
+        ),
     )
     parser.add_argument(
         "--config", default="configs/specialists/weak_pair_ablation.toml"
@@ -693,8 +830,8 @@ def main() -> None:
     if args.action in {"prepare", "train", "evaluate"}:
         if not args.pair or not args.variant:
             parser.error(f"{args.action} requires --pair and --variant")
-    if args.action == "compare" and not args.pair:
-        parser.error("compare requires --pair")
+    if args.action in {"compare", "final_evaluate"} and not args.pair:
+        parser.error(f"{args.action} requires --pair")
     if args.variant == "directional_full" and not args.direction:
         parser.error("directional_full requires --direction")
     if args.variant != "directional_full" and args.direction:
@@ -710,6 +847,8 @@ def main() -> None:
         result = train(config, args.pair, args.variant, args.direction)
     elif args.action == "evaluate":
         result = evaluate(config, args.pair, args.variant, args.direction)
+    elif args.action == "final_evaluate":
+        result = final_evaluate(config, args.pair)
     else:
         result = compare(config, args.pair)
     print(json.dumps(result, ensure_ascii=False, indent=2))

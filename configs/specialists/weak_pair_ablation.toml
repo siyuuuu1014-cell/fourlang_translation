@@ -48,6 +48,12 @@ max_new_tokens = 256
 noise_floor_chrf2 = 0.30
 meaningful_gain_chrf2 = 1.00
 
+# Frozen only after FLORES dev selected the same winner in both directions.
+# final_evaluate refuses any candidate that does not match comparison.json.
+[final_selection.zh_uz]
+baseline_variant = "baseline_exp1"
+candidate_variant = "flores_relaxed_8k_ep3"
+
 [variants.bidir_full]
 learning_rate = 0.000005
 

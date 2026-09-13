@@ -117,3 +117,21 @@ to three, and all artifacts remain separate.
 The three-epoch model is stored under
 `results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/` and never
 overwrites the two-epoch run.
+
+## 5. One-time protected final evaluation
+
+After the FLORES `dev` comparison selects `flores_relaxed_8k_ep3` in both
+directions, run the frozen final evaluation exactly once:
+
+```bash
+"$PY" scripts/pipeline_v3/weak_pair_ablation.py final_evaluate \
+  --config "$TRAIN_CFG" \
+  --pair zh_uz
+```
+
+The command refuses a candidate that is not the recorded `dev` winner. It
+evaluates the configured Exp1 baseline and frozen candidate on FLORES
+`devtest`, writes the per-direction BLEU/chrF2 gate to
+`results/evaluation/weak_pair_ablation/zh_uz/final_devtest.json`, and reuses
+that immutable report without loading either model if invoked again. Do not
+change the candidate or tune training after viewing this report.

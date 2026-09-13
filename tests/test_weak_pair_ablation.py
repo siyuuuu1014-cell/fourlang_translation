@@ -37,6 +37,12 @@ def config() -> dict:
             "noise_floor_chrf2": 0.3,
             "meaningful_gain_chrf2": 1.0,
         },
+        "final_selection": {
+            "zh_uz": {
+                "baseline_variant": "baseline_exp1",
+                "candidate_variant": "flores_relaxed_8k_ep3",
+            }
+        },
         "variants": {
             "bidir_full": {"learning_rate": 5e-6},
             "directional_full": {"learning_rate": 5e-6},
@@ -294,6 +300,69 @@ class WeakPairAblationTests(unittest.TestCase):
             if item["variant"] == "bidir_full" and item["direction"] == "uz-zh"
         ][0]
         self.assertEqual(regressed["signal"], "regression")
+
+    def test_final_evaluate_requires_candidate_to_win_dev_both_directions(self):
+        cfg = config()
+        comparison = {
+            "benchmark": "flores_dev",
+            "baseline_variant": "baseline_exp1",
+            "winners": {
+                "zh-uz": {"variant": "flores_relaxed_8k_ep3"},
+                "uz-zh": {"variant": "baseline_exp1"},
+            },
+        }
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            target = root / "results/evaluation/weak_pair_ablation/zh_uz"
+            target.mkdir(parents=True)
+            (target / "comparison.json").write_text(json.dumps(comparison))
+            with mock.patch.object(ablation, "PROJECT_ROOT", root):
+                with self.assertRaisesRegex(RuntimeError, "not the FLORES dev winner"):
+                    ablation.final_evaluate(cfg, "zh_uz")
+
+    def test_final_evaluate_scores_frozen_candidate_once_and_writes_gate(self):
+        cfg = config()
+        comparison = {
+            "benchmark": "flores_dev",
+            "baseline_variant": "baseline_exp1",
+            "winners": {
+                "zh-uz": {"variant": "flores_relaxed_8k_ep3"},
+                "uz-zh": {"variant": "flores_relaxed_8k_ep3"},
+            },
+        }
+        benchmark = pd.DataFrame({"zh": ["z"], "uz": ["u"]})
+        score_values = [
+            ({"bleu": 4.0, "chrf2": 30.0, "samples": 1}),
+            ({"bleu": 18.0, "chrf2": 14.0, "samples": 1}),
+            ({"bleu": 5.0, "chrf2": 31.0, "samples": 1}),
+            ({"bleu": 19.0, "chrf2": 14.5, "samples": 1}),
+        ]
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            target = root / "results/evaluation/weak_pair_ablation/zh_uz"
+            target.mkdir(parents=True)
+            comparison_path = target / "comparison.json"
+            comparison_path.write_text(json.dumps(comparison))
+            (root / "devtest.parquet").write_text("protected")
+            with mock.patch.object(ablation, "PROJECT_ROOT", root), mock.patch.object(
+                ablation.pd, "read_parquet", return_value=benchmark
+            ) as reader, mock.patch.object(
+                ablation, "model_files"
+            ), mock.patch.object(
+                ablation, "load_model", return_value=(mock.Mock(), mock.Mock())
+            ) as loader, mock.patch.object(
+                ablation, "translate", return_value=["prediction"]
+            ), mock.patch.object(
+                ablation, "metrics", side_effect=score_values
+            ):
+                report = ablation.final_evaluate(cfg, "zh_uz")
+                reused = ablation.final_evaluate(cfg, "zh_uz")
+        self.assertEqual(report["status"], "PASS")
+        self.assertEqual(report["benchmark"], "flores_devtest")
+        self.assertEqual(report, reused)
+        self.assertEqual(loader.call_count, 2)
+        reader.assert_called_once_with(root / "devtest.parquet")
+        self.assertTrue(all(item["passed"] for item in report["directions"]))
 
 
 if __name__ == "__main__":

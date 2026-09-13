@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import gc
+import json
 import sys
 from pathlib import Path
 
@@ -25,6 +26,11 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--input", default=DEFAULT_INPUT)
     parser.add_argument("--model", default=DEFAULT_MODEL)
+    parser.add_argument(
+        "--family",
+        choices=("small100", "m2m100", "nllb", "madlad", "transformers"),
+        help="Override model-family dispatch when evaluating a non-default model.",
+    )
     parser.add_argument("--output", default=DEFAULT_OUTPUT)
     parser.add_argument("--config", default="configs/multilingual/fourlang.toml")
     parser.add_argument(
@@ -33,6 +39,20 @@ def parse_args() -> argparse.Namespace:
         help="Score an existing predictions file without loading the model.",
     )
     return parser.parse_args()
+
+
+def resolve_model_family(
+    model_path: Path, selected_family: str, override: str | None = None
+) -> str:
+    if override:
+        return override
+    tokenizer_config = model_path / "tokenizer_config.json"
+    if tokenizer_config.is_file():
+        payload = json.loads(tokenizer_config.read_text(encoding="utf-8"))
+        tokenizer_class = str(payload.get("tokenizer_class", "")).lower()
+        if tokenizer_class == "small100tokenizer":
+            return "small100"
+    return selected_family
 
 
 def main() -> None:
@@ -91,8 +111,12 @@ def main() -> None:
     selected = diag.read_json(
         diag.PROJECT_ROOT / "results/model_selection/fourlang/selected_student.json"
     )
+    family = resolve_model_family(
+        model_path, str(selected["candidate"]["family"]), args.family
+    )
     candidate = {
         **selected["candidate"],
+        "family": family,
         "path": str(model_path),
         "require_local_artifact": True,
     }
@@ -138,6 +162,7 @@ def main() -> None:
             "direction": "zh-uz",
             "rows": len(results),
             "model": str(model_path),
+            "model_family": family,
             "input": str(input_path),
             "predictions": str(output_path),
             "automatic_metrics": automatic_metrics,

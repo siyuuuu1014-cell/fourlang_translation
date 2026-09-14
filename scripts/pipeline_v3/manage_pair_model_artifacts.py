@@ -139,12 +139,23 @@ def main() -> int:
     manifest = load_manifest(args.manifest)
     inventory = model_inventory(manifest, PROJECT_ROOT)
     if args.action == "inventory":
+        legacy = []
+        for item in manifest.get("legacy_retained", []):
+            path = resolve_inside(PROJECT_ROOT, item["model_path"])
+            legacy.append(
+                {
+                    **item,
+                    "available": path.is_dir(),
+                    "bytes": size_bytes(path),
+                }
+            )
         result = {
             "schema_version": 1,
             "suite": manifest["suite"],
             "protected_shared_model": True,
             "models": inventory,
             "active_follow_up": manifest["active_follow_up"],
+            "legacy_retained": legacy,
         }
     else:
         plan = cleanup_plan(manifest, PROJECT_ROOT)

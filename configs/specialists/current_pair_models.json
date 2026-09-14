@@ -131,6 +131,20 @@
       "data_root": "data/pipeline_v2/zh_uz_deepseek_teacher_v1"
     }
   ],
+  "legacy_retained": [
+    {
+      "id": "en_zh_marian_v1",
+      "direction": "en-zh",
+      "model_path": "models/final_specialists/en_zh_v1",
+      "reason": "Still referenced by models/model_registry.json; retain until a formal route migration."
+    },
+    {
+      "id": "zh_en_marian_v1",
+      "direction": "zh-en",
+      "model_path": "models/final_specialists/zh_en_v1",
+      "reason": "Still referenced by models/model_registry.json; retain until a formal route migration."
+    }
+  ],
   "protected_prefixes": [
     "configs/multilingual",
     "configs/pipelines/fourlang.toml",
@@ -139,6 +153,8 @@
     "results/student/fourlang",
     "results/evaluation/fourlang",
     "models/final_multilingual",
+    "models/final_specialists/en_zh_v1",
+    "models/final_specialists/zh_en_v1",
     "data/pipeline_v2/zh_uz_deepseek_teacher_v1"
   ],
   "safe_delete": [

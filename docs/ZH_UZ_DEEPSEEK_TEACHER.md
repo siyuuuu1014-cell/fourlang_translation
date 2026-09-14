@@ -44,6 +44,21 @@ requests:
 These runtime-only overrides do not change the generation fingerprint. Existing
 completed rows are reused.
 
+Re-audit completed generations after numeric/source-filter improvements without
+calling the API or modifying the original Teacher output:
+
+```bash
+"$PY" scripts/pipeline_v3/deepseek_teacher.py reaudit --config "$CFG"
+python -m json.tool \
+  data/pipeline_v2/zh_uz_deepseek_teacher_v1/pilot/reaudit_report.json
+```
+
+The revised numeric check accepts equivalent forms such as decimal comma versus
+decimal point, Chinese `万`/`亿` versus `million`, and numeric months versus Uzbek
+month names. It still rejects missing values and changed magnitudes. The source
+filter removes high-confidence gambling/SEO contamination only from future
+`--full` selection; the completed pilot remains intact for audit evidence.
+
 ```text
 data/pipeline_v2/zh_uz_deepseek_teacher_v1/pilot/
 ```

@@ -12,6 +12,8 @@ import random
 import re
 import sys
 import time
+from collections import Counter
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any
 
@@ -34,6 +36,82 @@ CYRILLIC_RE = re.compile(r"[\u0400-\u04ff]")
 HAN_RE = re.compile(r"[\u3400-\u9fff]")
 LATIN_RE = re.compile(r"[A-Za-z]")
 REPEATED_TOKEN_RE = re.compile(r"(?i)(?:^|\s)([^\s]+)(?:\s+\1){3,}(?:\s|$)")
+SCALED_RANGE_RE = re.compile(
+    r"(\d+(?:[.,]\d+)?)\s*[-–—~至到]\s*(\d+(?:[.,]\d+)?)\s*"
+    r"-?\s*(千万|百万|十万|万|亿|ming|million|milliard)",
+    re.IGNORECASE,
+)
+CHINESE_NUMBER_RE = re.compile(r"[零〇一二两三四五六七八九十百千万亿]+")
+CHINESE_SCALE_AFTER_ARABIC_RE = re.compile(r"\s*(?:多\s*)?(千万|百万|十万|万|亿)")
+LATIN_SCALE_AFTER_ARABIC_RE = re.compile(
+    r"\s*(ming|million|milliard)(?:dan|ga|ni|ning|lik|lar)?\b",
+    re.IGNORECASE,
+)
+UZ_MONTHS = {
+    "yanvar": 1,
+    "fevral": 2,
+    "mart": 3,
+    "aprel": 4,
+    "may": 5,
+    "iyun": 6,
+    "iyul": 7,
+    "avgust": 8,
+    "sentabr": 9,
+    "sentyabr": 9,
+    "oktabr": 10,
+    "oktyabr": 10,
+    "noyabr": 11,
+    "dekabr": 12,
+}
+UZ_NUMBER_PHRASES = {
+    "o'n ikkinchi": 12,
+    "o'n birinchi": 11,
+    "birinchi": 1,
+    "ikkinchi": 2,
+    "uchinchi": 3,
+    "to'rtinchi": 4,
+    "beshinchi": 5,
+    "oltinchi": 6,
+    "yettinchi": 7,
+    "sakkizinchi": 8,
+    "to'qqizinchi": 9,
+    "o'ninchi": 10,
+    "yigirma": 20,
+    "qirq": 40,
+    "to'qqiz": 9,
+    "sakkiz": 8,
+    "yetti": 7,
+    "olti": 6,
+    "besh": 5,
+    "to'rt": 4,
+    "uch": 3,
+    "ikki": 2,
+    "bir": 1,
+}
+SOURCE_SPAM_PATTERNS = (
+    (
+        "GAMBLING_OR_BETTING",
+        re.compile(
+            r"(?i)(?:kazino|qimor|mostbet|bukmeker|pul\s+tikish|"
+            r"tikish\s+(?:bozori|sayti|o'yin)|slot\s+(?:video\s+)?o'yin|"
+            r"赌场|博彩|赌博|下注|投注|老虎机|真人娱乐场|幸运\s*8|六合彩)"
+        ),
+    ),
+    (
+        "SEO_OR_PROMO_PREFIX",
+        re.compile(r"(?i)^\s*(?:top\s*\d+|澳洲幸运\s*\d+公式)"),
+    ),
+)
+SCALE_VALUES = {
+    "万": Decimal(10_000),
+    "十万": Decimal(100_000),
+    "百万": Decimal(1_000_000),
+    "千万": Decimal(10_000_000),
+    "亿": Decimal(100_000_000),
+    "ming": Decimal(1_000),
+    "million": Decimal(1_000_000),
+    "milliard": Decimal(1_000_000_000),
+}
 
 SYSTEM_PROMPT = """You are a professional Chinese-Uzbek translator creating clean
 knowledge-distillation data. Translate every item faithfully and completely. Preserve the
@@ -79,6 +157,179 @@ def direction(row: dict[str, Any]) -> str:
     return f"{row['src_lang']}-{row['tgt_lang']}"
 
 
+def _decimal_key(value: Decimal) -> str:
+    normalized = value.normalize()
+    return format(normalized, "f")
+
+
+def _plain_number(token: str) -> Decimal | None:
+    token = token.strip()
+    if not token:
+        return None
+    if token.count(":") or token.count(".") + token.count(",") > 1:
+        return None
+    if "," in token:
+        left, right = token.split(",", maxsplit=1)
+        token = left + right if len(right) == 3 else left + "." + right
+    try:
+        return Decimal(token)
+    except InvalidOperation:
+        return None
+
+
+def _token_values(token: str) -> list[Decimal]:
+    if token.count(":") or token.count(".") + token.count(",") > 1:
+        values = []
+        for part in re.split(r"[.,:]", token):
+            if part:
+                values.append(Decimal(part))
+        return values
+    value = _plain_number(token)
+    return [value] if value is not None else []
+
+
+def _chinese_integer(token: str) -> int | None:
+    digits = {
+        "零": 0,
+        "〇": 0,
+        "一": 1,
+        "二": 2,
+        "两": 2,
+        "三": 3,
+        "四": 4,
+        "五": 5,
+        "六": 6,
+        "七": 7,
+        "八": 8,
+        "九": 9,
+    }
+    units = {"十": 10, "百": 100, "千": 1_000, "万": 10_000, "亿": 100_000_000}
+    if all(character in digits for character in token):
+        return int("".join(str(digits[character]) for character in token))
+    total = section = number = 0
+    for character in token:
+        if character in digits:
+            number = digits[character]
+            continue
+        unit = units.get(character)
+        if unit is None:
+            return None
+        if unit < 10_000:
+            section += (number or 1) * unit
+        else:
+            section = (section + number) * unit
+            total += section
+            section = 0
+        number = 0
+    return total + section + number
+
+
+def _scaled_number_matches(text: str) -> tuple[list[Decimal], list[tuple[int, int]]]:
+    values: list[Decimal] = []
+    occupied: list[tuple[int, int]] = []
+    for match in SCALED_RANGE_RE.finditer(text):
+        first = _plain_number(match.group(1))
+        second = _plain_number(match.group(2))
+        scale = SCALE_VALUES[match.group(3).casefold()]
+        if first is not None and second is not None:
+            values.extend((first * scale, second * scale))
+            occupied.append(match.span())
+    return values, occupied
+
+
+def _overlaps(span: tuple[int, int], occupied: list[tuple[int, int]]) -> bool:
+    return any(span[0] < end and start < span[1] for start, end in occupied)
+
+
+def numeric_values(
+    text: str, language: str, *, include_language_words: bool = True
+) -> Counter[str]:
+    values, occupied = _scaled_number_matches(text)
+    for match in ARABIC_NUMBER_RE.finditer(text):
+        if _overlaps(match.span(), occupied):
+            continue
+        token_values = _token_values(match.group())
+        suffix = text[match.end() : match.end() + 20]
+        scale_match = (
+            CHINESE_SCALE_AFTER_ARABIC_RE.match(suffix)
+            if language == "zh"
+            else LATIN_SCALE_AFTER_ARABIC_RE.match(suffix)
+        )
+        if scale_match and len(token_values) == 1:
+            scale = SCALE_VALUES[scale_match.group(1).casefold()]
+            token_values = [token_values[0] * scale]
+            occupied.append((match.start(), match.end() + scale_match.end()))
+        values.extend(token_values)
+    if language == "zh" and include_language_words:
+        for match in CHINESE_NUMBER_RE.finditer(text):
+            if _overlaps(match.span(), occupied):
+                continue
+            parsed = _chinese_integer(match.group())
+            if parsed is not None:
+                values.append(Decimal(parsed))
+        if "元旦" in text:
+            values.append(Decimal(1))
+    elif language == "uz" and include_language_words:
+        lowered = text.casefold()
+        for month, value in UZ_MONTHS.items():
+            values.extend(
+                Decimal(value)
+                for _ in re.finditer(
+                    rf"\b{re.escape(month)}(?:ning|dan|ida|iga|da|de|ga|ni)?\b",
+                    lowered,
+                )
+            )
+        for phrase, value in UZ_NUMBER_PHRASES.items():
+            pattern = rf"(?<![\w']){re.escape(phrase)}(?:ta|tasi)?(?![\w'])"
+            values.extend(Decimal(value) for _ in re.finditer(pattern, lowered))
+        values.extend(
+            Decimal(20) for _ in re.finditer(r"\bXX\s+asr", text, re.IGNORECASE)
+        )
+    return Counter(_decimal_key(value) for value in values)
+
+
+def numbers_preserved(
+    source: str, target: str, source_lang: str, target_lang: str
+) -> bool:
+    # Preserve the original check's high-precision scope: explicit Arabic
+    # numbers in the source are mandatory. Language words are parsed only in
+    # the translation so equivalent forms such as 6 -> "oltita" are accepted.
+    required = numeric_values(source, source_lang, include_language_words=False)
+    available = numeric_values(target, target_lang)
+    if re.search(r"(?i)\b(?:km|cm|mm|m)2\b", source) and "平方" in target:
+        required["2"] -= 1
+    if re.search(r"(?i)\b(?:km|cm|mm|m)3\b", source) and "立方" in target:
+        required["3"] -= 1
+    return all(available[value] >= count for value, count in required.items())
+
+
+def source_filter_reasons(text: str) -> list[str]:
+    normalized = " ".join(str(text).split())
+    return [
+        reason for reason, pattern in SOURCE_SPAM_PATTERNS if pattern.search(normalized)
+    ]
+
+
+def select_for_mode(
+    rows: list[dict[str, Any]], config: dict[str, Any], full: bool
+) -> tuple[list[dict[str, Any]], Counter[str]]:
+    rejections: Counter[str] = Counter()
+    eligible = rows
+    if full and config.get("source_filter", {}).get("enabled", True):
+        eligible = []
+        for row in rows:
+            reasons = source_filter_reasons(str(row.get("src_text", "")))
+            if reasons:
+                rejections.update(reasons)
+            else:
+                eligible.append(row)
+    limit = None if full else int(config["pilot"]["rows_per_direction"])
+    return (
+        select_rows(eligible, int(config["pipeline"]["seed"]), limit),
+        rejections,
+    )
+
+
 def select_rows(
     rows: list[dict[str, Any]], seed: int, limit_per_direction: int | None
 ) -> list[dict[str, Any]]:
@@ -113,9 +364,7 @@ def select_rows(
     return selected
 
 
-def parse_translation_response(
-    content: str, expected_ids: list[str]
-) -> dict[str, str]:
+def parse_translation_response(content: str, expected_ids: list[str]) -> dict[str, str]:
     payload = json.loads(content)
     items = payload.get("items")
     if not isinstance(items, list):
@@ -127,14 +376,18 @@ def parse_translation_response(
         key = str(item.get("id", ""))
         text = str(item.get("translation", "")).strip()
         if key in translations or not key or not text:
-            raise ValueError("DeepSeek response contains duplicate/empty id or translation")
+            raise ValueError(
+                "DeepSeek response contains duplicate/empty id or translation"
+            )
         translations[key] = text
     if set(translations) != set(expected_ids):
         raise ValueError("DeepSeek response ids do not exactly match the request")
     return translations
 
 
-def hard_check(row: dict[str, Any], translation: str, config: dict[str, Any]) -> list[str]:
+def hard_check(
+    row: dict[str, Any], translation: str, config: dict[str, Any]
+) -> list[str]:
     failures = []
     source = str(row["src_text"]).strip()
     target = str(row["tgt_lang"])
@@ -149,11 +402,16 @@ def hard_check(row: dict[str, Any], translation: str, config: dict[str, Any]) ->
     if quality.get("reject_source_copy") and normalized.casefold() == source.casefold():
         failures.append("SOURCE_COPIED")
     if quality.get("require_arabic_numbers"):
-        source_numbers = ARABIC_NUMBER_RE.findall(source)
-        target_numbers = ARABIC_NUMBER_RE.findall(normalized)
-        if sorted(source_numbers) != sorted(target_numbers):
+        if not numbers_preserved(
+            source,
+            normalized,
+            str(row["src_lang"]),
+            target,
+        ):
             failures.append("ARABIC_NUMBER_MISMATCH")
-    if quality.get("reject_excessive_repetition") and REPEATED_TOKEN_RE.search(normalized):
+    if quality.get("reject_excessive_repetition") and REPEATED_TOKEN_RE.search(
+        normalized
+    ):
         failures.append("EXCESSIVE_REPETITION")
     if quality.get("require_target_script_signal"):
         if target == "zh" and not HAN_RE.search(normalized):
@@ -249,13 +507,19 @@ def output_root(config: dict[str, Any], full: bool) -> Path:
 
 
 def manifest_payload(
-    config: dict[str, Any], input_path: Path, selected: list[dict[str, Any]], full: bool
+    config: dict[str, Any],
+    input_path: Path,
+    selected: list[dict[str, Any]],
+    full: bool,
+    source_filter_rejections: Counter[str] | None = None,
 ) -> dict[str, Any]:
     generation_contract = {
         "api": config["api"],
         "quality": config["quality"],
         "system_prompt": SYSTEM_PROMPT,
     }
+    if full:
+        generation_contract["source_filter"] = config.get("source_filter", {})
     return {
         "schema_version": 1,
         "mode": "full" if full else "pilot",
@@ -267,11 +531,14 @@ def manifest_payload(
         },
         "generation_contract": generation_contract,
         "generation_fingerprint": fingerprint(generation_contract),
+        "source_filter_rejections": dict(source_filter_rejections or {}),
         "status": "running",
     }
 
 
-def load_state(path: Path, selected: list[dict[str, Any]], signature: str) -> dict[str, dict[str, Any]]:
+def load_state(
+    path: Path, selected: list[dict[str, Any]], signature: str
+) -> dict[str, dict[str, Any]]:
     if not path.is_file():
         return {}
     allowed = {row_key(row) for row in selected}
@@ -291,9 +558,8 @@ def load_state(path: Path, selected: list[dict[str, Any]], signature: str) -> di
 def plan(config: dict[str, Any], full: bool) -> dict[str, Any]:
     input_path = project_path(config["input"]["candidates"])
     rows = read_jsonl(input_path)
-    limit = None if full else int(config["pilot"]["rows_per_direction"])
-    selected = select_rows(rows, int(config["pipeline"]["seed"]), limit)
-    manifest = manifest_payload(config, input_path, selected, full)
+    selected, source_rejections = select_for_mode(rows, config, full)
+    manifest = manifest_payload(config, input_path, selected, full, source_rejections)
     root = output_root(config, full)
     completed = load_state(
         root / "generations.jsonl",
@@ -351,16 +617,20 @@ def generate(
 
     input_path = project_path(config["input"]["candidates"])
     rows = read_jsonl(input_path)
-    limit = None if full else int(config["pilot"]["rows_per_direction"])
-    selected = select_rows(rows, int(config["pipeline"]["seed"]), limit)
+    selected, source_rejections = select_for_mode(rows, config, full)
     root = output_root(config, full)
     root.mkdir(parents=True, exist_ok=True)
-    manifest = manifest_payload(config, input_path, selected, full)
+    manifest = manifest_payload(config, input_path, selected, full, source_rejections)
     manifest_path = root / "manifest.json"
     if manifest_path.is_file():
         existing = read_json(manifest_path)
-        if existing.get("generation_fingerprint") != manifest["generation_fingerprint"] or existing.get("input_sha256") != manifest["input_sha256"]:
-            raise RuntimeError("Existing run has different inputs or generation settings")
+        if (
+            existing.get("generation_fingerprint") != manifest["generation_fingerprint"]
+            or existing.get("input_sha256") != manifest["input_sha256"]
+        ):
+            raise RuntimeError(
+                "Existing run has different inputs or generation settings"
+            )
     else:
         write_json(manifest_path, manifest)
     checkpoint_path = root / "generations.jsonl"
@@ -473,9 +743,105 @@ def generate(
     return report
 
 
+def _reason_counts(values: pd.Series) -> dict[str, int]:
+    counts: Counter[str] = Counter()
+    for value in values:
+        counts.update(json.loads(str(value)))
+    return dict(sorted(counts.items()))
+
+
+def reaudit(config: dict[str, Any], full: bool) -> dict[str, Any]:
+    root = output_root(config, full)
+    generated_path = root / "teacher_generated.parquet"
+    if not generated_path.is_file():
+        raise FileNotFoundError(generated_path)
+    frame = pd.read_parquet(generated_path)
+    required = {"pair_id", "src_lang", "tgt_lang", "src_text", "teacher_text"}
+    missing = required - set(frame.columns)
+    if missing:
+        raise RuntimeError(f"Teacher output is missing columns: {sorted(missing)}")
+
+    audited_rows = []
+    for raw in frame.to_dict(orient="records"):
+        translation_failures = hard_check(raw, str(raw["teacher_text"]), config)
+        source_failures = (
+            source_filter_reasons(str(raw["src_text"]))
+            if config.get("source_filter", {}).get("enabled", True)
+            else []
+        )
+        audited_rows.append(
+            {
+                **raw,
+                "original_hard_check_pass": bool(raw.get("hard_check_pass", False)),
+                "revised_translation_pass": not translation_failures,
+                "revised_translation_failures_json": json.dumps(translation_failures),
+                "source_filter_pass": not source_failures,
+                "source_filter_failures_json": json.dumps(source_failures),
+                "combined_usable": not translation_failures and not source_failures,
+            }
+        )
+    audited = pd.DataFrame(audited_rows)
+    parquet_path = root / "reaudit.parquet"
+    parquet_temporary = parquet_path.with_suffix(".parquet.tmp")
+    audited.to_parquet(parquet_temporary, index=False)
+    parquet_temporary.replace(parquet_path)
+    jsonl_path = root / "reaudit.jsonl"
+    jsonl_temporary = jsonl_path.with_suffix(".jsonl.tmp")
+    audited.to_json(
+        jsonl_temporary,
+        orient="records",
+        lines=True,
+        force_ascii=False,
+    )
+    jsonl_temporary.replace(jsonl_path)
+
+    directions: dict[str, dict[str, Any]] = {}
+    for current in DIRECTIONS:
+        subset = audited[
+            (audited["src_lang"].astype(str) + "-" + audited["tgt_lang"].astype(str))
+            == current
+        ]
+        directions[current] = {
+            "rows": len(subset),
+            "original_hard_pass_rows": int(subset["original_hard_check_pass"].sum()),
+            "revised_translation_pass_rows": int(
+                subset["revised_translation_pass"].sum()
+            ),
+            "source_filter_pass_rows": int(subset["source_filter_pass"].sum()),
+            "combined_usable_rows": int(subset["combined_usable"].sum()),
+            "combined_usable_rate": (
+                float(subset["combined_usable"].mean()) if len(subset) else 0.0
+            ),
+        }
+    report = {
+        "schema_version": 1,
+        "status": "REAUDIT_READY_SEMANTIC_REVIEW_REQUIRED",
+        "mode": "full" if full else "pilot",
+        "input": str(generated_path),
+        "rows": len(audited),
+        "directions": directions,
+        "revised_translation_failure_reasons": _reason_counts(
+            audited["revised_translation_failures_json"]
+        ),
+        "source_filter_failure_reasons": _reason_counts(
+            audited["source_filter_failures_json"]
+        ),
+        "reaudit_parquet": str(parquet_path),
+        "reaudit_jsonl": str(jsonl_path),
+        "original_teacher_output_modified": False,
+        "api_called": False,
+        "manual_review_note": (
+            "Rule checks cannot detect every entity or meaning error; preserve the "
+            "completed 100-row semantic audit as selection evidence."
+        ),
+    }
+    write_json(root / "reaudit_report.json", report)
+    return report
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=("plan", "status", "generate"))
+    parser.add_argument("action", choices=("plan", "status", "generate", "reaudit"))
     parser.add_argument(
         "--config", default="configs/directions/zh_uz_deepseek_teacher_v1.toml"
     )
@@ -502,16 +868,17 @@ def main() -> None:
     )
     args = parser.parse_args()
     config = load_config(args.config)
-    result = (
-        generate(
+    if args.action == "generate":
+        result = generate(
             config,
             args.full,
             batch_size_override=args.batch_size,
             concurrency_override=args.concurrency,
         )
-        if args.action == "generate"
-        else plan(config, args.full)
-    )
+    elif args.action == "reaudit":
+        result = reaudit(config, args.full)
+    else:
+        result = plan(config, args.full)
     print(json.dumps(result, ensure_ascii=False, indent=2))
 
 

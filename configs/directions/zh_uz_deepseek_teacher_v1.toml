@@ -30,3 +30,6 @@ require_arabic_numbers = true
 reject_excessive_repetition = true
 require_target_script_signal = true
 
+[source_filter]
+enabled = true
+version = "flores_like_source_filter_v1"

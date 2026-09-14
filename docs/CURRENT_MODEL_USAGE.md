@@ -72,24 +72,13 @@ Create a current inventory, including path availability and disk usage:
 "$PY" scripts/pipeline_v3/manage_pair_model_artifacts.py inventory
 ```
 
-Preview cleanup of only the explicitly abandoned ZH-UZ ablation artifacts:
+Do not execute the historical cleanup allowlist. It is not an approved deletion
+plan, and the apply entry point remains disabled. The previous archive inventory
+was found missing after concurrent cleanup. Follow the current organization
+record and rebuild evidence before considering deletion.
 
-```bash
-"$PY" scripts/pipeline_v3/manage_pair_model_artifacts.py cleanup
-```
-
-The preview does not delete anything. Review its exact paths and reclaimable
-bytes first. Applying cleanup requires all six selected models to exist with a
-`config.json`, plus an explicit confirmation token:
-
-```bash
-"$PY" scripts/pipeline_v3/manage_pair_model_artifacts.py cleanup \
-  --apply \
-  --confirm DELETE_DISCARDED_PAIR_EXPERIMENTS
-```
-
-The cleanup allowlist excludes the shared four-language model, its results and
-multilingual data, all six selected pair models, evaluation evidence, and the
-active DeepSeek Teacher output. Exp1 controls and source datasets are retained
-for provenance; tracked source code is not deleted because it consumes little
-space and is needed to reproduce the selected models.
+All six selected models, Exp1 controls, evaluation evidence, source datasets,
+DeepSeek outputs, legacy registered Marian models, and shared four-language
+dependencies remain protected. Coordinate with the separate shared-model task
+before deleting any common resource. Do not use `git clean` to organize this
+repository: experiment code may still be untracked.

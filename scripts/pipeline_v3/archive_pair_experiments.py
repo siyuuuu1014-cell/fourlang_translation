@@ -37,10 +37,11 @@ def digest(path):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=ROOT)
+    parser.add_argument("--output-root", type=Path, help="Independent archive directory outside the project")
     args = parser.parse_args()
     root = args.root.resolve()
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    output = root / "reports/experiment_archive" / stamp
+    output = (args.output_root.resolve() if args.output_root else root / "reports/experiment_archive") / stamp
     output.mkdir(parents=True, exist_ok=False)
     evidence = output / "evidence"
     records, reports, skipped = [], [], []

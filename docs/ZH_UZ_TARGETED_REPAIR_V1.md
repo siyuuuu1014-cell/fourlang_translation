@@ -96,3 +96,25 @@ reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/selected_candidates.json
 ```
 
 这些样本仍标记为 `TRAINING_CANDIDATE_PENDING_HUMAN_SPOTCHECK`。需要按六个类别分别抽查后，才能冻结为训练数据。Qwen两遍判断不是两个独立审核者，也不能替代乌兹别克语母语认证。
+
+## 5. 生成固定的分层人工抽检包
+
+默认每类抽取50条，并为风险较高的医疗急救类额外抽取50条，共350条：
+
+```bash
+/root/autodl-tmp/venvs/small100_student/bin/python \
+scripts/pipeline_v3/prepare_zh_uz_targeted_spotcheck.py
+
+python -m json.tool \
+  reports/diagnostics/fourlang/zh_uz_targeted_v1_spotcheck_v1/summary.json
+```
+
+需要检查的文件是：
+
+```text
+reports/diagnostics/fourlang/zh_uz_targeted_v1_spotcheck_v1/blind_spotcheck.jsonl
+```
+
+为每条填写 `human_review.decision`，只允许 `PASS`、`MINOR_FIX` 或 `FAIL`。选择
+`MINOR_FIX` 时必须填写 `corrected_tgt_text`。审核前不要查看同目录中的
+`review_key.jsonl`，以免教师身份影响判断。此步骤只生成抽检包，不会改写训练数据或启动训练。

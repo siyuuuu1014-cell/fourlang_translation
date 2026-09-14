@@ -11,48 +11,28 @@ from typing import Any
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT))
+DEFAULT_MANIFEST = PROJECT_ROOT / "configs/specialists/current_pair_models.json"
 
 from inference.engine import TranslationEngine, parse_direction  # noqa: E402
 from inference.loader import load_translation_model  # noqa: E402
 
 
-# One shared bidirectional model per unordered language pair. These are the
-# latest selected/validated artifacts, not training checkpoints chosen ad hoc.
-PAIR_MODELS = {
-    "en_zh": {
-        "languages": ("en", "zh"),
-        "name": "en_zh_pair_exp2",
-        "path": "results/student/pair_specialists/en_zh/exp2/best_model/shared",
-    },
-    "en_uz": {
-        "languages": ("en", "uz"),
-        "name": "en_uz_small100_exp2_v1",
-        "path": "models/final_specialists/en_uz_small100_v1",
-    },
-    "en_ru": {
-        "languages": ("en", "ru"),
-        "name": "en_ru_pair_exp2",
-        "path": "results/student/pair_specialists/en_ru/exp2/best_model/shared",
-    },
-    "zh_uz": {
-        "languages": ("zh", "uz"),
-        "name": "zh_uz_flores_relaxed_8k_ep3",
-        "path": (
-            "results/experiments/weak_pair_ablation/zh_uz/"
-            "flores_relaxed_8k_ep3/best_model/shared"
-        ),
-    },
-    "zh_ru": {
-        "languages": ("zh", "ru"),
-        "name": "zh_ru_pair_exp2",
-        "path": "results/student/pair_specialists/zh_ru/exp2/best_model/shared",
-    },
-    "uz_ru": {
-        "languages": ("uz", "ru"),
-        "name": "uz_ru_pair_exp2",
-        "path": "results/student/pair_specialists/uz_ru/exp2/best_model/shared",
-    },
-}
+def load_pair_models(
+    manifest_path: Path = DEFAULT_MANIFEST,
+) -> dict[str, dict[str, Any]]:
+    payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    pairs: dict[str, dict[str, Any]] = {}
+    for item in payload["pairs"]:
+        source, target = item["directions"][0].split("-")
+        pairs[item["id"]] = {
+            "languages": (source, target),
+            "name": item["model_name"],
+            "path": item["model_path"],
+        }
+    return pairs
+
+
+PAIR_MODELS = load_pair_models()
 
 
 def direction_catalog() -> dict[str, dict[str, str]]:

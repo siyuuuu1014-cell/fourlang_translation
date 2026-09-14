@@ -30,9 +30,7 @@ class TranslateCurrentModelsTests(unittest.TestCase):
         self.assertEqual(route["pair"], "en_ru")
         self.assertEqual(
             path,
-            (
-                root / "results/student/pair_specialists/en_ru/exp2/best_model/shared"
-            ).resolve(),
+            (root / "models/final_pair_specialists/en_ru_v1").resolve(),
         )
 
     def test_require_model_rejects_project_root_instead_of_loading_it(self) -> None:

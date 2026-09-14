@@ -1,0 +1,167 @@
+{
+  "schema_version": 1,
+  "suite": "current_pair_specialists_2026_09",
+  "policy": "Keep six selected bidirectional specialists; preserve the shared four-language model unchanged.",
+  "common_code": [
+    "scripts/pipeline_v3/translate_current_models.py",
+    "inference/loader.py",
+    "inference/engine.py",
+    "scripts/pipeline_v2/seq2seq_flow.py"
+  ],
+  "pairs": [
+    {
+      "id": "en_zh",
+      "directions": ["en-zh", "zh-en"],
+      "status": "selected_validated",
+      "model_name": "en_zh_pair_exp2",
+      "model_path": "results/student/pair_specialists/en_zh/exp2/best_model/shared",
+      "training_entrypoint": "scripts/pipeline_v3/pair_specialist_flow.py",
+      "training_config": "configs/specialists/six_pair.toml",
+      "training_data": [
+        "data/splits/zh_en/v1/train_bidirectional_v1.parquet",
+        "data/distillation/zh_en/v1/18h_exp2_training/exp2_train_combined_v1.parquet"
+      ],
+      "validation_data": "data/splits/zh_en/v1/validation_bidirectional_v1.parquet",
+      "evaluation_evidence": [
+        "results/evaluation/pair_specialists/en_zh/exp2.json",
+        "results/evaluation/pair_specialists/en_zh/promotion_gate.json"
+      ]
+    },
+    {
+      "id": "en_uz",
+      "directions": ["en-uz", "uz-en"],
+      "status": "frozen_ready",
+      "model_name": "en_uz_small100_exp2_v1",
+      "model_path": "models/final_specialists/en_uz_small100_v1",
+      "training_entrypoint": "scripts/pipeline/11b_train_student_exp2.py",
+      "training_config": "configs/specialists/six_pair.toml",
+      "training_data": [
+        "data/splits/en_uz/v1/train_exp1_bidirectional_v1.parquet",
+        "data/distillation/en_uz/v1/11a_exp2_training/exp2_train_combined_v1.parquet"
+      ],
+      "validation_data": "data/splits/en_uz/v1/validation_exp1_bidirectional_v1.parquet",
+      "evaluation_evidence": [
+        "results/evaluation/pair_specialists/en_uz/exp2.json",
+        "results/evaluation/pair_specialists/en_uz/promotion_gate.json"
+      ]
+    },
+    {
+      "id": "en_ru",
+      "directions": ["en-ru", "ru-en"],
+      "status": "frozen_ready",
+      "model_name": "en_ru_pair_specialist_v1",
+      "model_path": "models/final_pair_specialists/en_ru_v1",
+      "training_entrypoint": "scripts/pipeline_v3/pair_specialist_flow.py",
+      "training_config": "configs/specialists/six_pair.toml",
+      "training_data": [
+        "data/splits/en_ru/v1/train.jsonl",
+        "data/distillation/en_ru/v1/train.jsonl"
+      ],
+      "validation_data": "data/splits/en_ru/v1/validation.jsonl",
+      "evaluation_evidence": [
+        "results/evaluation/pair_specialists/en_ru/exp2.json",
+        "results/evaluation/pair_specialists/en_ru/promotion_gate.json"
+      ]
+    },
+    {
+      "id": "zh_uz",
+      "directions": ["zh-uz", "uz-zh"],
+      "status": "selected_dev_and_devtest_winner",
+      "model_name": "zh_uz_flores_relaxed_8k_ep3",
+      "model_path": "results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/best_model/shared",
+      "training_entrypoint": "scripts/pipeline_v3/weak_pair_ablation.py",
+      "training_config": "configs/specialists/weak_pair_ablation.toml",
+      "training_data": [
+        "data/distillation/zh_uz/flores_relaxed_8k/train.jsonl"
+      ],
+      "source_data_to_preserve": [
+        "data/splits/zh_uz/v2/train.jsonl",
+        "data/distillation/zh_uz/v4/train.jsonl"
+      ],
+      "validation_data": "data/distillation/zh_uz/flores_relaxed_8k/validation.jsonl",
+      "evaluation_evidence": [
+        "results/evaluation/weak_pair_ablation/zh_uz/comparison.json",
+        "results/evaluation/weak_pair_ablation/zh_uz/final_devtest.json",
+        "results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/train_report.json"
+      ]
+    },
+    {
+      "id": "zh_ru",
+      "directions": ["zh-ru", "ru-zh"],
+      "status": "selected_validated",
+      "model_name": "zh_ru_pair_exp2",
+      "model_path": "results/student/pair_specialists/zh_ru/exp2/best_model/shared",
+      "training_entrypoint": "scripts/pipeline_v3/pair_specialist_flow.py",
+      "training_config": "configs/specialists/six_pair.toml",
+      "training_data": [
+        "data/splits/zh_ru/v1/train.jsonl",
+        "data/distillation/zh_ru/v1/train.jsonl"
+      ],
+      "validation_data": "data/splits/zh_ru/v1/validation.jsonl",
+      "evaluation_evidence": [
+        "results/evaluation/pair_specialists/zh_ru/exp2.json",
+        "results/evaluation/pair_specialists/zh_ru/promotion_gate.json"
+      ]
+    },
+    {
+      "id": "uz_ru",
+      "directions": ["uz-ru", "ru-uz"],
+      "status": "selected_validated",
+      "model_name": "uz_ru_pair_exp2",
+      "model_path": "results/student/pair_specialists/uz_ru/exp2/best_model/shared",
+      "training_entrypoint": "scripts/pipeline_v3/pair_specialist_flow.py",
+      "training_config": "configs/specialists/six_pair.toml",
+      "training_data": [
+        "data/splits/uz_ru/v1/train.jsonl",
+        "data/distillation/uz_ru/v1/train.jsonl"
+      ],
+      "validation_data": "data/splits/uz_ru/v1/validation.jsonl",
+      "evaluation_evidence": [
+        "results/evaluation/pair_specialists/uz_ru/exp2.json",
+        "results/evaluation/pair_specialists/uz_ru/promotion_gate.json"
+      ]
+    }
+  ],
+  "active_follow_up": [
+    {
+      "id": "zh_uz_deepseek_teacher_v1",
+      "status": "data_generation_in_progress_not_current_model",
+      "config": "configs/directions/zh_uz_deepseek_teacher_v1.toml",
+      "code": "scripts/pipeline_v3/deepseek_teacher.py",
+      "data_root": "data/pipeline_v2/zh_uz_deepseek_teacher_v1"
+    }
+  ],
+  "protected_prefixes": [
+    "configs/multilingual",
+    "configs/pipelines/fourlang.toml",
+    "scripts/pipeline_v3/fourlang_flow.py",
+    "data/multilingual/fourlang",
+    "results/student/fourlang",
+    "results/evaluation/fourlang",
+    "models/final_multilingual",
+    "data/pipeline_v2/zh_uz_deepseek_teacher_v1"
+  ],
+  "safe_delete": [
+    "results/experiments/weak_pair_ablation/zh_uz/baseline_exp1",
+    "results/experiments/weak_pair_ablation/zh_uz/baseline_exp2",
+    "results/experiments/weak_pair_ablation/zh_uz/bidir_full",
+    "results/experiments/weak_pair_ablation/zh_uz/full_weighted_60_40",
+    "results/experiments/weak_pair_ablation/zh_uz/full_native_lr2e6",
+    "results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k",
+    "results/experiments/weak_pair_ablation/zh_uz/directional_full__zh_uz",
+    "results/experiments/weak_pair_ablation/zh_uz/directional_full__uz_zh",
+    "results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints",
+    "results/student/pair_specialists/en_ru/exp2/best_model",
+    "results/student/pair_specialists/en_ru/exp2/checkpoints",
+    "results/student/pair_specialists/zh_uz/exp2/best_model",
+    "results/student/pair_specialists/zh_uz/exp2/checkpoints",
+    "data/experiments/weak_pair_ablation/zh_uz/baseline_exp1",
+    "data/experiments/weak_pair_ablation/zh_uz/baseline_exp2",
+    "data/experiments/weak_pair_ablation/zh_uz/bidir_full",
+    "data/experiments/weak_pair_ablation/zh_uz/full_weighted_60_40",
+    "data/experiments/weak_pair_ablation/zh_uz/full_native_lr2e6",
+    "data/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k",
+    "data/experiments/weak_pair_ablation/zh_uz/directional_full__zh_uz",
+    "data/experiments/weak_pair_ablation/zh_uz/directional_full__uz_zh"
+  ]
+}

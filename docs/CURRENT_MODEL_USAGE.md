@@ -3,11 +3,15 @@
 The unified test entry point maps all 12 directions onto the six currently
 selected bidirectional specialists:
 
+The machine-readable source of truth is
+`configs/specialists/current_pair_models.json`. It records each model's code,
+training/validation data, evaluation evidence, and protected shared-model paths.
+
 | Directions | Model path |
 |---|---|
 | `en-zh`, `zh-en` | `results/student/pair_specialists/en_zh/exp2/best_model/shared` |
 | `en-uz`, `uz-en` | `models/final_specialists/en_uz_small100_v1` |
-| `en-ru`, `ru-en` | `results/student/pair_specialists/en_ru/exp2/best_model/shared` |
+| `en-ru`, `ru-en` | `models/final_pair_specialists/en_ru_v1` |
 | `zh-uz`, `uz-zh` | `results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/best_model/shared` |
 | `zh-ru`, `ru-zh` | `results/student/pair_specialists/zh_ru/exp2/best_model/shared` |
 | `uz-ru`, `ru-uz` | `results/student/pair_specialists/uz_ru/exp2/best_model/shared` |
@@ -38,3 +42,33 @@ The default runtime uses FP16 and five-beam decoding. Use `--json` for structure
 output. An explicit `--model PATH` overrides the built-in route for one run.
 Alternatively set a per-direction environment variable such as
 `FOURLANG_ZH_UZ_MODEL_PATH`; an explicit `--model` takes priority.
+
+## Inventory and cleanup
+
+Create a current inventory, including path availability and disk usage:
+
+```bash
+"$PY" scripts/pipeline_v3/manage_pair_model_artifacts.py inventory
+```
+
+Preview cleanup of only the explicitly abandoned ZH-UZ ablation artifacts:
+
+```bash
+"$PY" scripts/pipeline_v3/manage_pair_model_artifacts.py cleanup
+```
+
+The preview does not delete anything. Review its exact paths and reclaimable
+bytes first. Applying cleanup requires all six selected models to exist with a
+`config.json`, plus an explicit confirmation token:
+
+```bash
+"$PY" scripts/pipeline_v3/manage_pair_model_artifacts.py cleanup \
+  --apply \
+  --confirm DELETE_DISCARDED_PAIR_EXPERIMENTS
+```
+
+The cleanup allowlist excludes the shared four-language model, its results and
+multilingual data, all six selected pair models, evaluation evidence, and the
+active DeepSeek Teacher output. Exp1 controls and source datasets are retained
+for provenance; tracked source code is not deleted because it consumes little
+space and is needed to reproduce the selected models.

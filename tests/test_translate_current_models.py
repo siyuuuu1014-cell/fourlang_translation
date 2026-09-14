@@ -1,0 +1,61 @@
+from __future__ import annotations
+
+import tempfile
+import unittest
+from pathlib import Path
+
+from scripts.pipeline_v3 import translate_current_models as current
+
+
+class TranslateCurrentModelsTests(unittest.TestCase):
+    def test_catalog_has_all_twelve_directions_and_six_models(self) -> None:
+        catalog = current.direction_catalog()
+
+        self.assertEqual(len(catalog), 12)
+        self.assertEqual(len({item["relative_path"] for item in catalog.values()}), 6)
+        self.assertEqual(
+            catalog["zh-uz"]["model_name"],
+            "zh_uz_flores_relaxed_8k_ep3",
+        )
+        self.assertEqual(
+            catalog["uz-zh"]["relative_path"],
+            catalog["zh-uz"]["relative_path"],
+        )
+
+    def test_direction_alias_and_project_relative_resolution(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            route, path = current.resolve_model("ru_en", project_root=root)
+
+        self.assertEqual(route["pair"], "en_ru")
+        self.assertEqual(
+            path,
+            (
+                root / "results/student/pair_specialists/en_ru/exp2/best_model/shared"
+            ).resolve(),
+        )
+
+    def test_require_model_rejects_project_root_instead_of_loading_it(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            with self.assertRaisesRegex(FileNotFoundError, "config.json"):
+                current.require_model(root, "uz-zh")
+
+    def test_manifest_checks_paths_without_loading_models(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            model = root / current.PAIR_MODELS["en_uz"]["path"]
+            model.mkdir(parents=True)
+            (model / "config.json").write_text("{}", encoding="utf-8")
+
+            manifest = current.model_manifest(root)
+
+        en_uz = next(item for item in manifest if item["direction"] == "en-uz")
+        uz_en = next(item for item in manifest if item["direction"] == "uz-en")
+        self.assertTrue(en_uz["available"])
+        self.assertTrue(en_uz["config_available"])
+        self.assertEqual(en_uz["model_path"], uz_en["model_path"])
+
+
+if __name__ == "__main__":
+    unittest.main()

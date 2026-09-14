@@ -1,0 +1,334 @@
+{
+  "output": "/root/autodl-tmp/fourlang_translation/reports/cleanup_verification/20260914T054957Z",
+  "deleted": 0,
+  "models": [
+    {
+      "pair": "en_zh",
+      "path": "results/student/pair_specialists/en_zh/exp2/best_model/shared",
+      "smoke_tests": [
+        {
+          "direction": "en-zh",
+          "input": "The meeting starts at nine.",
+          "translation": "会议从九点开始。",
+          "nonempty": true
+        },
+        {
+          "direction": "zh-en",
+          "input": "会议九点开始。",
+          "translation": "The meeting starts at nine o'clock.",
+          "nonempty": true
+        }
+      ],
+      "required_tokenizer_files": {
+        "config.json": true,
+        "tokenization_small100.py": true,
+        "vocab.json": true,
+        "sentencepiece.bpe.model": true
+      },
+      "status": "PASS"
+    },
+    {
+      "pair": "en_uz",
+      "path": "models/final_specialists/en_uz_small100_v1",
+      "smoke_tests": [
+        {
+          "direction": "en-uz",
+          "input": "The meeting starts at nine.",
+          "translation": "Uchrashuv to'qqiz da boshlanadi.",
+          "nonempty": true
+        },
+        {
+          "direction": "uz-en",
+          "input": "Uchrashuv soat to'qqizda boshlanadi.",
+          "translation": "The meeting begins at nine.",
+          "nonempty": true
+        }
+      ],
+      "required_tokenizer_files": {
+        "config.json": true,
+        "tokenization_small100.py": true,
+        "vocab.json": true,
+        "sentencepiece.bpe.model": true
+      },
+      "status": "PASS"
+    },
+    {
+      "pair": "en_ru",
+      "path": "models/final_pair_specialists/en_ru_v1",
+      "smoke_tests": [
+        {
+          "direction": "en-ru",
+          "input": "The meeting starts at nine.",
+          "translation": "Встреча начинается в девять.",
+          "nonempty": true
+        },
+        {
+          "direction": "ru-en",
+          "input": "Встреча начинается в девять часов.",
+          "translation": "The meeting begins at nine.",
+          "nonempty": true
+        }
+      ],
+      "required_tokenizer_files": {
+        "config.json": true,
+        "tokenization_small100.py": true,
+        "vocab.json": true,
+        "sentencepiece.bpe.model": true
+      },
+      "status": "PASS"
+    },
+    {
+      "pair": "zh_uz",
+      "path": "results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/best_model/shared",
+      "smoke_tests": [
+        {
+          "direction": "zh-uz",
+          "input": "会议九点开始。",
+          "translation": "Sayohat to'rtada boshladi.",
+          "nonempty": true
+        },
+        {
+          "direction": "uz-zh",
+          "input": "Uchrashuv soat to'qqizda boshlanadi.",
+          "translation": "收听始于八点钟.",
+          "nonempty": true
+        }
+      ],
+      "required_tokenizer_files": {
+        "config.json": true,
+        "tokenization_small100.py": true,
+        "vocab.json": true,
+        "sentencepiece.bpe.model": true
+      },
+      "status": "PASS"
+    },
+    {
+      "pair": "zh_ru",
+      "path": "results/student/pair_specialists/zh_ru/exp2/best_model/shared",
+      "smoke_tests": [
+        {
+          "direction": "zh-ru",
+          "input": "会议九点开始。",
+          "translation": "Конференция начинается в 9 часов.",
+          "nonempty": true
+        },
+        {
+          "direction": "ru-zh",
+          "input": "Встреча начинается в девять часов.",
+          "translation": "会议在九点开始。",
+          "nonempty": true
+        }
+      ],
+      "required_tokenizer_files": {
+        "config.json": true,
+        "tokenization_small100.py": true,
+        "vocab.json": true,
+        "sentencepiece.bpe.model": true
+      },
+      "status": "PASS"
+    },
+    {
+      "pair": "uz_ru",
+      "path": "results/student/pair_specialists/uz_ru/exp2/best_model/shared",
+      "smoke_tests": [
+        {
+          "direction": "uz-ru",
+          "input": "Uchrashuv soat to'qqizda boshlanadi.",
+          "translation": "Выбор начинается в полном порядке.",
+          "nonempty": true
+        },
+        {
+          "direction": "ru-uz",
+          "input": "Встреча начинается в девять часов.",
+          "translation": "Talab to'xtat soatda boshlaydi.",
+          "nonempty": true
+        }
+      ],
+      "required_tokenizer_files": {
+        "config.json": true,
+        "tokenization_small100.py": true,
+        "vocab.json": true,
+        "sentencepiece.bpe.model": true
+      },
+      "status": "PASS"
+    }
+  ],
+  "candidates": [
+    {
+      "path": "results/experiments/weak_pair_ablation/zh_uz/bidir_full",
+      "bytes": 1337151365,
+      "archived_metadata_files": 6,
+      "metadata_archive_gaps": [],
+      "literal_references": [],
+      "decision": "HOLD_FOR_REVIEW",
+      "impact": "Removing checkpoints loses exact optimizer/RNG resume; removing old weights loses direct reruns. Dynamic path construction also requires review."
+    },
+    {
+      "path": "results/experiments/weak_pair_ablation/zh_uz/full_weighted_60_40",
+      "bytes": 1337151392,
+      "archived_metadata_files": 6,
+      "metadata_archive_gaps": [],
+      "literal_references": [],
+      "decision": "HOLD_FOR_REVIEW",
+      "impact": "Removing checkpoints loses exact optimizer/RNG resume; removing old weights loses direct reruns. Dynamic path construction also requires review."
+    },
+    {
+      "path": "results/experiments/weak_pair_ablation/zh_uz/full_native_lr2e6",
+      "bytes": 1337151385,
+      "archived_metadata_files": 6,
+      "metadata_archive_gaps": [],
+      "literal_references": [],
+      "decision": "HOLD_FOR_REVIEW",
+      "impact": "Removing checkpoints loses exact optimizer/RNG resume; removing old weights loses direct reruns. Dynamic path construction also requires review."
+    },
+    {
+      "path": "results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k",
+      "bytes": 13335184489,
+      "archived_metadata_files": 33,
+      "metadata_archive_gaps": [],
+      "literal_references": [],
+      "decision": "HOLD_FOR_REVIEW",
+      "impact": "Removing checkpoints loses exact optimizer/RNG resume; removing old weights loses direct reruns. Dynamic path construction also requires review."
+    },
+    {
+      "path": "results/experiments/weak_pair_ablation/zh_uz/directional_full__zh_uz",
+      "bytes": 1337151213,
+      "archived_metadata_files": 6,
+      "metadata_archive_gaps": [],
+      "literal_references": [],
+      "decision": "HOLD_FOR_REVIEW",
+      "impact": "Removing checkpoints loses exact optimizer/RNG resume; removing old weights loses direct reruns. Dynamic path construction also requires review."
+    },
+    {
+      "path": "results/experiments/weak_pair_ablation/zh_uz/directional_full__uz_zh",
+      "bytes": 1337151211,
+      "archived_metadata_files": 6,
+      "metadata_archive_gaps": [],
+      "literal_references": [],
+      "decision": "HOLD_FOR_REVIEW",
+      "impact": "Removing checkpoints loses exact optimizer/RNG resume; removing old weights loses direct reruns. Dynamic path construction also requires review."
+    },
+    {
+      "path": "results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints",
+      "bytes": 11998018300,
+      "archived_metadata_files": 28,
+      "metadata_archive_gaps": [],
+      "literal_references": [],
+      "decision": "HOLD_FOR_REVIEW",
+      "impact": "Removing checkpoints loses exact optimizer/RNG resume; removing old weights loses direct reruns. Dynamic path construction also requires review."
+    },
+    {
+      "path": "results/student/pair_specialists/en_ru/exp2/best_model",
+      "bytes": 1337149439,
+      "archived_metadata_files": 5,
+      "metadata_archive_gaps": [],
+      "literal_references": [],
+      "decision": "HOLD_FOR_REVIEW",
+      "impact": "Removing checkpoints loses exact optimizer/RNG resume; removing old weights loses direct reruns. Dynamic path construction also requires review."
+    },
+    {
+      "path": "results/student/pair_specialists/zh_uz/exp2/best_model",
+      "bytes": 1337169207,
+      "archived_metadata_files": 5,
+      "metadata_archive_gaps": [],
+      "literal_references": [
+        "configs/specialists/weak_pair_ablation.toml"
+      ],
+      "decision": "HOLD_FOR_REVIEW",
+      "impact": "Removing checkpoints loses exact optimizer/RNG resume; removing old weights loses direct reruns. Dynamic path construction also requires review."
+    },
+    {
+      "path": "data/experiments/weak_pair_ablation/zh_uz/bidir_full",
+      "bytes": 12533715,
+      "archived_metadata_files": 3,
+      "metadata_archive_gaps": [],
+      "literal_references": [],
+      "decision": "HOLD_FOR_REVIEW",
+      "impact": "Removing checkpoints loses exact optimizer/RNG resume; removing old weights loses direct reruns. Dynamic path construction also requires review."
+    },
+    {
+      "path": "data/experiments/weak_pair_ablation/zh_uz/full_weighted_60_40",
+      "bytes": 12852821,
+      "archived_metadata_files": 3,
+      "metadata_archive_gaps": [],
+      "literal_references": [],
+      "decision": "HOLD_FOR_REVIEW",
+      "impact": "Removing checkpoints loses exact optimizer/RNG resume; removing old weights loses direct reruns. Dynamic path construction also requires review."
+    },
+    {
+      "path": "data/experiments/weak_pair_ablation/zh_uz/full_native_lr2e6",
+      "bytes": 12533764,
+      "archived_metadata_files": 3,
+      "metadata_archive_gaps": [],
+      "literal_references": [],
+      "decision": "HOLD_FOR_REVIEW",
+      "impact": "Removing checkpoints loses exact optimizer/RNG resume; removing old weights loses direct reruns. Dynamic path construction also requires review."
+    },
+    {
+      "path": "data/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k",
+      "bytes": 21230942,
+      "archived_metadata_files": 3,
+      "metadata_archive_gaps": [],
+      "literal_references": [],
+      "decision": "HOLD_FOR_REVIEW",
+      "impact": "Removing checkpoints loses exact optimizer/RNG resume; removing old weights loses direct reruns. Dynamic path construction also requires review."
+    },
+    {
+      "path": "data/experiments/weak_pair_ablation/zh_uz/directional_full__zh_uz",
+      "bytes": 6419834,
+      "archived_metadata_files": 3,
+      "metadata_archive_gaps": [],
+      "literal_references": [],
+      "decision": "HOLD_FOR_REVIEW",
+      "impact": "Removing checkpoints loses exact optimizer/RNG resume; removing old weights loses direct reruns. Dynamic path construction also requires review."
+    },
+    {
+      "path": "data/experiments/weak_pair_ablation/zh_uz/directional_full__uz_zh",
+      "bytes": 6115708,
+      "archived_metadata_files": 3,
+      "metadata_archive_gaps": [],
+      "literal_references": [],
+      "decision": "HOLD_FOR_REVIEW",
+      "impact": "Removing checkpoints loses exact optimizer/RNG resume; removing old weights loses direct reruns. Dynamic path construction also requires review."
+    }
+  ],
+  "en_ru_duplicate_comparison": [
+    {
+      "file": "config.json",
+      "same": true
+    },
+    {
+      "file": "generation_config.json",
+      "same": true
+    },
+    {
+      "file": "model.safetensors",
+      "same": true
+    },
+    {
+      "file": "sentencepiece.bpe.model",
+      "same": true
+    },
+    {
+      "file": "special_tokens_map.json",
+      "same": true
+    },
+    {
+      "file": "tokenization_small100.py",
+      "same": true
+    },
+    {
+      "file": "tokenizer_config.json",
+      "same": true
+    },
+    {
+      "file": "training_args.bin",
+      "same": true
+    },
+    {
+      "file": "vocab.json",
+      "same": true
+    }
+  ],
+  "en_ru_source_files_all_identical": true
+}

@@ -51,6 +51,21 @@ Alternatively set a per-direction environment variable such as
 
 ## Inventory and cleanup
 
+Deletion is currently suspended at the user's request. Even `--apply` refuses
+to run until the experiment record and evidence archive have been completed and
+reviewed. The older command example below is not currently executable.
+
+Create a timestamped evidence snapshot and experiment record on the server:
+
+```bash
+"$PY" scripts/pipeline_v3/archive_pair_experiments.py
+```
+
+The output lives under `reports/experiment_archive/<UTC timestamp>/` and includes
+`EXPERIMENT_RECORD.md`, original code/config/report copies in `evidence/`, a file
+inventory, omissions, checksums, and a compressed evidence copy. Weights and large
+datasets stay in their original locations; this is not a full weight backup.
+
 Create a current inventory, including path availability and disk usage:
 
 ```bash

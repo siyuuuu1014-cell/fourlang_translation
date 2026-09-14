@@ -136,6 +136,10 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main() -> int:
     args = build_parser().parse_args()
+    if args.apply:
+        raise RuntimeError(
+            "Deletion suspended: complete and review the experiment archive first."
+        )
     manifest = load_manifest(args.manifest)
     inventory = model_inventory(manifest, PROJECT_ROOT)
     if args.action == "inventory":

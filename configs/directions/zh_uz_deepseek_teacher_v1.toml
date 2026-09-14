@@ -12,6 +12,10 @@ root = "data/pipeline_v2/zh_uz_deepseek_teacher_v1"
 [pilot]
 rows_per_direction = 200
 
+[full]
+# Generate enough candidates for an 8k/direction training set plus QA losses.
+rows_per_direction = 9000
+
 [api]
 base_url = "https://api.deepseek.com"
 model = "deepseek-v4-pro"

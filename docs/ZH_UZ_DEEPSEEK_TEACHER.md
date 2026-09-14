@@ -77,4 +77,7 @@ Only after the pilot passes semantic review:
 ```
 
 `--full` is intentionally mandatory for the paid full run. It uses a separate
-checkpoint directory and cannot overwrite the pilot.
+checkpoint directory and cannot overwrite the pilot. The default full plan
+selects 9,000 rows per direction (18,000 total): 8,000 rows per direction are
+intended for the eventual training set, with a 1,000-row quality-control loss
+buffer. Run `plan --full` and verify the counts before starting paid generation.

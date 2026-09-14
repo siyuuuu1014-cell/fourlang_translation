@@ -85,6 +85,34 @@ class DeepSeekTeacherTests(unittest.TestCase):
         self.assertEqual({item["pair_id"] for item in full}, {"zh-clean", "uz-clean"})
         self.assertEqual(full_rejections["GAMBLING_OR_BETTING"], 2)
 
+    def test_full_selection_is_capped_per_direction(self):
+        rows = [
+            row(f"zh-{index}", "zh", "uz", f"中文句子{index}。") for index in range(3)
+        ] + [
+            row(f"uz-{index}", "uz", "zh", f"Oddiy jumla {index}.")
+            for index in range(3)
+        ]
+        config = {
+            "pipeline": {"seed": 2026},
+            "pilot": {"rows_per_direction": 1},
+            "full": {"rows_per_direction": 2},
+            "source_filter": {"enabled": True},
+        }
+
+        selected, rejections = teacher.select_for_mode(rows, config, True)
+
+        self.assertEqual(len(selected), 4)
+        self.assertEqual(
+            {
+                direction: sum(
+                    teacher.direction(item) == direction for item in selected
+                )
+                for direction in teacher.DIRECTIONS
+            },
+            {"zh-uz": 2, "uz-zh": 2},
+        )
+        self.assertFalse(rejections)
+
     def test_reaudit_is_offline_and_preserves_original_output(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary) / "teacher"

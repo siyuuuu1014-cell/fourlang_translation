@@ -323,7 +323,11 @@ def select_for_mode(
                 rejections.update(reasons)
             else:
                 eligible.append(row)
-    limit = None if full else int(config["pilot"]["rows_per_direction"])
+    if full:
+        configured_limit = config.get("full", {}).get("rows_per_direction")
+        limit = int(configured_limit) if configured_limit is not None else None
+    else:
+        limit = int(config["pilot"]["rows_per_direction"])
     return (
         select_rows(eligible, int(config["pipeline"]["seed"]), limit),
         rejections,
@@ -520,6 +524,7 @@ def manifest_payload(
     }
     if full:
         generation_contract["source_filter"] = config.get("source_filter", {})
+        generation_contract["full_selection"] = config.get("full", {})
     return {
         "schema_version": 1,
         "mode": "full" if full else "pilot",

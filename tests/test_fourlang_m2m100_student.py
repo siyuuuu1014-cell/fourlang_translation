@@ -58,3 +58,17 @@ def test_metric_summary_tracks_worst_direction():
     assert summary["macro_chrf2"] == 30.0
     assert summary["worst_direction"] == "en-zh"
 
+
+def test_kd_v2_continues_from_kd_v1_and_reuses_kd_data(tmp_path, monkeypatch):
+    monkeypatch.setattr(runner, "PROJECT_ROOT", tmp_path)
+    settings = {
+        "student": {"path": "models/m2m100_418M"},
+        "outputs": {"root": "results/student/fourlang_m2m100"},
+    }
+    experiment, source_model, data_stage = runner.stage_plan(settings, "kd_v2")
+    assert experiment == "m2m100_kd_v2"
+    assert source_model == (
+        tmp_path
+        / "results/student/fourlang_m2m100/m2m100_kd_v1/best_model/shared"
+    )
+    assert data_stage == "kd"

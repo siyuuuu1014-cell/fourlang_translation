@@ -47,6 +47,14 @@ learning_rate = 0.00003
 checkpoint_interval_steps = 1000
 direction_validation_samples = 200
 
+[training.m2m100_kd_v2]
+# One fresh-scheduler continuation epoch from the exported KD-v1 best model.
+# This is intentionally a separate experiment so KD-v1 is never overwritten.
+epochs = 1
+learning_rate = 0.000005
+checkpoint_interval_steps = 1000
+direction_validation_samples = 200
+
 [training.m2m100_targeted_v1]
 # Continue from the best KD checkpoint with the already-built targeted dataset.
 epochs = 1
@@ -61,4 +69,3 @@ gradient_accumulation_steps = 4
 [deployment]
 num_beams = 5
 max_new_tokens = 256
-

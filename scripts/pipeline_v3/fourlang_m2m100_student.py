@@ -26,6 +26,7 @@ from scripts.pipeline_v3.fourlang_flow import directions  # noqa: E402
 
 CONFIG_DEFAULT = "configs/multilingual/fourlang_m2m100_v1.toml"
 KD_EXPERIMENT = "m2m100_kd_v1"
+KD_CONTINUATION_EXPERIMENT = "m2m100_kd_v2"
 TARGETED_EXPERIMENT = "m2m100_targeted_v1"
 EXPECTED_MODEL_TYPE = "m2m_100"
 EXPECTED_REPO = "facebook/m2m100_418M"
@@ -145,17 +146,24 @@ def exported_model(config: dict[str, Any], experiment: str) -> Path:
     return output_root(config, experiment) / "best_model" / "shared"
 
 
-def train_stage(config: dict[str, Any], stage: str) -> dict[str, Any]:
+def stage_plan(config: dict[str, Any], stage: str) -> tuple[str, Path, str]:
     if stage == "kd":
-        experiment = KD_EXPERIMENT
-        source_model = project_path(config["student"]["path"])
-    elif stage == "targeted":
-        experiment = TARGETED_EXPERIMENT
-        source_model = exported_model(config, KD_EXPERIMENT)
-    else:
-        raise ValueError(stage)
+        return KD_EXPERIMENT, project_path(config["student"]["path"]), "kd"
+    if stage == "kd_v2":
+        return (
+            KD_CONTINUATION_EXPERIMENT,
+            exported_model(config, KD_EXPERIMENT),
+            "kd",
+        )
+    if stage == "targeted":
+        return TARGETED_EXPERIMENT, exported_model(config, KD_EXPERIMENT), "targeted"
+    raise ValueError(stage)
+
+
+def train_stage(config: dict[str, Any], stage: str) -> dict[str, Any]:
+    experiment, source_model, data_stage = stage_plan(config, stage)
     verify_m2m100_artifact(source_model)
-    train_path, validation_path = data_paths(config, stage)
+    train_path, validation_path = data_paths(config, data_stage)
     train_rows = read_jsonl(train_path)
     validation_rows = read_jsonl(validation_path)
     validate_rows(train_rows, train_path)
@@ -199,7 +207,7 @@ def summarize_metrics(values: dict[str, dict[str, float]]) -> dict[str, Any]:
 
 
 def evaluate_stage(config: dict[str, Any], stage: str) -> dict[str, Any]:
-    experiment = KD_EXPERIMENT if stage == "kd" else TARGETED_EXPERIMENT
+    experiment, _, _ = stage_plan(config, stage)
     model_path = exported_model(config, experiment)
     verify_m2m100_artifact(model_path)
     benchmark_path = project_path(config["benchmarks"]["flores_devtest"])
@@ -279,6 +287,53 @@ def compare(config: dict[str, Any]) -> dict[str, Any]:
     return report
 
 
+def compare_kd_v2(config: dict[str, Any]) -> dict[str, Any]:
+    evaluation_root = project_path(config["outputs"]["evaluation_root"])
+    experiments = (KD_EXPERIMENT, TARGETED_EXPERIMENT, KD_CONTINUATION_EXPERIMENT)
+    payloads = {
+        name: json.loads(
+            (evaluation_root / name / "metrics.json").read_text(encoding="utf-8")
+        )
+        for name in experiments
+    }
+    candidate_payload = payloads[KD_CONTINUATION_EXPERIMENT]
+
+    def delta_from(baseline: str) -> dict[str, Any]:
+        baseline_payload = payloads[baseline]
+        return {
+            "summary": {
+                metric: candidate_payload["summary"][metric]
+                - baseline_payload["summary"][metric]
+                for metric in ("macro_bleu", "macro_chrf2", "worst_chrf2")
+            },
+            "directions": {
+                direction: {
+                    metric: candidate_payload["metrics"][direction][metric]
+                    - baseline_payload["metrics"][direction][metric]
+                    for metric in ("bleu", "chrf2")
+                }
+                for direction in directions()
+            },
+        }
+
+    report = {
+        "schema_version": 1,
+        "status": "COMPARED",
+        "candidate": KD_CONTINUATION_EXPERIMENT,
+        "summaries": {
+            name: payloads[name]["summary"] for name in experiments
+        },
+        "candidate_minus": {
+            KD_EXPERIMENT: delta_from(KD_EXPERIMENT),
+            TARGETED_EXPERIMENT: delta_from(TARGETED_EXPERIMENT),
+        },
+    }
+    destination = evaluation_root / "kd_v2_comparison.json"
+    write_json(destination, report)
+    print(f"M2M100_KD_V2_COMPARISON_READY: {destination}", flush=True)
+    return report
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Train and evaluate a fresh M2M100-418M four-language student."
@@ -291,7 +346,11 @@ def main() -> None:
             "eval-kd",
             "train-targeted",
             "eval-targeted",
+            "train-kd-v2",
+            "eval-kd-v2",
             "compare",
+            "compare-kd-v2",
+            "run-kd-v2",
             "run-all",
         ),
     )
@@ -308,8 +367,19 @@ def main() -> None:
         train_stage(config, "targeted")
     elif args.action == "eval-targeted":
         evaluate_stage(config, "targeted")
+    elif args.action == "train-kd-v2":
+        train_stage(config, "kd_v2")
+    elif args.action == "eval-kd-v2":
+        evaluate_stage(config, "kd_v2")
     elif args.action == "compare":
         compare(config)
+    elif args.action == "compare-kd-v2":
+        compare_kd_v2(config)
+    elif args.action == "run-kd-v2":
+        preflight(config)
+        train_stage(config, "kd_v2")
+        evaluate_stage(config, "kd_v2")
+        compare_kd_v2(config)
     else:
         preflight(config)
         train_stage(config, "kd")
@@ -321,4 +391,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

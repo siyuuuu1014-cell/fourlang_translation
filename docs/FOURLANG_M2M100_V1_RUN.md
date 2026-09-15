@@ -17,10 +17,19 @@
 
 ## 服务器运行
 
+在Blackwell服务器上使用新环境时，通过`FOURLANG_STUDENT_PYTHON`指定Python；不要复用旧V100服务器中基于CUDA 12.1安装的虚拟环境。
+
 先仅检查模型与数据：
 
 ```bash
 cd /root/autodl-tmp/fourlang_translation
+bash scripts/pipeline_v3/run_fourlang_m2m100_v1.sh preflight
+```
+
+Blackwell服务器示例：
+
+```bash
+export FOURLANG_STUDENT_PYTHON=/root/autodl-tmp/venvs/m2m100_blackwell/bin/python
 bash scripts/pipeline_v3/run_fourlang_m2m100_v1.sh preflight
 ```
 
@@ -54,3 +63,42 @@ python -m json.tool results/evaluation/fourlang_m2m100/m2m100_targeted_v1/metric
 python -m json.tool results/evaluation/fourlang_m2m100/comparison.json
 ```
 
+## KD v2：追加一轮通用蒸馏训练
+
+该实验不会从原始M2M100重新训练，也不会覆盖KD v1或定向模型。它从：
+
+`/root/autodl-tmp/fourlang_translation/results/student/fourlang_m2m100/m2m100_kd_v1/best_model/shared`
+
+加载已经完成两轮KD的最佳权重，重新初始化优化器和学习率调度器，用Exp2的158,000条训练数据以`5e-6`学习率再训练一轮。新日志中的epoch会从0重新计数，但模型权重不会重置。
+
+完整执行训练、FLORES devtest评测，并与KD v1和定向v1比较：
+
+```bash
+cd /root/autodl-tmp/fourlang_translation
+nohup bash scripts/pipeline_v3/run_fourlang_m2m100_v1.sh run-kd-v2 \
+  > fourlang_m2m100_kd_v2.log 2>&1 &
+echo $!
+tail -n 50 -f fourlang_m2m100_kd_v2.log
+```
+
+也可以分阶段执行：
+
+```bash
+bash scripts/pipeline_v3/run_fourlang_m2m100_v1.sh train-kd-v2
+bash scripts/pipeline_v3/run_fourlang_m2m100_v1.sh eval-kd-v2
+bash scripts/pipeline_v3/run_fourlang_m2m100_v1.sh compare-kd-v2
+```
+
+新产物独立写入：
+
+```text
+results/student/fourlang_m2m100/m2m100_kd_v2/
+results/evaluation/fourlang_m2m100/m2m100_kd_v2/metrics.json
+results/evaluation/fourlang_m2m100/kd_v2_comparison.json
+```
+
+全部完成标志为：
+
+```text
+M2M100_KD_V2_COMPARISON_READY
+```

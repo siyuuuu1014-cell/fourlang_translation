@@ -2,7 +2,7 @@
 set -euo pipefail
 
 PROJECT_ROOT="/root/autodl-tmp/fourlang_translation"
-PYTHON_BIN="/root/autodl-tmp/venvs/small100_student/bin/python"
+PYTHON_BIN="${FOURLANG_STUDENT_PYTHON:-/root/autodl-tmp/venvs/small100_student/bin/python}"
 ACTION="${1:-run-all}"
 
 cd "$PROJECT_ROOT"
@@ -19,4 +19,3 @@ fi
 "$PYTHON_BIN" scripts/pipeline_v3/fourlang_m2m100_student.py \
   "$ACTION" \
   --config configs/multilingual/fourlang_m2m100_v1.toml
-

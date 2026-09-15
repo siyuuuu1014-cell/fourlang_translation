@@ -74,9 +74,11 @@ checkpoint_interval_steps = 1000
 direction_validation_samples = 200
 
 [training.m2m100_kd_from_human_v1]
-# Fair-path stage 2: continue the human foundation on the existing Exp2 KD/replay mix.
-epochs = 2
-learning_rate = 0.000005
+# M2M100-specific stage 2: enough adaptation for the weaker 418M base without
+# using the aggressive fresh-model LR that could erase the human foundation.
+epochs = 3
+learning_rate = 0.00001
+early_stopping_patience = 2
 checkpoint_interval_steps = 1000
 direction_validation_samples = 200
 

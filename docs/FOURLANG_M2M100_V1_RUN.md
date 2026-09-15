@@ -108,7 +108,7 @@ M2M100_KD_V2_COMPARISON_READY
 该路线用于公平复刻历史 NLLB 的训练顺序，不覆盖现有 M2M100 实验：
 
 1. 原始 M2M100-418M → Exp1 人工平衡数据，3 epochs，学习率 `3e-5`。
-2. 人工基础模型 → Exp2 Teacher KD + 人工回放混合数据，2 epochs，学习率 `5e-6`。
+2. 人工基础模型 → Exp2 Teacher KD + 人工回放混合数据，最多 3 epochs，学习率 `1e-5`；连续两轮方向验证不提升时早停，并始终导出宏 chrF2 最佳轮次。
 3. KD 模型 → Exp3_v2 定向数据，1 epoch，学习率 `1e-6`。
 
 运行前先执行完整路线专用检查，它会逐项验证 Exp1、Exp2、Exp3_v2、FLORES devtest 和基础模型；任何输入缺失都会在训练前停止：

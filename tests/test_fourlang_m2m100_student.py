@@ -1,9 +1,25 @@
 import json
+import tomllib
 from pathlib import Path
 
 import pytest
 
 from scripts.pipeline_v3 import fourlang_m2m100_student as runner
+
+
+def test_human_route_uses_m2m100_specific_training_parameters():
+    config_path = Path("configs/multilingual/fourlang_m2m100_v1.toml")
+    with config_path.open("rb") as stream:
+        settings = tomllib.load(stream)["training"]
+
+    assert settings["m2m100_human_v1"]["epochs"] == 3
+    kd = settings["m2m100_kd_from_human_v1"]
+    assert kd["epochs"] == 3
+    assert kd["learning_rate"] == pytest.approx(1e-5)
+    assert kd["early_stopping_patience"] == 2
+    assert settings["m2m100_targeted_from_human_v1"]["learning_rate"] == pytest.approx(
+        1e-6
+    )
 
 
 def test_candidate_is_locked_to_m2m100():

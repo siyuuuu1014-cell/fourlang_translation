@@ -102,3 +102,58 @@ results/evaluation/fourlang_m2m100/kd_v2_comparison.json
 ```text
 M2M100_KD_V2_COMPARISON_READY
 ```
+
+## 完整人工基础路线（推荐）
+
+该路线用于公平复刻历史 NLLB 的训练顺序，不覆盖现有 M2M100 实验：
+
+1. 原始 M2M100-418M → Exp1 人工平衡数据，3 epochs，学习率 `3e-5`。
+2. 人工基础模型 → Exp2 Teacher KD + 人工回放混合数据，2 epochs，学习率 `5e-6`。
+3. KD 模型 → Exp3_v2 定向数据，1 epoch，学习率 `1e-6`。
+
+运行前先执行完整路线专用检查，它会逐项验证 Exp1、Exp2、Exp3_v2、FLORES devtest 和基础模型；任何输入缺失都会在训练前停止：
+
+```bash
+cd /root/autodl-tmp/fourlang_translation
+bash scripts/pipeline_v3/run_fourlang_m2m100_v1.sh preflight-human-route
+```
+
+完整后台运行：
+
+```bash
+cd /root/autodl-tmp/fourlang_translation
+nohup bash scripts/pipeline_v3/run_fourlang_m2m100_v1.sh run-human-route \
+  > fourlang_m2m100_human_route.log 2>&1 &
+echo $!
+tail -n 50 -f fourlang_m2m100_human_route.log
+```
+
+可分阶段执行：
+
+```bash
+bash scripts/pipeline_v3/run_fourlang_m2m100_v1.sh train-human
+bash scripts/pipeline_v3/run_fourlang_m2m100_v1.sh eval-human
+bash scripts/pipeline_v3/run_fourlang_m2m100_v1.sh train-kd-from-human
+bash scripts/pipeline_v3/run_fourlang_m2m100_v1.sh eval-kd-from-human
+bash scripts/pipeline_v3/run_fourlang_m2m100_v1.sh train-targeted-from-human
+bash scripts/pipeline_v3/run_fourlang_m2m100_v1.sh eval-targeted-from-human
+bash scripts/pipeline_v3/run_fourlang_m2m100_v1.sh compare-human-route
+```
+
+新产物：
+
+```text
+results/student/fourlang_m2m100/m2m100_human_v1/
+results/student/fourlang_m2m100/m2m100_kd_from_human_v1/
+results/student/fourlang_m2m100/m2m100_targeted_from_human_v1/
+results/evaluation/fourlang_m2m100/m2m100_human_v1/metrics.json
+results/evaluation/fourlang_m2m100/m2m100_kd_from_human_v1/metrics.json
+results/evaluation/fourlang_m2m100/m2m100_targeted_from_human_v1/metrics.json
+results/evaluation/fourlang_m2m100/human_route_comparison.json
+```
+
+全部完成标志：
+
+```text
+M2M100_HUMAN_ROUTE_COMPARISON_READY
+```

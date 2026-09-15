@@ -72,3 +72,54 @@ def test_kd_v2_continues_from_kd_v1_and_reuses_kd_data(tmp_path, monkeypatch):
         / "results/student/fourlang_m2m100/m2m100_kd_v1/best_model/shared"
     )
     assert data_stage == "kd"
+
+
+def test_human_route_uses_isolated_chained_models(tmp_path, monkeypatch):
+    monkeypatch.setattr(runner, "PROJECT_ROOT", tmp_path)
+    settings = {
+        "student": {"path": "models/m2m100_418M"},
+        "outputs": {"root": "results/student/fourlang_m2m100"},
+    }
+
+    human = runner.stage_plan(settings, "human")
+    kd = runner.stage_plan(settings, "kd_from_human")
+    targeted = runner.stage_plan(settings, "targeted_from_human")
+
+    assert human == (
+        "m2m100_human_v1",
+        tmp_path / "models/m2m100_418M",
+        "human",
+    )
+    assert kd == (
+        "m2m100_kd_from_human_v1",
+        tmp_path
+        / "results/student/fourlang_m2m100/m2m100_human_v1/best_model/shared",
+        "kd",
+    )
+    assert targeted == (
+        "m2m100_targeted_from_human_v1",
+        tmp_path
+        / "results/student/fourlang_m2m100/m2m100_kd_from_human_v1/best_model/shared",
+        "targeted",
+    )
+
+
+def test_default_preflight_does_not_change_existing_route(monkeypatch, tmp_path):
+    monkeypatch.setattr(runner, "PROJECT_ROOT", tmp_path)
+    observed = []
+    monkeypatch.setattr(runner, "project_path", lambda value: tmp_path / value)
+    monkeypatch.setattr(runner, "candidate", lambda config: config["student"])
+    monkeypatch.setattr(runner, "verify_m2m100_artifact", lambda path: {})
+
+    def missing_paths(config, stage):
+        observed.append(stage)
+        return tmp_path / f"{stage}.train", tmp_path / f"{stage}.validation"
+
+    monkeypatch.setattr(runner, "data_paths", missing_paths)
+    settings = {
+        "student": {"path": "base"},
+        "outputs": {"root": "output"},
+    }
+    with pytest.raises(FileNotFoundError):
+        runner.preflight(settings)
+    assert observed == ["kd"]

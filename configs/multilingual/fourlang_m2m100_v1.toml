@@ -16,6 +16,10 @@ license = "MIT"
 train = "data/multilingual/fourlang/exp2/train.jsonl"
 validation = "data/multilingual/fourlang/exp2/validation.jsonl"
 
+[data.human]
+train = "data/multilingual/fourlang/exp1/train.jsonl"
+validation = "data/multilingual/fourlang/exp1/validation.jsonl"
+
 [data.targeted]
 train = "data/multilingual/fourlang/exp3_v2/train.jsonl"
 validation = "data/multilingual/fourlang/exp3_v2/validation.jsonl"
@@ -59,6 +63,27 @@ direction_validation_samples = 200
 # Continue from the best KD checkpoint with the already-built targeted dataset.
 epochs = 1
 learning_rate = 0.000005
+checkpoint_interval_steps = 500
+direction_validation_samples = 200
+
+[training.m2m100_human_v1]
+# Fair-path stage 1: establish the same three-epoch human-data foundation as NLLB Exp1.
+epochs = 3
+learning_rate = 0.00003
+checkpoint_interval_steps = 1000
+direction_validation_samples = 200
+
+[training.m2m100_kd_from_human_v1]
+# Fair-path stage 2: continue the human foundation on the existing Exp2 KD/replay mix.
+epochs = 2
+learning_rate = 0.000005
+checkpoint_interval_steps = 1000
+direction_validation_samples = 200
+
+[training.m2m100_targeted_from_human_v1]
+# Fair-path stage 3: mirror the historical NLLB Exp3_v2 learning rate.
+epochs = 1
+learning_rate = 0.000001
 checkpoint_interval_steps = 500
 direction_validation_samples = 200
 

@@ -28,6 +28,9 @@ CONFIG_DEFAULT = "configs/multilingual/fourlang_m2m100_v1.toml"
 KD_EXPERIMENT = "m2m100_kd_v1"
 KD_CONTINUATION_EXPERIMENT = "m2m100_kd_v2"
 TARGETED_EXPERIMENT = "m2m100_targeted_v1"
+HUMAN_EXPERIMENT = "m2m100_human_v1"
+KD_FROM_HUMAN_EXPERIMENT = "m2m100_kd_from_human_v1"
+TARGETED_FROM_HUMAN_EXPERIMENT = "m2m100_targeted_from_human_v1"
 EXPECTED_MODEL_TYPE = "m2m_100"
 EXPECTED_REPO = "facebook/m2m100_418M"
 
@@ -99,7 +102,11 @@ def validate_rows(rows: list[dict[str, Any]], path: Path) -> dict[str, int]:
     return dict(sorted(counts.items()))
 
 
-def preflight(config: dict[str, Any]) -> dict[str, Any]:
+def preflight(
+    config: dict[str, Any],
+    stages: tuple[str, ...] = ("kd", "targeted"),
+    report_name: str = "preflight.json",
+) -> dict[str, Any]:
     base = project_path(config["student"]["path"])
     report: dict[str, Any] = {
         "status": "READY",
@@ -107,7 +114,7 @@ def preflight(config: dict[str, Any]) -> dict[str, Any]:
         "base_model": verify_m2m100_artifact(base),
         "datasets": {},
     }
-    for stage in ("kd", "targeted"):
+    for stage in stages:
         train_path, validation_path = data_paths(config, stage)
         if not train_path.is_file() or not validation_path.is_file():
             raise FileNotFoundError(
@@ -132,7 +139,7 @@ def preflight(config: dict[str, Any]) -> dict[str, Any]:
         "path": str(benchmark.resolve()),
         "sha256": file_sha256(benchmark),
     }
-    output = project_path(config["outputs"]["root"]) / "preflight.json"
+    output = project_path(config["outputs"]["root"]) / report_name
     write_json(output, report)
     print(f"M2M100_PREFLIGHT_READY: {output}", flush=True)
     return report
@@ -147,6 +154,20 @@ def exported_model(config: dict[str, Any], experiment: str) -> Path:
 
 
 def stage_plan(config: dict[str, Any], stage: str) -> tuple[str, Path, str]:
+    if stage == "human":
+        return HUMAN_EXPERIMENT, project_path(config["student"]["path"]), "human"
+    if stage == "kd_from_human":
+        return (
+            KD_FROM_HUMAN_EXPERIMENT,
+            exported_model(config, HUMAN_EXPERIMENT),
+            "kd",
+        )
+    if stage == "targeted_from_human":
+        return (
+            TARGETED_FROM_HUMAN_EXPERIMENT,
+            exported_model(config, KD_FROM_HUMAN_EXPERIMENT),
+            "targeted",
+        )
     if stage == "kd":
         return KD_EXPERIMENT, project_path(config["student"]["path"]), "kd"
     if stage == "kd_v2":
@@ -334,6 +355,60 @@ def compare_kd_v2(config: dict[str, Any]) -> dict[str, Any]:
     return report
 
 
+def compare_human_route(config: dict[str, Any]) -> dict[str, Any]:
+    evaluation_root = project_path(config["outputs"]["evaluation_root"])
+    experiments = (
+        HUMAN_EXPERIMENT,
+        KD_FROM_HUMAN_EXPERIMENT,
+        TARGETED_FROM_HUMAN_EXPERIMENT,
+    )
+    payloads = {
+        name: json.loads(
+            (evaluation_root / name / "metrics.json").read_text(encoding="utf-8")
+        )
+        for name in experiments
+    }
+
+    def delta(candidate_name: str, baseline_name: str) -> dict[str, Any]:
+        candidate_payload = payloads[candidate_name]
+        baseline_payload = payloads[baseline_name]
+        return {
+            "summary": {
+                metric: candidate_payload["summary"][metric]
+                - baseline_payload["summary"][metric]
+                for metric in ("macro_bleu", "macro_chrf2", "worst_chrf2")
+            },
+            "directions": {
+                direction: {
+                    metric: candidate_payload["metrics"][direction][metric]
+                    - baseline_payload["metrics"][direction][metric]
+                    for metric in ("bleu", "chrf2")
+                }
+                for direction in directions()
+            },
+        }
+
+    report = {
+        "schema_version": 1,
+        "status": "COMPARED",
+        "route": list(experiments),
+        "summaries": {name: payloads[name]["summary"] for name in experiments},
+        "stage_deltas": {
+            "kd_minus_human": delta(KD_FROM_HUMAN_EXPERIMENT, HUMAN_EXPERIMENT),
+            "targeted_minus_kd": delta(
+                TARGETED_FROM_HUMAN_EXPERIMENT, KD_FROM_HUMAN_EXPERIMENT
+            ),
+            "targeted_minus_human": delta(
+                TARGETED_FROM_HUMAN_EXPERIMENT, HUMAN_EXPERIMENT
+            ),
+        },
+    }
+    destination = evaluation_root / "human_route_comparison.json"
+    write_json(destination, report)
+    print(f"M2M100_HUMAN_ROUTE_COMPARISON_READY: {destination}", flush=True)
+    return report
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Train and evaluate a fresh M2M100-418M four-language student."
@@ -342,6 +417,7 @@ def main() -> None:
         "action",
         choices=(
             "preflight",
+            "preflight-human-route",
             "train-kd",
             "eval-kd",
             "train-targeted",
@@ -351,6 +427,14 @@ def main() -> None:
             "compare",
             "compare-kd-v2",
             "run-kd-v2",
+            "train-human",
+            "eval-human",
+            "train-kd-from-human",
+            "eval-kd-from-human",
+            "train-targeted-from-human",
+            "eval-targeted-from-human",
+            "compare-human-route",
+            "run-human-route",
             "run-all",
         ),
     )
@@ -359,6 +443,12 @@ def main() -> None:
     config = load_config(args.config)
     if args.action == "preflight":
         preflight(config)
+    elif args.action == "preflight-human-route":
+        preflight(
+            config,
+            stages=("human", "kd", "targeted"),
+            report_name="human_route_preflight.json",
+        )
     elif args.action == "train-kd":
         train_stage(config, "kd")
     elif args.action == "eval-kd":
@@ -380,6 +470,33 @@ def main() -> None:
         train_stage(config, "kd_v2")
         evaluate_stage(config, "kd_v2")
         compare_kd_v2(config)
+    elif args.action == "train-human":
+        train_stage(config, "human")
+    elif args.action == "eval-human":
+        evaluate_stage(config, "human")
+    elif args.action == "train-kd-from-human":
+        train_stage(config, "kd_from_human")
+    elif args.action == "eval-kd-from-human":
+        evaluate_stage(config, "kd_from_human")
+    elif args.action == "train-targeted-from-human":
+        train_stage(config, "targeted_from_human")
+    elif args.action == "eval-targeted-from-human":
+        evaluate_stage(config, "targeted_from_human")
+    elif args.action == "compare-human-route":
+        compare_human_route(config)
+    elif args.action == "run-human-route":
+        preflight(
+            config,
+            stages=("human", "kd", "targeted"),
+            report_name="human_route_preflight.json",
+        )
+        train_stage(config, "human")
+        evaluate_stage(config, "human")
+        train_stage(config, "kd_from_human")
+        evaluate_stage(config, "kd_from_human")
+        train_stage(config, "targeted_from_human")
+        evaluate_stage(config, "targeted_from_human")
+        compare_human_route(config)
     else:
         preflight(config)
         train_stage(config, "kd")

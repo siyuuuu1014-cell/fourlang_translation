@@ -27,6 +27,9 @@ validation = "data/multilingual/fourlang/exp3_v2/validation.jsonl"
 [benchmarks]
 flores_devtest = "data/benchmark/fourlang/flores_devtest.parquet"
 
+[baselines]
+nllb_exp3_v2_metrics = "results/evaluation/fourlang/exp3_v2/metrics.json"
+
 [outputs]
 root = "results/student/fourlang_m2m100"
 evaluation_root = "results/evaluation/fourlang_m2m100"
@@ -86,6 +89,14 @@ direction_validation_samples = 200
 # Fair-path stage 3: mirror the historical NLLB Exp3_v2 learning rate.
 epochs = 1
 learning_rate = 0.000001
+checkpoint_interval_steps = 500
+direction_validation_samples = 200
+
+[training.m2m100_targeted_from_human_v2]
+# Controlled Exp3_v2 retry from the KD export, isolated from v1.  The v1 delta
+# was effectively zero, so use a still-conservative but actionable M2M100 LR.
+epochs = 1
+learning_rate = 0.000003
 checkpoint_interval_steps = 500
 direction_validation_samples = 200
 

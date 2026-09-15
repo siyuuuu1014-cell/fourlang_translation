@@ -31,6 +31,7 @@ TARGETED_EXPERIMENT = "m2m100_targeted_v1"
 HUMAN_EXPERIMENT = "m2m100_human_v1"
 KD_FROM_HUMAN_EXPERIMENT = "m2m100_kd_from_human_v1"
 TARGETED_FROM_HUMAN_EXPERIMENT = "m2m100_targeted_from_human_v1"
+TARGETED_FROM_HUMAN_V2_EXPERIMENT = "m2m100_targeted_from_human_v2"
 EXPECTED_MODEL_TYPE = "m2m_100"
 EXPECTED_REPO = "facebook/m2m100_418M"
 
@@ -165,6 +166,12 @@ def stage_plan(config: dict[str, Any], stage: str) -> tuple[str, Path, str]:
     if stage == "targeted_from_human":
         return (
             TARGETED_FROM_HUMAN_EXPERIMENT,
+            exported_model(config, KD_FROM_HUMAN_EXPERIMENT),
+            "targeted",
+        )
+    if stage == "targeted_from_human_v2":
+        return (
+            TARGETED_FROM_HUMAN_V2_EXPERIMENT,
             exported_model(config, KD_FROM_HUMAN_EXPERIMENT),
             "targeted",
         )
@@ -409,6 +416,90 @@ def compare_human_route(config: dict[str, Any]) -> dict[str, Any]:
     return report
 
 
+def compare_targeted_from_human_v2(config: dict[str, Any]) -> dict[str, Any]:
+    evaluation_root = project_path(config["outputs"]["evaluation_root"])
+    experiments = (
+        KD_FROM_HUMAN_EXPERIMENT,
+        TARGETED_FROM_HUMAN_EXPERIMENT,
+        TARGETED_FROM_HUMAN_V2_EXPERIMENT,
+    )
+    payloads = {
+        name: json.loads(
+            (evaluation_root / name / "metrics.json").read_text(encoding="utf-8")
+        )
+        for name in experiments
+    }
+    candidate_payload = payloads[TARGETED_FROM_HUMAN_V2_EXPERIMENT]
+
+    def delta_from_payload(baseline_payload: dict[str, Any]) -> dict[str, Any]:
+        return {
+            "summary": {
+                metric: candidate_payload["summary"][metric]
+                - baseline_payload["summary"][metric]
+                for metric in ("macro_bleu", "macro_chrf2", "worst_chrf2")
+            },
+            "directions": {
+                direction: {
+                    metric: candidate_payload["metrics"][direction][metric]
+                    - baseline_payload["metrics"][direction][metric]
+                    for metric in ("bleu", "chrf2")
+                }
+                for direction in directions()
+            },
+        }
+
+    candidate_minus = {
+        name: delta_from_payload(payloads[name]) for name in experiments[:-1]
+    }
+    kd_delta = candidate_minus[KD_FROM_HUMAN_EXPERIMENT]
+    target_directions = ("en-uz", "zh-uz", "ru-uz")
+    non_target_directions = tuple(
+        direction for direction in directions() if direction not in target_directions
+    )
+    acceptance = {
+        "macro_chrf2_gain_at_least_0_3": (
+            kd_delta["summary"]["macro_chrf2"] >= 0.3
+        ),
+        "all_uz_target_chrf2_improved": all(
+            kd_delta["directions"][direction]["chrf2"] > 0
+            for direction in target_directions
+        ),
+        "no_non_target_chrf2_regression_below_minus_0_5": all(
+            kd_delta["directions"][direction]["chrf2"] >= -0.5
+            for direction in non_target_directions
+        ),
+        "worst_chrf2_not_lower": kd_delta["summary"]["worst_chrf2"] >= 0,
+    }
+    acceptance["passed"] = all(acceptance.values())
+    report: dict[str, Any] = {
+        "schema_version": 1,
+        "status": "COMPARED",
+        "candidate": TARGETED_FROM_HUMAN_V2_EXPERIMENT,
+        "summaries": {name: payloads[name]["summary"] for name in experiments},
+        "candidate_minus": candidate_minus,
+        "acceptance": acceptance,
+    }
+
+    nllb_path_value = config.get("baselines", {}).get("nllb_exp3_v2_metrics")
+    if nllb_path_value:
+        nllb_path = project_path(nllb_path_value)
+        report["nllb_exp3_v2"] = {"path": str(nllb_path.resolve()), "exists": nllb_path.is_file()}
+        if nllb_path.is_file():
+            nllb_payload = json.loads(nllb_path.read_text(encoding="utf-8"))
+            nllb_metrics = nllb_payload.get("metrics", nllb_payload)
+            normalized_nllb = {
+                "metrics": nllb_metrics,
+                "summary": summarize_metrics(nllb_metrics),
+            }
+            report["nllb_exp3_v2"]["summary"] = normalized_nllb["summary"]
+            report["candidate_minus_nllb_exp3_v2"] = delta_from_payload(normalized_nllb)
+
+    destination = evaluation_root / "targeted_from_human_v2_comparison.json"
+    write_json(destination, report)
+    print(f"M2M100_TARGETED_FROM_HUMAN_V2_COMPARISON_READY: {destination}", flush=True)
+    return report
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Train and evaluate a fresh M2M100-418M four-language student."
@@ -433,6 +524,10 @@ def main() -> None:
             "eval-kd-from-human",
             "train-targeted-from-human",
             "eval-targeted-from-human",
+            "train-targeted-from-human-v2",
+            "eval-targeted-from-human-v2",
+            "compare-targeted-from-human-v2",
+            "run-targeted-from-human-v2",
             "compare-human-route",
             "run-human-route",
             "run-all",
@@ -482,6 +577,17 @@ def main() -> None:
         train_stage(config, "targeted_from_human")
     elif args.action == "eval-targeted-from-human":
         evaluate_stage(config, "targeted_from_human")
+    elif args.action == "train-targeted-from-human-v2":
+        train_stage(config, "targeted_from_human_v2")
+    elif args.action == "eval-targeted-from-human-v2":
+        evaluate_stage(config, "targeted_from_human_v2")
+    elif args.action == "compare-targeted-from-human-v2":
+        compare_targeted_from_human_v2(config)
+    elif args.action == "run-targeted-from-human-v2":
+        preflight(config, stages=("targeted",), report_name="targeted_from_human_v2_preflight.json")
+        train_stage(config, "targeted_from_human_v2")
+        evaluate_stage(config, "targeted_from_human_v2")
+        compare_targeted_from_human_v2(config)
     elif args.action == "compare-human-route":
         compare_human_route(config)
     elif args.action == "run-human-route":

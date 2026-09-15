@@ -20,6 +20,9 @@ def test_human_route_uses_m2m100_specific_training_parameters():
     assert settings["m2m100_targeted_from_human_v1"]["learning_rate"] == pytest.approx(
         1e-6
     )
+    targeted_v2 = settings["m2m100_targeted_from_human_v2"]
+    assert targeted_v2["epochs"] == 1
+    assert targeted_v2["learning_rate"] == pytest.approx(3e-6)
 
 
 def test_candidate_is_locked_to_m2m100():
@@ -119,6 +122,14 @@ def test_human_route_uses_isolated_chained_models(tmp_path, monkeypatch):
         "targeted",
     )
 
+    targeted_v2 = runner.stage_plan(settings, "targeted_from_human_v2")
+    assert targeted_v2 == (
+        "m2m100_targeted_from_human_v2",
+        tmp_path
+        / "results/student/fourlang_m2m100/m2m100_kd_from_human_v1/best_model/shared",
+        "targeted",
+    )
+
 
 def test_default_preflight_does_not_change_existing_route(monkeypatch, tmp_path):
     monkeypatch.setattr(runner, "PROJECT_ROOT", tmp_path)
@@ -139,3 +150,45 @@ def test_default_preflight_does_not_change_existing_route(monkeypatch, tmp_path)
     with pytest.raises(FileNotFoundError):
         runner.preflight(settings)
     assert observed == ["kd"]
+
+
+def test_targeted_v2_comparison_applies_acceptance_gate_and_optional_nllb(
+    monkeypatch, tmp_path
+):
+    monkeypatch.setattr(runner, "PROJECT_ROOT", tmp_path)
+    evaluation_root = tmp_path / "evaluation"
+    all_directions = runner.directions()
+
+    def payload(experiment, bleu, chrf2):
+        values = {
+            direction: {"bleu": bleu, "chrf2": chrf2, "samples": 1012}
+            for direction in all_directions
+        }
+        return {
+            "experiment": experiment,
+            "metrics": values,
+            "summary": runner.summarize_metrics(values),
+        }
+
+    experiments = {
+        runner.KD_FROM_HUMAN_EXPERIMENT: payload("kd", 20.0, 40.0),
+        runner.TARGETED_FROM_HUMAN_EXPERIMENT: payload("v1", 20.1, 40.1),
+        runner.TARGETED_FROM_HUMAN_V2_EXPERIMENT: payload("v2", 20.5, 40.5),
+    }
+    for name, value in experiments.items():
+        path = evaluation_root / name / "metrics.json"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(value), encoding="utf-8")
+
+    nllb_path = tmp_path / "nllb.json"
+    nllb_path.write_text(
+        json.dumps(payload("nllb", 22.0, 42.0)["metrics"]), encoding="utf-8"
+    )
+    config = {
+        "outputs": {"evaluation_root": "evaluation"},
+        "baselines": {"nllb_exp3_v2_metrics": "nllb.json"},
+    }
+    report = runner.compare_targeted_from_human_v2(config)
+    assert report["acceptance"]["passed"] is True
+    assert report["nllb_exp3_v2"]["exists"] is True
+    assert report["candidate_minus_nllb_exp3_v2"]["summary"]["macro_chrf2"] == pytest.approx(-1.5)

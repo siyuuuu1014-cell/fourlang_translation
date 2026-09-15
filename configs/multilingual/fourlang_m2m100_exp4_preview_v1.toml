@@ -30,10 +30,24 @@ zh_uz_direction_multiplier = 1.10
 other_direction_multiplier = 1.0
 duplicate_normalization = "inverse_group_size"
 
+[quality_review]
+# Difficulty is not treated as quality. These conservative signals only adjust
+# preview weights and remain subject to review.
+length_log_ratio_mad_threshold = 4.0
+length_log_ratio_min_deviation = 1.0
+minimum_script_characters = 8
+target_script_min_ratio = 0.50
+cross_script_max_ratio = 0.35
+token_overlap_threshold = 0.80
+token_overlap_min_tokens = 5
+one_flag_multiplier = 0.65
+multiple_flag_multiplier = 0.40
+
 [planning]
 effective_batch_size = 32
 observed_optimizer_steps_per_second = 1.9
 review_samples_per_band_per_direction = 3
+quality_samples_per_flag_per_direction = 3
 
 [student]
 id = "m2m100_418m"

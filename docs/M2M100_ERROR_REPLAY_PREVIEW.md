@@ -13,6 +13,10 @@ The approved invariants are:
 The 30/50/15/5 difficulty bands and all numerical multipliers are proposals. Review
 `preview.json` and `review_samples.jsonl` before authorizing a formal dataset build.
 
+The second preview pass separates model difficulty from automatic quality-review
+flags, and normalizes total direction weight so zh-to-uz is exactly 1.10 times an
+ordinary direction. It reuses completed scoring shards and does not rerun the model.
+
 Server preview command:
 
 ```bash

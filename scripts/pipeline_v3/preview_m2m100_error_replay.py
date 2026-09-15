@@ -9,7 +9,9 @@ import argparse
 import hashlib
 import json
 import math
+import re
 import shutil
+import statistics
 import sys
 import unicodedata
 from collections import Counter, defaultdict
@@ -35,6 +37,9 @@ from scripts.pipeline_v3.fourlang_flow import directions  # noqa: E402
 CONFIG_DEFAULT = "configs/multilingual/fourlang_m2m100_exp4_preview_v1.toml"
 REQUIRED_FIELDS = {"src_lang", "tgt_lang", "src_text", "tgt_text"}
 PREVIEW_STATUS = "AWAITING_USER_APPROVAL_NOT_TRAINABLE"
+WORD_RE = re.compile(r"[^\W\d_]+", re.UNICODE)
+CJK_RE = re.compile(r"[\u3400-\u4dbf\u4e00-\u9fff]")
+CYRILLIC_RE = re.compile(r"[\u0400-\u052f]")
 
 
 def project_path(value: str | Path) -> Path:
@@ -347,8 +352,84 @@ def assign_bands(records: list[dict[str, Any]], config: dict[str, Any]) -> None:
             item["difficulty_band"] = band
 
 
+def normalized_text(value: Any) -> str:
+    return " ".join(unicodedata.normalize("NFKC", str(value)).split()).casefold()
+
+
+def alphabetic_count(value: str) -> int:
+    return sum(character.isalpha() for character in value)
+
+
+def token_overlap(source: str, target: str) -> tuple[float, int]:
+    source_tokens = set(WORD_RE.findall(source.casefold()))
+    target_tokens = set(WORD_RE.findall(target.casefold()))
+    smaller = min(len(source_tokens), len(target_tokens))
+    if smaller == 0:
+        return 0.0, 0
+    return len(source_tokens & target_tokens) / smaller, smaller
+
+
+def add_quality_flags(records: list[dict[str, Any]], config: dict[str, Any]) -> None:
+    """Add reviewable language/shape flags without deleting any record."""
+    settings = config["quality_review"]
+    grouped_ratios: dict[str, list[float]] = defaultdict(list)
+    for item in records:
+        row = item["row"]
+        source = normalized_text(row["src_text"])
+        target = normalized_text(row["tgt_text"])
+        ratio = math.log((len(target) + 1) / (len(source) + 1))
+        item["target_source_log_length_ratio"] = ratio
+        grouped_ratios[item["direction"]].append(ratio)
+
+    robust_limits = {}
+    for direction, values in grouped_ratios.items():
+        median = statistics.median(values)
+        mad = statistics.median(abs(value - median) for value in values)
+        deviation = max(
+            float(settings["length_log_ratio_min_deviation"]),
+            float(settings["length_log_ratio_mad_threshold"]) * 1.4826 * mad,
+        )
+        robust_limits[direction] = (median, deviation)
+
+    for item in records:
+        row = item["row"]
+        source = normalized_text(row["src_text"])
+        target = normalized_text(row["tgt_text"])
+        target_lang = str(row["tgt_lang"])
+        flags = []
+        if source == target and alphabetic_count(source) >= 4:
+            flags.append("source_target_identical")
+
+        median, deviation = robust_limits[item["direction"]]
+        if abs(item["target_source_log_length_ratio"] - median) > deviation:
+            flags.append("length_ratio_outlier")
+
+        alphabetic = alphabetic_count(target)
+        if alphabetic >= int(settings["minimum_script_characters"]):
+            cjk_ratio = len(CJK_RE.findall(target)) / alphabetic
+            cyrillic_ratio = len(CYRILLIC_RE.findall(target)) / alphabetic
+            required = float(settings["target_script_min_ratio"])
+            forbidden = float(settings["cross_script_max_ratio"])
+            if target_lang == "zh" and cjk_ratio < required:
+                flags.append("target_script_mismatch")
+            elif target_lang == "ru" and cyrillic_ratio < required:
+                flags.append("target_script_mismatch")
+            elif target_lang in {"en", "uz"} and (cjk_ratio > forbidden or cyrillic_ratio > forbidden):
+                flags.append("target_script_mismatch")
+
+        overlap, comparable_tokens = token_overlap(source, target)
+        if (
+            str(row["src_lang"]) != target_lang
+            and comparable_tokens >= int(settings["token_overlap_min_tokens"])
+            and overlap >= float(settings["token_overlap_threshold"])
+        ):
+            flags.append("high_cross_language_token_overlap")
+        item["quality_flags"] = sorted(set(flags))
+
+
 def apply_provisional_weights(records: list[dict[str, Any]], config: dict[str, Any]) -> None:
     settings = config["provisional_weights"]
+    quality = config["quality_review"]
     duplicate_counts = Counter(item["duplicate_group_id"] for item in records)
     for item in records:
         raw = item["row"].get("weight")
@@ -361,27 +442,62 @@ def apply_provisional_weights(records: list[dict[str, Any]], config: dict[str, A
             original = float(settings["missing_original_weight"])
             imputed = True
         band_multiplier = float(settings[item["difficulty_band"]])
-        direction_multiplier = float(
-            settings["zh_uz_direction_multiplier"]
-            if item["direction"] == "zh-uz"
-            else settings["other_direction_multiplier"]
+        flag_count = len(item.get("quality_flags", []))
+        quality_multiplier = (
+            1.0
+            if flag_count == 0
+            else float(quality["one_flag_multiplier"])
+            if flag_count == 1
+            else float(quality["multiple_flag_multiplier"])
         )
         group_size = duplicate_counts[item["duplicate_group_id"]]
         duplicate_multiplier = 1.0 / group_size
-        proposed = original * band_multiplier * direction_multiplier * duplicate_multiplier
-        if proposed <= 0 or not math.isfinite(proposed):
+        preliminary = original * band_multiplier * quality_multiplier * duplicate_multiplier
+        if preliminary <= 0 or not math.isfinite(preliminary):
             raise RuntimeError(f"Proposed weight is not positive: {item['record_id']}")
         item.update(
             {
                 "original_weight_effective": original,
                 "original_weight_imputed": imputed,
                 "band_multiplier": band_multiplier,
-                "direction_multiplier": direction_multiplier,
+                "quality_multiplier": quality_multiplier,
                 "duplicate_group_size": group_size,
                 "duplicate_multiplier": duplicate_multiplier,
-                "proposed_weight": proposed,
+                "pre_direction_normalization_weight": preliminary,
             }
         )
+
+
+def normalize_direction_mass(records: list[dict[str, Any]], config: dict[str, Any]) -> None:
+    """Make 11 direction totals equal and zh-uz exactly slightly higher."""
+    settings = config["provisional_weights"]
+    current: Counter[str] = Counter()
+    for item in records:
+        current[item["direction"]] += item["pre_direction_normalization_weight"]
+    expected = set(directions())
+    if set(current) != expected or any(current[value] <= 0 for value in expected):
+        raise RuntimeError("Cannot normalize incomplete or non-positive direction mass")
+    priority = {
+        direction: float(
+            settings["zh_uz_direction_multiplier"]
+            if direction == "zh-uz"
+            else settings["other_direction_multiplier"]
+        )
+        for direction in expected
+    }
+    total_mass = sum(current.values())
+    one_unit = total_mass / sum(priority.values())
+    factors = {
+        direction: one_unit * priority[direction] / current[direction]
+        for direction in expected
+    }
+    for item in records:
+        factor = factors[item["direction"]]
+        proposed = item["pre_direction_normalization_weight"] * factor
+        if proposed <= 0 or not math.isfinite(proposed):
+            raise RuntimeError(f"Direction-normalized weight is invalid: {item['record_id']}")
+        item["direction_mass_normalization_multiplier"] = factor
+        item["proposed_weight"] = proposed
 
 
 def read_scored(output_root: Path) -> list[dict[str, Any]]:
@@ -407,13 +523,18 @@ def preview(config: dict[str, Any]) -> dict[str, Any]:
     if len(records) != manifest["rows"]:
         raise RuntimeError("Scored row count does not match the scoring manifest.")
     assign_bands(records, config)
+    add_quality_flags(records, config)
     apply_provisional_weights(records, config)
+    normalize_direction_mass(records, config)
 
     band_counts: dict[str, Counter[str]] = defaultdict(Counter)
+    quality_flag_counts: dict[str, Counter[str]] = defaultdict(Counter)
     direction_counts: Counter[str] = Counter()
     weight_sums: Counter[str] = Counter()
     for item in records:
         band_counts[item["direction"]][item["difficulty_band"]] += 1
+        for flag in item["quality_flags"]:
+            quality_flag_counts[item["direction"]][flag] += 1
         direction_counts[item["direction"]] += 1
         weight_sums[item["direction"]] += item["proposed_weight"]
     sample_count = int(config["planning"]["review_samples_per_band_per_direction"])
@@ -424,6 +545,19 @@ def preview(config: dict[str, Any]) -> dict[str, Any]:
             selected.sort(key=lambda item: (item["difficulty_nll"], item["record_id"]), reverse=band in {"hard", "extreme"})
             samples.extend(selected[:sample_count])
     atomic_jsonl(output_root / "review_samples.jsonl", samples)
+    quality_samples = []
+    quality_sample_count = int(config["planning"]["quality_samples_per_flag_per_direction"])
+    for direction in directions():
+        flags = sorted(quality_flag_counts[direction])
+        for flag in flags:
+            selected = [
+                item
+                for item in records
+                if item["direction"] == direction and flag in item["quality_flags"]
+            ]
+            selected.sort(key=lambda item: (-item["difficulty_nll"], item["record_id"]))
+            quality_samples.extend(selected[:quality_sample_count])
+    atomic_jsonl(output_root / "quality_flag_samples.jsonl", quality_samples)
 
     total = len(records)
     effective_batch = int(config["planning"]["effective_batch_size"])
@@ -445,6 +579,9 @@ def preview(config: dict[str, Any]) -> dict[str, Any]:
         "total_rows": total,
         "rows_by_direction": dict(sorted(direction_counts.items())),
         "rows_by_direction_and_band": {key: dict(value) for key, value in sorted(band_counts.items())},
+        "quality_flags_by_direction": {
+            key: dict(value) for key, value in sorted(quality_flag_counts.items())
+        },
         "proposed_weight_sum_by_direction": dict(sorted(weight_sums.items())),
         "proposed_weight_range": {
             "min": min(item["proposed_weight"] for item in records),
@@ -453,8 +590,9 @@ def preview(config: dict[str, Any]) -> dict[str, Any]:
         "provisional_parameters_requiring_user_approval": {
             "difficulty_band_percentiles": config["difficulty_bands"],
             "weight_multipliers": config["provisional_weights"],
+            "quality_review": config["quality_review"],
             "missing_or_invalid_weight_is_temporarily_imputed": config["provisional_weights"]["missing_original_weight"],
-            "zh_uz_priority_is_provisional": config["provisional_weights"]["zh_uz_direction_multiplier"],
+            "zh_uz_total_direction_mass_ratio": config["provisional_weights"]["zh_uz_direction_multiplier"],
         },
         "planning_only": {
             "optimizer_steps_per_epoch": steps,
@@ -462,6 +600,7 @@ def preview(config: dict[str, Any]) -> dict[str, Any]:
             "free_disk_gb_at_preview": usage.free / (1024 ** 3),
         },
         "review_samples": str((output_root / "review_samples.jsonl").resolve()),
+        "quality_flag_samples": str((output_root / "quality_flag_samples.jsonl").resolve()),
         "next_action": "Review preview.json and review_samples.jsonl; do not train until explicit approval.",
     }
     atomic_json(output_root / "preview.json", result)

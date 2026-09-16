@@ -66,12 +66,17 @@ def list_model_manifest() -> list[dict]:
 
 
 def ensure_tar(model_id: str) -> Path:
-    """Return the tar path for a package, creating it on first use."""
+    """Return the tar path for a package, creating or refreshing it as needed."""
     pkg_dir = MODEL_PACKAGES_DIR / f"{model_id}_mobile"
     if not pkg_dir.is_dir():
         raise HTTPException(status_code=404, detail=f"model package {model_id!r} not found")
     tar_path = MODEL_PACKAGES_DIR / f"{model_id}_mobile.tar"
-    if not tar_path.exists():
+    manifest = pkg_dir / "MANIFEST.json"
+    stale = (
+        not tar_path.exists()
+        or (manifest.exists() and tar_path.stat().st_mtime < manifest.stat().st_mtime)
+    )
+    if stale:
         with tarfile.open(tar_path, "w") as tf:
             tf.add(pkg_dir, arcname=pkg_dir.name)
     return tar_path

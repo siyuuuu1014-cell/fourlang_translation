@@ -76,6 +76,16 @@ learning_rate = 0.000005
 epochs = 3
 kd_train = "data/distillation/zh_uz/flores_relaxed_8k/train.jsonl"
 
+# One-direction continuation from the currently selected ZH-UZ model. This is
+# isolated from the existing bidirectional export and intentionally starts with
+# a conservative one-epoch, low-learning-rate trial.
+[variants.directional_existing_v1]
+pairs = ["zh_uz"]
+learning_rate = 0.000002
+epochs = 1
+kd_train = "data/distillation/zh_uz/flores_relaxed_8k/train.jsonl"
+source_model = "results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/best_model/shared"
+
 [[pairs]]
 id = "zh_uz"
 languages = ["zh", "uz"]

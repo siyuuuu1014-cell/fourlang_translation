@@ -40,6 +40,7 @@ TRAIN_VARIANTS = (
     "full_native_lr2e6",
     "flores_relaxed_8k",
     "flores_relaxed_8k_ep3",
+    "directional_existing_v1",
 )
 BASELINE_VARIANTS = ("baseline_exp1", "baseline_exp2")
 ALL_VARIANTS = BASELINE_VARIANTS + TRAIN_VARIANTS
@@ -70,11 +71,15 @@ def validate_direction(pair: dict[str, Any], direction: str | None) -> str:
     return str(direction)
 
 
+def is_directional_variant(variant: str) -> bool:
+    return variant in {"directional_full", "directional_existing_v1"}
+
+
 def run_id(variant: str, direction: str | None = None) -> str:
-    if variant == "directional_full":
+    if is_directional_variant(variant):
         if not direction:
-            raise ValueError("directional_full requires a direction.")
-        return f"directional_full__{direction.replace('-', '_')}"
+            raise ValueError(f"{variant} requires a direction.")
+        return f"{variant}__{direction.replace('-', '_')}"
     return variant
 
 
@@ -83,6 +88,12 @@ def variant_settings(config: dict[str, Any], variant: str) -> dict[str, Any]:
     if not isinstance(settings, dict):
         raise KeyError(f"Missing variants.{variant} configuration.")
     return dict(settings)
+
+
+def validate_variant_pair(settings: dict[str, Any], pair_id: str) -> None:
+    allowed = settings.get("pairs")
+    if allowed is not None and pair_id not in allowed:
+        raise ValueError(f"Variant is only configured for pairs {allowed}; got {pair_id!r}.")
 
 
 def prepared_root(pair_id: str, variant: str, direction: str | None = None) -> Path:
@@ -298,12 +309,14 @@ def prepare(
     pair = pair_config(config, pair_id)
     if pair.get("kd_quality_status") != "approved":
         raise RuntimeError(f"{pair_id} KD data has not passed its quality gate.")
-    if variant == "directional_full":
+    settings = variant_settings(config, variant)
+    validate_variant_pair(settings, pair_id)
+    if is_directional_variant(variant):
         direction = validate_direction(pair, direction)
     elif direction is not None:
         raise ValueError(f"{variant} does not accept --direction.")
 
-    source_name = str(variant_settings(config, variant).get("kd_train", pair["kd_train"]))
+    source_name = str(settings.get("kd_train", pair["kd_train"]))
     source_path = project_path(source_name)
     validation_path = project_path(pair["validation"])
     human_path = project_path(pair["human_train"])
@@ -329,7 +342,7 @@ def prepare(
         tuple(pair["languages"]),
         previous_train,
     )
-    if variant == "directional_full":
+    if is_directional_variant(variant):
         source, target = direction.split("-")
         train_frame = train_frame[
             (train_frame["src_lang"] == source)
@@ -360,7 +373,7 @@ def prepare(
             "variant": variant,
             "direction": direction,
             "training": config["training"],
-            "variant_settings": variant_settings(config, variant),
+            "variant_settings": settings,
         }
     )
     report = {
@@ -429,7 +442,7 @@ def trained_model_path(
     pair_id: str, variant: str, direction: str | None = None
 ) -> Path:
     root = artifact_root(pair_id, variant, direction) / "best_model"
-    if variant != "directional_full":
+    if not is_directional_variant(variant):
         return root / "shared"
     checked = str(direction).replace("-", "_")
     return root / checked
@@ -458,7 +471,9 @@ def train(
     if variant not in TRAIN_VARIANTS:
         raise ValueError(f"Cannot train baseline variant {variant!r}.")
     pair = pair_config(config, pair_id)
-    if variant == "directional_full":
+    settings = variant_settings(config, variant)
+    validate_variant_pair(settings, pair_id)
+    if is_directional_variant(variant):
         direction = validate_direction(pair, direction)
         source, target = direction.split("-")
         shared = False
@@ -468,7 +483,7 @@ def train(
         source, target = pair["languages"]
         shared = True
     verify_prepared(config, pair_id, variant, direction)
-    source_model = project_path(pair["exp1_model"])
+    source_model = project_path(settings.get("source_model", pair["exp1_model"]))
     model_files(source_model)
     prepared = prepared_root(pair_id, variant, direction)
     destination = trained_model_path(pair_id, variant, direction)
@@ -479,10 +494,10 @@ def train(
             "exp2": {
                 **config["training"]["exp2"],
                 "learning_rate": float(
-                    variant_settings(config, variant)["learning_rate"]
+                    settings["learning_rate"]
                 ),
                 "epochs": int(
-                    variant_settings(config, variant).get(
+                    settings.get(
                         "epochs", config["training"]["exp2"]["epochs"]
                     )
                 ),
@@ -520,7 +535,7 @@ def _score_model(
     direction: str | None,
     benchmark: pd.DataFrame,
 ) -> tuple[Path, dict[str, Any]]:
-    if variant == "directional_full":
+    if is_directional_variant(variant):
         direction = validate_direction(pair, direction)
         directions = (direction,)
     else:
@@ -705,6 +720,10 @@ def compare(config: dict[str, Any], pair_id: str) -> dict[str, Any]:
         ("flores_relaxed_8k_ep3", None),
     ]
     variants.extend(("directional_full", item) for item in pair_directions(pair))
+    if pair_id == "zh_uz":
+        variants.extend(
+            ("directional_existing_v1", item) for item in pair_directions(pair)
+        )
     rows: list[dict[str, Any]] = []
     winners: dict[str, Any] = {}
     for direction in pair_directions(pair):
@@ -776,6 +795,14 @@ def status(config: dict[str, Any]) -> dict[str, Any]:
             ("flores_relaxed_8k", None),
             ("flores_relaxed_8k_ep3", None),
             *(('directional_full', item) for item in pair_directions(pair)),
+            *(
+                tuple(
+                    ("directional_existing_v1", item)
+                    for item in pair_directions(pair)
+                )
+                if pair_id == "zh_uz"
+                else ()
+            ),
         ):
             rows.append(
                 {
@@ -832,10 +859,10 @@ def main() -> None:
             parser.error(f"{args.action} requires --pair and --variant")
     if args.action in {"compare", "final_evaluate"} and not args.pair:
         parser.error(f"{args.action} requires --pair")
-    if args.variant == "directional_full" and not args.direction:
-        parser.error("directional_full requires --direction")
-    if args.variant != "directional_full" and args.direction:
-        parser.error("--direction is only valid with directional_full")
+    if args.variant and is_directional_variant(args.variant) and not args.direction:
+        parser.error(f"{args.variant} requires --direction")
+    if args.variant and not is_directional_variant(args.variant) and args.direction:
+        parser.error("--direction is only valid with a directional variant")
 
     if args.action == "validate":
         result = validate(config)

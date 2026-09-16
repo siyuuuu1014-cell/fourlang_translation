@@ -60,6 +60,13 @@ def config() -> dict:
                 "epochs": 3,
                 "kd_train": "relaxed.jsonl",
             },
+            "directional_existing_v1": {
+                "pairs": ["zh_uz"],
+                "learning_rate": 2e-6,
+                "epochs": 1,
+                "kd_train": "relaxed.jsonl",
+                "source_model": "ep3",
+            },
         },
         "pairs": [
             {
@@ -94,6 +101,10 @@ class WeakPairAblationTests(unittest.TestCase):
         self.assertEqual(
             ablation.run_id("directional_full", "zh-uz"),
             "directional_full__zh_uz",
+        )
+        self.assertEqual(
+            ablation.run_id("directional_existing_v1", "zh-uz"),
+            "directional_existing_v1__zh_uz",
         )
 
     def test_prepare_full_keeps_every_unique_eligible_row(self):
@@ -258,6 +269,28 @@ class WeakPairAblationTests(unittest.TestCase):
         self.assertEqual(runtime_config["training"]["exp2"]["epochs"], 3)
         self.assertEqual(runtime_config["training"]["exp2"]["learning_rate"], 5e-6)
         self.assertEqual(cfg["training"]["exp2"]["epochs"], 2)
+
+    def test_directional_existing_starts_from_ep3_with_conservative_settings(self):
+        cfg = config()
+        prepared = [row("zh", "uz", 1)]
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "ep3").mkdir(parents=True)
+            with mock.patch.object(ablation, "PROJECT_ROOT", root), mock.patch.object(
+                ablation, "verify_prepared"
+            ), mock.patch.object(ablation, "model_files"), mock.patch.object(
+                ablation, "_read_jsonl", return_value=prepared
+            ), mock.patch.object(ablation, "train_model", return_value={}) as trainer:
+                report = ablation.train(
+                    cfg, "zh_uz", "directional_existing_v1", "zh-uz"
+                )
+        self.assertEqual(trainer.call_args.args[1], str(root / "ep3"))
+        self.assertEqual(trainer.call_args.args[2:4], ("zh", "uz"))
+        self.assertFalse(trainer.call_args.kwargs["shared"])
+        runtime_config = trainer.call_args.args[7]
+        self.assertEqual(runtime_config["training"]["exp2"]["epochs"], 1)
+        self.assertEqual(runtime_config["training"]["exp2"]["learning_rate"], 2e-6)
+        self.assertEqual(report["source_model"], str(root / "ep3"))
 
     def test_compare_uses_selected_baseline_and_chrf_thresholds(self):
         cfg = config()

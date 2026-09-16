@@ -43,6 +43,15 @@ sys.path.insert(0, str(PROJECT_ROOT))
 LANG_TOKEN_IDS = {"en": 128022, "zh": 128102, "uz": 128096, "ru": 128077}
 SPECIAL_TOKENS = {"bos_token_id": 0, "eos_token_id": 2, "pad_token_id": 1}
 
+PAIR_TEST_CASES = {
+    "zh_uz": [("zh", "uz", "今天天气怎么样"), ("uz", "zh", "Salom, dunyo.")],
+    "en_zh": [("en", "zh", "Hello, world."), ("zh", "en", "你好，世界。")],
+    "en_uz": [("en", "uz", "Hello, world."), ("uz", "en", "Salom, dunyo.")],
+    "en_ru": [("en", "ru", "Hello, world."), ("ru", "en", "Привет, мир.")],
+    "zh_ru": [("zh", "ru", "你好，世界。"), ("ru", "zh", "Привет, мир.")],
+    "uz_ru": [("uz", "ru", "Salom, dunyo."), ("ru", "uz", "Привет, мир.")],
+}
+
 FAMILY_TOKENIZER_FILES = {
     "m2m100": [
         "config.json",
@@ -250,7 +259,7 @@ def package(fp32_dir: Path, out_dir: Path, *, family: str, model_path: str, vers
     print(f"packaged {len(manifest['files'])} files into {out_dir}")
 
 
-def verify(model_dir: Path, family: str) -> None:
+def verify(model_dir: Path, family: str, pair: str | None = None) -> None:
     import onnxruntime as ort
     from optimum.onnxruntime import ORTModelForSeq2SeqLM
     from inference.loader import _load_tokenizer
@@ -273,8 +282,8 @@ def verify(model_dir: Path, family: str) -> None:
         gen = model.generate(**inputs, **gen_kwargs)
         return tokenizer.batch_decode(gen, skip_special_tokens=True)[0]
 
-    cases = {
-        "small100": [("zh", "uz", "今天天气怎么样"), ("uz", "zh", "Salom, dunyo.")],
+    cases = PAIR_TEST_CASES.get(pair) if pair else {
+        "small100": PAIR_TEST_CASES["zh_uz"],
         "m2m100": [("zh", "uz", "今天天气怎么样"), ("en", "ru", "Hello, world.")],
     }[family]
     for src, tgt, text in cases:
@@ -285,6 +294,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--model", required=True, help="Path to the HF checkpoint.")
     parser.add_argument("--family", choices=("m2m100", "small100"), default="m2m100")
+    parser.add_argument("--pair", help="Pair id (e.g. zh_uz) for direction-correct verify cases.")
     parser.add_argument("--version", default="1.0.0", help="Package version tag.")
     parser.add_argument("--output", required=True, help="Output bundle directory.")
     parser.add_argument("--work-dir", default="onnx_export/_work", help="Scratch dir for fp32.")
@@ -305,7 +315,7 @@ def main() -> int:
 
     if not args.skip_verify:
         print("verifying ...")
-        verify(out_dir, args.family)
+        verify(out_dir, args.family, args.pair)
 
     print("done")
     return 0

@@ -41,6 +41,7 @@ TRAIN_VARIANTS = (
     "flores_relaxed_8k",
     "flores_relaxed_8k_ep3",
     "directional_existing_v1",
+    "directional_existing_ep2_v1",
 )
 BASELINE_VARIANTS = ("baseline_exp1", "baseline_exp2")
 ALL_VARIANTS = BASELINE_VARIANTS + TRAIN_VARIANTS
@@ -72,7 +73,11 @@ def validate_direction(pair: dict[str, Any], direction: str | None) -> str:
 
 
 def is_directional_variant(variant: str) -> bool:
-    return variant in {"directional_full", "directional_existing_v1"}
+    return variant in {
+        "directional_full",
+        "directional_existing_v1",
+        "directional_existing_ep2_v1",
+    }
 
 
 def run_id(variant: str, direction: str | None = None) -> str:
@@ -721,9 +726,13 @@ def compare(config: dict[str, Any], pair_id: str) -> dict[str, Any]:
     ]
     variants.extend(("directional_full", item) for item in pair_directions(pair))
     if pair_id == "zh_uz":
-        variants.extend(
-            ("directional_existing_v1", item) for item in pair_directions(pair)
-        )
+        for directional_variant in (
+            "directional_existing_v1",
+            "directional_existing_ep2_v1",
+        ):
+            variants.extend(
+                (directional_variant, item) for item in pair_directions(pair)
+            )
     rows: list[dict[str, Any]] = []
     winners: dict[str, Any] = {}
     for direction in pair_directions(pair):
@@ -797,7 +806,11 @@ def status(config: dict[str, Any]) -> dict[str, Any]:
             *(('directional_full', item) for item in pair_directions(pair)),
             *(
                 tuple(
-                    ("directional_existing_v1", item)
+                    (variant, item)
+                    for variant in (
+                        "directional_existing_v1",
+                        "directional_existing_ep2_v1",
+                    )
                     for item in pair_directions(pair)
                 )
                 if pair_id == "zh_uz"

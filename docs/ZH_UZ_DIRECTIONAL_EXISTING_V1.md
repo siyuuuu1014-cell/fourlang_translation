@@ -51,3 +51,21 @@ identical completed training run reuses its exported model.
 Compare the new FLORES dev result with the current `flores_relaxed_8k_ep3`
 result. Promote only if `zh→uz` chrF2 improves by at least `0.30` and BLEU does
 not regress. Do not run FLORES devtest until the dev decision is frozen.
+
+## Two-epoch follow-up
+
+`directional_existing_ep2_v1` starts again from the original
+`flores_relaxed_8k_ep3` model and changes only the duration from one epoch to
+two. It does not continue from or overwrite the one-epoch result.
+
+Use the same `prepare`, `train`, and `evaluate` commands with:
+
+```text
+--variant directional_existing_ep2_v1
+```
+
+Its output model is:
+
+```text
+results/experiments/weak_pair_ablation/zh_uz/directional_existing_ep2_v1__zh_uz/best_model/zh_uz
+```

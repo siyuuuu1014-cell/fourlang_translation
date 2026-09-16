@@ -86,6 +86,15 @@ epochs = 1
 kd_train = "data/distillation/zh_uz/flores_relaxed_8k/train.jsonl"
 source_model = "results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/best_model/shared"
 
+# Controlled follow-up to directional_existing_v1. It starts from the same ep3
+# source model and changes only the duration from one epoch to two epochs.
+[variants.directional_existing_ep2_v1]
+pairs = ["zh_uz"]
+learning_rate = 0.000002
+epochs = 2
+kd_train = "data/distillation/zh_uz/flores_relaxed_8k/train.jsonl"
+source_model = "results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/best_model/shared"
+
 [[pairs]]
 id = "zh_uz"
 languages = ["zh", "uz"]

@@ -221,59 +221,28 @@ def stable_hash(
 
 def find_madlad_snapshot() -> Path:
 
-    roots = [
-
-        Path(
-            "/root/autodl-tmp/"
-            "huggingface/hub/"
-            "models--google--madlad400-3b-mt/"
-            "snapshots"
-        ),
-
-        Path(
-            "/root/.cache/"
-            "huggingface/hub/"
-            "models--google--madlad400-3b-mt/"
-            "snapshots"
-        ),
-    ]
-
-    candidates = []
-
-    for root in roots:
-
-        if not root.exists():
-            continue
-
-        for child in root.iterdir():
-
-            if (
-                child.is_dir()
-                and
-                (
-                    child
-                    /
-                    "config.json"
-                ).exists()
-            ):
-
-                candidates.append(
-                    child
-                )
-
-    if not candidates:
-
-        raise FileNotFoundError(
-            "MADLAD snapshot not found."
-        )
-
-    candidates.sort(
-        key=lambda path:
-            path.stat().st_mtime,
-        reverse=True,
+    model_root = os.environ.get(
+        "FOURLANG_MODEL_ROOT",
+        "/root/autodl-tmp/models",
     )
 
-    return candidates[0]
+    path = Path(model_root) / "madlad400-3b-mt"
+
+    if (
+        path.is_dir()
+        and
+        (
+            path
+            /
+            "config.json"
+        ).is_file()
+    ):
+        return path
+
+    raise FileNotFoundError(
+        f"MADLAD snapshot not found at {path}; "
+        "set FOURLANG_MODEL_ROOT or pass --madlad_path."
+    )
 
 
 # ============================================================

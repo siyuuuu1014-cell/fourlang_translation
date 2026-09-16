@@ -1,0 +1,33 @@
+{
+  "name": "m2m100_fourlang_mobile",
+  "version": "2.0.0",
+  "framework": "ONNX (onnxruntime-mobile)",
+  "quantization": "int8 dynamic (MatMul/Gather 权重对称 per-tensor 量化，含 If 子图递归)",
+  "base_model": "facebook/m2m100_418M",
+  "base_license": "MIT",
+  "source_checkpoint": "results/student/fourlang_m2m100/m2m100_targeted_from_human_v1/best_model/shared",
+  "model_type": "m2m_100",
+  "vocab_size": 128112,
+  "d_model": 1024,
+  "encoder_layers": 12,
+  "decoder_layers": 12,
+  "attention_heads": 16,
+  "head_dim": 64,
+  "languages": {
+    "en": {"token_id": 128022},
+    "zh": {"token_id": 128102},
+    "uz": {"token_id": 128096},
+    "ru": {"token_id": 128077}
+  },
+  "special_tokens": {"bos_token_id": 0, "eos_token_id": 2, "pad_token_id": 1},
+  "generation": {"max_source_length": 256, "max_new_tokens": 256, "num_beams": 5, "early_stopping": false},
+  "layout": "2-file merged decoder (KV cache retained)",
+  "runtime_note": "onnxruntime 需 ORT_ENABLE_BASIC 图优化（EXTENDED 的 TransposeDQWeightsForMatMulNBits 对跨子图 int8 权重有 bug）",
+  "files": {
+    "encoder_model.onnx": {"size_bytes": 287317499, "role": "encode source once -> last_hidden_state"},
+    "decoder_model_merged.onnx": {"size_bytes": 473810586, "role": "merged decoder (If 节点自动处理 first-step / with-past)，输出 logits + present key/values"},
+    "sentencepiece.bpe.model": {"size_bytes": 2423393, "role": "M2M100 SentencePiece BPE 分词器"},
+    "vocab.json": {"size_bytes": 3708092, "role": "tokenizer vocab"},
+    "vocab.txt": {"size_bytes": 2330563, "role": "piece+score 辅助（BPE 合并规则在 sentencepiece.bpe.model 里）"}
+  }
+}

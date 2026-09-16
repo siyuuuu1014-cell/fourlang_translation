@@ -54,6 +54,51 @@ class TranslateCurrentModelsTests(unittest.TestCase):
         self.assertTrue(en_uz["config_available"])
         self.assertEqual(en_uz["model_path"], uz_en["model_path"])
 
+    def test_multidirection_input_switches_or_uses_inline_direction(self) -> None:
+        self.assertEqual(
+            current.parse_multidirection_input("/direction uz-ru", "zh-en"),
+            ("switch", "uz-ru", None),
+        )
+        self.assertEqual(
+            current.parse_multidirection_input("ru-uz: Добрый день", "zh-en"),
+            ("translate", "ru-uz", "Добрый день"),
+        )
+        self.assertEqual(
+            current.parse_multidirection_input("你好", "zh-en"),
+            ("translate", "zh-en", "你好"),
+        )
+
+    def test_bare_direction_switches_without_translating(self) -> None:
+        self.assertEqual(
+            current.parse_multidirection_input("zh-uz", "en-ru"),
+            ("switch", "zh-uz", None),
+        )
+        self.assertEqual(
+            current.parse_multidirection_input("uz_zh", "en-ru"),
+            ("switch", "uz-zh", None),
+        )
+
+    def test_bare_direction_command_requires_argument(self) -> None:
+        with self.assertRaises(ValueError):
+            current.parse_multidirection_input("/direction", "zh-en")
+        with self.assertRaises(ValueError):
+            current.parse_multidirection_input("/direction ", "zh-en")
+
+    def test_fourlang_stages_resolve_to_shared_exports(self) -> None:
+        self.assertEqual(set(current.FOURLANG_STAGES), {"exp1", "exp2", "exp3_v2"})
+        for path in current.FOURLANG_STAGES.values():
+            self.assertTrue(path.endswith("best_model/shared"))
+
+    def test_multidirection_control_commands(self) -> None:
+        self.assertEqual(
+            current.parse_multidirection_input("/directions", "en-uz"),
+            ("directions", "en-uz", None),
+        )
+        self.assertEqual(
+            current.parse_multidirection_input("/quit", "en-uz"),
+            ("quit", "en-uz", None),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

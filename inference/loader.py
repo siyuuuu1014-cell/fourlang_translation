@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -63,12 +64,28 @@ def _select_dtype(device: torch.device, requested: str) -> torch.dtype | None:
     }[requested]
 
 
+def _is_nllb(source: str) -> bool:
+    """Detect an NLLB checkpoint from its config before loading its tokenizer."""
+    config_file = Path(source) / "config.json"
+    if not config_file.is_file():
+        return False
+    try:
+        payload = json.loads(config_file.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return False
+    return "nllb" in str(payload.get("tokenizer_class", "")).lower()
+
+
 def _load_tokenizer(model_source: str, adapter_source: str | None) -> tuple[Any, str]:
     """Load the tokenizer required by the model family.
 
     SMaLL-100 ships a custom tokenizer whose target-language prefix is part of
     the encoder input. Its bundled tokenizer_config.json incorrectly names the
     standard M2M100 tokenizer, so AutoTokenizer cannot be used for that model.
+
+    NLLB checkpoints are loaded with the slow SentencePiece tokenizer: the fast
+    NllbTokenizerFast ships a broken split regex and crashes on some inputs
+    after a src_lang change.
     """
 
     model_dir = Path(model_source)
@@ -91,15 +108,35 @@ def _load_tokenizer(model_source: str, adapter_source: str | None) -> tuple[Any,
             tgt_lang="en",
             model_max_length=1024,
         )
+        # The bundled SMALL100Tokenizer tokenizes via
+        # `sp_model.encode(text, out_type=str)`, which is fragile across
+        # sentencepiece versions (some versions pass the `str` class straight
+        # to C++ and raise "Unable to cast str to C++ type"). Pin it to the
+        # stable `encode_as_pieces` entry point instead.
+        sp_model = tokenizer.sp_model
+        tokenizer._tokenize = lambda text: sp_model.encode_as_pieces(text)
         return tokenizer, "small100"
 
     tokenizer_source = model_source
     if adapter_source and Path(adapter_source).is_dir():
         if (Path(adapter_source) / "tokenizer_config.json").exists():
             tokenizer_source = adapter_source
+
+    if _is_nllb(tokenizer_source):
+        tokenizer = AutoTokenizer.from_pretrained(tokenizer_source, use_fast=False)
+        return tokenizer, "nllb"
+
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_source)
     tokenizer_name = type(tokenizer).__name__.lower()
-    tokenizer_kind = "marian" if "marian" in tokenizer_name else "m2m100"
+    if "nllb" in tokenizer_name:
+        # Fallback for NLLB checkpoints whose config does not declare a
+        # tokenizer_class: reload as the slow SentencePiece tokenizer.
+        tokenizer = AutoTokenizer.from_pretrained(tokenizer_source, use_fast=False)
+        tokenizer_kind = "nllb"
+    elif "marian" in tokenizer_name:
+        tokenizer_kind = "marian"
+    else:
+        tokenizer_kind = "m2m100"
     return tokenizer, tokenizer_kind
 
 

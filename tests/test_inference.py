@@ -47,6 +47,25 @@ class FakeModel:
         return torch.tensor([[1]])
 
 
+class FakeNllbTokenizer:
+    """NLLB fast tokenizers expose language codes only via the vocabulary."""
+
+    CODES = {"eng_Latn": 11, "zho_Hans": 10, "rus_Cyrl": 12, "uzn_Latn": 13}
+
+    def __init__(self) -> None:
+        self.src_lang = None
+        self.unk_token_id = 0
+
+    def __call__(self, *_args, **_kwargs):
+        return FakeBatch(input_ids=torch.tensor([[1]]))
+
+    def convert_tokens_to_ids(self, token: str) -> int:
+        return self.CODES[token]
+
+    def batch_decode(self, *_args, **_kwargs):
+        return ["translated"]
+
+
 class DirectionTests(unittest.TestCase):
     def test_all_twelve_directions_are_available(self) -> None:
         self.assertEqual(len(SUPPORTED_DIRECTIONS), 12)
@@ -103,6 +122,21 @@ class DirectionTests(unittest.TestCase):
         )
         TranslationEngine(loaded, direction="zh-en").translate("你好")
         self.assertEqual(tokenizer.src_lang, "zh")
+        self.assertEqual(model.generate_kwargs["forced_bos_token_id"], 11)
+
+    def test_nllb_uses_nllb_language_codes(self) -> None:
+        tokenizer = FakeNllbTokenizer()
+        model = FakeModel()
+        loaded = LoadedModel(
+            tokenizer=tokenizer,
+            model=model,
+            device=torch.device("cpu"),
+            model_path="models/fourlang",
+            adapter_path=None,
+            tokenizer_kind="nllb",
+        )
+        TranslationEngine(loaded, direction="zh-en").translate("你好")
+        self.assertEqual(tokenizer.src_lang, "zho_Hans")
         self.assertEqual(model.generate_kwargs["forced_bos_token_id"], 11)
 
     def test_marian_uses_fixed_direction_without_language_id(self) -> None:

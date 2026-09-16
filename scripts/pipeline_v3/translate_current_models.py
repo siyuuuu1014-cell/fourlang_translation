@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -12,6 +13,19 @@ from typing import Any
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT))
 DEFAULT_MANIFEST = PROJECT_ROOT / "configs/specialists/current_pair_models.json"
+FOURLANG_STAGES = {
+    "exp1": "results/student/fourlang/exp1/best_model/shared",
+    "exp2": "results/student/fourlang/exp2/best_model/shared",
+    "exp3_v2": "results/student/fourlang/exp3_v2/best_model/shared",
+}
+INLINE_DIRECTION_RE = re.compile(
+    r"^\s*([a-z]{2})\s*(?:->|-|_)\s*([a-z]{2})\s*[:：]\s*(.+?)\s*$",
+    re.IGNORECASE,
+)
+BARE_DIRECTION_RE = re.compile(
+    r"^\s*([a-z]{2})\s*(?:->|-|_)\s*([a-z]{2})\s*$",
+    re.IGNORECASE,
+)
 
 from inference.engine import TranslationEngine, parse_direction  # noqa: E402
 from inference.loader import load_translation_model  # noqa: E402
@@ -102,6 +116,26 @@ def require_model(path: Path, direction: str) -> None:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--direction", help="Direction such as zh-uz or ru_en")
+    parser.add_argument(
+        "--all-directions",
+        action="store_true",
+        help=(
+            "Load one explicitly supplied shared model once, then switch among "
+            "all 12 directions interactively"
+        ),
+    )
+    parser.add_argument(
+        "--fourlang",
+        nargs="?",
+        const="exp2",
+        choices=tuple(FOURLANG_STAGES),
+        metavar="STAGE",
+        help=(
+            "Interactive shared four-language model; optional stage is one of "
+            + ", ".join(FOURLANG_STAGES)
+            + " (default exp2). Implies --all-directions."
+        ),
+    )
     parser.add_argument("--text", help="One sentence; omit for interactive input")
     parser.add_argument(
         "--model",
@@ -125,6 +159,46 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def parse_multidirection_input(
+    value: str, current_direction: str
+) -> tuple[str, str, str | None]:
+    """Return (action, direction, text) for the shared-model interactive shell."""
+    text = value.strip()
+    lowered = text.lower()
+    if lowered in {"/quit", "/exit", "quit", "exit", "q"}:
+        return "quit", current_direction, None
+    if lowered in {"/help", "help"}:
+        return "help", current_direction, None
+    if lowered in {"/directions", "/list"}:
+        return "directions", current_direction, None
+    if lowered == "/direction" or lowered == "/direction ":
+        raise ValueError("usage: /direction zh-uz")
+    if lowered.startswith("/direction "):
+        parts = text.split(None, 1)
+        if len(parts) < 2 or not parts[1].strip():
+            raise ValueError("usage: /direction zh-uz")
+        direction = normalize_direction(parts[1])
+        return "switch", direction, None
+    match = INLINE_DIRECTION_RE.match(text)
+    if match:
+        direction = normalize_direction(f"{match.group(1)}-{match.group(2)}")
+        return "translate", direction, match.group(3).strip()
+    bare = BARE_DIRECTION_RE.match(text)
+    if bare:
+        direction = normalize_direction(f"{bare.group(1)}-{bare.group(2)}")
+        return "switch", direction, None
+    return "translate", current_direction, text
+
+
+def print_multidirection_help() -> None:
+    print("Commands:")
+    print("  zh-uz              switch the default direction")
+    print("  /direction zh-uz   same as above")
+    print("  zh-uz: text        translate one sentence in an explicit direction")
+    print("  /directions        show all 12 supported directions")
+    print("  /quit              exit")
+
+
 def print_result(result: dict[str, Any], as_json: bool) -> None:
     if as_json:
         print(json.dumps(result, ensure_ascii=False, indent=2))
@@ -145,10 +219,27 @@ def main() -> int:
             )
         )
         return 0
-    if not args.direction:
+    if args.fourlang is not None:
+        if args.direction or args.text is not None:
+            raise SystemExit(
+                "--fourlang is interactive; do not combine it with --direction or --text"
+            )
+        if args.model:
+            raise SystemExit("--fourlang and --model are mutually exclusive")
+        args.all_directions = True
+        args.model = FOURLANG_STAGES[args.fourlang]
+    if args.all_directions and args.direction:
+        raise SystemExit("--all-directions cannot be combined with --direction")
+    if args.all_directions and args.text is not None:
+        raise SystemExit("--all-directions is interactive; omit --text")
+    if args.all_directions and not args.model:
+        raise SystemExit(
+            "--all-directions requires --model pointing to one shared four-language model"
+        )
+    if not args.direction and not args.all_directions:
         raise SystemExit("--direction is required unless --list-models is used")
 
-    direction = normalize_direction(args.direction)
+    direction = normalize_direction(args.direction or "zh-en")
     route, model_path = resolve_model(
         direction,
         override=args.model,
@@ -167,13 +258,58 @@ def main() -> int:
         num_beams=args.num_beams,
     )
 
-    def translate(text: str) -> None:
-        result = engine.translate(text)
-        result["model_name"] = route["model_name"]
+    model_name = (
+        "explicit_shared_fourlang_model"
+        if args.all_directions
+        else route["model_name"]
+    )
+
+    def translate(text: str, requested_direction: str | None = None) -> None:
+        result = engine.translate(text, direction=requested_direction)
+        result["model_name"] = model_name
         print_result(result, args.json)
 
     if args.text is not None:
         translate(args.text)
+        return 0
+
+    if args.all_directions:
+        print(
+            "Loaded one shared four-language model. Default direction is zh-en. "
+            "Switch with a bare direction like 'zh-uz', or translate one line as "
+            "'zh-uz: text'. Enter /help for commands."
+        )
+        current_direction = direction
+        while True:
+            try:
+                text = input(f"[{current_direction}]> ")
+            except EOFError:
+                break
+            if not text.strip():
+                continue
+            try:
+                action, requested_direction, sentence = parse_multidirection_input(
+                    text, current_direction
+                )
+            except ValueError as error:
+                print(f"[error] {error}")
+                continue
+            if action == "quit":
+                break
+            if action == "help":
+                print_multidirection_help()
+                continue
+            if action == "directions":
+                print(" ".join(sorted(direction_catalog())))
+                continue
+            if action == "switch":
+                current_direction = requested_direction
+                engine.set_direction(current_direction)
+                print(f"[direction] {current_direction}")
+                continue
+            if sentence:
+                translate(sentence, requested_direction)
+                current_direction = requested_direction
         return 0
 
     print(f"Loaded {route['model_name']} for {direction}. Enter /quit to exit.")

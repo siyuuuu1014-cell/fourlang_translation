@@ -53,12 +53,22 @@ def parse_direction(value: str) -> tuple[str, str]:
 
 
 def _language_id(tokenizer: Any, language: str) -> int:
-    if hasattr(tokenizer, "get_lang_id"):
-        return int(tokenizer.get_lang_id(language))
-    try:
-        return int(tokenizer.lang_code_to_id[language])
-    except (AttributeError, KeyError) as exc:
-        raise ValueError(f"tokenizer does not support target language: {language}") from exc
+    get_lang_id = getattr(tokenizer, "get_lang_id", None)
+    if callable(get_lang_id):
+        try:
+            return int(get_lang_id(language))
+        except (KeyError, ValueError):
+            pass
+    lang_code_to_id = getattr(tokenizer, "lang_code_to_id", None)
+    if isinstance(lang_code_to_id, dict) and language in lang_code_to_id:
+        return int(lang_code_to_id[language])
+    # NLLB fast tokenizers expose language tokens through the vocabulary only.
+    convert = getattr(tokenizer, "convert_tokens_to_ids", None)
+    if callable(convert):
+        token_id = convert(language)
+        if token_id is not None and token_id != getattr(tokenizer, "unk_token_id", None):
+            return int(token_id)
+    raise ValueError(f"tokenizer does not support target language: {language}")
 
 
 @dataclass

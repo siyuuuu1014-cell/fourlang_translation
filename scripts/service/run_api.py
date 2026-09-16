@@ -1,6 +1,13 @@
 from __future__ import annotations
 import argparse
-import uvicorn
+import sys
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(PROJECT_ROOT))
+
+import uvicorn  # noqa: E402
+
 
 def parse_args():
     p = argparse.ArgumentParser(description="Run the FourLang FastAPI inference service.")

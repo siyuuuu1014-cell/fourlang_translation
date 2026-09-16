@@ -49,6 +49,24 @@ output. An explicit `--model PATH` overrides the built-in route for one run.
 Alternatively set a per-direction environment variable such as
 `FOURLANG_ZH_UZ_MODEL_PATH`; an explicit `--model` takes priority.
 
+## One shared four-language model, all directions
+
+Load a shared four-language model once and switch among all 12 directions in one
+session. `--fourlang` selects the trained NLLB export by stage (`exp1`, `exp2`,
+or `exp3_v2`; default `exp2`):
+
+```bash
+"$PY" scripts/pipeline_v3/translate_current_models.py --fourlang
+"$PY" scripts/pipeline_v3/translate_current_models.py --fourlang exp3_v2
+```
+
+Switch the default direction with a bare direction such as `zh-uz` (or
+`/direction zh-uz`), translate a one-off line as `ru-en: Текст`, list every
+direction with `/directions`, and exit with `/quit`. The model is loaded only
+once. For any other shared model, use the explicit form
+`--all-directions --model <path>`; it cannot accidentally load one of the six
+specialist routes.
+
 ## Inventory and cleanup
 
 Deletion is currently suspended at the user's request. Even `--apply` refuses

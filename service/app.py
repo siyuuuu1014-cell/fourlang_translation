@@ -1,13 +1,18 @@
 from __future__ import annotations
 import time
 from contextlib import asynccontextmanager
+from pathlib import Path
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from .dependencies import get_pair_service
 from .schemas import HealthResponse, ModelInfo, ModelsResponse, TranslateRequest, TranslateResponse
 
 SERVICE_NAME = "FourLang Translation API"
 API_VERSION = "0.2.0"
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+MODEL_PACKAGE_TAR = PROJECT_ROOT / "onnx_export" / "m2m100_fourlang_mobile.tar"
 
 
 def build_direction(source_lang: str, target_lang: str) -> str:
@@ -85,4 +90,15 @@ def translate(request: TranslateRequest, service=Depends(get_pair_service)):
         translation=result["translation"],
         latency_ms=round(request_latency, 3),
         device=result["device"],
+    )
+
+
+@app.get("/download/model-package")
+def download_model_package():
+    if not MODEL_PACKAGE_TAR.exists():
+        raise HTTPException(status_code=404, detail="model package not built yet")
+    return FileResponse(
+        str(MODEL_PACKAGE_TAR),
+        filename=MODEL_PACKAGE_TAR.name,
+        media_type="application/x-tar",
     )

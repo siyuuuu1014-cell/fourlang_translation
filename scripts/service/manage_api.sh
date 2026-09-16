@@ -1,29 +1,32 @@
 #!/usr/bin/env bash
-# Manage the FourLang translation API via supervisord.
+# Manage the FourLang translation API (supervisord daemon; supervisorctl is not installed).
 set -euo pipefail
 
 ROOT=/root/autodl-tmp/fourlang_translation
 CONF="$ROOT/service/supervisord_api.conf"
-SUPERVISORCTL="/usr/bin/supervisorctl"
 
 case "${1:-status}" in
   start)
-    # Stop any previous bare-nohup instance so supervisord owns the process.
     pkill -f "scripts/service/run_api.py" 2>/dev/null || true
+    pkill -f "supervisord_api.conf" 2>/dev/null || true
     sleep 1
-    supervisord -c "$CONF"
-    sleep 3
-    "$SUPERVISORCTL" -c "$CONF" status
+    nohup supervisord -c "$CONF" >/dev/null 2>&1 &
+    sleep 4
+    ps -eo pid,etime,cmd | grep "run_api.py" | grep -v grep || echo "run_api not up"
     ;;
   stop)
-    "$SUPERVISORCTL" -c "$CONF" stop fourlang_api 2>/dev/null || true
-    "$SUPERVISORCTL" -c "$CONF" shutdown 2>/dev/null || true
+    pkill -f "supervisord_api.conf" 2>/dev/null || true
+    pkill -f "scripts/service/run_api.py" 2>/dev/null || true
+    echo "stopped"
     ;;
   restart)
-    "$SUPERVISORCTL" -c "$CONF" restart fourlang_api
+    pkill -f "scripts/service/run_api.py" 2>/dev/null || true
+    sleep 6
+    ps -eo pid,etime,cmd | grep "run_api.py" | grep -v grep || echo "run_api not up"
     ;;
   status)
-    "$SUPERVISORCTL" -c "$CONF" status
+    ps -eo pid,etime,cmd | grep -E "run_api.py|supervisord_api.conf" | grep -v grep || echo "not running"
+    curl -s -m 3 http://127.0.0.1:8000/health >/dev/null 2>&1 && echo "health: ok" || echo "health: unreachable"
     ;;
   *)
     echo "usage: $0 {start|stop|restart|status}"

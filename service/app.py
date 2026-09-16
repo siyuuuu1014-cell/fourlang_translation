@@ -1,4 +1,6 @@
 from __future__ import annotations
+import json
+import tarfile
 import time
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -9,10 +11,70 @@ from .dependencies import get_pair_service
 from .schemas import HealthResponse, ModelInfo, ModelsResponse, TranslateRequest, TranslateResponse
 
 SERVICE_NAME = "FourLang Translation API"
-API_VERSION = "0.2.0"
+API_VERSION = "0.3.0"
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-MODEL_PACKAGE_TAR = PROJECT_ROOT / "onnx_export" / "m2m100_fourlang_mobile.tar"
+MODEL_PACKAGES_DIR = PROJECT_ROOT / "onnx_export"
+
+
+def model_directions() -> dict[str, list[str]]:
+    """Map model_id -> covered directions (pair specialists + the four-language model)."""
+    directions: dict[str, list[str]] = {}
+    manifest = PROJECT_ROOT / "configs/specialists/current_pair_models.json"
+    if manifest.is_file():
+        payload = json.loads(manifest.read_text(encoding="utf-8"))
+        for item in payload["pairs"]:
+            directions[item["id"]] = sorted(item["directions"])
+    directions["m2m100_fourlang"] = sorted(
+        f"{s}-{t}"
+        for s in ("zh", "en", "ru", "uz")
+        for t in ("zh", "en", "ru", "uz")
+        if s != t
+    )
+    return directions
+
+
+def list_model_manifest() -> list[dict]:
+    """Scan onnx_export/*_mobile/MANIFEST.json and return a versioned model list."""
+    rows: list[dict] = []
+    if not MODEL_PACKAGES_DIR.is_dir():
+        return rows
+    dir_map = model_directions()
+    for child in sorted(MODEL_PACKAGES_DIR.iterdir()):
+        if not child.is_dir() or not child.name.endswith("_mobile"):
+            continue
+        manifest_path = child / "MANIFEST.json"
+        if not manifest_path.is_file():
+            continue
+        try:
+            m = json.loads(manifest_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        model_id = child.name[: -len("_mobile")]
+        rows.append(
+            {
+                "model_id": model_id,
+                "family": m.get("family"),
+                "version": m.get("version"),
+                "source_sha256": m.get("source_sha256"),
+                "size_bytes": sum(f["size_bytes"] for f in m.get("files", {}).values()),
+                "directions": dir_map.get(model_id, []),
+                "download_url": f"/download/{model_id}",
+            }
+        )
+    return rows
+
+
+def ensure_tar(model_id: str) -> Path:
+    """Return the tar path for a package, creating it on first use."""
+    pkg_dir = MODEL_PACKAGES_DIR / f"{model_id}_mobile"
+    if not pkg_dir.is_dir():
+        raise HTTPException(status_code=404, detail=f"model package {model_id!r} not found")
+    tar_path = MODEL_PACKAGES_DIR / f"{model_id}_mobile.tar"
+    if not tar_path.exists():
+        with tarfile.open(tar_path, "w") as tf:
+            tf.add(pkg_dir, arcname=pkg_dir.name)
+    return tar_path
 
 
 def build_direction(source_lang: str, target_lang: str) -> str:
@@ -93,12 +155,16 @@ def translate(request: TranslateRequest, service=Depends(get_pair_service)):
     )
 
 
-@app.get("/download/model-package")
-def download_model_package():
-    if not MODEL_PACKAGE_TAR.exists():
-        raise HTTPException(status_code=404, detail="model package not built yet")
+@app.get("/models/manifest")
+def model_manifest():
+    return {"models": list_model_manifest()}
+
+
+@app.get("/download/{model_id}")
+def download_model_package(model_id: str):
+    tar_path = ensure_tar(model_id)
     return FileResponse(
-        str(MODEL_PACKAGE_TAR),
-        filename=MODEL_PACKAGE_TAR.name,
+        str(tar_path),
+        filename=tar_path.name,
         media_type="application/x-tar",
     )

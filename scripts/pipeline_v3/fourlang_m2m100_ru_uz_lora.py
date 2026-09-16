@@ -1,4 +1,4 @@
-"""Train and regression-gate a ru->uz-only LoRA routed on top of M2M100 Exp4."""
+"""Train and regression-gate one direction-routed LoRA on top of M2M100 Exp4."""
 
 from __future__ import annotations
 
@@ -48,6 +48,7 @@ from scripts.pipeline_v3.fourlang_m2m100_student import (  # noqa: E402
 
 CONFIG_DEFAULT = "configs/multilingual/fourlang_m2m100_ru_uz_lora_v1.toml"
 EXPECTED_DIRECTION = "ru-uz"
+SUPPORTED_LANGUAGES = {"en", "zh", "uz", "ru"}
 
 
 def project_path(value: str | Path) -> Path:
@@ -68,17 +69,29 @@ def read_jsonl(path: Path) -> list[dict[str, Any]]:
     return rows
 
 
-def repair_rows(path: Path) -> list[dict[str, Any]]:
+def configured_direction(config: dict[str, Any]) -> tuple[str, str, str]:
+    direction = str(config["experiment"]["repair_direction"])
+    parts = direction.split("-")
+    if len(parts) != 2 or parts[0] == parts[1] or not set(parts).issubset(SUPPORTED_LANGUAGES):
+        raise ValueError(f"Invalid repair direction: {direction!r}")
+    return direction, parts[0], parts[1]
+
+
+def direction_tag(direction: str) -> str:
+    return direction.replace("-", "_").upper()
+
+
+def repair_rows(path: Path, direction: str = EXPECTED_DIRECTION) -> list[dict[str, Any]]:
     required = {"src_lang", "tgt_lang", "src_text", "tgt_text"}
     selected = []
     for index, row in enumerate(read_jsonl(path), start=1):
         missing = required - set(row)
         if missing:
             raise ValueError(f"{path}:{index} missing fields: {sorted(missing)}")
-        if f"{row['src_lang']}-{row['tgt_lang']}" == EXPECTED_DIRECTION:
+        if f"{row['src_lang']}-{row['tgt_lang']}" == direction:
             selected.append(row)
     if not selected:
-        raise RuntimeError(f"No {EXPECTED_DIRECTION} rows in {path}")
+        raise RuntimeError(f"No {direction} rows in {path}")
     return selected
 
 
@@ -126,8 +139,7 @@ def training_manifest(config: dict[str, Any]) -> dict[str, Any]:
 
 
 def preflight(config: dict[str, Any]) -> dict[str, Any]:
-    if config["experiment"]["repair_direction"] != EXPECTED_DIRECTION:
-        raise RuntimeError("This route is intentionally locked to ru-uz.")
+    direction, source, target = configured_direction(config)
     base = project_path(config["base_model"]["path"])
     verify_m2m100_artifact(base)
     train = project_path(config["data"]["train"])
@@ -138,9 +150,9 @@ def preflight(config: dict[str, Any]) -> dict[str, Any]:
     for item in (train, validation, benchmark, exp4_metrics, targeted_metrics):
         if not item.is_file():
             raise FileNotFoundError(item)
-    train_rows = repair_rows(train)
-    validation_rows = repair_rows(validation)
-    frame = pd.read_parquet(benchmark, columns=["ru", "uz"])
+    train_rows = repair_rows(train, direction)
+    validation_rows = repair_rows(validation, direction)
+    frame = pd.read_parquet(benchmark, columns=[source, target])
     if frame.empty:
         raise RuntimeError("The fixed benchmark is empty.")
     free_gb = shutil.disk_usage(PROJECT_ROOT).free / (1024**3)
@@ -150,8 +162,8 @@ def preflight(config: dict[str, Any]) -> dict[str, Any]:
     report = {
         "schema_version": 1,
         "status": "READY",
-        "repair_direction": EXPECTED_DIRECTION,
-        "routing": {"ru-uz": "exp4_plus_adapter", "all_other_directions": "exp4_base"},
+        "repair_direction": direction,
+        "routing": {direction: "exp4_plus_adapter", "all_other_directions": "exp4_base"},
         "base_model": str(base.resolve()),
         "train": str(train.resolve()),
         "train_rows": len(train_rows),
@@ -168,12 +180,17 @@ def preflight(config: dict[str, Any]) -> dict[str, Any]:
         ),
     }
     write_json(project_path(config["outputs"]["preflight"]), report)
-    print(f"M2M100_RU_UZ_LORA_PREFLIGHT_READY: {project_path(config['outputs']['preflight'])}", flush=True)
+    print(
+        f"M2M100_{direction_tag(direction)}_LORA_PREFLIGHT_READY: "
+        f"{project_path(config['outputs']['preflight'])}",
+        flush=True,
+    )
     return report
 
 
 def train(config: dict[str, Any]) -> dict[str, Any]:
     preflight(config)
+    direction, source, target = configured_direction(config)
     if int(__import__("os").environ.get("WORLD_SIZE", "1")) != 1:
         raise RuntimeError("This safety-locked adapter route supports one GPU only.")
     if not torch.cuda.is_available():
@@ -184,20 +201,29 @@ def train(config: dict[str, Any]) -> dict[str, Any]:
     manifest_record = {"fingerprint": run_fingerprint, "manifest": manifest}
     if destination.exists():
         route_manifest = destination / "route_manifest.json"
-        if not route_manifest.is_file() or json.loads(route_manifest.read_text(encoding="utf-8")) != manifest_record:
+        if not route_manifest.is_file():
+            raise RuntimeError(f"Existing adapter differs; refusing overwrite: {destination}")
+        existing = json.loads(route_manifest.read_text(encoding="utf-8"))
+        # Allow a previously completed adapter to survive code-only maintenance.
+        # Every material input, model signature and hyperparameter must still match.
+        previous_manifest = dict(existing.get("manifest", {}))
+        current_manifest = dict(manifest)
+        previous_manifest.pop("implementation_sha256", None)
+        current_manifest.pop("implementation_sha256", None)
+        if previous_manifest != current_manifest:
             raise RuntimeError(f"Existing adapter differs; refusing overwrite: {destination}")
         adapter_signature(destination)
-        print(f"M2M100_RU_UZ_LORA_TRAINING_REUSED: {destination}", flush=True)
+        print(f"M2M100_{direction_tag(direction)}_LORA_TRAINING_REUSED: {destination}", flush=True)
         return json.loads(project_path(config["outputs"]["training_report"]).read_text(encoding="utf-8"))
 
     base_path = project_path(config["base_model"]["path"])
-    train_rows = repair_rows(project_path(config["data"]["train"]))
-    validation_rows = repair_rows(project_path(config["data"]["validation"]))
+    train_rows = repair_rows(project_path(config["data"]["train"]), direction)
+    validation_rows = repair_rows(project_path(config["data"]["validation"]), direction)
     settings = config["training"]
     set_seed(int(config["experiment"]["seed"]))
     tokenizer = M2M100Tokenizer.from_pretrained(base_path, local_files_only=True)
-    tokenizer.src_lang = "ru"
-    tokenizer.tgt_lang = "uz"
+    tokenizer.src_lang = source
+    tokenizer.tgt_lang = target
     base_model = M2M100ForConditionalGeneration.from_pretrained(
         base_path, local_files_only=True, low_cpu_mem_usage=True, torch_dtype=torch.float32
     )
@@ -253,7 +279,8 @@ def train(config: dict[str, Any]) -> dict[str, Any]:
     )
     trainer.model_accepts_loss_kwargs = False
     print(
-        f"M2M100_RU_UZ_LORA_TRAINING: rows={len(train_rows)} epochs={settings['epochs']} "
+        f"M2M100_{direction_tag(direction)}_LORA_TRAINING: rows={len(train_rows)} "
+        f"epochs={settings['epochs']} "
         f"trainable={trainable} total={total}",
         flush=True,
     )
@@ -271,7 +298,7 @@ def train(config: dict[str, Any]) -> dict[str, Any]:
     report = {
         "schema_version": 1,
         "status": "TRAINED_NOT_PROMOTED",
-        "repair_direction": EXPECTED_DIRECTION,
+        "repair_direction": direction,
         "adapter": str(destination.resolve()),
         "base_model": str(base_path.resolve()),
         "train_rows": len(train_rows),
@@ -284,7 +311,7 @@ def train(config: dict[str, Any]) -> dict[str, Any]:
         "run_fingerprint": run_fingerprint,
     }
     write_json(project_path(config["outputs"]["training_report"]), report)
-    print(f"M2M100_RU_UZ_LORA_TRAINING_COMPLETE: {destination}", flush=True)
+    print(f"M2M100_{direction_tag(direction)}_LORA_TRAINING_COMPLETE: {destination}", flush=True)
     del trainer, model, base_model, tokenizer
     gc.collect()
     torch.cuda.empty_cache()
@@ -301,19 +328,21 @@ def load_routed_model(config: dict[str, Any], source: str, target: str):
         torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
     )
     route = f"{source}-{target}"
-    if route == EXPECTED_DIRECTION:
+    repair_direction, _, _ = configured_direction(config)
+    if route == repair_direction:
         adapter = project_path(config["outputs"]["adapter"])
         adapter_signature(adapter)
         model = PeftModel.from_pretrained(model, adapter, local_files_only=True)
     model.to("cuda" if torch.cuda.is_available() else "cpu")
     model.eval()
-    return tokenizer, model, route == EXPECTED_DIRECTION
+    return tokenizer, model, route == repair_direction
 
 
 def evaluate(config: dict[str, Any]) -> dict[str, Any]:
     if not torch.cuda.is_available():
         raise RuntimeError("CUDA is required for the fixed benchmark evaluation.")
     destination = project_path(config["outputs"]["metrics"])
+    direction, source, target = configured_direction(config)
     adapter = project_path(config["outputs"]["adapter"])
     signature = fingerprint(
         {
@@ -321,63 +350,74 @@ def evaluate(config: dict[str, Any]) -> dict[str, Any]:
             "adapter": adapter_signature(adapter),
             "benchmark": file_sha256(project_path(config["benchmark"]["path"])),
             "deployment": config["deployment"],
-            "routing": {EXPECTED_DIRECTION: "adapter", "default": "base"},
+            "routing": {direction: "adapter", "default": "base"},
         }
     )
     if destination.exists():
         payload = json.loads(destination.read_text(encoding="utf-8"))
         if payload.get("evaluation_signature") != signature:
             raise RuntimeError(f"Existing evaluation differs; refusing overwrite: {destination}")
-        print(f"M2M100_RU_UZ_LORA_EVALUATION_REUSED: {destination}", flush=True)
+        print(f"M2M100_{direction_tag(direction)}_LORA_EVALUATION_REUSED: {destination}", flush=True)
         return payload
     exp4 = load_metrics(project_path(config["baselines"]["exp4_metrics"]))
-    frame = pd.read_parquet(project_path(config["benchmark"]["path"]), columns=["ru", "uz"])
-    tokenizer, model, adapter_active = load_routed_model(config, "ru", "uz")
+    frame = pd.read_parquet(
+        project_path(config["benchmark"]["path"]), columns=[source, target]
+    )
+    tokenizer, model, adapter_active = load_routed_model(config, source, target)
     if not adapter_active:
-        raise RuntimeError("ru-uz evaluation did not activate the adapter.")
+        raise RuntimeError(f"{direction} evaluation did not activate the adapter.")
     try:
         predictions = translate(
             tokenizer,
             model,
             "m2m100",
-            "ru",
-            "uz",
-            frame["ru"].fillna("").astype(str).tolist(),
+            source,
+            target,
+            frame[source].fillna("").astype(str).tolist(),
             config,
         )
-        repaired = metrics(predictions, frame["uz"].fillna("").astype(str).tolist(), "uz")
+        repaired = metrics(
+            predictions, frame[target].fillna("").astype(str).tolist(), target
+        )
     finally:
         del model, tokenizer
         gc.collect()
         torch.cuda.empty_cache()
     values = {key: dict(value) for key, value in exp4["metrics"].items()}
-    values[EXPECTED_DIRECTION] = repaired
+    values[direction] = repaired
     payload = {
         "schema_version": 1,
         "status": "EVALUATED_ROUTED_SYSTEM_NOT_PROMOTED",
         "evaluation_signature": signature,
-        "routing": {EXPECTED_DIRECTION: "exp4_plus_adapter", "all_other_directions": "exp4_base"},
+        "routing": {direction: "exp4_plus_adapter", "all_other_directions": "exp4_base"},
         "metrics": values,
         "summary": summarize_metrics(values),
         "metric_provenance": {
-            EXPECTED_DIRECTION: "evaluated_live_with_adapter_on_fixed_benchmark",
+            direction: "evaluated_live_with_adapter_on_fixed_benchmark",
             "all_other_directions": "exact_exp4_fixed_benchmark_metrics_reused_because_adapter_is_not_loaded",
         },
     }
     write_json(destination, payload)
-    print(f"M2M100_RU_UZ_LORA_EVALUATION_COMPLETE: {destination}", flush=True)
+    print(f"M2M100_{direction_tag(direction)}_LORA_EVALUATION_COMPLETE: {destination}", flush=True)
     return payload
 
 
 def compare(config: dict[str, Any]) -> dict[str, Any]:
+    direction, _, _ = configured_direction(config)
     candidate = load_metrics(project_path(config["outputs"]["metrics"]))
     exp4 = load_metrics(project_path(config["baselines"]["exp4_metrics"]))
     targeted = load_metrics(project_path(config["baselines"]["targeted_v2_metrics"]))
-    repair = candidate["metrics"][EXPECTED_DIRECTION]["chrf2"] - exp4["metrics"][EXPECTED_DIRECTION]["chrf2"]
+    repair = candidate["metrics"][direction]["chrf2"] - exp4["metrics"][direction]["chrf2"]
     settings = config["selection"]
+    minimum_recovery = float(
+        settings.get(
+            "minimum_repair_chrf2_from_exp4",
+            settings.get("minimum_ru_uz_recovery_from_exp4"),
+        )
+    )
     constraints = {
-        "ru_uz_recovery_from_exp4_at_least_minimum": repair
-        >= float(settings["minimum_ru_uz_recovery_from_exp4"]),
+        "repair_direction_recovery_from_exp4_at_least_minimum": repair
+        >= minimum_recovery,
         "macro_chrf2_at_least_minimum": candidate["summary"]["macro_chrf2"]
         >= float(settings["minimum_macro_chrf2"]),
         "worst_chrf2_at_least_minimum": candidate["summary"]["worst_chrf2"]
@@ -390,9 +430,9 @@ def compare(config: dict[str, Any]) -> dict[str, Any]:
         "candidate": candidate,
         "baselines": {"exp4": exp4, "targeted_v2": targeted},
         "deltas": {
-            "ru_uz_chrf2_from_exp4": repair,
-            "ru_uz_chrf2_from_targeted_v2": candidate["metrics"][EXPECTED_DIRECTION]["chrf2"]
-            - targeted["metrics"][EXPECTED_DIRECTION]["chrf2"],
+            f"{direction.replace('-', '_')}_chrf2_from_exp4": repair,
+            f"{direction.replace('-', '_')}_chrf2_from_targeted_v2": candidate["metrics"][direction]["chrf2"]
+            - targeted["metrics"][direction]["chrf2"],
             "macro_chrf2_from_exp4": candidate["summary"]["macro_chrf2"]
             - exp4["summary"]["macro_chrf2"],
         },
@@ -401,12 +441,16 @@ def compare(config: dict[str, Any]) -> dict[str, Any]:
     }
     destination = project_path(config["outputs"]["comparison"])
     write_json(destination, report)
-    print(f"M2M100_RU_UZ_LORA_COMPARISON_READY: {destination} status={report['status']}", flush=True)
+    print(
+        f"M2M100_{direction_tag(direction)}_LORA_COMPARISON_READY: "
+        f"{destination} status={report['status']}",
+        flush=True,
+    )
     return report
 
 
 def translate_text(config: dict[str, Any], source: str, target: str, text: str) -> None:
-    if source == target or source not in {"en", "zh", "uz", "ru"} or target not in {"en", "zh", "uz", "ru"}:
+    if source == target or source not in SUPPORTED_LANGUAGES or target not in SUPPORTED_LANGUAGES:
         raise ValueError("source and target must be different members of en, zh, uz, ru")
     tokenizer, model, adapter_active = load_routed_model(config, source, target)
     try:

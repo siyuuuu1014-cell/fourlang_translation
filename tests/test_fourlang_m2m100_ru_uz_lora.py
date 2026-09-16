@@ -7,6 +7,7 @@ from scripts.pipeline_v3 import fourlang_m2m100_ru_uz_lora as route
 
 
 CONFIG = Path("configs/multilingual/fourlang_m2m100_ru_uz_lora_v1.toml")
+ZH_UZ_CONFIG = Path("configs/multilingual/fourlang_m2m100_zh_uz_lora_v1.toml")
 
 
 def load_config():
@@ -43,3 +44,22 @@ def test_repair_rows_keeps_only_ru_uz(tmp_path):
 def test_hard_gate_recovery_is_not_weakened():
     config = load_config()
     assert config["selection"]["minimum_ru_uz_recovery_from_exp4"] == pytest.approx(0.30)
+
+
+def test_direction_configuration_supports_isolated_zh_uz_route():
+    with ZH_UZ_CONFIG.open("rb") as stream:
+        config = tomllib.load(stream)
+    assert route.configured_direction(config) == ("zh-uz", "zh", "uz")
+    assert config["outputs"]["adapter"].endswith("m2m100_zh_uz_lora_v1/adapter")
+    assert config["selection"]["minimum_repair_chrf2_from_exp4"] == pytest.approx(0.30)
+
+
+def test_repair_rows_can_select_zh_uz_without_changing_ru_uz_default(tmp_path):
+    path = tmp_path / "rows.jsonl"
+    rows = [
+        {"src_lang": "ru", "tgt_lang": "uz", "src_text": "a", "tgt_text": "b"},
+        {"src_lang": "zh", "tgt_lang": "uz", "src_text": "c", "tgt_text": "d"},
+    ]
+    path.write_text("\n".join(__import__("json").dumps(row) for row in rows), encoding="utf-8")
+    assert route.repair_rows(path) == [rows[0]]
+    assert route.repair_rows(path, "zh-uz") == [rows[1]]

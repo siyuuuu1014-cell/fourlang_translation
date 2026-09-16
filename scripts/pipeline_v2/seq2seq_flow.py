@@ -606,7 +606,7 @@ def train_model(
         load_best_model_at_end=True,
         metric_for_best_model="eval_macro_chrf2" if directional else "eval_loss",
         greater_is_better=directional,
-        save_total_limit=3,
+        save_total_limit=int(settings.get("save_total_limit", 3)),
         restore_callback_states_from_checkpoint=True,
         fp16=torch.cuda.is_available(),
         report_to=[],
@@ -715,6 +715,7 @@ def train_model(
         "metric_for_best_model": arguments.metric_for_best_model,
         "initial_validation": trainer.baseline_metrics,
         "checkpoint_interval_steps": int(settings.get("checkpoint_interval_steps", 1000)),
+        "save_total_limit": int(settings.get("save_total_limit", 3)),
         "recovered_final_export": bool(resume_checkpoint and (exhausted or control.get("should_training_stop", False))),
     }
     if directional and trainer.state.best_metric is not None:

@@ -1,0 +1,74 @@
+[multilingual]
+schema_version = 1
+id = "fourlang_m2m100_error_replay_v1"
+languages = ["en", "zh", "uz", "ru"]
+seed = 2026
+
+[student]
+id = "m2m100_418m"
+family = "m2m100"
+path = "${FOURLANG_MODEL_ROOT}/m2m100_418M"
+repo_id = "facebook/m2m100_418M"
+revision = "55c2e61bbf05dfb8d7abccdc3fae6fc8512fd636"
+license = "MIT"
+
+[data.error_replay]
+train = "data/multilingual/fourlang/exp4_error_replay_v1/train.jsonl"
+# Keep the KD validation set fixed for a comparable continuation experiment.
+validation = "data/multilingual/fourlang/exp2/validation.jsonl"
+manifest = "data/multilingual/fourlang/exp4_error_replay_v1/manifest.json"
+
+[preview_inputs]
+config = "configs/multilingual/fourlang_m2m100_exp4_preview_v1.toml"
+report = "reports/diagnostics/fourlang/m2m100_error_replay_v1/preview.json"
+score_manifest = "reports/diagnostics/fourlang/m2m100_error_replay_v1/score_manifest.json"
+
+[source_model]
+path = "results/student/fourlang_m2m100/m2m100_kd_from_human_v1/best_model/shared"
+
+[approval]
+status = "USER_APPROVED"
+date = "2026-09-16"
+epochs = 1
+learning_rate = 0.000002
+save_total_limit = 1
+zh_uz_total_direction_mass_ratio = 1.10
+
+[benchmarks]
+flores_devtest = "data/benchmark/fourlang/flores_devtest.parquet"
+
+[baselines]
+nllb_exp3_v2_metrics = "results/evaluation/fourlang/exp3_v2/metrics.json"
+
+[outputs]
+root = "results/student/fourlang_m2m100"
+evaluation_root = "results/evaluation/fourlang_m2m100"
+
+[training]
+batch_size = 8
+gradient_accumulation_steps = 4
+weight_decay = 0.01
+warmup_ratio = 0.05
+max_source_length = 256
+max_target_length = 256
+early_stopping_patience = 1
+gradient_checkpointing = false
+group_by_length = true
+dataloader_num_workers = 4
+optim = "adamw_torch_fused"
+
+[training.m2m100_error_replay_v1]
+epochs = 1
+learning_rate = 0.000002
+checkpoint_interval_steps = 5000
+save_total_limit = 1
+direction_validation_samples = 200
+minimum_free_disk_gb = 16
+
+[training_by_family.m2m100]
+batch_size = 8
+gradient_accumulation_steps = 4
+
+[deployment]
+num_beams = 5
+max_new_tokens = 256

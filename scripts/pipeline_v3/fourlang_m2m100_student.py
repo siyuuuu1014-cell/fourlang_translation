@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import gc
 import json
+import shutil
 import sys
 from collections import Counter
 from pathlib import Path
@@ -21,7 +22,11 @@ from scripts.pipeline_v2.seq2seq_flow import (  # noqa: E402
     train_model,
     translate,
 )
-from scripts.pipeline_v2.training_safety import file_sha256, model_files  # noqa: E402
+from scripts.pipeline_v2.training_safety import (  # noqa: E402
+    file_sha256,
+    model_files,
+    model_signature,
+)
 from scripts.pipeline_v3.fourlang_flow import directions  # noqa: E402
 
 CONFIG_DEFAULT = "configs/multilingual/fourlang_m2m100_v1.toml"
@@ -32,6 +37,7 @@ HUMAN_EXPERIMENT = "m2m100_human_v1"
 KD_FROM_HUMAN_EXPERIMENT = "m2m100_kd_from_human_v1"
 TARGETED_FROM_HUMAN_EXPERIMENT = "m2m100_targeted_from_human_v1"
 TARGETED_FROM_HUMAN_V2_EXPERIMENT = "m2m100_targeted_from_human_v2"
+ERROR_REPLAY_EXPERIMENT = "m2m100_error_replay_v1"
 EXPECTED_MODEL_TYPE = "m2m_100"
 EXPECTED_REPO = "facebook/m2m100_418M"
 
@@ -175,6 +181,12 @@ def stage_plan(config: dict[str, Any], stage: str) -> tuple[str, Path, str]:
             exported_model(config, KD_FROM_HUMAN_EXPERIMENT),
             "targeted",
         )
+    if stage == "error_replay":
+        return (
+            ERROR_REPLAY_EXPERIMENT,
+            project_path(config["source_model"]["path"]),
+            "error_replay",
+        )
     if stage == "kd":
         return KD_EXPERIMENT, project_path(config["student"]["path"]), "kd"
     if stage == "kd_v2":
@@ -192,6 +204,25 @@ def train_stage(config: dict[str, Any], stage: str) -> dict[str, Any]:
     experiment, source_model, data_stage = stage_plan(config, stage)
     verify_m2m100_artifact(source_model)
     train_path, validation_path = data_paths(config, data_stage)
+    if data_stage == "error_replay":
+        manifest_path = project_path(config["data"][data_stage]["manifest"])
+        if not manifest_path.is_file():
+            raise FileNotFoundError(f"Missing approved Exp4 manifest: {manifest_path}")
+        dataset_manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        if dataset_manifest.get("status") != "FORMAL_TRAINING_DATA_READY_NOT_TRAINED":
+            raise RuntimeError("Exp4 dataset manifest is not ready for training.")
+        if dataset_manifest.get("train_sha256") != file_sha256(train_path):
+            raise RuntimeError("Exp4 train data no longer matches its manifest.")
+        if dataset_manifest.get("source_model_signature") != model_signature(source_model):
+            raise RuntimeError("Exp4 source model no longer matches its approved manifest.")
+        settings = config["training"][ERROR_REPLAY_EXPERIMENT]
+        minimum_free = float(settings.get("minimum_free_disk_gb", 0))
+        free_gb = shutil.disk_usage(output_root(config, ERROR_REPLAY_EXPERIMENT).parent).free / (1024 ** 3)
+        if free_gb < minimum_free:
+            raise RuntimeError(
+                f"Need at least {minimum_free:g} GiB free before Exp4 training; "
+                f"found {free_gb:.2f} GiB."
+            )
     train_rows = read_jsonl(train_path)
     validation_rows = read_jsonl(validation_path)
     validate_rows(train_rows, train_path)
@@ -500,6 +531,67 @@ def compare_targeted_from_human_v2(config: dict[str, Any]) -> dict[str, Any]:
     return report
 
 
+def compare_error_replay(config: dict[str, Any]) -> dict[str, Any]:
+    evaluation_root = project_path(config["outputs"]["evaluation_root"])
+    candidate_path = evaluation_root / ERROR_REPLAY_EXPERIMENT / "metrics.json"
+    baseline_path = evaluation_root / KD_FROM_HUMAN_EXPERIMENT / "metrics.json"
+    if not candidate_path.is_file() or not baseline_path.is_file():
+        raise FileNotFoundError("Error-replay and KD-from-human metrics are required.")
+    candidate_payload = json.loads(candidate_path.read_text(encoding="utf-8"))
+    baseline_payload = json.loads(baseline_path.read_text(encoding="utf-8"))
+
+    def delta_from(payload: dict[str, Any]) -> dict[str, Any]:
+        return {
+            "summary": {
+                metric: candidate_payload["summary"][metric] - payload["summary"][metric]
+                for metric in ("macro_bleu", "macro_chrf2", "worst_chrf2")
+            },
+            "directions": {
+                direction: {
+                    metric: candidate_payload["metrics"][direction][metric]
+                    - payload["metrics"][direction][metric]
+                    for metric in ("bleu", "chrf2")
+                }
+                for direction in directions()
+            },
+        }
+
+    report: dict[str, Any] = {
+        "schema_version": 1,
+        "status": "COMPARED",
+        "candidate": ERROR_REPLAY_EXPERIMENT,
+        "candidate_summary": candidate_payload["summary"],
+        "baselines": {
+            KD_FROM_HUMAN_EXPERIMENT: {
+                "summary": baseline_payload["summary"],
+                "candidate_minus_baseline": delta_from(baseline_payload),
+            }
+        },
+    }
+    targeted_path = evaluation_root / TARGETED_FROM_HUMAN_V2_EXPERIMENT / "metrics.json"
+    if targeted_path.is_file():
+        targeted = json.loads(targeted_path.read_text(encoding="utf-8"))
+        report["baselines"][TARGETED_FROM_HUMAN_V2_EXPERIMENT] = {
+            "summary": targeted["summary"],
+            "candidate_minus_baseline": delta_from(targeted),
+        }
+    nllb_value = config.get("baselines", {}).get("nllb_exp3_v2_metrics")
+    if nllb_value:
+        nllb_path = project_path(nllb_value)
+        if nllb_path.is_file():
+            payload = json.loads(nllb_path.read_text(encoding="utf-8"))
+            nllb_metrics = payload.get("metrics", payload)
+            normalized = {"metrics": nllb_metrics, "summary": summarize_metrics(nllb_metrics)}
+            report["baselines"]["nllb_exp3_v2"] = {
+                "summary": normalized["summary"],
+                "candidate_minus_baseline": delta_from(normalized),
+            }
+    destination = evaluation_root / "error_replay_v1_comparison.json"
+    write_json(destination, report)
+    print(f"M2M100_ERROR_REPLAY_COMPARISON_READY: {destination}", flush=True)
+    return report
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Train and evaluate a fresh M2M100-418M four-language student."
@@ -528,6 +620,11 @@ def main() -> None:
             "eval-targeted-from-human-v2",
             "compare-targeted-from-human-v2",
             "run-targeted-from-human-v2",
+            "preflight-error-replay",
+            "train-error-replay",
+            "eval-error-replay",
+            "compare-error-replay",
+            "run-error-replay",
             "compare-human-route",
             "run-human-route",
             "run-all",
@@ -588,6 +685,19 @@ def main() -> None:
         train_stage(config, "targeted_from_human_v2")
         evaluate_stage(config, "targeted_from_human_v2")
         compare_targeted_from_human_v2(config)
+    elif args.action == "preflight-error-replay":
+        preflight(config, stages=("error_replay",), report_name="error_replay_v1_preflight.json")
+    elif args.action == "train-error-replay":
+        train_stage(config, "error_replay")
+    elif args.action == "eval-error-replay":
+        evaluate_stage(config, "error_replay")
+    elif args.action == "compare-error-replay":
+        compare_error_replay(config)
+    elif args.action == "run-error-replay":
+        preflight(config, stages=("error_replay",), report_name="error_replay_v1_preflight.json")
+        train_stage(config, "error_replay")
+        evaluate_stage(config, "error_replay")
+        compare_error_replay(config)
     elif args.action == "compare-human-route":
         compare_human_route(config)
     elif args.action == "run-human-route":

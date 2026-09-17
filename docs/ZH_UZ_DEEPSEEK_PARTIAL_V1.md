@@ -24,7 +24,8 @@ The builder:
 - verifies that the checkpoint does not change while it is read;
 - re-runs translation and source filters offline;
 - keeps only usable `zh→uz` rows;
-- removes normalized source duplicates against the existing training mix;
+- preserves human targets, replaces duplicate legacy Teacher KD targets with
+  DeepSeek translations, and adds genuinely new sources;
 - assigns DeepSeek rows weight `1.5`;
 - refuses to build with fewer than 4,000 unique usable rows;
 - writes a versioned report and hashes without changing the checkpoint.

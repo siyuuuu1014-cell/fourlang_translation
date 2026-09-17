@@ -127,10 +127,10 @@ def build_training_rows(
     deepseek_weight: float = DEEPSEEK_WEIGHT,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, int]]:
     base = baseline.copy()
-    existing = {
-        _source_key(str(row.src_lang), str(row.src_text))
-        for row in base.itertuples()
-    }
+    baseline_by_source: dict[tuple[str, str], list[int]] = {}
+    for index, row in base.iterrows():
+        key = _source_key(str(row["src_lang"]), str(row["src_text"]))
+        baseline_by_source.setdefault(key, []).append(index)
     usable = audited[
         audited["combined_usable"].astype(bool)
         & (audited["src_lang"].astype(str) == "zh")
@@ -138,14 +138,31 @@ def build_training_rows(
     ].copy()
     usable = usable.sort_values("pair_id", kind="stable")
     accepted: list[dict[str, Any]] = []
-    seen = set(existing)
-    rejections: Counter[str] = Counter()
+    seen_deepseek: set[tuple[str, str]] = set()
+    remove_baseline_indices: set[int] = set()
+    source_resolution: Counter[str] = Counter()
     for row in usable.to_dict(orient="records"):
         key = _source_key("zh", str(row["src_text"]))
-        if key in seen:
-            rejections["DUPLICATE_SOURCE"] += 1
+        if key in seen_deepseek:
+            source_resolution["DUPLICATE_DEEPSEEK_SOURCE_REJECTED"] += 1
             continue
-        seen.add(key)
+        seen_deepseek.add(key)
+        baseline_indices = baseline_by_source.get(key, [])
+        if baseline_indices:
+            baseline_sources = {
+                str(base.at[index, "training_source"]).lower()
+                for index in baseline_indices
+            }
+            if any("human" in value for value in baseline_sources):
+                source_resolution["DUPLICATE_HUMAN_SOURCE_REJECTED"] += 1
+                continue
+            remove_baseline_indices.update(baseline_indices)
+            source_resolution["BASELINE_TEACHER_SOURCE_REPLACED"] += 1
+            source_resolution["BASELINE_TEACHER_ROWS_REMOVED"] += len(
+                baseline_indices
+            )
+        else:
+            source_resolution["NEW_SOURCE_ADDED"] += 1
         accepted.append(
             {
                 "src_lang": "zh",
@@ -157,8 +174,9 @@ def build_training_rows(
                 "source_id": str(row["pair_id"]),
             }
         )
-    combined = base.to_dict(orient="records") + accepted
-    return combined, accepted, dict(sorted(rejections.items()))
+    retained = base.drop(index=sorted(remove_baseline_indices))
+    combined = retained.to_dict(orient="records") + accepted
+    return combined, accepted, dict(sorted(source_resolution.items()))
 
 
 def _direction_counts(frame: pd.DataFrame, mask: pd.Series | None = None) -> dict[str, int]:
@@ -205,7 +223,7 @@ def build(config: dict[str, Any]) -> dict[str, Any]:
 
     audited = audit_completed(completed, config)
     baseline = normalize_base_rows(_read_table(BASE_TRAIN))
-    combined, accepted, duplicate_rejections = build_training_rows(
+    combined, accepted, source_resolution = build_training_rows(
         baseline, audited
     )
     if len(accepted) < 4000:
@@ -223,11 +241,16 @@ def build(config: dict[str, Any]) -> dict[str, Any]:
     _write_jsonl(train_path, combined)
 
     usable_mask = audited["combined_usable"].astype(bool)
-    baseline_zh_uz = baseline[
-        (baseline["src_lang"].astype(str) == "zh")
-        & (baseline["tgt_lang"].astype(str) == "uz")
+    combined_frame = pd.DataFrame(combined)
+    retained_baseline_zh_uz = combined_frame[
+        (combined_frame["src_lang"].astype(str) == "zh")
+        & (combined_frame["tgt_lang"].astype(str) == "uz")
+        & (
+            combined_frame["training_source"].astype(str)
+            != "teacher_kd_deepseek_partial_v1"
+        )
     ]
-    baseline_effective_mass = float(baseline_zh_uz["weight"].sum())
+    baseline_effective_mass = float(retained_baseline_zh_uz["weight"].sum())
     deepseek_effective_mass = float(sum(row["weight"] for row in accepted))
     report = {
         "schema_version": 1,
@@ -246,7 +269,7 @@ def build(config: dict[str, Any]) -> dict[str, Any]:
             "deepseek_share": deepseek_effective_mass
             / (baseline_effective_mass + deepseek_effective_mass),
         },
-        "duplicate_rejections": duplicate_rejections,
+        "source_resolution": source_resolution,
         "baseline_rows": len(baseline),
         "combined_rows": len(combined),
         "output": str(train_path),

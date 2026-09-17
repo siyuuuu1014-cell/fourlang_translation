@@ -103,6 +103,7 @@ learning_rate = 0.000002
 epochs = 1
 kd_train = "data/distillation/zh_uz/deepseek_partial_v1/train.jsonl"
 source_model = "results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/best_model/shared"
+final_baseline_variant = "flores_relaxed_8k_ep3"
 
 [[pairs]]
 id = "zh_uz"

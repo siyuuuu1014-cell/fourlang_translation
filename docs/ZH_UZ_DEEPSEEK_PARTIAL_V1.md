@@ -64,3 +64,18 @@ data/distillation/zh_uz/deepseek_partial_v1/build_report.json
 The experiment starts from the current `flores_relaxed_8k_ep3` model, trains
 for one epoch at `2e-6`, and writes to an isolated result directory. Do not run
 FLORES devtest until the dev result is selected.
+
+After the candidate passes the frozen FLORES dev gate, run its protected
+single-direction evaluation exactly once:
+
+```bash
+"$PY" scripts/pipeline_v3/weak_pair_ablation.py directional_final_evaluate \
+  --config "$TRAIN_CFG" \
+  --pair zh_uz \
+  --variant directional_deepseek_partial_v1 \
+  --direction zh-uz
+```
+
+This preserves the existing bidirectional `final_devtest.json`, reuses its
+frozen `flores_relaxed_8k_ep3` score as the baseline, and writes a separate
+immutable directional report.

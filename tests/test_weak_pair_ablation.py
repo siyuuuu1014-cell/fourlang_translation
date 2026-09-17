@@ -438,6 +438,68 @@ class WeakPairAblationTests(unittest.TestCase):
         reader.assert_called_once_with(root / "devtest.parquet")
         self.assertTrue(all(item["passed"] for item in report["directions"]))
 
+    def test_directional_final_evaluate_reuses_frozen_baseline_and_scores_once(self):
+        cfg = config()
+        cfg["variants"]["directional_deepseek_partial_v1"][
+            "final_baseline_variant"
+        ] = "flores_relaxed_8k_ep3"
+        baseline_dev = {
+            "benchmark": "flores_dev",
+            "scores": {"zh-uz": {"bleu": 5.2, "chrf2": 33.3, "samples": 10}},
+        }
+        candidate_dev = {
+            "benchmark": "flores_dev",
+            "scores": {"zh-uz": {"bleu": 5.5, "chrf2": 34.1, "samples": 10}},
+        }
+        protected = {
+            "benchmark": "flores_devtest",
+            "candidate": {
+                "variant": "flores_relaxed_8k_ep3",
+                "scores": {
+                    "zh-uz": {"bleu": 5.4, "chrf2": 33.6, "samples": 10}
+                },
+            },
+        }
+        candidate_devtest = {
+            "zh-uz": {"bleu": 5.8, "chrf2": 34.4, "samples": 10}
+        }
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            target = root / "results/evaluation/weak_pair_ablation/zh_uz"
+            target.mkdir(parents=True)
+            (target / "flores_relaxed_8k_ep3.json").write_text(
+                json.dumps(baseline_dev)
+            )
+            (target / "directional_deepseek_partial_v1__zh_uz.json").write_text(
+                json.dumps(candidate_dev)
+            )
+            (target / "final_devtest.json").write_text(json.dumps(protected))
+            (root / "devtest.parquet").write_text("protected")
+            with mock.patch.object(ablation, "PROJECT_ROOT", root), mock.patch.object(
+                ablation.pd, "read_parquet", return_value=pd.DataFrame()
+            ), mock.patch.object(
+                ablation,
+                "_score_model",
+                return_value=(Path("candidate"), candidate_devtest),
+            ) as scorer:
+                report = ablation.directional_final_evaluate(
+                    cfg,
+                    "zh_uz",
+                    "directional_deepseek_partial_v1",
+                    "zh-uz",
+                )
+                reused = ablation.directional_final_evaluate(
+                    cfg,
+                    "zh_uz",
+                    "directional_deepseek_partial_v1",
+                    "zh-uz",
+                )
+        self.assertEqual(report, reused)
+        self.assertEqual(report["status"], "PASS")
+        self.assertAlmostEqual(report["selection_evidence"]["delta_chrf2"], 0.8)
+        self.assertAlmostEqual(report["delta_chrf2"], 0.8)
+        scorer.assert_called_once()
+
 
 if __name__ == "__main__":
     unittest.main()

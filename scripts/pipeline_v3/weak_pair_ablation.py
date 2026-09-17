@@ -139,6 +139,17 @@ def final_evaluation_path(pair_id: str) -> Path:
     )
 
 
+def directional_final_evaluation_path(
+    pair_id: str, variant: str, direction: str
+) -> Path:
+    return (
+        PROJECT_ROOT
+        / "results/evaluation/weak_pair_ablation"
+        / pair_id
+        / f"{run_id(variant, direction)}.final_devtest.json"
+    )
+
+
 def _candidate(config: dict[str, Any], path: Path | None = None) -> dict[str, Any]:
     candidate = {
         "id": config["experiment"]["backbone"],
@@ -700,6 +711,124 @@ def final_evaluate(config: dict[str, Any], pair_id: str) -> dict[str, Any]:
     return report
 
 
+def directional_final_evaluate(
+    config: dict[str, Any], pair_id: str, variant: str, direction: str
+) -> dict[str, Any]:
+    """Evaluate one dev-selected directional candidate once on FLORES devtest."""
+    if not is_directional_variant(variant):
+        raise ValueError("directional_final_evaluate requires a directional variant.")
+    pair = pair_config(config, pair_id)
+    direction = validate_direction(pair, direction)
+    settings = variant_settings(config, variant)
+    validate_variant_pair(settings, pair_id)
+    output = directional_final_evaluation_path(pair_id, variant, direction)
+    if output.is_file():
+        return read_json(output)
+
+    baseline_variant = str(settings.get("final_baseline_variant", ""))
+    if baseline_variant not in TRAIN_VARIANTS or is_directional_variant(
+        baseline_variant
+    ):
+        raise RuntimeError(
+            f"variants.{variant}.final_baseline_variant must name a shared "
+            "trained variant."
+        )
+
+    baseline_dev_path = evaluation_path(pair_id, baseline_variant)
+    candidate_dev_path = evaluation_path(pair_id, variant, direction)
+    if not baseline_dev_path.is_file() or not candidate_dev_path.is_file():
+        raise RuntimeError("Evaluate the baseline and directional candidate on dev first.")
+    baseline_dev = read_json(baseline_dev_path)
+    candidate_dev = read_json(candidate_dev_path)
+    if baseline_dev.get("benchmark") != "flores_dev" or candidate_dev.get(
+        "benchmark"
+    ) != "flores_dev":
+        raise RuntimeError("Directional final selection evidence must come from FLORES dev.")
+    baseline_dev_score = baseline_dev["scores"][direction]
+    candidate_dev_score = candidate_dev["scores"][direction]
+    dev_delta_bleu = float(candidate_dev_score["bleu"]) - float(
+        baseline_dev_score["bleu"]
+    )
+    dev_delta_chrf2 = float(candidate_dev_score["chrf2"]) - float(
+        baseline_dev_score["chrf2"]
+    )
+    noise_floor = float(config["comparison"]["noise_floor_chrf2"])
+    if dev_delta_bleu < 0 or dev_delta_chrf2 < noise_floor:
+        raise RuntimeError(
+            f"{run_id(variant, direction)} did not pass the frozen dev gate: "
+            f"delta_bleu={dev_delta_bleu:.6f}, "
+            f"delta_chrf2={dev_delta_chrf2:.6f}."
+        )
+
+    protected_baseline_path = final_evaluation_path(pair_id)
+    if not protected_baseline_path.is_file():
+        raise RuntimeError(
+            "The frozen shared-model devtest report is required as baseline evidence."
+        )
+    protected_baseline = read_json(protected_baseline_path)
+    if protected_baseline.get("benchmark") != "flores_devtest":
+        raise RuntimeError("Protected baseline evidence is not FLORES devtest.")
+    protected_candidate = protected_baseline.get("candidate", {})
+    if protected_candidate.get("variant") != baseline_variant:
+        raise RuntimeError(
+            "Protected baseline report candidate does not match "
+            f"{baseline_variant!r}."
+        )
+    baseline_score = protected_candidate["scores"][direction]
+
+    benchmark_path = project_path(config["benchmarks"]["protected_devtest"])
+    benchmark = pd.read_parquet(benchmark_path)
+    candidate_model, candidate_scores = _score_model(
+        config, pair, variant, direction, benchmark
+    )
+    candidate_score = candidate_scores[direction]
+    metric_checks = {
+        metric: float(candidate_score[metric]) >= float(baseline_score[metric])
+        for metric in ("bleu", "chrf2")
+    }
+    report = {
+        "schema_version": 1,
+        "status": "PASS" if all(metric_checks.values()) else "FAIL",
+        "pair": pair_id,
+        "direction": direction,
+        "benchmark": "flores_devtest",
+        "final_evaluation_policy": "frozen_dev_directional_winner_evaluated_once",
+        "selection_evidence": {
+            "benchmark": "flores_dev",
+            "baseline_variant": baseline_variant,
+            "candidate_variant": run_id(variant, direction),
+            "baseline_evaluation": str(baseline_dev_path),
+            "baseline_evaluation_sha256": file_sha256(baseline_dev_path),
+            "candidate_evaluation": str(candidate_dev_path),
+            "candidate_evaluation_sha256": file_sha256(candidate_dev_path),
+            "delta_bleu": dev_delta_bleu,
+            "delta_chrf2": dev_delta_chrf2,
+            "minimum_delta_chrf2": noise_floor,
+        },
+        "benchmark_evidence": {
+            "path": str(benchmark_path),
+            "sha256": file_sha256(benchmark_path),
+        },
+        "baseline": {
+            "variant": baseline_variant,
+            "evidence": str(protected_baseline_path),
+            "evidence_sha256": file_sha256(protected_baseline_path),
+            "score": baseline_score,
+        },
+        "candidate": {
+            "variant": run_id(variant, direction),
+            "model_path": str(candidate_model),
+            "score": candidate_score,
+        },
+        "metric_checks": metric_checks,
+        "delta_bleu": float(candidate_score["bleu"]) - float(baseline_score["bleu"]),
+        "delta_chrf2": float(candidate_score["chrf2"])
+        - float(baseline_score["chrf2"]),
+    }
+    write_json(output, report)
+    return report
+
+
 def _signal(delta: float, noise_floor: float, meaningful: float) -> str:
     if delta >= meaningful:
         return "meaningful_gain"
@@ -861,6 +990,7 @@ def main() -> None:
             "evaluate",
             "compare",
             "final_evaluate",
+            "directional_final_evaluate",
         ),
     )
     parser.add_argument(
@@ -871,7 +1001,12 @@ def main() -> None:
     parser.add_argument("--direction")
     args = parser.parse_args()
     config = load_config(args.config)
-    if args.action in {"prepare", "train", "evaluate"}:
+    if args.action in {
+        "prepare",
+        "train",
+        "evaluate",
+        "directional_final_evaluate",
+    }:
         if not args.pair or not args.variant:
             parser.error(f"{args.action} requires --pair and --variant")
     if args.action in {"compare", "final_evaluate"} and not args.pair:
@@ -893,6 +1028,10 @@ def main() -> None:
         result = evaluate(config, args.pair, args.variant, args.direction)
     elif args.action == "final_evaluate":
         result = final_evaluate(config, args.pair)
+    elif args.action == "directional_final_evaluate":
+        result = directional_final_evaluate(
+            config, args.pair, args.variant, args.direction
+        )
     else:
         result = compare(config, args.pair)
     print(json.dumps(result, ensure_ascii=False, indent=2))

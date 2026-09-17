@@ -42,6 +42,7 @@ TRAIN_VARIANTS = (
     "flores_relaxed_8k_ep3",
     "directional_existing_v1",
     "directional_existing_ep2_v1",
+    "directional_deepseek_partial_v1",
 )
 BASELINE_VARIANTS = ("baseline_exp1", "baseline_exp2")
 ALL_VARIANTS = BASELINE_VARIANTS + TRAIN_VARIANTS
@@ -77,6 +78,7 @@ def is_directional_variant(variant: str) -> bool:
         "directional_full",
         "directional_existing_v1",
         "directional_existing_ep2_v1",
+        "directional_deepseek_partial_v1",
     }
 
 
@@ -729,6 +731,7 @@ def compare(config: dict[str, Any], pair_id: str) -> dict[str, Any]:
         for directional_variant in (
             "directional_existing_v1",
             "directional_existing_ep2_v1",
+            "directional_deepseek_partial_v1",
         ):
             variants.extend(
                 (directional_variant, item) for item in pair_directions(pair)
@@ -810,6 +813,7 @@ def status(config: dict[str, Any]) -> dict[str, Any]:
                     for variant in (
                         "directional_existing_v1",
                         "directional_existing_ep2_v1",
+                        "directional_deepseek_partial_v1",
                     )
                     for item in pair_directions(pair)
                 )

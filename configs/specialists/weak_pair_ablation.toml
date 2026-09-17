@@ -95,6 +95,15 @@ epochs = 2
 kd_train = "data/distillation/zh_uz/flores_relaxed_8k/train.jsonl"
 source_model = "results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/best_model/shared"
 
+# Frozen partial DeepSeek snapshot mixed into the existing bidirectional base;
+# the directional preparation stage selects only zh-uz rows for this run.
+[variants.directional_deepseek_partial_v1]
+pairs = ["zh_uz"]
+learning_rate = 0.000002
+epochs = 1
+kd_train = "data/distillation/zh_uz/deepseek_partial_v1/train.jsonl"
+source_model = "results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/best_model/shared"
+
 [[pairs]]
 id = "zh_uz"
 languages = ["zh", "uz"]

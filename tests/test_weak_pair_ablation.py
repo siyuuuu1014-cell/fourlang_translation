@@ -74,6 +74,13 @@ def config() -> dict:
                 "kd_train": "relaxed.jsonl",
                 "source_model": "ep3",
             },
+            "directional_deepseek_partial_v1": {
+                "pairs": ["zh_uz"],
+                "learning_rate": 2e-6,
+                "epochs": 1,
+                "kd_train": "deepseek-partial.jsonl",
+                "source_model": "ep3",
+            },
         },
         "pairs": [
             {
@@ -116,6 +123,10 @@ class WeakPairAblationTests(unittest.TestCase):
         self.assertEqual(
             ablation.run_id("directional_existing_ep2_v1", "zh-uz"),
             "directional_existing_ep2_v1__zh_uz",
+        )
+        self.assertEqual(
+            ablation.run_id("directional_deepseek_partial_v1", "zh-uz"),
+            "directional_deepseek_partial_v1__zh_uz",
         )
 
     def test_prepare_full_keeps_every_unique_eligible_row(self):

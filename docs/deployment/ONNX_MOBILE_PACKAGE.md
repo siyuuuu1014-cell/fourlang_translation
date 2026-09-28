@@ -99,15 +99,41 @@ logits, present = decoder_with_past.run(
   （见项目内 `docs/PIPELINE_RUNBOOK.md` 的「商业许可证门禁」）。
 - `sentencepiece` 模型为 Apache-2.0。
 
-## 复现
+## 复现与模型更新
 
-本包由以下命令生成（服务器 `small100_student` venv，已装 `optimum[onnxruntime]`）：
+本包由统一量化脚本 `scripts/onnx_export/quantize_model.py` 生成（服务器 `small100_student` venv，已装 `optimum[onnxruntime]`）。
+
+### 首次生成
 
 ```bash
-PY=/root/autodl-tmp/venvs/small100_student/bin/python
-MODEL=results/student/fourlang_m2m100/m2m100_targeted_from_human_v1/best_model/shared
-# 1. fp32 导出
-"$PY" -m optimum.commands.optimum_cli export onnx -m "$MODEL" --task seq2seq-lm-with-past onnx_export/m2m100_fourlang_fp32
-# 2. int8 动态量化（onnxruntime quantize_dynamic, QInt8）
-#    见 onnx_export/ 下的 quantize 脚本；量化 encoder/decoder/decoder_with_past 三个文件
+python scripts/onnx_export/quantize_model.py \
+    --model results/student/fourlang_m2m100/m2m100_targeted_from_human_v1/best_model/shared \
+    --family m2m100 --version 1.0.0 \
+    --output onnx_export/m2m100_fourlang_mobile
 ```
+
+### 模型更新（微调/重训后）
+
+换 checkpoint 路径 + 递增 `--version`，重跑同一条命令，**用同一个 `--output` 目录覆盖**（保持 model_id 不变）：
+
+```bash
+python scripts/onnx_export/quantize_model.py \
+    --model <新checkpoint路径> --family m2m100 --version 2.0.0 \
+    --output onnx_export/m2m100_fourlang_mobile
+```
+
+然后重启服务：
+
+```bash
+bash scripts/service/manage_api.sh restart
+```
+
+之后全自动：新包写入（`source_sha256` 自动更新）→ `/models/manifest` 扫到新 SHA → `/download/{id}` 检测 tar 过期自动重打 → App 端对比 SHA 自动重新下载。
+
+### 何时需要改代码
+
+- **同 family 内更新**（微调/换数据重训）→ 零改代码，只换 `--model` + `--version`。
+- **换架构/family**（如 m2m100 → NLLB）→ 需在 `quantize_model.py` 加新 family 分支（分词器打包 + 方向机制 + 验证用例）。
+- **改词表大小**（加语言/扩 vocab）→ 脚本不用改，但语言 token id 会变，App 端从 manifest 读新 id 即可。
+
+参数说明：`--family` 取 `m2m100`（四语）或 `small100`（六组）；`--pair`（如 `zh_uz`）用于方向正确的验证用例。

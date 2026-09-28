@@ -55,19 +55,34 @@
 2. **ORT 冲突**：复用 sherpa 已有的 onnxruntime 1.27.1 的 Java 桥 + libonnxruntime4j_jni.so。导出用标准算子，1.27.1 能跑。
 3. **体积/内存**：最终包压到 **734MB（磁盘）**，运行时内存 ~1GB（单实例）；**必须限制单 session 并发**（多实例会压垮手机）。磁盘 734MB 仍偏大，建议"首次下载"而非打进 APK；再小只能 int4（掉点）或蒸馏。
 4. **分词器**：SentencePiece BPE（128000 pieces，无 byte fallback）。用 `sentencepiece.bpe.model`（已含合并规则），别用 vocab.json；`vocab.txt`（piece+score）已提取供 Kotlin BPE 参考。
-5. **六组模型**：现状只有 FastAPI 在线（SMaLL-100 自定义 Python 分词器，ONNX 导出更麻烦），短期先调 `POST :8000/translate`，离线包二期。
+5. **六组模型**：已有 6 个 int8 离线包（`onnx_export/<pair>_mobile/`，各 587MB），走 `/download/{pair}`；在线 `/translate` 也在。SMaLL-100 分词器是自定义 Python，端侧要重写（比 m2m100 的标准 sentencepiece 麻烦），但量化导出流程和四语共用。
+
+## 模型更新流程（微调/重训后）
+
+量化已工程化，**同 family 内更新模型 = 换 checkpoint 路径 + 重跑一条命令，零改代码**：
+
+```bash
+python scripts/onnx_export/quantize_model.py \
+    --model <新checkpoint路径> --family small100|m2m100 --version 2.0.0 \
+    --output onnx_export/<模型>_mobile    # 同一个目录覆盖，保持 model_id 不变
+bash scripts/service/manage_api.sh restart
+```
+
+之后全自动：新包写入（`source_sha256` 自动更新）→ `/models/manifest` 扫到新 SHA → `/download/{id}` 自动重打 tar → App 端对比 SHA 自动重下。
+
+- `--family`：`m2m100`（四语）/ `small100`（六组）；`--pair`（如 `zh_uz`）用于方向正确的验证用例。
+- 换架构/family 才需要改 `quantize_model.py`；详细见 `docs/deployment/ONNX_MOBILE_PACKAGE.md`。
 
 ## 下一步（按优先级）
 
-1. **App 端接入**：六组走 API；四语走 `m2m100_fourlang_mobile/` 包（`onnxruntime-mobile` + 自己写解码循环，见 README）。
+1. **App 端接入**：四语 + 六组都走 `/models/manifest` + `/download/{id}` 首次下载；四语包见 `m2m100_fourlang_mobile/`，六组见 `<pair>_mobile/`（`onnxruntime-mobile` + 自己写解码循环，见各包 README）。
 2. 出 **Python 版 merged 解码参考实现**（便于 App 端转 Swift/Kotlin）。
-3. **git 提交**（本会话改动均未提交）。
-4. 训练数据许可核对（商用前，见 `docs/PIPELINE_RUNBOOK.md`）。
+3. 训练数据许可核对（商用前，见 `docs/PIPELINE_RUNBOOK.md`）。
 
 ## 隐患 / 注意
 
 - **onnxruntime 图优化必须用 `ORT_ENABLE_BASIC`**，不能 EXTENDED（1.30 的 `TransposeDQWeightsForMatMulNBits` 对跨子图 int8 权重有 bug，README 已写清）。
 - protobuf 4.25.3 → 7.36.1（onnx 依赖），核心依赖 import 正常。
-- 磁盘 205G/235G，可用 ~31G。
+- 磁盘 152G/235G，可用 ~84G。
 - 服务器 SSH：`region-46.seetacloud.com:28893`，凭据在用户处，不写入文档。
 - 未经用户确认，不删除/重训/改模型路由。

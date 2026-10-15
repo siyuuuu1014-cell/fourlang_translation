@@ -1,0 +1,19 @@
+{
+  "validator_version": "0.5.3",
+  "frozen_parent": "0.5.2",
+  "input": "data\\synthetic\\generated\\v053_audit_200\\02_hard_semantic\\hard_accepted.jsonl",
+  "total": 200,
+  "frozen_rows": 100,
+  "new_rows": 100,
+  "accepted": 200,
+  "rejected": 0,
+  "accept_rate": 1.0,
+  "new_accepted": 100,
+  "new_rejected": 0,
+  "new_frame_distribution": {
+    "GIVE_OBJECT_PERSON": 50,
+    "BRING_OBJECT_DESTINATION": 50
+  },
+  "rejected_by_language": {},
+  "reject_reasons": {}
+}

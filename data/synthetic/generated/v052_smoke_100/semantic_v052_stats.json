@@ -1,0 +1,58 @@
+{
+  "generator_version": "0.5.2",
+  "frozen_parent_version": "0.5.1",
+  "seed": 2052,
+  "samples": 100,
+  "frozen_parent_rows": 70,
+  "new_rows": 30,
+  "new_ratio": 0.3,
+  "new_generation_attempts": 32,
+  "contract_errors": 0,
+  "frame_distribution": {
+    "TRANSITIVE_TIME": 8,
+    "CALL_PERSON": 10,
+    "MOTION_TIME": 8,
+    "WAIT_AT_PLACE": 10,
+    "MOTION_CLOCK": 7,
+    "SEE_OBJECT": 7,
+    "WANT_OBJECT": 5,
+    "TRANSITIVE_CLOCK": 8,
+    "TRANSITIVE": 7,
+    "WAIT_PERSON": 10,
+    "WHERE_PLACE": 1,
+    "MOTION_DESTINATION": 7,
+    "TAKE_OBJECT": 7,
+    "INTRANSITIVE_TIME": 3,
+    "INTRANSITIVE": 2
+  },
+  "verb_distribution": {
+    "READ": 5,
+    "CALL": 10,
+    "GO": 11,
+    "WAIT": 20,
+    "ARRIVE": 7,
+    "SEE": 7,
+    "WANT": 5,
+    "EAT": 5,
+    "BUY": 5,
+    "FIND": 4,
+    "NO_VERB": 1,
+    "TAKE": 7,
+    "COME": 9,
+    "DRINK": 4
+  },
+  "source_distribution": {
+    "frozen_parent_v051": 70,
+    "v052_new_frame": 30
+  },
+  "new_frame_distribution": {
+    "CALL_PERSON": 10,
+    "WAIT_AT_PLACE": 10,
+    "WAIT_PERSON": 10
+  },
+  "new_verb_distribution": {
+    "CALL": 10,
+    "WAIT": 20
+  },
+  "activation_file": "D:\\dev\\projects\\fourlang_translation\\data\\synthetic\\resources\\v05\\activation_v052.json"
+}

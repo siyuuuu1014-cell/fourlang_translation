@@ -1,0 +1,174 @@
+{
+  "samples": 27,
+  "counts": {
+    "scenario": {
+      "daily": 6,
+      "travel": 5,
+      "shopping": 4,
+      "restaurant": 3,
+      "transport": 3,
+      "hotel": 3,
+      "work_study": 1,
+      "medical": 1,
+      "communication": 1
+    },
+    "frame": {
+      "MOTION_DESTINATION": 5,
+      "TRANSITIVE_CLOCK": 4,
+      "TRANSITIVE_TIME": 3,
+      "TRANSITIVE": 3,
+      "MOTION_TIME": 3,
+      "WANT_OBJECT": 3,
+      "MOTION_CLOCK": 3,
+      "INTRANSITIVE": 1,
+      "INTRANSITIVE_TIME": 1,
+      "WHERE_PLACE": 1
+    },
+    "verb": {
+      "COME": 5,
+      "GO": 4,
+      "ARRIVE": 4,
+      "BUY": 3,
+      "WANT": 3,
+      "EAT": 2,
+      "FIND": 2,
+      "READ": 2,
+      "DRINK": 1
+    },
+    "subject": {
+      "PERSON_YOU": 7,
+      "PERSON_SHE": 5,
+      "PERSON_THEY": 4,
+      "PERSON_WE": 4,
+      "PERSON_HE": 3,
+      "PERSON_I": 3
+    },
+    "object": {
+      "FOOD": 3,
+      "WATER": 3,
+      "BOOK": 3,
+      "TICKET": 2,
+      "MEDICINE": 1,
+      "COFFEE": 1
+    },
+    "destination": {
+      "BEIJING": 2,
+      "MOSCOW": 2,
+      "STATION": 1,
+      "HOTEL": 1,
+      "TASHKENT": 1,
+      "HOSPITAL": 1,
+      "AIRPORT": 1,
+      "BANK": 1,
+      "RESTAURANT": 1
+    },
+    "time": {
+      "TIME_TOMORROW": 10,
+      "TIME_TODAY": 2,
+      "TIME_NEXT_WEEK": 1,
+      "TIME_EVERY_DAY": 1
+    },
+    "tense": {
+      "future": 18,
+      "present": 8,
+      "NONE": 1
+    },
+    "polarity": {
+      "pos": 22,
+      "neg": 5
+    }
+  },
+  "ratios": {
+    "scenario": {
+      "shopping": 0.14814814814814814,
+      "restaurant": 0.1111111111111111,
+      "transport": 0.1111111111111111,
+      "daily": 0.2222222222222222,
+      "hotel": 0.1111111111111111,
+      "work_study": 0.037037037037037035,
+      "travel": 0.18518518518518517,
+      "medical": 0.037037037037037035,
+      "communication": 0.037037037037037035
+    },
+    "frame": {
+      "TRANSITIVE_TIME": 0.1111111111111111,
+      "TRANSITIVE": 0.1111111111111111,
+      "MOTION_TIME": 0.1111111111111111,
+      "MOTION_DESTINATION": 0.18518518518518517,
+      "WANT_OBJECT": 0.1111111111111111,
+      "INTRANSITIVE": 0.037037037037037035,
+      "TRANSITIVE_CLOCK": 0.14814814814814814,
+      "MOTION_CLOCK": 0.1111111111111111,
+      "INTRANSITIVE_TIME": 0.037037037037037035,
+      "WHERE_PLACE": 0.037037037037037035
+    },
+    "verb": {
+      "EAT": 0.07407407407407407,
+      "BUY": 0.1111111111111111,
+      "GO": 0.14814814814814814,
+      "COME": 0.18518518518518517,
+      "WANT": 0.1111111111111111,
+      "ARRIVE": 0.14814814814814814,
+      "FIND": 0.07407407407407407,
+      "READ": 0.07407407407407407,
+      "DRINK": 0.037037037037037035
+    },
+    "subject": {
+      "PERSON_SHE": 0.18518518518518517,
+      "PERSON_THEY": 0.14814814814814814,
+      "PERSON_YOU": 0.25925925925925924,
+      "PERSON_WE": 0.14814814814814814,
+      "PERSON_HE": 0.1111111111111111,
+      "PERSON_I": 0.1111111111111111
+    },
+    "object": {
+      "FOOD": 0.1111111111111111,
+      "TICKET": 0.07407407407407407,
+      "MEDICINE": 0.037037037037037035,
+      "WATER": 0.1111111111111111,
+      "BOOK": 0.1111111111111111,
+      "COFFEE": 0.037037037037037035
+    },
+    "destination": {
+      "STATION": 0.037037037037037035,
+      "HOTEL": 0.037037037037037035,
+      "TASHKENT": 0.037037037037037035,
+      "BEIJING": 0.07407407407407407,
+      "HOSPITAL": 0.037037037037037035,
+      "AIRPORT": 0.037037037037037035,
+      "MOSCOW": 0.07407407407407407,
+      "BANK": 0.037037037037037035,
+      "RESTAURANT": 0.037037037037037035
+    },
+    "time": {
+      "TIME_NEXT_WEEK": 0.037037037037037035,
+      "TIME_TOMORROW": 0.37037037037037035,
+      "TIME_EVERY_DAY": 0.037037037037037035,
+      "TIME_TODAY": 0.07407407407407407
+    },
+    "tense": {
+      "future": 0.6666666666666666,
+      "present": 0.2962962962962963,
+      "NONE": 0.037037037037037035
+    },
+    "polarity": {
+      "pos": 0.8148148148148148,
+      "neg": 0.18518518518518517
+    }
+  },
+  "coverage_constraint_violations": [
+    {
+      "type": "verb",
+      "id": "COME",
+      "ratio": 0.18518518518518517,
+      "max_ratio": 0.15
+    },
+    {
+      "type": "frame",
+      "id": "MOTION_DESTINATION",
+      "ratio": 0.18518518518518517,
+      "max_ratio": 0.15
+    }
+  ],
+  "note": "Coverage constraint violations during a 100-sample smoke test are diagnostic only and do not automatically invalidate the corpus."
+}

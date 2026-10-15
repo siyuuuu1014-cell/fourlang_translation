@@ -1,0 +1,38 @@
+{
+  "version": "0.5.1",
+  "total": 70,
+  "new_rows": 14,
+  "blocked_verbs": [
+    "BRING",
+    "CALL",
+    "GIVE",
+    "LEAVE",
+    "LOSE",
+    "NEED",
+    "RETURN",
+    "WAIT"
+  ],
+  "blocked_frames": [
+    "BRING_OBJECT_DESTINATION",
+    "CALL_PERSON",
+    "GIVE_OBJECT_PERSON",
+    "LEAVE_PLACE",
+    "LOSE_OBJECT",
+    "NEED_OBJECT",
+    "RETURN_PLACE",
+    "WAIT_AT_PLACE",
+    "WAIT_PERSON",
+    "WHERE_OBJECT",
+    "WHERE_PERSON"
+  ],
+  "new_verb_counts": {
+    "TAKE": 7,
+    "SEE": 7
+  },
+  "new_frame_counts": {
+    "TAKE_OBJECT": 7,
+    "SEE_OBJECT": 7
+  },
+  "errors": [],
+  "pass": true
+}

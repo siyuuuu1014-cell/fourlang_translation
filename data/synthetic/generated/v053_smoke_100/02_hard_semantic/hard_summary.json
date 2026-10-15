@@ -1,0 +1,14 @@
+{
+  "validator_version": "0.5.3",
+  "total": 100,
+  "accepted": 100,
+  "rejected": 0,
+  "accept_rate": 1.0,
+  "new_accepted": 30,
+  "new_rejected": 0,
+  "new_frame_distribution": {
+    "BRING_OBJECT_DESTINATION": 15,
+    "GIVE_OBJECT_PERSON": 15
+  },
+  "reject_reasons": {}
+}

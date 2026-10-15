@@ -1,0 +1,96 @@
+{
+  "schema_version": 2,
+  "stage": "final_source_selection",
+  "candidate_pool": [
+    "/root/autodl-tmp/fourlang_translation/data/pipeline_v2/zh_uz_flores_like_v2/monolingual_candidates.jsonl"
+  ],
+  "by_direction": {
+    "zh-uz": {
+      "eligible": 19726,
+      "selected": 14000,
+      "target": 14000,
+      "by_source_group": {
+        "fineweb": 1810,
+        "hplt": 2950,
+        "v2_bronze": 140,
+        "wikipedia": 9100
+      },
+      "by_feature": {
+        "long|question|digit|multi": 13,
+        "long|question|digit|simple": 3,
+        "long|question|no_digit|multi": 28,
+        "long|question|no_digit|simple": 1,
+        "long|statement|digit|multi": 1434,
+        "long|statement|digit|simple": 407,
+        "long|statement|no_digit|multi": 2165,
+        "long|statement|no_digit|simple": 820,
+        "medium|question|digit|multi": 2,
+        "medium|question|digit|simple": 2,
+        "medium|question|no_digit|multi": 13,
+        "medium|question|no_digit|simple": 13,
+        "medium|statement|digit|multi": 437,
+        "medium|statement|digit|simple": 528,
+        "medium|statement|no_digit|multi": 1400,
+        "medium|statement|no_digit|simple": 1433,
+        "short|question|digit|multi": 1,
+        "short|question|digit|simple": 8,
+        "short|question|no_digit|multi": 17,
+        "short|question|no_digit|simple": 83,
+        "short|statement|digit|multi": 145,
+        "short|statement|digit|simple": 660,
+        "short|statement|no_digit|multi": 605,
+        "short|statement|no_digit|simple": 3782
+      },
+      "rejections": {}
+    },
+    "uz-zh": {
+      "eligible": 15313,
+      "selected": 14000,
+      "target": 14000,
+      "by_source_group": {
+        "fineweb": 2606,
+        "hplt": 4887,
+        "v2_bronze": 140,
+        "wikipedia": 6367
+      },
+      "by_feature": {
+        "long|question|digit|multi": 1,
+        "long|question|digit|simple": 1,
+        "long|question|no_digit|multi": 6,
+        "long|question|no_digit|simple": 1,
+        "long|statement|digit|multi": 631,
+        "long|statement|digit|simple": 475,
+        "long|statement|no_digit|multi": 1448,
+        "long|statement|no_digit|simple": 1078,
+        "medium|question|digit|multi": 1,
+        "medium|question|no_digit|multi": 1,
+        "medium|question|no_digit|simple": 5,
+        "medium|statement|digit|multi": 252,
+        "medium|statement|digit|simple": 608,
+        "medium|statement|no_digit|multi": 829,
+        "medium|statement|no_digit|simple": 1834,
+        "short|question|digit|simple": 10,
+        "short|question|no_digit|multi": 11,
+        "short|question|no_digit|simple": 98,
+        "short|statement|digit|multi": 188,
+        "short|statement|digit|simple": 1294,
+        "short|statement|no_digit|multi": 695,
+        "short|statement|no_digit|simple": 4533
+      },
+      "rejections": {}
+    }
+  },
+  "flores_rows_selected": 0,
+  "output": "/root/autodl-tmp/fourlang_translation/data/distillation/zh_uz/flores_like_v2/selected_sources.jsonl",
+  "teacher_input": "/root/autodl-tmp/fourlang_translation/data/pipeline_v2/zh_uz_flores_like_v2/kd_candidates.jsonl",
+  "inputs_sha256": {
+    "candidate_pool": "ef0322f71f2629758dd89727c88159326de115da3d864b5fc367c17389aff6f4",
+    "source_review": "cf00c948d5a10b359ebd61ce387c494e8d8b9178e3c32933e056b93960bddccf",
+    "previous_selected": "7b9c6aa4fe9f75b8b7048fedb105c6d5c6f4a88c8b17efe973fb2b99fa336591",
+    "existing_train": "fb98038b0e462f4dec03254e4fa1431a4d8a87b945d738cb5d428a1b55e7afbc",
+    "validation": "20906dbe010fabefa92cd54d365dfde557b7858c227502e9ceb83b39fdde5228",
+    "flores_dev": "e5d9565440682c8ad1fab045df0fd7f752fc8912642bf834ddfadad39cf937a4",
+    "flores_devtest": "933a9c29300d65ca6c1b85345dce5922dfe78c4797c5b306c0481f33d25db41e"
+  },
+  "shortages": {}
+}

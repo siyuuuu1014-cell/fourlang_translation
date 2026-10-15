@@ -1,0 +1,9 @@
+{
+  "validator_version": "0.4.4.1",
+  "input": "data\\synthetic\\generated\\v053_smoke_100\\02_hard_semantic\\_frozen_v052_validator\\_frozen_v051_validator\\_frozen_core_input.jsonl",
+  "total": 39,
+  "accepted": 39,
+  "rejected": 0,
+  "accept_rate": 1.0,
+  "reject_reasons": {}
+}

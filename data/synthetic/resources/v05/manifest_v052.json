@@ -1,0 +1,32 @@
+{
+  "version": "0.5.2",
+  "frozen_parent": "0.5.1",
+  "batch": "Batch-2A",
+  "new_verbs": [
+    "CALL",
+    "WAIT"
+  ],
+  "new_frames": [
+    "CALL_PERSON",
+    "WAIT_PERSON",
+    "WAIT_AT_PLACE"
+  ],
+  "generation_enabled": false,
+  "new_argument_features": [
+    "person_en_object",
+    "person_ru_accusative",
+    "person_ru_dative",
+    "person_uz_accusative",
+    "person_uz_dative",
+    "place_locative"
+  ],
+  "constraints": [
+    "CALL_PERSON subject != person",
+    "WAIT_PERSON subject != person",
+    "reflexive semantics postponed"
+  ],
+  "files": {
+    "verbs": "D:\\dev\\projects\\fourlang_translation\\data\\synthetic\\resources\\v05\\verb_realization_v052.json",
+    "arguments": "D:\\dev\\projects\\fourlang_translation\\data\\synthetic\\resources\\v05\\argument_realization_v052.json"
+  }
+}

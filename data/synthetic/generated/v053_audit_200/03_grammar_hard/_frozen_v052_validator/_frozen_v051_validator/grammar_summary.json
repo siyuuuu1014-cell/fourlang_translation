@@ -1,0 +1,14 @@
+{
+  "validator_version": "0.5.1",
+  "input": "data\\synthetic\\generated\\v053_audit_200\\03_grammar_hard\\_frozen_v052_validator\\_frozen_v051_input.jsonl",
+  "total": 70,
+  "frozen_core_rows": 56,
+  "new_rows": 14,
+  "accepted": 70,
+  "rejected": 0,
+  "accept_rate": 1.0,
+  "new_accepted": 14,
+  "new_rejected": 0,
+  "reject_reasons": {},
+  "rejected_by_language": {}
+}

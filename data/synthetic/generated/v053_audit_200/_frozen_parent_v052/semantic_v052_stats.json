@@ -1,0 +1,72 @@
+{
+  "generator_version": "0.5.2",
+  "frozen_parent_version": "0.5.1",
+  "seed": 2057,
+  "samples": 100,
+  "frozen_parent_rows": 70,
+  "new_rows": 30,
+  "new_ratio": 0.3,
+  "new_generation_attempts": 31,
+  "contract_errors": 0,
+  "participant_overlap_policy": {
+    "exact_reflexive_allowed": false,
+    "speaker_group_overlap_allowed": false,
+    "blocked_pairs": [
+      [
+        "PERSON_I",
+        "PERSON_WE"
+      ],
+      [
+        "PERSON_WE",
+        "PERSON_I"
+      ]
+    ]
+  },
+  "frame_distribution": {
+    "WAIT_AT_PLACE": 10,
+    "WAIT_PERSON": 10,
+    "TRANSITIVE": 8,
+    "CALL_PERSON": 10,
+    "INTRANSITIVE_TIME": 3,
+    "TRANSITIVE_TIME": 6,
+    "TRANSITIVE_CLOCK": 8,
+    "MOTION_CLOCK": 7,
+    "TAKE_OBJECT": 7,
+    "SEE_OBJECT": 7,
+    "WANT_OBJECT": 6,
+    "MOTION_DESTINATION": 7,
+    "MOTION_TIME": 8,
+    "INTRANSITIVE": 2,
+    "WHERE_PLACE": 1
+  },
+  "verb_distribution": {
+    "WAIT": 20,
+    "READ": 5,
+    "CALL": 10,
+    "GO": 11,
+    "EAT": 5,
+    "FIND": 4,
+    "BUY": 3,
+    "DRINK": 5,
+    "COME": 9,
+    "TAKE": 7,
+    "SEE": 7,
+    "WANT": 6,
+    "ARRIVE": 7,
+    "NO_VERB": 1
+  },
+  "source_distribution": {
+    "v052_new_frame": 30,
+    "frozen_parent_v051": 70
+  },
+  "new_frame_distribution": {
+    "WAIT_AT_PLACE": 10,
+    "WAIT_PERSON": 10,
+    "CALL_PERSON": 10
+  },
+  "new_verb_distribution": {
+    "WAIT": 20,
+    "CALL": 10
+  },
+  "activation_file": "D:\\dev\\projects\\fourlang_translation\\data\\synthetic\\resources\\v05\\activation_v052.json"
+}

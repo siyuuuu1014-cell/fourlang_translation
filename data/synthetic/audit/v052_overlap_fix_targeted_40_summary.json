@@ -1,0 +1,61 @@
+{
+  "audit_version": "0.5.2",
+  "seed": 2056,
+  "input_rows": 200,
+  "candidate_rows": 100,
+  "selected": 40,
+  "frame_distribution": {
+    "CALL_PERSON": 14,
+    "WAIT_AT_PLACE": 13,
+    "WAIT_PERSON": 13
+  },
+  "tense_distribution": {
+    "present": 21,
+    "future": 19
+  },
+  "polarity_distribution": {
+    "neg": 19,
+    "pos": 21
+  },
+  "subject_distribution": {
+    "PERSON_HE": 8,
+    "PERSON_SHE": 7,
+    "PERSON_THEY": 7,
+    "PERSON_I": 7,
+    "PERSON_WE": 5,
+    "PERSON_YOU": 6
+  },
+  "target_distribution": {
+    "PERSON_YOU": 4,
+    "BANK": 2,
+    "PERSON_I": 5,
+    "PERSON_HE": 5,
+    "HOTEL": 2,
+    "SCHOOL": 1,
+    "PERSON_THEY": 5,
+    "PERSON_SHE": 4,
+    "TASHKENT": 1,
+    "OFFICE": 1,
+    "AIRPORT": 1,
+    "PERSON_WE": 4,
+    "MOSCOW": 1,
+    "BEIJING": 1,
+    "STATION": 1,
+    "RESTAURANT": 1,
+    "HOSPITAL": 1
+  },
+  "frame_tense_polarity": {
+    "CALL_PERSON|present|neg": 3,
+    "WAIT_AT_PLACE|present|pos": 4,
+    "CALL_PERSON|future|pos": 3,
+    "WAIT_PERSON|present|pos": 4,
+    "WAIT_AT_PLACE|present|neg": 3,
+    "WAIT_PERSON|future|pos": 3,
+    "CALL_PERSON|present|pos": 4,
+    "WAIT_AT_PLACE|future|pos": 3,
+    "WAIT_PERSON|future|neg": 3,
+    "WAIT_PERSON|present|neg": 3,
+    "CALL_PERSON|future|neg": 4,
+    "WAIT_AT_PLACE|future|neg": 3
+  }
+}

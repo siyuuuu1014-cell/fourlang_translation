@@ -1,0 +1,203 @@
+{
+  "schema_version": 1,
+  "stage": "teacher_calibration_diagnostics",
+  "first_review": "/root/autodl-tmp/fourlang_translation/data/pipeline_v2/zh_uz_flores_like_v2/teacher_judge_calibration.parquet",
+  "minor_second_review": "/root/autodl-tmp/fourlang_translation/data/pipeline_v2/zh_uz_flores_like_v2/teacher_minor_second_review_calibration.parquet",
+  "directions": {
+    "zh-uz": {
+      "samples": 519,
+      "labels": {
+        "FAIL": 140,
+        "MINOR": 244,
+        "PASS": 135
+      },
+      "usefulness": {
+        "HIGH": 305,
+        "MEDIUM": 74,
+        "REJECT": 140
+      },
+      "error_flags": {
+        "omission": 123,
+        "addition": 68,
+        "mistranslation": 146,
+        "number_error": 10,
+        "entity_error": 166,
+        "negation_error": 10
+      },
+      "semantic_inconsistent": 140,
+      "parse_failures": 0,
+      "minor_rows": 244,
+      "clean_minor_sent_to_second_review": 199,
+      "second_review_pass": 30,
+      "second_review_salvage_rate": 0.1507537688442211,
+      "accepted_rate": 0.3179190751445087,
+      "conservative_accepted_rate_95": 0.2793184868483656,
+      "selected_candidates": 14000,
+      "minimum_required_rows": 8000,
+      "estimated_candidates_for_minimum": 28642,
+      "additional_candidates_for_minimum": 14642,
+      "by_source_corpus": {
+        "fineweb2_cmn_hani": {
+          "samples": 69,
+          "pass": 15,
+          "minor": 36,
+          "fail": 18,
+          "uncertain": 0,
+          "strict_pass_rate": 0.21739130434782608
+        },
+        "hplt3_cmn_hans": {
+          "samples": 96,
+          "pass": 14,
+          "minor": 57,
+          "fail": 25,
+          "uncertain": 0,
+          "strict_pass_rate": 0.14583333333333334
+        },
+        "v2_bronze_zh": {
+          "samples": 4,
+          "pass": 0,
+          "minor": 4,
+          "fail": 0,
+          "uncertain": 0,
+          "strict_pass_rate": 0.0
+        },
+        "wikipedia_flores_like_zh": {
+          "samples": 348,
+          "pass": 106,
+          "minor": 145,
+          "fail": 97,
+          "uncertain": 0,
+          "strict_pass_rate": 0.3045977011494253
+        },
+        "wikipedia_zh": {
+          "samples": 2,
+          "pass": 0,
+          "minor": 2,
+          "fail": 0,
+          "uncertain": 0,
+          "strict_pass_rate": 0.0
+        }
+      },
+      "top_non_pass_reasons": {
+        "Minor stylistic issues, but overall accurate and fluent translation.": 9,
+        "Minor stylistic improvement possible for fluency": 8,
+        "Minor stylistic difference in phrasing, but meaning is fully preserved.": 8,
+        "Minor stylistic improvement possible, but meaning is fully preserved.": 5,
+        "Minor issue with word order and phrasing, but overall meaning is clear and accurate.": 5,
+        "Minor stylistic issues, but meaning is fully preserved.": 4,
+        "Minor stylistic or phrasing issue, but meaning is fully preserved.": 3,
+        "Minor stylistic improvement in phrasing, but meaning is fully preserved.": 3,
+        "Minor stylistic or phrasing issue, but meaning is clear and accurate.": 2,
+        "Minor issue with phrasing, but overall meaning is clear and accurate.": 2,
+        "Minor issue with date format, but overall translation is accurate and fluent.": 2,
+        "Minor stylistic issue in the translation, but meaning is fully preserved.": 2,
+        "Minor stylistic issues, but meaning is clear and accurate.": 2,
+        "Minor stylistic issue; the translation is semantically accurate but could be slightly more natural in Uzbek.": 2,
+        "Minor stylistic issue with word order, but meaning is fully preserved.": 2,
+        "Minor fluency issues, but overall meaning is clear and accurate.": 2,
+        "Minor stylistic variation, but meaning is fully preserved.": 2,
+        "Minor lexical inaccuracies and awkward phrasing, but overall meaning is clear and usable.": 1,
+        "Incorrect translation of '胡先骕' as 'Hu Zhengyu', and incorrect translation of '水杉' as 'suv daraxtini' (water tree) instead of the proper scientific name 'Metasequoia'": 1,
+        "Minor stylistic improvements could be made for better fluency, but the translation is semantically accurate and fully usable.": 1
+      }
+    },
+    "uz-zh": {
+      "samples": 481,
+      "labels": {
+        "FAIL": 73,
+        "MINOR": 200,
+        "PASS": 208
+      },
+      "usefulness": {
+        "HIGH": 346,
+        "MEDIUM": 62,
+        "REJECT": 73
+      },
+      "error_flags": {
+        "omission": 64,
+        "addition": 61,
+        "mistranslation": 79,
+        "number_error": 2,
+        "entity_error": 89,
+        "negation_error": 1
+      },
+      "semantic_inconsistent": 73,
+      "parse_failures": 0,
+      "minor_rows": 200,
+      "clean_minor_sent_to_second_review": 160,
+      "second_review_pass": 16,
+      "second_review_salvage_rate": 0.1,
+      "accepted_rate": 0.4656964656964657,
+      "conservative_accepted_rate_95": 0.42156552733857966,
+      "selected_candidates": 14000,
+      "minimum_required_rows": 8000,
+      "estimated_candidates_for_minimum": 18977,
+      "additional_candidates_for_minimum": 4977,
+      "by_source_corpus": {
+        "fineweb2_uzn_latn": {
+          "samples": 90,
+          "pass": 39,
+          "minor": 27,
+          "fail": 24,
+          "uncertain": 0,
+          "strict_pass_rate": 0.43333333333333335
+        },
+        "hplt3_uzn_latn": {
+          "samples": 176,
+          "pass": 57,
+          "minor": 90,
+          "fail": 29,
+          "uncertain": 0,
+          "strict_pass_rate": 0.32386363636363635
+        },
+        "v2_bronze_uz": {
+          "samples": 6,
+          "pass": 3,
+          "minor": 3,
+          "fail": 0,
+          "uncertain": 0,
+          "strict_pass_rate": 0.5
+        },
+        "wikipedia_flores_like_uz": {
+          "samples": 208,
+          "pass": 109,
+          "minor": 79,
+          "fail": 20,
+          "uncertain": 0,
+          "strict_pass_rate": 0.5240384615384616
+        },
+        "wikipedia_uz": {
+          "samples": 1,
+          "pass": 0,
+          "minor": 1,
+          "fail": 0,
+          "uncertain": 0,
+          "strict_pass_rate": 0.0
+        }
+      },
+      "top_non_pass_reasons": {
+        "Minor stylistic difference in phrasing, but meaning is fully preserved.": 3,
+        "Minor issue with naturalness and fluency, but meaning is fully preserved.": 2,
+        "Minor wording difference, but meaning is fully preserved.": 2,
+        "Minor stylistic issue with word order, but meaning is fully preserved.": 2,
+        "Minor stylistic improvement, but meaning is fully preserved.": 2,
+        "Minor stylistic improvement possible, but meaning is fully preserved.": 2,
+        "错误地将 'Xiva' 翻译为 '哈维'，'Xiva' 是乌兹别克斯坦的一个地区，应音译为 '希瓦'。": 1,
+        "Significant semantic inconsistencies, omissions, and additions; mistranslation of key terms like 'markazlashtirilgan' and 'qimor o'ynash'; entity error with '1win' being a brand name that should be properly translated or retained as is.": 1,
+        "严重语义不一致，遗漏关键信息，添加无意义字符，实体翻译错误": 1,
+        "Semantic inconsistency, omissions, additions, and mistranslations affect meaning and fluency.": 1,
+        "Minor stylistic issue; 'Tao Fortune' is translated as a proper noun, which is acceptable, but the structure could be slightly more natural in Chinese.": 1,
+        "Semantic inconsistency and mistranslation; omission of key terms like 'block' and 'gambling problem'; addition of irrelevant terms like 'field website'; entity error with 'field website' instead of 'casino websites'.": 1,
+        "The translation is semantically accurate but slightly informal and uses '投注' (betting) which may not be the most natural term for the context. The original text is about 'pul tikish' (money repair), which is more likely to mean 'repairing money' or 'reimbursement' rather than 'betting'.": 1,
+        "Incomplete and mistranslated scientific terminology; missing key concepts like 'magnit dipol momenti' and 'atom orbitalini' which are essential for understanding the original meaning.": 1,
+        "Minor fluency issue with '技巧和技巧' which is redundant. The translation is otherwise accurate and fully usable.": 1,
+        "Minor stylistic issue with the phrase '城市有2个地区报纸' which could be more natural as '有2份地区报纸' or similar.": 1,
+        "Minor stylistic choice in parentheses usage, but meaning is fully preserved.": 1,
+        "Minor issue with '在线场' which is less natural than '在线赌场' but still understandable.": 1,
+        "严重语义不一致，遗漏关键信息，添加不相关词汇，实体错误（如'博'未明确指代），整体翻译不可用": 1,
+        "严重语义错误，遗漏关键信息，添加不相关内容，实体错误": 1
+      }
+    }
+  },
+  "recommendation": "DO_NOT_RUN_FULL_AUDIT"
+}

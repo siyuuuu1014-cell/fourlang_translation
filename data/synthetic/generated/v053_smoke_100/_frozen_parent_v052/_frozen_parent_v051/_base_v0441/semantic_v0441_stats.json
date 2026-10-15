@@ -1,0 +1,46 @@
+{
+  "generated": 39,
+  "attempts": 40,
+  "efficiency": 0.975,
+  "duplicate_signatures": 1,
+  "candidate_errors": 0,
+  "top_candidate_errors": [],
+  "generator_version": "0.4.4.1",
+  "generation_policy_version": "0.4.4",
+  "balance_fallback_count": 1,
+  "scenario_quotas": {
+    "daily": 8,
+    "travel": 7,
+    "shopping": 6,
+    "restaurant": 4,
+    "hotel": 4,
+    "transport": 4,
+    "medical": 2,
+    "communication": 2,
+    "work_study": 2
+  },
+  "frame_quotas": {
+    "INTRANSITIVE": 1,
+    "INTRANSITIVE_TIME": 2,
+    "MOTION_DESTINATION": 5,
+    "MOTION_TIME": 5,
+    "MOTION_CLOCK": 5,
+    "TRANSITIVE": 6,
+    "TRANSITIVE_TIME": 6,
+    "TRANSITIVE_CLOCK": 6,
+    "WANT_OBJECT": 3,
+    "WHERE_PLACE": 0
+  },
+  "verb_quotas": {
+    "GO": 6,
+    "COME": 6,
+    "ARRIVE": 6,
+    "BUY": 4,
+    "FIND": 4,
+    "EAT": 4,
+    "DRINK": 3,
+    "READ": 3,
+    "WANT": 3
+  },
+  "renderer_version": "0.4.4.1"
+}

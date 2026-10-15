@@ -1,0 +1,749 @@
+{
+  "version": "0.5.4",
+  "description": "Subject pronouns and object case realization for V0.5.1 Batch-1A.",
+  "subjects": {
+    "PERSON_I": {
+      "person_code": "1sg",
+      "zh": "我",
+      "en": "I",
+      "ru": "Я",
+      "uz": "Men"
+    },
+    "PERSON_YOU": {
+      "person_code": "2sg",
+      "zh": "你",
+      "en": "You",
+      "ru": "Ты",
+      "uz": "Sen"
+    },
+    "PERSON_HE": {
+      "person_code": "3sg",
+      "zh": "他",
+      "en": "He",
+      "ru": "Он",
+      "uz": "U"
+    },
+    "PERSON_SHE": {
+      "person_code": "3sg",
+      "zh": "她",
+      "en": "She",
+      "ru": "Она",
+      "uz": "U"
+    },
+    "PERSON_WE": {
+      "person_code": "1pl",
+      "zh": "我们",
+      "en": "We",
+      "ru": "Мы",
+      "uz": "Biz"
+    },
+    "PERSON_THEY": {
+      "person_code": "3pl",
+      "zh": "他们",
+      "en": "They",
+      "ru": "Они",
+      "uz": "Ular"
+    }
+  },
+  "objects": {
+    "ID_CARD": {
+      "zh": "身份证",
+      "en": "the ID card",
+      "ru_acc": "удостоверение личности",
+      "uz_acc": "shaxsiy guvohnomani",
+      "ru_nom": "удостоверение личности",
+      "ru_gender": "n",
+      "ru_number": "sg",
+      "ru_need_agreement": "n",
+      "uz_nom": "shaxsiy guvohnoma"
+    },
+    "MONEY": {
+      "zh": "钱",
+      "en": "money",
+      "ru_acc": "деньги",
+      "uz_acc": "pulni",
+      "ru_nom": "деньги",
+      "ru_gender": null,
+      "ru_number": "pl",
+      "ru_need_agreement": "pl",
+      "uz_nom": "pul"
+    },
+    "LUGGAGE": {
+      "zh": "行李",
+      "en": "the luggage",
+      "ru_acc": "багаж",
+      "uz_acc": "bagajni",
+      "ru_nom": "багаж",
+      "ru_gender": "m",
+      "ru_number": "sg",
+      "ru_need_agreement": "m",
+      "uz_nom": "bagaj"
+    },
+    "CHARGER": {
+      "zh": "充电器",
+      "en": "the charger",
+      "ru_acc": "зарядное устройство",
+      "uz_acc": "quvvatlagichni",
+      "ru_nom": "зарядное устройство",
+      "ru_gender": "n",
+      "ru_number": "sg",
+      "ru_need_agreement": "n",
+      "uz_nom": "quvvatlagich"
+    },
+    "CLOTHES": {
+      "zh": "衣服",
+      "en": "clothes",
+      "ru_acc": "одежду",
+      "uz_acc": "kiyimni",
+      "ru_nom": "одежда",
+      "ru_gender": "f",
+      "ru_number": "sg",
+      "ru_need_agreement": "f",
+      "uz_nom": "kiyim"
+    },
+    "ADDRESS": {
+      "zh": "地址",
+      "en": "the address",
+      "ru_acc": "адрес",
+      "uz_acc": "manzilni",
+      "ru_nom": "адрес",
+      "ru_gender": "m",
+      "ru_number": "sg",
+      "ru_need_agreement": "m",
+      "uz_nom": "manzil"
+    },
+    "ROOM": {
+      "zh": "房间",
+      "en": "the room",
+      "ru_acc": "комнату",
+      "uz_acc": "xonani",
+      "ru_nom": "комната",
+      "ru_gender": "f",
+      "ru_number": "sg",
+      "ru_need_agreement": "f",
+      "uz_nom": "xona"
+    },
+    "TABLE": {
+      "zh": "桌子",
+      "en": "the table",
+      "ru_acc": "стол",
+      "uz_acc": "stolni",
+      "ru_nom": "стол",
+      "ru_gender": "m",
+      "ru_number": "sg",
+      "ru_need_agreement": "m",
+      "uz_nom": "stol"
+    }
+  },
+  "person_targets": {
+    "PERSON_I": {
+      "zh": "我",
+      "en_object": "me",
+      "ru_acc": "меня",
+      "ru_dat": "мне",
+      "uz_acc": "meni",
+      "uz_dat": "menga"
+    },
+    "PERSON_YOU": {
+      "zh": "你",
+      "en_object": "you",
+      "ru_acc": "тебя",
+      "ru_dat": "тебе",
+      "uz_acc": "seni",
+      "uz_dat": "senga"
+    },
+    "PERSON_HE": {
+      "zh": "他",
+      "en_object": "him",
+      "ru_acc": "его",
+      "ru_dat": "ему",
+      "uz_acc": "uni",
+      "uz_dat": "unga"
+    },
+    "PERSON_SHE": {
+      "zh": "她",
+      "en_object": "her",
+      "ru_acc": "её",
+      "ru_dat": "ей",
+      "uz_acc": "uni",
+      "uz_dat": "unga"
+    },
+    "PERSON_WE": {
+      "zh": "我们",
+      "en_object": "us",
+      "ru_acc": "нас",
+      "ru_dat": "нам",
+      "uz_acc": "bizni",
+      "uz_dat": "bizga"
+    },
+    "PERSON_THEY": {
+      "zh": "他们",
+      "en_object": "them",
+      "ru_acc": "их",
+      "ru_dat": "им",
+      "uz_acc": "ularni",
+      "uz_dat": "ularga"
+    }
+  },
+  "place_targets": {
+    "AIRPORT": {
+      "zh_loc": "在机场",
+      "en_loc": "at the airport",
+      "ru_loc": "в аэропорту",
+      "uz_loc": "aeroportda",
+      "zh_dir": "机场",
+      "en_dir": "to the airport",
+      "ru_dir": "в аэропорт",
+      "uz_dir": "aeroportga"
+    },
+    "STATION": {
+      "zh_loc": "在车站",
+      "en_loc": "at the station",
+      "ru_loc": "на вокзале",
+      "uz_loc": "vokzalda",
+      "zh_dir": "车站",
+      "en_dir": "to the station",
+      "ru_dir": "на вокзал",
+      "uz_dir": "vokzalga"
+    },
+    "BANK": {
+      "zh_loc": "在银行",
+      "en_loc": "at the bank",
+      "ru_loc": "в банке",
+      "uz_loc": "bankda",
+      "zh_dir": "银行",
+      "en_dir": "to the bank",
+      "ru_dir": "в банк",
+      "uz_dir": "bankka"
+    },
+    "HOSPITAL": {
+      "zh_loc": "在医院",
+      "en_loc": "at the hospital",
+      "ru_loc": "в больнице",
+      "uz_loc": "shifoxonada",
+      "zh_dir": "医院",
+      "en_dir": "to the hospital",
+      "ru_dir": "в больницу",
+      "uz_dir": "shifoxonaga"
+    },
+    "SCHOOL": {
+      "zh_loc": "在学校",
+      "en_loc": "at school",
+      "ru_loc": "в школе",
+      "uz_loc": "maktabda",
+      "zh_dir": "学校",
+      "en_dir": "to the school",
+      "ru_dir": "в школу",
+      "uz_dir": "maktabga"
+    },
+    "OFFICE": {
+      "zh_loc": "在办公室",
+      "en_loc": "at the office",
+      "ru_loc": "в офисе",
+      "uz_loc": "ofisda",
+      "zh_dir": "办公室",
+      "en_dir": "to the office",
+      "ru_dir": "в офис",
+      "uz_dir": "ofisga"
+    },
+    "HOTEL": {
+      "zh_loc": "在酒店",
+      "en_loc": "at the hotel",
+      "ru_loc": "в отеле",
+      "uz_loc": "mehmonxonada",
+      "zh_dir": "酒店",
+      "en_dir": "to the hotel",
+      "ru_dir": "в отель",
+      "uz_dir": "mehmonxonaga"
+    },
+    "RESTAURANT": {
+      "zh_loc": "在餐厅",
+      "en_loc": "at the restaurant",
+      "ru_loc": "в ресторане",
+      "uz_loc": "restoranda",
+      "zh_dir": "餐厅",
+      "en_dir": "to the restaurant",
+      "ru_dir": "в ресторан",
+      "uz_dir": "restoranga"
+    },
+    "TASHKENT": {
+      "zh_loc": "在塔什干",
+      "en_loc": "in Tashkent",
+      "ru_loc": "в Ташкенте",
+      "uz_loc": "Toshkentda",
+      "zh_dir": "塔什干",
+      "en_dir": "to Tashkent",
+      "ru_dir": "в Ташкент",
+      "uz_dir": "Toshkentga"
+    },
+    "BEIJING": {
+      "zh_loc": "在北京",
+      "en_loc": "in Beijing",
+      "ru_loc": "в Пекине",
+      "uz_loc": "Pekinda",
+      "zh_dir": "北京",
+      "en_dir": "to Beijing",
+      "ru_dir": "в Пекин",
+      "uz_dir": "Pekinga"
+    },
+    "MOSCOW": {
+      "zh_loc": "在莫斯科",
+      "en_loc": "in Moscow",
+      "ru_loc": "в Москве",
+      "uz_loc": "Moskvada",
+      "zh_dir": "莫斯科",
+      "en_dir": "to Moscow",
+      "ru_dir": "в Москву",
+      "uz_dir": "Moskvaga"
+    }
+  },
+  "frame_contracts_v052": {
+    "CALL_PERSON": {
+      "verb": "CALL",
+      "required_slots": [
+        "subject",
+        "verb",
+        "person"
+      ],
+      "forbidden_slots": [
+        "object",
+        "destination",
+        "place",
+        "time",
+        "day"
+      ],
+      "argument_roles": {
+        "person": {
+          "en": "object",
+          "ru": "dative",
+          "uz": "dative"
+        }
+      },
+      "constraints": [
+        "subject_must_not_equal_person"
+      ],
+      "generation_enabled": false
+    },
+    "WAIT_PERSON": {
+      "verb": "WAIT",
+      "required_slots": [
+        "subject",
+        "verb",
+        "person"
+      ],
+      "forbidden_slots": [
+        "object",
+        "destination",
+        "place",
+        "time",
+        "day"
+      ],
+      "argument_roles": {
+        "person": {
+          "en": "wait_for_object",
+          "ru": "accusative",
+          "uz": "accusative"
+        }
+      },
+      "constraints": [
+        "subject_must_not_equal_person"
+      ],
+      "generation_enabled": false
+    },
+    "WAIT_AT_PLACE": {
+      "verb": "WAIT",
+      "required_slots": [
+        "subject",
+        "verb",
+        "place"
+      ],
+      "forbidden_slots": [
+        "object",
+        "person",
+        "destination",
+        "time",
+        "day"
+      ],
+      "argument_roles": {
+        "place": {
+          "zh": "locative",
+          "en": "locative",
+          "ru": "locative",
+          "uz": "locative"
+        }
+      },
+      "generation_enabled": false
+    }
+  },
+  "resource_version": "0.5.4",
+  "frozen_parent": "0.5.3",
+  "frame_contracts_v053": {
+    "CALL_PERSON": {
+      "verb": "CALL",
+      "required_slots": [
+        "subject",
+        "verb",
+        "person"
+      ],
+      "forbidden_slots": [
+        "object",
+        "destination",
+        "place",
+        "time",
+        "day"
+      ],
+      "argument_roles": {
+        "person": {
+          "en": "object",
+          "ru": "dative",
+          "uz": "dative"
+        }
+      },
+      "constraints": [
+        "subject_must_not_equal_person"
+      ],
+      "generation_enabled": false
+    },
+    "WAIT_PERSON": {
+      "verb": "WAIT",
+      "required_slots": [
+        "subject",
+        "verb",
+        "person"
+      ],
+      "forbidden_slots": [
+        "object",
+        "destination",
+        "place",
+        "time",
+        "day"
+      ],
+      "argument_roles": {
+        "person": {
+          "en": "wait_for_object",
+          "ru": "accusative",
+          "uz": "accusative"
+        }
+      },
+      "constraints": [
+        "subject_must_not_equal_person"
+      ],
+      "generation_enabled": false
+    },
+    "WAIT_AT_PLACE": {
+      "verb": "WAIT",
+      "required_slots": [
+        "subject",
+        "verb",
+        "place"
+      ],
+      "forbidden_slots": [
+        "object",
+        "person",
+        "destination",
+        "time",
+        "day"
+      ],
+      "argument_roles": {
+        "place": {
+          "zh": "locative",
+          "en": "locative",
+          "ru": "locative",
+          "uz": "locative"
+        }
+      },
+      "generation_enabled": false
+    },
+    "GIVE_OBJECT_PERSON": {
+      "verb": "GIVE",
+      "required_slots": [
+        "subject",
+        "verb",
+        "object",
+        "person"
+      ],
+      "forbidden_slots": [
+        "destination",
+        "place",
+        "time",
+        "day"
+      ],
+      "argument_roles": {
+        "object": {
+          "en": "direct_object",
+          "ru": "accusative",
+          "uz": "accusative"
+        },
+        "person": {
+          "en": "indirect_object",
+          "ru": "dative",
+          "uz": "dative"
+        }
+      },
+      "constraints": [
+        "subject_must_not_equal_person",
+        "speaker_group_overlap_not_allowed",
+        "object_person_roles_must_not_swap"
+      ],
+      "generation_enabled": false
+    },
+    "BRING_OBJECT_DESTINATION": {
+      "verb": "BRING",
+      "required_slots": [
+        "subject",
+        "verb",
+        "object",
+        "destination"
+      ],
+      "forbidden_slots": [
+        "person",
+        "place",
+        "time",
+        "day"
+      ],
+      "argument_roles": {
+        "object": {
+          "en": "direct_object",
+          "ru": "accusative",
+          "uz": "accusative"
+        },
+        "destination": {
+          "zh": "directional",
+          "en": "directional",
+          "ru": "directional",
+          "uz": "directional"
+        }
+      },
+      "constraints": [
+        "object_destination_roles_must_not_swap",
+        "destination_must_use_directional_form"
+      ],
+      "generation_enabled": false
+    }
+  },
+  "frame_contracts_v054": {
+    "CALL_PERSON": {
+      "verb": "CALL",
+      "required_slots": [
+        "subject",
+        "verb",
+        "person"
+      ],
+      "forbidden_slots": [
+        "object",
+        "destination",
+        "place",
+        "time",
+        "day"
+      ],
+      "argument_roles": {
+        "person": {
+          "en": "object",
+          "ru": "dative",
+          "uz": "dative"
+        }
+      },
+      "constraints": [
+        "subject_must_not_equal_person"
+      ],
+      "generation_enabled": false
+    },
+    "WAIT_PERSON": {
+      "verb": "WAIT",
+      "required_slots": [
+        "subject",
+        "verb",
+        "person"
+      ],
+      "forbidden_slots": [
+        "object",
+        "destination",
+        "place",
+        "time",
+        "day"
+      ],
+      "argument_roles": {
+        "person": {
+          "en": "wait_for_object",
+          "ru": "accusative",
+          "uz": "accusative"
+        }
+      },
+      "constraints": [
+        "subject_must_not_equal_person"
+      ],
+      "generation_enabled": false
+    },
+    "WAIT_AT_PLACE": {
+      "verb": "WAIT",
+      "required_slots": [
+        "subject",
+        "verb",
+        "place"
+      ],
+      "forbidden_slots": [
+        "object",
+        "person",
+        "destination",
+        "time",
+        "day"
+      ],
+      "argument_roles": {
+        "place": {
+          "zh": "locative",
+          "en": "locative",
+          "ru": "locative",
+          "uz": "locative"
+        }
+      },
+      "generation_enabled": false
+    },
+    "GIVE_OBJECT_PERSON": {
+      "verb": "GIVE",
+      "required_slots": [
+        "subject",
+        "verb",
+        "object",
+        "person"
+      ],
+      "forbidden_slots": [
+        "destination",
+        "place",
+        "time",
+        "day"
+      ],
+      "argument_roles": {
+        "object": {
+          "en": "direct_object",
+          "ru": "accusative",
+          "uz": "accusative"
+        },
+        "person": {
+          "en": "indirect_object",
+          "ru": "dative",
+          "uz": "dative"
+        }
+      },
+      "constraints": [
+        "subject_must_not_equal_person",
+        "speaker_group_overlap_not_allowed",
+        "object_person_roles_must_not_swap"
+      ],
+      "generation_enabled": false
+    },
+    "BRING_OBJECT_DESTINATION": {
+      "verb": "BRING",
+      "required_slots": [
+        "subject",
+        "verb",
+        "object",
+        "destination"
+      ],
+      "forbidden_slots": [
+        "person",
+        "place",
+        "time",
+        "day"
+      ],
+      "argument_roles": {
+        "object": {
+          "en": "direct_object",
+          "ru": "accusative",
+          "uz": "accusative"
+        },
+        "destination": {
+          "zh": "directional",
+          "en": "directional",
+          "ru": "directional",
+          "uz": "directional"
+        }
+      },
+      "constraints": [
+        "object_destination_roles_must_not_swap",
+        "destination_must_use_directional_form"
+      ],
+      "generation_enabled": false
+    },
+    "NEED_OBJECT": {
+      "verb": "NEED",
+      "required_slots": [
+        "subject",
+        "verb",
+        "object"
+      ],
+      "forbidden_slots": [
+        "person",
+        "destination",
+        "place",
+        "time",
+        "day"
+      ],
+      "allowed_tenses": [
+        "present",
+        "future"
+      ],
+      "allowed_polarities": [
+        "pos",
+        "neg"
+      ],
+      "argument_roles": {
+        "subject": {
+          "zh": "subject",
+          "en": "subject",
+          "ru": "dative_experiencer",
+          "uz": "dative_experiencer"
+        },
+        "object": {
+          "zh": "object",
+          "en": "object",
+          "ru": "nominative_need_argument",
+          "uz": "bare_need_argument"
+        }
+      },
+      "constraints": [
+        "language_specific_need_construction",
+        "ru_experiencer_dative",
+        "ru_object_nominative",
+        "ru_predicative_agreement",
+        "uz_experiencer_dative",
+        "uz_object_bare"
+      ],
+      "generation_enabled": false
+    },
+    "LOSE_OBJECT": {
+      "verb": "LOSE",
+      "required_slots": [
+        "subject",
+        "verb",
+        "object"
+      ],
+      "forbidden_slots": [
+        "person",
+        "destination",
+        "place",
+        "time",
+        "day"
+      ],
+      "allowed_tenses": [
+        "future"
+      ],
+      "allowed_polarities": [
+        "pos",
+        "neg"
+      ],
+      "argument_roles": {
+        "object": {
+          "en": "direct_object",
+          "ru": "accusative",
+          "uz": "accusative"
+        }
+      },
+      "constraints": [
+        "future_only_generation",
+        "past_not_yet_enabled",
+        "present_generation_not_enabled"
+      ],
+      "generation_enabled": false
+    }
+  }
+}

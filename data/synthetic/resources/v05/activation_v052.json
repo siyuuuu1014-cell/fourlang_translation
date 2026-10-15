@@ -1,0 +1,51 @@
+{
+  "activation_version": "0.5.2",
+  "frozen_parent": "0.5.1",
+  "status": "validated",
+  "enabled_verbs": [
+    "CALL",
+    "WAIT"
+  ],
+  "enabled_frames": [
+    "CALL_PERSON",
+    "WAIT_AT_PLACE",
+    "WAIT_PERSON"
+  ],
+  "blocked_verbs": [
+    "BRING",
+    "GIVE",
+    "LEAVE",
+    "LOSE",
+    "NEED",
+    "RETURN"
+  ],
+  "blocked_frames": [
+    "BRING_OBJECT_DESTINATION",
+    "GIVE_OBJECT_PERSON",
+    "LEAVE_PLACE",
+    "LOSE_OBJECT",
+    "NEED_OBJECT",
+    "RETURN_PLACE"
+  ],
+  "constraints": {
+    "CALL_PERSON": [
+      "subject_must_not_equal_person",
+      "person_role_ru_dative",
+      "person_role_uz_dative"
+    ],
+    "WAIT_PERSON": [
+      "subject_must_not_equal_person",
+      "person_role_ru_accusative",
+      "person_role_uz_accusative",
+      "english_wait_for"
+    ],
+    "WAIT_AT_PLACE": [
+      "language_specific_locative"
+    ]
+  },
+  "generation_policy": {
+    "v052_generation_allowed": true,
+    "only_enabled_frames": true,
+    "reflexive_generation_allowed": false
+  }
+}

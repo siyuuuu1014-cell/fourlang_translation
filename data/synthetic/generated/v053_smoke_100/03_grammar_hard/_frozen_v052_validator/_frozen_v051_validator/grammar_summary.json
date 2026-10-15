@@ -1,0 +1,14 @@
+{
+  "validator_version": "0.5.1",
+  "input": "data\\synthetic\\generated\\v053_smoke_100\\03_grammar_hard\\_frozen_v052_validator\\_frozen_v051_input.jsonl",
+  "total": 49,
+  "frozen_core_rows": 39,
+  "new_rows": 10,
+  "accepted": 49,
+  "rejected": 0,
+  "accept_rate": 1.0,
+  "new_accepted": 10,
+  "new_rejected": 0,
+  "reject_reasons": {},
+  "rejected_by_language": {}
+}

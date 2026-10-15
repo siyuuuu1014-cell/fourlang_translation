@@ -1,0 +1,65 @@
+{
+  "audit_version": "0.5.3",
+  "seed": 2058,
+  "input_rows": 200,
+  "candidate_rows": 100,
+  "selected": 40,
+  "frame_distribution": {
+    "GIVE_OBJECT_PERSON": 20,
+    "BRING_OBJECT_DESTINATION": 20
+  },
+  "tense_distribution": {
+    "future": 20,
+    "present": 20
+  },
+  "polarity_distribution": {
+    "pos": 20,
+    "neg": 20
+  },
+  "subject_distribution": {
+    "PERSON_HE": 5,
+    "PERSON_SHE": 8,
+    "PERSON_THEY": 8,
+    "PERSON_WE": 7,
+    "PERSON_I": 6,
+    "PERSON_YOU": 6
+  },
+  "object_distribution": {
+    "LUGGAGE": 11,
+    "CHARGER": 11,
+    "ID_CARD": 9,
+    "MONEY": 4,
+    "CLOTHES": 5
+  },
+  "person_distribution": {
+    "PERSON_WE": 4,
+    "PERSON_HE": 3,
+    "PERSON_SHE": 4,
+    "PERSON_I": 3,
+    "PERSON_THEY": 4,
+    "PERSON_YOU": 2
+  },
+  "destination_distribution": {
+    "AIRPORT": 2,
+    "RESTAURANT": 2,
+    "OFFICE": 1,
+    "HOTEL": 2,
+    "BANK": 2,
+    "SCHOOL": 2,
+    "MOSCOW": 2,
+    "STATION": 2,
+    "HOSPITAL": 2,
+    "TASHKENT": 2,
+    "BEIJING": 1
+  },
+  "frame_tense_polarity": {
+    "GIVE_OBJECT_PERSON|future|pos": 4,
+    "GIVE_OBJECT_PERSON|future|neg": 5,
+    "GIVE_OBJECT_PERSON|present|pos": 6,
+    "BRING_OBJECT_DESTINATION|future|pos": 6,
+    "GIVE_OBJECT_PERSON|present|neg": 5,
+    "BRING_OBJECT_DESTINATION|present|neg": 5,
+    "BRING_OBJECT_DESTINATION|future|neg": 5,
+    "BRING_OBJECT_DESTINATION|present|pos": 4
+  }
+}

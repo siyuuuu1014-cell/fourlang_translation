@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "status": "FLORES_LIKE_RELAXED_8K_BUILT_NOT_TRAINED",
+  "rows": 45521,
+  "new_teacher_rows": {
+    "uz-zh": 8000,
+    "zh-uz": 8000
+  },
+  "raw_mass": {
+    "zh-uz|human": 4275.0,
+    "zh-uz|existing_kd": 8208.5,
+    "zh-uz|flores_like_kd": 4499.2,
+    "uz-zh|human": 4268.0,
+    "uz-zh|existing_kd": 10911.0,
+    "uz-zh|flores_like_kd": 6536.0
+  },
+  "weight_multipliers": {
+    "zh-uz|human": 2.129637426900585,
+    "zh-uz|existing_kd": 0.8318389474325394,
+    "zh-uz|flores_like_kd": 1.5176364687055477,
+    "uz-zh|human": 2.133130271790066,
+    "uz-zh|existing_kd": 0.6258042342590047,
+    "uz-zh|flores_like_kd": 1.0446985924112606
+  },
+  "effective_mass": {
+    "zh-uz|human": 9104.200000000004,
+    "zh-uz|existing_kd": 6828.149999999999,
+    "zh-uz|flores_like_kd": 6828.149999999998,
+    "uz-zh|human": 9104.200000000003,
+    "uz-zh|existing_kd": 6828.15,
+    "uz-zh|flores_like_kd": 6828.149999999999
+  },
+  "target_global_shares": {
+    "zh-uz|human": 0.2,
+    "zh-uz|existing_kd": 0.15,
+    "zh-uz|flores_like_kd": 0.15,
+    "uz-zh|human": 0.2,
+    "uz-zh|existing_kd": 0.15,
+    "uz-zh|flores_like_kd": 0.15
+  },
+  "train": {
+    "path": "/root/autodl-tmp/fourlang_translation/data/distillation/zh_uz/flores_relaxed_8k/train.jsonl",
+    "sha256": "83a0ccbc8233c6629ca6e5fab020efadcae051fd804b80a2b43f3a7ebab29874"
+  },
+  "validation": {
+    "path": "/root/autodl-tmp/fourlang_translation/data/distillation/zh_uz/flores_relaxed_8k/validation.jsonl",
+    "sha256": "1d537dab6b47ae7f5c77ed5dc82b7f2c52a9e3a4c860b16edd947dfad9ea70ac"
+  },
+  "flores_rows_in_training": 0,
+  "existing_v4_modified": false
+}

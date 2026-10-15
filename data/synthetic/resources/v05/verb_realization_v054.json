@@ -1,0 +1,529 @@
+{
+  "version": "0.5.4",
+  "description": "Batch-1A realization policies for SEE, TAKE and LOSE.",
+  "enabled_verbs": [
+    "BRING",
+    "CALL",
+    "GIVE",
+    "LOSE",
+    "NEED",
+    "SEE",
+    "TAKE",
+    "WAIT"
+  ],
+  "verbs": {
+    "SEE": {
+      "semantic_type": "simple_transitive",
+      "zh": {
+        "present_positive": "看见",
+        "present_negative": "没看见",
+        "future_positive": "会看见",
+        "future_negative": "不会看见"
+      },
+      "en": {
+        "lemma": "see",
+        "present": {
+          "1sg": "see",
+          "2sg": "see",
+          "3sg": "sees",
+          "1pl": "see",
+          "2pl": "see",
+          "3pl": "see"
+        },
+        "future": "will see",
+        "present_negative": {
+          "1sg": "do not see",
+          "2sg": "do not see",
+          "3sg": "does not see",
+          "1pl": "do not see",
+          "2pl": "do not see",
+          "3pl": "do not see"
+        },
+        "future_negative": "will not see"
+      },
+      "ru": {
+        "present": {
+          "1sg": "вижу",
+          "2sg": "видишь",
+          "3sg": "видит",
+          "1pl": "видим",
+          "2pl": "видите",
+          "3pl": "видят"
+        },
+        "future": {
+          "1sg": "увижу",
+          "2sg": "увидишь",
+          "3sg": "увидит",
+          "1pl": "увидим",
+          "2pl": "увидите",
+          "3pl": "увидят"
+        }
+      },
+      "uz": {
+        "present_future": {
+          "1sg": "ko'raman",
+          "2sg": "ko'rasan",
+          "3sg": "ko'radi",
+          "1pl": "ko'ramiz",
+          "2pl": "ko'rasiz",
+          "3pl": "ko'radilar"
+        },
+        "negative": {
+          "1sg": "ko'rmayman",
+          "2sg": "ko'rmaysan",
+          "3sg": "ko'rmaydi",
+          "1pl": "ko'rmaymiz",
+          "2pl": "ko'rmaysiz",
+          "3pl": "ko'rmaydilar"
+        }
+      }
+    },
+    "TAKE": {
+      "semantic_type": "simple_transitive",
+      "zh": {
+        "present_positive": "拿",
+        "present_negative": "不拿",
+        "future_positive": "会拿",
+        "future_negative": "不会拿"
+      },
+      "en": {
+        "lemma": "take",
+        "present": {
+          "1sg": "take",
+          "2sg": "take",
+          "3sg": "takes",
+          "1pl": "take",
+          "2pl": "take",
+          "3pl": "take"
+        },
+        "future": "will take",
+        "present_negative": {
+          "1sg": "do not take",
+          "2sg": "do not take",
+          "3sg": "does not take",
+          "1pl": "do not take",
+          "2pl": "do not take",
+          "3pl": "do not take"
+        },
+        "future_negative": "will not take"
+      },
+      "ru": {
+        "present": {
+          "1sg": "беру",
+          "2sg": "берёшь",
+          "3sg": "берёт",
+          "1pl": "берём",
+          "2pl": "берёте",
+          "3pl": "берут"
+        },
+        "future": {
+          "1sg": "возьму",
+          "2sg": "возьмёшь",
+          "3sg": "возьмёт",
+          "1pl": "возьмём",
+          "2pl": "возьмёте",
+          "3pl": "возьмут"
+        }
+      },
+      "uz": {
+        "present_future": {
+          "1sg": "olaman",
+          "2sg": "olasan",
+          "3sg": "oladi",
+          "1pl": "olamiz",
+          "2pl": "olasiz",
+          "3pl": "oladilar"
+        },
+        "negative": {
+          "1sg": "olmayman",
+          "2sg": "olmaysan",
+          "3sg": "olmaydi",
+          "1pl": "olmaymiz",
+          "2pl": "olmaysiz",
+          "3pl": "olmaydilar"
+        }
+      }
+    },
+    "LOSE": {
+      "semantic_type": "simple_transitive",
+      "generation_tenses": [
+        "future"
+      ],
+      "zh": {
+        "present_positive": "弄丢",
+        "present_negative": "没弄丢",
+        "future_positive": "会弄丢",
+        "future_negative": "不会弄丢"
+      },
+      "en": {
+        "lemma": "lose",
+        "present": {
+          "1sg": "lose",
+          "2sg": "lose",
+          "3sg": "loses",
+          "1pl": "lose",
+          "2pl": "lose",
+          "3pl": "lose"
+        },
+        "present_negative": {
+          "1sg": "do not lose",
+          "2sg": "do not lose",
+          "3sg": "does not lose",
+          "1pl": "do not lose",
+          "2pl": "do not lose",
+          "3pl": "do not lose"
+        },
+        "future": "will lose",
+        "future_negative": "will not lose"
+      },
+      "ru": {
+        "present": {
+          "1sg": "теряю",
+          "2sg": "теряешь",
+          "3sg": "теряет",
+          "1pl": "теряем",
+          "2pl": "теряете",
+          "3pl": "теряют"
+        },
+        "future": {
+          "1sg": "потеряю",
+          "2sg": "потеряешь",
+          "3sg": "потеряет",
+          "1pl": "потеряем",
+          "2pl": "потеряете",
+          "3pl": "потеряют"
+        }
+      },
+      "uz": {
+        "present_future": {
+          "1sg": "yo'qotaman",
+          "2sg": "yo'qotasan",
+          "3sg": "yo'qotadi",
+          "1pl": "yo'qotamiz",
+          "2pl": "yo'qotasiz",
+          "3pl": "yo'qotadilar"
+        },
+        "negative": {
+          "1sg": "yo'qotmayman",
+          "2sg": "yo'qotmaysan",
+          "3sg": "yo'qotmaydi",
+          "1pl": "yo'qotmaymiz",
+          "2pl": "yo'qotmaysiz",
+          "3pl": "yo'qotmaydilar"
+        }
+      }
+    },
+    "CALL": {
+      "zh": {
+        "present_positive": "打电话",
+        "present_negative": "不打电话",
+        "future_positive": "会打电话",
+        "future_negative": "不会打电话"
+      },
+      "en": {
+        "present": {
+          "1sg": "call",
+          "2sg": "call",
+          "3sg": "calls",
+          "1pl": "call",
+          "2pl": "call",
+          "3pl": "call"
+        },
+        "present_negative": {
+          "1sg": "do not call",
+          "2sg": "do not call",
+          "3sg": "does not call",
+          "1pl": "do not call",
+          "2pl": "do not call",
+          "3pl": "do not call"
+        },
+        "future": "will call",
+        "future_negative": "will not call"
+      },
+      "ru": {
+        "present": {
+          "1sg": "звоню",
+          "2sg": "звонишь",
+          "3sg": "звонит",
+          "1pl": "звоним",
+          "2pl": "звоните",
+          "3pl": "звонят"
+        },
+        "future": {
+          "1sg": "позвоню",
+          "2sg": "позвонишь",
+          "3sg": "позвонит",
+          "1pl": "позвоним",
+          "2pl": "позвоните",
+          "3pl": "позвонят"
+        }
+      },
+      "uz": {
+        "present_future": {
+          "1sg": "qo'ng'iroq qilaman",
+          "2sg": "qo'ng'iroq qilasan",
+          "3sg": "qo'ng'iroq qiladi",
+          "1pl": "qo'ng'iroq qilamiz",
+          "2pl": "qo'ng'iroq qilasiz",
+          "3pl": "qo'ng'iroq qiladilar"
+        },
+        "negative": {
+          "1sg": "qo'ng'iroq qilmayman",
+          "2sg": "qo'ng'iroq qilmaysan",
+          "3sg": "qo'ng'iroq qilmaydi",
+          "1pl": "qo'ng'iroq qilmaymiz",
+          "2pl": "qo'ng'iroq qilmaysiz",
+          "3pl": "qo'ng'iroq qilmaydilar"
+        }
+      }
+    },
+    "WAIT": {
+      "zh": {
+        "present_positive": "等",
+        "present_negative": "不等",
+        "future_positive": "会等",
+        "future_negative": "不会等"
+      },
+      "en": {
+        "present": {
+          "1sg": "wait",
+          "2sg": "wait",
+          "3sg": "waits",
+          "1pl": "wait",
+          "2pl": "wait",
+          "3pl": "wait"
+        },
+        "present_negative": {
+          "1sg": "do not wait",
+          "2sg": "do not wait",
+          "3sg": "does not wait",
+          "1pl": "do not wait",
+          "2pl": "do not wait",
+          "3pl": "do not wait"
+        },
+        "future": "will wait",
+        "future_negative": "will not wait"
+      },
+      "ru": {
+        "present": {
+          "1sg": "жду",
+          "2sg": "ждёшь",
+          "3sg": "ждёт",
+          "1pl": "ждём",
+          "2pl": "ждёте",
+          "3pl": "ждут"
+        },
+        "future": {
+          "1sg": "буду ждать",
+          "2sg": "будешь ждать",
+          "3sg": "будет ждать",
+          "1pl": "будем ждать",
+          "2pl": "будете ждать",
+          "3pl": "будут ждать"
+        }
+      },
+      "uz": {
+        "present_future": {
+          "1sg": "kutaman",
+          "2sg": "kutasan",
+          "3sg": "kutadi",
+          "1pl": "kutamiz",
+          "2pl": "kutasiz",
+          "3pl": "kutadilar"
+        },
+        "negative": {
+          "1sg": "kutmayman",
+          "2sg": "kutmaysan",
+          "3sg": "kutmaydi",
+          "1pl": "kutmaymiz",
+          "2pl": "kutmaysiz",
+          "3pl": "kutmaydilar"
+        }
+      }
+    },
+    "GIVE": {
+      "semantic_type": "ditransitive",
+      "zh": {
+        "present_positive": "给",
+        "present_negative": "不给",
+        "future_positive": "会给",
+        "future_negative": "不会给"
+      },
+      "en": {
+        "lemma": "give",
+        "present": {
+          "1sg": "give",
+          "2sg": "give",
+          "3sg": "gives",
+          "1pl": "give",
+          "2pl": "give",
+          "3pl": "give"
+        },
+        "present_negative": {
+          "1sg": "do not give",
+          "2sg": "do not give",
+          "3sg": "does not give",
+          "1pl": "do not give",
+          "2pl": "do not give",
+          "3pl": "do not give"
+        },
+        "future": "will give",
+        "future_negative": "will not give"
+      },
+      "ru": {
+        "present": {
+          "1sg": "даю",
+          "2sg": "даёшь",
+          "3sg": "даёт",
+          "1pl": "даём",
+          "2pl": "даёте",
+          "3pl": "дают"
+        },
+        "future": {
+          "1sg": "дам",
+          "2sg": "дашь",
+          "3sg": "даст",
+          "1pl": "дадим",
+          "2pl": "дадите",
+          "3pl": "дадут"
+        }
+      },
+      "uz": {
+        "present_future": {
+          "1sg": "beraman",
+          "2sg": "berasan",
+          "3sg": "beradi",
+          "1pl": "beramiz",
+          "2pl": "berasiz",
+          "3pl": "beradilar"
+        },
+        "negative": {
+          "1sg": "bermayman",
+          "2sg": "bermaysan",
+          "3sg": "bermaydi",
+          "1pl": "bermaymiz",
+          "2pl": "bermaysiz",
+          "3pl": "bermaydilar"
+        }
+      }
+    },
+    "BRING": {
+      "semantic_type": "transitive_destination",
+      "zh": {
+        "present_positive": "带到",
+        "present_negative": "不带到",
+        "future_positive": "会带到",
+        "future_negative": "不会带到"
+      },
+      "en": {
+        "lemma": "bring",
+        "present": {
+          "1sg": "bring",
+          "2sg": "bring",
+          "3sg": "brings",
+          "1pl": "bring",
+          "2pl": "bring",
+          "3pl": "bring"
+        },
+        "present_negative": {
+          "1sg": "do not bring",
+          "2sg": "do not bring",
+          "3sg": "does not bring",
+          "1pl": "do not bring",
+          "2pl": "do not bring",
+          "3pl": "do not bring"
+        },
+        "future": "will bring",
+        "future_negative": "will not bring"
+      },
+      "ru": {
+        "present": {
+          "1sg": "приношу",
+          "2sg": "приносишь",
+          "3sg": "приносит",
+          "1pl": "приносим",
+          "2pl": "приносите",
+          "3pl": "приносят"
+        },
+        "future": {
+          "1sg": "принесу",
+          "2sg": "принесёшь",
+          "3sg": "принесёт",
+          "1pl": "принесём",
+          "2pl": "принесёте",
+          "3pl": "принесут"
+        }
+      },
+      "uz": {
+        "present_future": {
+          "1sg": "olib boraman",
+          "2sg": "olib borasan",
+          "3sg": "olib boradi",
+          "1pl": "olib boramiz",
+          "2pl": "olib borasiz",
+          "3pl": "olib boradilar"
+        },
+        "negative": {
+          "1sg": "olib bormayman",
+          "2sg": "olib bormaysan",
+          "3sg": "olib bormaydi",
+          "1pl": "olib bormaymiz",
+          "2pl": "olib bormaysiz",
+          "3pl": "olib bormaydilar"
+        }
+      }
+    },
+    "NEED": {
+      "semantic_type": "language_specific_need_construction",
+      "zh": {
+        "present_positive": "需要",
+        "present_negative": "不需要",
+        "future_positive": "会需要",
+        "future_negative": "不会需要"
+      },
+      "en": {
+        "lemma": "need",
+        "present": {
+          "1sg": "need",
+          "2sg": "need",
+          "3sg": "needs",
+          "1pl": "need",
+          "2pl": "need",
+          "3pl": "need"
+        },
+        "present_negative": {
+          "1sg": "do not need",
+          "2sg": "do not need",
+          "3sg": "does not need",
+          "1pl": "do not need",
+          "2pl": "do not need",
+          "3pl": "do not need"
+        },
+        "future": "will need",
+        "future_negative": "will not need"
+      },
+      "ru": {
+        "construction": "dative_experiencer_predicative",
+        "predicative": {
+          "m": "нужен",
+          "f": "нужна",
+          "n": "нужно",
+          "pl": "нужны"
+        },
+        "future_copula": {
+          "sg": "будет",
+          "pl": "будут"
+        }
+      },
+      "uz": {
+        "construction": "dative_experiencer_kerak",
+        "present_positive": "kerak",
+        "present_negative": "kerak emas",
+        "future_positive": "kerak bo'ladi",
+        "future_negative": "kerak bo'lmaydi"
+      }
+    }
+  },
+  "resource_version": "0.5.4",
+  "frozen_parent": "0.5.3"
+}

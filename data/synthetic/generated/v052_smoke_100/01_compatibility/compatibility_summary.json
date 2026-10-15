@@ -1,0 +1,22 @@
+{
+  "validator_version": "0.5.2",
+  "input": "data\\synthetic\\generated\\v052_smoke_100\\semantic_v052_raw.jsonl",
+  "total": 100,
+  "accepted": 100,
+  "rejected": 0,
+  "accept_rate": 1.0,
+  "rows_with_warnings": 0,
+  "warning_rate": 0.0,
+  "new_frame_distribution": {
+    "CALL_PERSON": 10,
+    "WAIT_AT_PLACE": 10,
+    "WAIT_PERSON": 10
+  },
+  "new_verb_distribution": {
+    "CALL": 10,
+    "WAIT": 20
+  },
+  "violation_types": {},
+  "warning_types": {},
+  "activation_version": "0.5.2"
+}

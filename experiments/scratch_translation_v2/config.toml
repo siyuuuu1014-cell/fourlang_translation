@@ -1,0 +1,71 @@
+[experiment]
+suite = "fourlang_scratch_v2"
+seed = 2026
+languages = ["en", "zh", "uz", "ru"]
+# Read-only frozen data/tokenizer produced by v1. No v1 model weights are used.
+prepared_source = "experiments/scratch_translation/artifacts/fourlang_scratch_v1/prepared"
+
+[model]
+d_model = 512
+nhead = 8
+encoder_layers = 6
+decoder_layers = 6
+dim_feedforward = 2048
+dropout = 0.1
+max_length = 256
+
+[sampling]
+rows_per_direction = 20000
+max_teacher_repeats_per_block = 3
+
+[sampling.kd_ratio]
+en-zh = 0.30
+en-uz = 0.30
+en-ru = 0.30
+zh-en = 0.30
+zh-uz = 0.50
+zh-ru = 0.40
+uz-en = 0.30
+uz-zh = 0.50
+uz-ru = 0.50
+ru-en = 0.30
+ru-zh = 0.40
+ru-uz = 0.50
+
+[training]
+batch_size = 12
+gradient_accumulation_steps = 4
+weight_decay = 0.01
+label_smoothing = 0.1
+max_grad_norm = 1.0
+checkpoint_steps = 500
+eval_steps = 1000
+log_steps = 50
+keep_checkpoints = 3
+amp = true
+
+[[training.phases]]
+name = "mixed_kd"
+steps = 50000
+learning_rate = 0.0003
+warmup_steps = 4000
+data = "mixed"
+
+[[training.phases]]
+name = "human_polish"
+steps = 10000
+learning_rate = 0.00005
+warmup_steps = 500
+data = "human"
+
+[evaluation]
+validation_batch_size = 16
+final_batch_size = 8
+max_new_tokens = 255
+beam_size = 5
+length_penalty = 1.0
+diagnostic_samples_per_direction = 50
+
+[v1_diagnostics]
+suite = "fourlang_scratch_v1"
+groups = ["human_only", "human_kd"]

@@ -1,0 +1,42 @@
+{
+  "generator_version": "0.5.3",
+  "frozen_parent": "0.5.2",
+  "samples": 100,
+  "seed": 2053,
+  "frozen_parent_rows": 70,
+  "new_rows": 30,
+  "new_ratio": 0.3,
+  "new_generation_attempts": 30,
+  "contract_errors": 0,
+  "new_frame_distribution": {
+    "GIVE_OBJECT_PERSON": 15,
+    "BRING_OBJECT_DESTINATION": 15
+  },
+  "new_verb_distribution": {
+    "GIVE": 15,
+    "BRING": 15
+  },
+  "new_tense_distribution": {
+    "present": 15,
+    "future": 15
+  },
+  "new_polarity_distribution": {
+    "pos": 21,
+    "neg": 9
+  },
+  "participant_overlap_policy": {
+    "exact_reflexive_allowed": false,
+    "speaker_group_overlap_allowed": false,
+    "blocked_pairs": [
+      [
+        "PERSON_I",
+        "PERSON_WE"
+      ],
+      [
+        "PERSON_WE",
+        "PERSON_I"
+      ]
+    ]
+  },
+  "role_swap_allowed": false
+}

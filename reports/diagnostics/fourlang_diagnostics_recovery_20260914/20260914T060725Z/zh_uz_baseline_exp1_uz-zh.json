@@ -1,0 +1,216 @@
+{
+  "direction": "uz-zh",
+  "token_matches": 30,
+  "rows": [
+    {
+      "id": 1,
+      "source": "Uchrashuv soat to'qqizda boshlanadi.",
+      "reference": "会议九点开始。",
+      "evaluation_call": "收听始于八小时。",
+      "direct_call": "收听始于八小时。"
+    },
+    {
+      "id": 2,
+      "source": "Men bugun maktabga bormayman.",
+      "reference": "我今天不去学校。",
+      "evaluation_call": "我不在今天的学校。",
+      "direct_call": "我不在今天的学校。"
+    },
+    {
+      "id": 3,
+      "source": "Iltimos, menga bir stakan suv bering.",
+      "reference": "请给我一杯水。",
+      "evaluation_call": "最后,我只有一瓶水瓶。",
+      "direct_call": "最后,我只有一瓶水瓶。"
+    },
+    {
+      "id": 4,
+      "source": "Bu kitob qancha turadi?",
+      "reference": "这本书多少钱？",
+      "evaluation_call": "这本书有多好呢?",
+      "direct_call": "这本书有多好呢?"
+    },
+    {
+      "id": 5,
+      "source": "Men uchta olma sotib oldim.",
+      "reference": "我买了三个苹果。",
+      "evaluation_call": "我买了三个人",
+      "direct_call": "我买了三个人"
+    },
+    {
+      "id": 6,
+      "source": "U kecha menga telefon qildi.",
+      "reference": "他昨天给我打了电话。",
+      "evaluation_call": "然后他给我打电话。",
+      "direct_call": "然后他给我打电话。"
+    },
+    {
+      "id": 7,
+      "source": "Biz ertaga ertalab yo'lga chiqamiz.",
+      "reference": "我们明天早上出发。",
+      "evaluation_call": "我们早就走向延迟的路径",
+      "direct_call": "我们早就走向延迟的路径"
+    },
+    {
+      "id": 8,
+      "source": "Iltimos, derazani ochmang.",
+      "reference": "请不要打开窗户。",
+      "evaluation_call": "最后,请勿打开门",
+      "direct_call": "最后,请勿打开门"
+    },
+    {
+      "id": 9,
+      "source": "Shifoxona bank yonida joylashgan.",
+      "reference": "医院在银行旁边。",
+      "evaluation_call": "位于Shifoxona银行内。",
+      "direct_call": "位于Shifoxona银行内。"
+    },
+    {
+      "id": 10,
+      "source": "Men kalitni uyda unutib qoldirdim.",
+      "reference": "我把钥匙忘在家里了。",
+      "evaluation_call": "我在床上忘记了品质",
+      "direct_call": "我忘记了品质。"
+    },
+    {
+      "id": 11,
+      "source": "Agar yomg'ir yog'sa, biz bog'ga bormaymiz.",
+      "reference": "如果下雨，我们就不去公园。",
+      "evaluation_call": "若是子,我们就不是子",
+      "direct_call": "若是子,我们就不是子"
+    },
+    {
+      "id": 12,
+      "source": "Men Toshkentga chipta sotib olmoqchiman.",
+      "reference": "我想买一张去塔什干的车票。",
+      "evaluation_call": "我可以买个芯片。",
+      "direct_call": "我可以买个芯片。"
+    },
+    {
+      "id": 13,
+      "source": "Poyezd tushdan keyin soat 3 da yetib keladi.",
+      "reference": "火车下午3点到达。",
+      "evaluation_call": "火车停车后下午3点",
+      "direct_call": "火车停车后下午3点"
+    },
+    {
+      "id": 14,
+      "source": "Bu xonada issiq suv yo'q.",
+      "reference": "这个房间没有热水。",
+      "evaluation_call": "这里没有热水",
+      "direct_call": "这里没有热水"
+    },
+    {
+      "id": 15,
+      "source": "Iltimos, manzilni menga yuboring.",
+      "reference": "请把地址发给我。",
+      "evaluation_call": "最后,发送给我的信号",
+      "direct_call": "最后,发送给我的信号"
+    },
+    {
+      "id": 16,
+      "source": "Men allaqachon nonushta qildim.",
+      "reference": "我已经吃过早饭了。",
+      "evaluation_call": "我已经失败了",
+      "direct_call": "我已经失败了"
+    },
+    {
+      "id": 17,
+      "source": "U hali qaytib kelmadi.",
+      "reference": "他还没有回来。",
+      "evaluation_call": "他还没有回来。",
+      "direct_call": "他还没有回来。"
+    },
+    {
+      "id": 18,
+      "source": "Bu mening telefonim emas.",
+      "reference": "这不是我的手机。",
+      "evaluation_call": "不是我的电话",
+      "direct_call": "不是我的电话"
+    },
+    {
+      "id": 19,
+      "source": "Iltimos, sekinroq gapiring.",
+      "reference": "请慢一点说。",
+      "evaluation_call": "最后,比较轻松",
+      "direct_call": "最后,比较轻松"
+    },
+    {
+      "id": 20,
+      "source": "Men bu gapni tushunmayapman.",
+      "reference": "我听不懂这句话。",
+      "evaluation_call": "我不懂这个差距",
+      "direct_call": "我不懂这个差距"
+    },
+    {
+      "id": 21,
+      "source": "Biz o'n daqiqa kutishimiz kerak.",
+      "reference": "我们需要等十分钟。",
+      "evaluation_call": "我们需要一分钟的盒子",
+      "direct_call": "我们需要一分钟的盒子"
+    },
+    {
+      "id": 22,
+      "source": "Do'kon kechqurun soat sakkizda yopiladi.",
+      "reference": "商店晚上八点关门。",
+      "evaluation_call": "夜晚下午八点关闭",
+      "direct_call": "夜晚下午八点关闭"
+    },
+    {
+      "id": 23,
+      "source": "Iltimos, chapga buriling, keyin to'g'ri yuring.",
+      "reference": "请向左转，然后一直走。",
+      "evaluation_call": "最后,进去,然后进去。",
+      "direct_call": "最后,进去,然后进去。"
+    },
+    {
+      "id": 24,
+      "source": "Bola uxlayapti.",
+      "reference": "孩子正在睡觉。",
+      "evaluation_call": "会摔倒",
+      "direct_call": "会摔倒"
+    },
+    {
+      "id": 25,
+      "source": "Men har kuni ishga avtobusda boraman.",
+      "reference": "我每天坐公交车上班。",
+      "evaluation_call": "我每天都在公共汽车上班",
+      "direct_call": "我每天都在公共汽车上班"
+    },
+    {
+      "id": 26,
+      "source": "Bu kiyim juda katta.",
+      "reference": "这件衣服太大了。",
+      "evaluation_call": "这个衣物太大了",
+      "direct_call": "这个衣物太大了"
+    },
+    {
+      "id": 27,
+      "source": "Menga faqat ikkita chipta kerak.",
+      "reference": "我只需要两张票。",
+      "evaluation_call": "我只需要两个芯片",
+      "direct_call": "我只需要两个芯片"
+    },
+    {
+      "id": 28,
+      "source": "Iltimos, avval qo'lingizni yuving, keyin ovqatlaning.",
+      "reference": "请先洗手，再吃饭。",
+      "evaluation_call": "第二,先吃鸡蛋,然后吃饭。",
+      "direct_call": "第二,先吃鸡蛋,然后吃饭。"
+    },
+    {
+      "id": 29,
+      "source": "Yo'l yopilgani uchun avtobus kechikdi.",
+      "reference": "因为道路封闭，公交车晚点了。",
+      "evaluation_call": "因为道路关闭,公共汽车停了下来。",
+      "direct_call": "因为道路关闭,公共汽车停了下来。"
+    },
+    {
+      "id": 30,
+      "source": "Bu do'kon yakshanba kuni ochilmaydi.",
+      "reference": "这家商店周日不开门。",
+      "evaluation_call": "这个箱子无法关闭。",
+      "direct_call": "这个箱子无法关闭。"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "validator_version": "0.5.2",
+  "input": "data\\synthetic\\generated\\v052_audit_200\\semantic_v052_raw.jsonl",
+  "total": 200,
+  "accepted": 200,
+  "rejected": 0,
+  "accept_rate": 1.0,
+  "rows_with_warnings": 0,
+  "warning_rate": 0.0,
+  "new_frame_distribution": {
+    "WAIT_PERSON": 33,
+    "WAIT_AT_PLACE": 33,
+    "CALL_PERSON": 34
+  },
+  "new_verb_distribution": {
+    "WAIT": 66,
+    "CALL": 34
+  },
+  "violation_types": {},
+  "warning_types": {},
+  "activation_version": "0.5.2"
+}

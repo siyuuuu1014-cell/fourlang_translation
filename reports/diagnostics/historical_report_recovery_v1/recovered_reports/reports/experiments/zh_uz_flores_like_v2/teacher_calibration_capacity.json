@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "first_review": "/root/autodl-tmp/fourlang_translation/data/pipeline_v2/zh_uz_flores_like_v2/teacher_judge_calibration.parquet",
+  "minor_second_review": "/root/autodl-tmp/fourlang_translation/data/pipeline_v2/zh_uz_flores_like_v2/teacher_minor_second_review_calibration.parquet",
+  "directions": {
+    "zh-uz": {
+      "samples": 519,
+      "first_pass": 135,
+      "minor_second_pass": 30,
+      "accepted_total": 165,
+      "accepted_rate": 0.3179190751445087,
+      "projected_accepted_rows": 4450,
+      "conservative_projected_rows_95": 3910,
+      "minimum_required_rows": 8000,
+      "decision": "NOT_READY"
+    },
+    "uz-zh": {
+      "samples": 481,
+      "first_pass": 208,
+      "minor_second_pass": 16,
+      "accepted_total": 224,
+      "accepted_rate": 0.4656964656964657,
+      "projected_accepted_rows": 6519,
+      "conservative_projected_rows_95": 5901,
+      "minimum_required_rows": 8000,
+      "decision": "NOT_READY"
+    }
+  },
+  "full_teacher_audit_recommended": false
+}

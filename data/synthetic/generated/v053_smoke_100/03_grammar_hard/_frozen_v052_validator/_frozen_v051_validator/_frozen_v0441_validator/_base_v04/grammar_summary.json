@@ -1,0 +1,25 @@
+{
+  "validator_version": "0.4",
+  "input": "data\\synthetic\\generated\\v053_smoke_100\\03_grammar_hard\\_frozen_v052_validator\\_frozen_v051_validator\\_frozen_core_input.jsonl",
+  "total": 39,
+  "accepted": 37,
+  "rejected": 2,
+  "accept_rate": 0.9487179487179487,
+  "rejected_by_language": {
+    "ru": 2
+  },
+  "reject_reasons": {
+    "RU_AGREEMENT_OR_TENSE": 2
+  },
+  "verb_distribution": {
+    "GO": 6,
+    "ARRIVE": 6,
+    "COME": 6,
+    "EAT": 4,
+    "BUY": 4,
+    "WANT": 3,
+    "READ": 3,
+    "DRINK": 3,
+    "FIND": 3
+  }
+}

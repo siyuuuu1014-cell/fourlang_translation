@@ -1,0 +1,36 @@
+{
+  "validator_version": "0.5.2",
+  "input": "data\\synthetic\\generated\\v053_audit_200\\01_compatibility\\_frozen_v052_input.jsonl",
+  "total": 100,
+  "accepted": 100,
+  "rejected": 0,
+  "accept_rate": 1.0,
+  "rows_with_warnings": 0,
+  "warning_rate": 0.0,
+  "new_frame_distribution": {
+    "WAIT_AT_PLACE": 10,
+    "WAIT_PERSON": 10,
+    "CALL_PERSON": 10
+  },
+  "new_verb_distribution": {
+    "WAIT": 20,
+    "CALL": 10
+  },
+  "violation_types": {},
+  "warning_types": {},
+  "participant_overlap_policy": {
+    "exact_reflexive_allowed": false,
+    "speaker_group_overlap_allowed": false,
+    "blocked_pairs": [
+      [
+        "PERSON_I",
+        "PERSON_WE"
+      ],
+      [
+        "PERSON_WE",
+        "PERSON_I"
+      ]
+    ]
+  },
+  "activation_version": "0.5.2"
+}

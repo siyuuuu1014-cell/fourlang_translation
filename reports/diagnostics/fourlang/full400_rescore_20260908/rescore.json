@@ -1,0 +1,583 @@
+{
+  "normalization": {
+    "。": ".",
+    "、": ",",
+    "，": ",",
+    "；": ";",
+    "：": ":",
+    "！": "!",
+    "？": "?",
+    "“": "\"",
+    "”": "\""
+  },
+  "directions": {
+    "zh-uz": {
+      "n": 200,
+      "metrics": {
+        "original_chrfpp": {
+          "scores": {
+            "teacher": 53.190058089617466,
+            "exp1": 58.095980226944754,
+            "exp2": 57.91085516626432
+          },
+          "exp2_minus_exp1": -0.18512506068043422,
+          "teacher_minus_exp1": -4.905922137327288,
+          "paired_bootstrap_95pct_percentile": {
+            "teacher_minus_exp1": [
+              -6.913214778830434,
+              -3.043903391558331
+            ],
+            "exp2_minus_exp1": [
+              -1.21405545844914,
+              0.793135804903167
+            ]
+          },
+          "signature": "nrefs:1|case:mixed|eff:yes|nc:6|nw:2|space:no|version:2.6.0"
+        },
+        "char_chrf": {
+          "scores": {
+            "teacher": 57.937549628276045,
+            "exp1": 62.3743206992636,
+            "exp2": 62.248100876332956
+          },
+          "exp2_minus_exp1": -0.1262198229306435,
+          "teacher_minus_exp1": -4.436771070987554,
+          "paired_bootstrap_95pct_percentile": {
+            "teacher_minus_exp1": [
+              -6.3792467855213495,
+              -2.6049457170109616
+            ],
+            "exp2_minus_exp1": [
+              -1.1108815838080621,
+              0.8285617315897961
+            ]
+          },
+          "signature": "nrefs:1|case:mixed|eff:yes|nc:6|nw:0|space:no|version:2.6.0"
+        },
+        "typography_chrfpp": {
+          "scores": {
+            "teacher": 53.27430611206733,
+            "exp1": 58.09105014583553,
+            "exp2": 58.00899102539977
+          },
+          "exp2_minus_exp1": -0.08205912043575836,
+          "teacher_minus_exp1": -4.816744033768202,
+          "paired_bootstrap_95pct_percentile": {
+            "teacher_minus_exp1": [
+              -6.834367351623185,
+              -2.9334562780587774
+            ],
+            "exp2_minus_exp1": [
+              -1.112131943629198,
+              0.8920900764074103
+            ]
+          },
+          "signature": "nrefs:1|case:mixed|eff:yes|nc:6|nw:2|space:no|version:2.6.0"
+        },
+        "typography_char_chrf": {
+          "scores": {
+            "teacher": 58.020696898319535,
+            "exp1": 62.387369099054524,
+            "exp2": 62.33005470952509
+          },
+          "exp2_minus_exp1": -0.0573143895294308,
+          "teacher_minus_exp1": -4.366672200734989,
+          "paired_bootstrap_95pct_percentile": {
+            "teacher_minus_exp1": [
+              -6.341238412428291,
+              -2.5152532816391138
+            ],
+            "exp2_minus_exp1": [
+              -1.0322595725604176,
+              0.9026066897311957
+            ]
+          },
+          "signature": "nrefs:1|case:mixed|eff:yes|nc:6|nw:0|space:no|version:2.6.0"
+        },
+        "bleu": {
+          "teacher": 28.051524404706534,
+          "exp1": 35.71247821533098,
+          "exp2": 34.69419754329628
+        }
+      },
+      "sentence_score_max_reproduction_error": 0,
+      "exact_equal": 73,
+      "only_typography_difference": 0,
+      "only_typography_down": 0,
+      "only_typography_ids": [],
+      "other_changed": 127,
+      "raw_sentence_delta_counts": {
+        "up": 61,
+        "equal": 74,
+        "down": 65
+      },
+      "exploratory_source_strata": {
+        "source_flagged": {
+          "n": 25,
+          "original": {
+            "scores": {
+              "teacher": 61.71208515211467,
+              "exp1": 73.56710136469808,
+              "exp2": 73.4546700750633
+            },
+            "delta": -0.11243128963477034
+          },
+          "typography": {
+            "scores": {
+              "teacher": 61.71208515211467,
+              "exp1": 73.56710136469808,
+              "exp2": 73.4546700750633
+            },
+            "delta": -0.11243128963477034
+          },
+          "char": {
+            "scores": {
+              "teacher": 63.075211205677405,
+              "exp1": 74.92882679842484,
+              "exp2": 74.68058700025357
+            },
+            "delta": -0.2482397981712694
+          }
+        },
+        "source_unflagged": {
+          "n": 175,
+          "original": {
+            "scores": {
+              "teacher": 52.47433060586337,
+              "exp1": 56.899991822979636,
+              "exp2": 56.7093524749165
+            },
+            "delta": -0.19063934806313654
+          },
+          "typography": {
+            "scores": {
+              "teacher": 52.56723557119871,
+              "exp1": 56.896653356500174,
+              "exp2": 56.817238977752915
+            },
+            "delta": -0.0794143787472592
+          },
+          "char": {
+            "scores": {
+              "teacher": 57.55785846271968,
+              "exp1": 61.479602040344005,
+              "exp2": 61.362934278032
+            },
+            "delta": -0.11666776231200515
+          }
+        }
+      },
+      "flagged_sources": [
+        {
+          "id": "ca30efaf",
+          "flags": [
+            "minority_Han_in_Zh_source"
+          ],
+          "source": "LinkedIn XING Viadeo 社会化媒体 社会网络 社会性软件 Business network 社交网络网站列表",
+          "reference": "LinkedIn XING Viadeo Ijtimoiy media Ijtimoiy tarmoq Ijtimoiy dasturiy ta'minot Ijtimoiy tarmoq veb-saytlari ro'yxati"
+        },
+        {
+          "id": "6b6f60ba",
+          "flags": [
+            "minority_Han_in_Zh_source"
+          ],
+          "source": "Clients(客户端)",
+          "reference": "Clients (mijozlar)"
+        },
+        {
+          "id": "365dc690",
+          "flags": [
+            "minority_Han_in_Zh_source"
+          ],
+          "source": "ICRANet所址和中心",
+          "reference": "ICRANet joylashuvi va markazi"
+        },
+        {
+          "id": "9af37f09",
+          "flags": [
+            "minority_Han_in_Zh_source"
+          ],
+          "source": "1988年,他创立了卢森堡的萨夫拉银行控股公司(Safra Republic Holdings SA)。[1]",
+          "reference": "1988-yilda u Lyuksemburgda Safra Respublika Holding kompaniyasini (Safra Republic Holdings SA) tashkil etdi.[1]"
+        },
+        {
+          "id": "083938fa",
+          "flags": [
+            "minority_Han_in_Zh_source"
+          ],
+          "source": "[25 February 2020] (英语). ↑ Royal Society Winton Prize for Science Books.",
+          "reference": "[25 February 2020] (inglizcha). ↑ „Royal Society Winton Prize for Science Books“."
+        },
+        {
+          "id": "71c0496b",
+          "flags": [
+            "minority_Han_in_Zh_source"
+          ],
+          "source": "27 January 2023 [2 April 2023]. (原始内容存档于5 February 2023) (芬兰语).",
+          "reference": "27 January 2023 [2 April 2023]. (asl nusxadan 5-fevral 2023-yilda arxivlandi) (fin.)"
+        },
+        {
+          "id": "ffdd30db",
+          "flags": [
+            "minority_Han_in_Zh_source"
+          ],
+          "source": "TCP中的ECN",
+          "reference": "TCPdagi ECN"
+        },
+        {
+          "id": "d0bacc7e",
+          "flags": [
+            "minority_Han_in_Zh_source"
+          ],
+          "source": "Solaborate的产品特点如下:",
+          "reference": "Solaborate mahsulotining xususiyatlari quyidagicha:"
+        },
+        {
+          "id": "a989bed3",
+          "flags": [
+            "minority_Han_in_Zh_source"
+          ],
+          "source": "一些ORCID数据也可检索为RDF/XML、RDF Turtle、XML或JSON格式。[56][57]ORCID使用GitHub作为其代码仓库。[58]",
+          "reference": "Ba'zi ORCID ma'lumotlari RDF/XML, RDF Turtle, XML yoki JSON formatida ham qidirilishi mumkin.[56][57] ORCID o'z kodlarining saqlanish xonasini GitHub sifatida ishlatadi.[58]"
+        },
+        {
+          "id": "9ac1e75b",
+          "flags": [
+            "minority_Han_in_Zh_source"
+          ],
+          "source": "每小时失效率 = λ hours {\\displaystyle \\lambda _{\\text{hours}}}",
+          "reference": "Soatlik yo'qotish darajasi = λ soat {\\displaystyle \\lambda _{\\text{soat}}}"
+        },
+        {
+          "id": "d5a2d869",
+          "flags": [
+            "minority_Han_in_Zh_source"
+          ],
+          "source": "[2018-10-20] (英语). ↑ VIDEO: Pigs Punched and Beaten for Walmart.",
+          "reference": "[2018-10-20] (inglizcha). ↑ VIDEO: Pigs Punched and Beaten for Walmart."
+        },
+        {
+          "id": "6d50dd2a",
+          "flags": [
+            "minority_Han_in_Zh_source"
+          ],
+          "source": "4Humanities and UCL Centre for Digital Humanities制作的资讯图表。",
+          "reference": "4 Gumanitar fanlar va UCL Digital Humanities Markazining tayyorlagan infografikasi."
+        },
+        {
+          "id": "883c053b",
+          "flags": [
+            "minority_Han_in_Zh_source"
+          ],
+          "source": "2023-09-13 [2023-11-25] (英语). ↑ King, Stephanie.",
+          "reference": "2023-09-13 [2023-11-25] (inglizcha). ↑ King, Stephanie."
+        },
+        {
+          "id": "54fef0c1",
+          "flags": [
+            "minority_Han_in_Zh_source"
+          ],
+          "source": "May 20, 2023 [April 27, 2024] (美国英语). ↑ Steele, Jennifer.",
+          "reference": "May 20, 2023 [April 27, 2024] (American English). ↑ Steele, Jennifer."
+        },
+        {
+          "id": "29dd569e",
+          "flags": [
+            "minority_Han_in_Zh_source"
+          ],
+          "source": "ARQ与FEC可以组合,使得不需重传就纠正微小错误,并经由重传请求校正大的错误,这被称为hybrid automatic repeat-request(HARQ)。",
+          "reference": "ARQ va FEC birlashib, kichik xato-larni qayta yuborishsiz tuzatish va qayta yuborish so'rovini orqali katta xato-larni tuzatish imkonini beradi, bu hybriddi avtomatik qayta so'rov (HARQ) deb ataladi."
+        },
+        {
+          "id": "7d6238d4",
+          "flags": [
+            "minority_Han_in_Zh_source"
+          ],
+          "source": "使用 ln ⁡ ( 1 + x ) ≈ x {\\displaystyle \\ln(1+x)\\approx x} ,可得出近似值如下:",
+          "reference": "ln ⁡ ( 1 + x ) ≈ x {\\displaystyle \\ln(1+x)\\approx x} ni qo'llab, quyidagi yaqinlashuvni olish mumkin:"
+        },
+        {
+          "id": "75d881de",
+          "flags": [
+            "minority_Han_in_Zh_source"
+          ],
+          "source": "17 July 2017 [22 March 2023]. (原始内容存档于8 January 2019). ↑ Fontdeglòria, Xavier.",
+          "reference": "17 July 2017 [22 March 2023]. (Asl nusxadan 8-yanvar 2019-yilda arxivlandi). ↑ Fontdeglòria, Xavier."
+        },
+        {
+          "id": "20f36e61",
+          "flags": [
+            "minority_Han_in_Zh_source"
+          ],
+          "source": "page和date参数是必要的。",
+          "reference": "page va date parametrlari majburiydir."
+        },
+        {
+          "id": "44691188",
+          "flags": [
+            "minority_Han_in_Zh_source"
+          ],
+          "source": "WwwwwWwwwwWwwwwWwwwwWwwwwWwwww Wwwww Wwwww Wwwww 注解 非北约成员国",
+          "reference": "WwwwwWwwwwWwwwwWwwwwWwwwwWwwww Wwwww Wwwww Wwwww Izohlar NATO a'zosi bo'lmagan davlatlar"
+        },
+        {
+          "id": "ca6bbd56",
+          "flags": [
+            "minority_Han_in_Zh_source"
+          ],
+          "source": "有关Rootkit的指控",
+          "reference": "Rootkitga nisbatan ayblar"
+        },
+        {
+          "id": "3353e74b",
+          "flags": [
+            "minority_Han_in_Zh_source"
+          ],
+          "source": "Light of Destiny(\"The Summoned One\") 召唤されし者 (Shōkansareshi mono) 2:55 20.",
+          "reference": "Light of Destiny (\"The Summoned One\") 2:55 20."
+        },
+        {
+          "id": "b3bd0c04",
+          "flags": [
+            "minority_Han_in_Zh_source"
+          ],
+          "source": "官方网站 TürkmenÄlem52°EonTurkmencosmos 国际空间系统-摩纳哥 SES官方网站",
+          "reference": "Rasmiy veb-sayt TürkmenÄlem52°EonTurkmencosmos Xalqaro kosmik tizim - Monako SES rasmiy veb-sayti"
+        },
+        {
+          "id": "f08a8845",
+          "flags": [
+            "minority_Han_in_Zh_source"
+          ],
+          "source": "SAS和SATA",
+          "reference": "SAS va SATA"
+        },
+        {
+          "id": "de3e71ba",
+          "flags": [
+            "minority_Han_in_Zh_source"
+          ],
+          "source": "滑动平面(Glide plane)",
+          "reference": "Yugurish tekisligi (Glide plane)"
+        },
+        {
+          "id": "4dec20dd",
+          "flags": [
+            "minority_Han_in_Zh_source"
+          ],
+          "source": "The Final Battle 最后の闘い (Saigo no Tatakai) 6:15 17.",
+          "reference": "The Final Battle 最後の闘い (Saigo no Tatakai) 6:15 17."
+        }
+      ]
+    },
+    "uz-zh": {
+      "n": 200,
+      "metrics": {
+        "original_chrfpp": {
+          "scores": {
+            "teacher": 37.02329638494991,
+            "exp1": 44.25364665998488,
+            "exp2": 42.81121674636863
+          },
+          "exp2_minus_exp1": -1.4424299136162517,
+          "teacher_minus_exp1": -7.230350275034972,
+          "paired_bootstrap_95pct_percentile": {
+            "teacher_minus_exp1": [
+              -11.311973818737698,
+              -3.509119926749257
+            ],
+            "exp2_minus_exp1": [
+              -2.895640518870828,
+              -0.2063265342909242
+            ]
+          },
+          "signature": "nrefs:1|case:mixed|eff:yes|nc:6|nw:2|space:no|version:2.6.0"
+        },
+        "char_chrf": {
+          "scores": {
+            "teacher": 40.3926700436482,
+            "exp1": 44.89336807334837,
+            "exp2": 43.97974569025473
+          },
+          "exp2_minus_exp1": -0.9136223830936387,
+          "teacher_minus_exp1": -4.5006980297001675,
+          "paired_bootstrap_95pct_percentile": {
+            "teacher_minus_exp1": [
+              -7.506200787933896,
+              -1.9505283639752289
+            ],
+            "exp2_minus_exp1": [
+              -1.9080298031640113,
+              0.041590765258152924
+            ]
+          },
+          "signature": "nrefs:1|case:mixed|eff:yes|nc:6|nw:0|space:no|version:2.6.0"
+        },
+        "typography_chrfpp": {
+          "scores": {
+            "teacher": 40.013526579338354,
+            "exp1": 44.87025987557774,
+            "exp2": 44.1628908152112
+          },
+          "exp2_minus_exp1": -0.7073690603665383,
+          "teacher_minus_exp1": -4.856733296239383,
+          "paired_bootstrap_95pct_percentile": {
+            "teacher_minus_exp1": [
+              -8.744167628310931,
+              -1.3367147508665231
+            ],
+            "exp2_minus_exp1": [
+              -2.0381334181676696,
+              0.4587916567873575
+            ]
+          },
+          "signature": "nrefs:1|case:mixed|eff:yes|nc:6|nw:2|space:no|version:2.6.0"
+        },
+        "typography_char_chrf": {
+          "scores": {
+            "teacher": 44.082159775135906,
+            "exp1": 45.403177664117784,
+            "exp2": 45.283360001055705
+          },
+          "exp2_minus_exp1": -0.1198176630620793,
+          "teacher_minus_exp1": -1.3210178889818778,
+          "paired_bootstrap_95pct_percentile": {
+            "teacher_minus_exp1": [
+              -4.3964990504326185,
+              1.3187746123836421
+            ],
+            "exp2_minus_exp1": [
+              -1.0365321537246948,
+              0.7453937012334069
+            ]
+          },
+          "signature": "nrefs:1|case:mixed|eff:yes|nc:6|nw:0|space:no|version:2.6.0"
+        },
+        "bleu": {
+          "teacher": 42.32574205891982,
+          "exp1": 45.19150446516295,
+          "exp2": 44.700986267216074
+        }
+      },
+      "sentence_score_max_reproduction_error": 0,
+      "exact_equal": 72,
+      "only_typography_difference": 9,
+      "only_typography_down": 8,
+      "only_typography_ids": [
+        "a05abcd2",
+        "56c9a5fb",
+        "ef941fe2",
+        "2d5f3255",
+        "0219d2a5",
+        "8b7d91d3",
+        "974d55de",
+        "0bfe4cbd",
+        "506492df"
+      ],
+      "other_changed": 119,
+      "raw_sentence_delta_counts": {
+        "equal": 76,
+        "down": 74,
+        "up": 50
+      },
+      "exploratory_source_strata": {
+        "source_flagged": {
+          "n": 2,
+          "original": {
+            "scores": {
+              "teacher": 56.751923317271256,
+              "exp1": 100,
+              "exp2": 93.74225447141413
+            },
+            "delta": -6.257745528585872
+          },
+          "typography": {
+            "scores": {
+              "teacher": 56.751923317271256,
+              "exp1": 100,
+              "exp2": 93.74225447141413
+            },
+            "delta": -6.257745528585872
+          },
+          "char": {
+            "scores": {
+              "teacher": 54.85255089900873,
+              "exp1": 100,
+              "exp2": 94.77688255419257
+            },
+            "delta": -5.223117445807432
+          }
+        },
+        "source_unflagged": {
+          "n": 198,
+          "original": {
+            "scores": {
+              "teacher": 36.52372683082273,
+              "exp1": 43.131214628465656,
+              "exp2": 41.80931437238873
+            },
+            "delta": -1.3219002560769297
+          },
+          "typography": {
+            "scores": {
+              "teacher": 39.59574623926875,
+              "exp1": 43.83976750642364,
+              "exp2": 43.25007524364422
+            },
+            "delta": -0.5896922627794225
+          },
+          "char": {
+            "scores": {
+              "teacher": 40.24135373275077,
+              "exp1": 44.2885366299803,
+              "exp2": 43.42307407819535
+            },
+            "delta": -0.865462551784951
+          }
+        }
+      },
+      "flagged_sources": [
+        {
+          "id": "bd49cd90",
+          "flags": [
+            "CJK_in_Uz_source"
+          ],
+          "source": "The Final Battle 最後の闘い (Saigo no Tatakai) 6:15 17.",
+          "reference": "The Final Battle 最后の闘い (Saigo no Tatakai) 6:15 17."
+        },
+        {
+          "id": "92c3b056",
+          "flags": [
+            "CJK_in_Uz_source"
+          ],
+          "source": "The Gift of Life Soken 生命の賜物 (Seimei no Tamamono) 1:07 8.",
+          "reference": "The Gift of Life Soken 生命の赐物 (Seimei no Tamamono) 1:07 8."
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "input": "D:/Download/comparisons.jsonl",
+    "input_sha256": "d70c39e788e624814b61b99e980c7ebc4e663b59adb275c58e8f9c9e9646be46",
+    "input_rows": 400,
+    "unique_sample_ids": 400,
+    "previous_review_rows_verified": 74,
+    "sacrebleu_version": "2.6.0",
+    "beta": 2,
+    "char_order": 6,
+    "empty_fields": 0,
+    "bootstrap": {
+      "resamples": 5000,
+      "seed": 20260908,
+      "method": "paired sentence resampling with replacement; corpus sufficient statistics summed per replicate; percentile 2.5/97.5 for score differences; exploratory, unadjusted, assumes sentence independence; no p-values"
+    },
+    "source_strata_rules": [
+      "Any source with a case-sensitive same-character run >=12",
+      "uz-zh source containing U+3040..U+30FF or U+3400..U+9FFF",
+      "zh-uz source with U+3400..U+9FFF characters <50% of alphabetic characters"
+    ],
+    "source_strata_limitations": "Source-only script heuristics fixed before scoring these strata. Flags do not establish bad data or wrong language; unflagged does not mean clean. No rows removed from full results. Semantic reference review is separate and non-exhaustive.",
+    "scope": "CPU-only rescore of saved fixed validation translations. No inference, training, model changes, source-data edits, checkpoint selection or benchmark replacement."
+  }
+}
+

@@ -1,0 +1,2696 @@
+{
+  "historical_report_count": 62,
+  "archive_report_count": 62,
+  "not_in_archive": [],
+  "reports": [
+    {
+      "path": "reports/experiments/six_pair_baseline_v1/summary.json",
+      "present_now": false,
+      "archive_matches_record": true,
+      "current_matches_record": null,
+      "archive_sha256": "d9b3d9e30cbbc74fbd7c2fd13148ed75f11540b937ef44000dbe46d89786caba",
+      "recovered_path": "/root/autodl-tmp/fourlang_diagnostics_recovery_20260914/historical_report_recovery_v1/recovered_reports/reports/experiments/six_pair_baseline_v1/summary.json"
+    },
+    {
+      "path": "reports/experiments/zh_uz_flores_like_v1/flores_profile.json",
+      "present_now": false,
+      "archive_matches_record": true,
+      "current_matches_record": null,
+      "archive_sha256": "e9c0a0a5b15dfc04ba57f77961371eb2081e4a00a0832e749c13b6736822914b",
+      "recovered_path": "/root/autodl-tmp/fourlang_diagnostics_recovery_20260914/historical_report_recovery_v1/recovered_reports/reports/experiments/zh_uz_flores_like_v1/flores_profile.json"
+    },
+    {
+      "path": "reports/experiments/zh_uz_flores_like_v1/source_calibration_capacity.json",
+      "present_now": false,
+      "archive_matches_record": true,
+      "current_matches_record": null,
+      "archive_sha256": "331da19990caa48061105c346d683ed729a37f7f3715925aa174fa217a0ba466",
+      "recovered_path": "/root/autodl-tmp/fourlang_diagnostics_recovery_20260914/historical_report_recovery_v1/recovered_reports/reports/experiments/zh_uz_flores_like_v1/source_calibration_capacity.json"
+    },
+    {
+      "path": "reports/experiments/zh_uz_flores_like_v1/source_selection.json",
+      "present_now": false,
+      "archive_matches_record": true,
+      "current_matches_record": null,
+      "archive_sha256": "282761e080ca9a3f3aa8d69f8c955da629f9b0d24341a4a65a39b6254d25a4b0",
+      "recovered_path": "/root/autodl-tmp/fourlang_diagnostics_recovery_20260914/historical_report_recovery_v1/recovered_reports/reports/experiments/zh_uz_flores_like_v1/source_selection.json"
+    },
+    {
+      "path": "reports/experiments/zh_uz_flores_like_v1/source_staging.json",
+      "present_now": false,
+      "archive_matches_record": true,
+      "current_matches_record": null,
+      "archive_sha256": "d80d8e31ff2c7aece8ca4d7a11ef393c90ccc86b9c94ad276ad7d8db706698c0",
+      "recovered_path": "/root/autodl-tmp/fourlang_diagnostics_recovery_20260914/historical_report_recovery_v1/recovered_reports/reports/experiments/zh_uz_flores_like_v1/source_staging.json"
+    },
+    {
+      "path": "reports/experiments/zh_uz_flores_like_v1/validation.json",
+      "present_now": false,
+      "archive_matches_record": true,
+      "current_matches_record": null,
+      "archive_sha256": "1f17b39882a939458ed0b089d5cb62e6bee1a88ea88d11d71d5bceb72dbd10bf",
+      "recovered_path": "/root/autodl-tmp/fourlang_diagnostics_recovery_20260914/historical_report_recovery_v1/recovered_reports/reports/experiments/zh_uz_flores_like_v1/validation.json"
+    },
+    {
+      "path": "reports/experiments/zh_uz_flores_like_v1/wikipedia_extension.json",
+      "present_now": false,
+      "archive_matches_record": true,
+      "current_matches_record": null,
+      "archive_sha256": "35bd12bb7005bc35217bb20d2f718ad40ea2f5b03a6364300ec26e136bbc897b",
+      "recovered_path": "/root/autodl-tmp/fourlang_diagnostics_recovery_20260914/historical_report_recovery_v1/recovered_reports/reports/experiments/zh_uz_flores_like_v1/wikipedia_extension.json"
+    },
+    {
+      "path": "reports/experiments/zh_uz_flores_like_v2/flores_profile.json",
+      "present_now": false,
+      "archive_matches_record": true,
+      "current_matches_record": null,
+      "archive_sha256": "e9c0a0a5b15dfc04ba57f77961371eb2081e4a00a0832e749c13b6736822914b",
+      "recovered_path": "/root/autodl-tmp/fourlang_diagnostics_recovery_20260914/historical_report_recovery_v1/recovered_reports/reports/experiments/zh_uz_flores_like_v2/flores_profile.json"
+    },
+    {
+      "path": "reports/experiments/zh_uz_flores_like_v2/source_selection.json",
+      "present_now": false,
+      "archive_matches_record": true,
+      "current_matches_record": null,
+      "archive_sha256": "0971eca8fdf3877cb6b6fb8e229598f1d9e79f3050b6de4c4f832ecbea01e259",
+      "recovered_path": "/root/autodl-tmp/fourlang_diagnostics_recovery_20260914/historical_report_recovery_v1/recovered_reports/reports/experiments/zh_uz_flores_like_v2/source_selection.json"
+    },
+    {
+      "path": "reports/experiments/zh_uz_flores_like_v2/source_staging.json",
+      "present_now": false,
+      "archive_matches_record": true,
+      "current_matches_record": null,
+      "archive_sha256": "b4b314cb9d5ef86602b265a04ed923f701e8e72617c400993011dfca4b7039d1",
+      "recovered_path": "/root/autodl-tmp/fourlang_diagnostics_recovery_20260914/historical_report_recovery_v1/recovered_reports/reports/experiments/zh_uz_flores_like_v2/source_staging.json"
+    },
+    {
+      "path": "reports/experiments/zh_uz_flores_like_v2/teacher_calibration_capacity.json",
+      "present_now": false,
+      "archive_matches_record": true,
+      "current_matches_record": null,
+      "archive_sha256": "a824bdaf02fcf8eff9c1dc41cabf1b779b13d5dc17807255f4cfc06f5b1dba17",
+      "recovered_path": "/root/autodl-tmp/fourlang_diagnostics_recovery_20260914/historical_report_recovery_v1/recovered_reports/reports/experiments/zh_uz_flores_like_v2/teacher_calibration_capacity.json"
+    },
+    {
+      "path": "reports/experiments/zh_uz_flores_like_v2/teacher_calibration_diagnostics.json",
+      "present_now": false,
+      "archive_matches_record": true,
+      "current_matches_record": null,
+      "archive_sha256": "c0f1a183118c839879006e6d62cfea6a616b2db9fee6979fa5c72fa95066cd1b",
+      "recovered_path": "/root/autodl-tmp/fourlang_diagnostics_recovery_20260914/historical_report_recovery_v1/recovered_reports/reports/experiments/zh_uz_flores_like_v2/teacher_calibration_diagnostics.json"
+    },
+    {
+      "path": "reports/experiments/zh_uz_flores_like_v2/validation.json",
+      "present_now": false,
+      "archive_matches_record": true,
+      "current_matches_record": null,
+      "archive_sha256": "1f17b39882a939458ed0b089d5cb62e6bee1a88ea88d11d71d5bceb72dbd10bf",
+      "recovered_path": "/root/autodl-tmp/fourlang_diagnostics_recovery_20260914/historical_report_recovery_v1/recovered_reports/reports/experiments/zh_uz_flores_like_v2/validation.json"
+    },
+    {
+      "path": "reports/experiments/zh_uz_flores_relaxed_8k/assembly.json",
+      "present_now": false,
+      "archive_matches_record": true,
+      "current_matches_record": null,
+      "archive_sha256": "54bfd96b70724bc24048f0ff18ce41e8ec373f1d6ae3d54fac2bb5263741cd52",
+      "recovered_path": "/root/autodl-tmp/fourlang_diagnostics_recovery_20260914/historical_report_recovery_v1/recovered_reports/reports/experiments/zh_uz_flores_relaxed_8k/assembly.json"
+    },
+    {
+      "path": "reports/experiments/zh_uz_flores_relaxed_8k/validation.json",
+      "present_now": false,
+      "archive_matches_record": true,
+      "current_matches_record": null,
+      "archive_sha256": "1f17b39882a939458ed0b089d5cb62e6bee1a88ea88d11d71d5bceb72dbd10bf",
+      "recovered_path": "/root/autodl-tmp/fourlang_diagnostics_recovery_20260914/historical_report_recovery_v1/recovered_reports/reports/experiments/zh_uz_flores_relaxed_8k/validation.json"
+    },
+    {
+      "path": "results/evaluation/en_ru/exp1/metrics.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "18427ad440367a44f582d8759216eed124101b06becc0d508b8bd32b0e89e4a1"
+    },
+    {
+      "path": "results/evaluation/pair_specialists/en_ru/exp1.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "ff92dbf59ccc1eb90e8f14a72af3424e390cbe5d37afb170de2edd059b64b4b6"
+    },
+    {
+      "path": "results/evaluation/pair_specialists/en_ru/exp2.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "4ae4f23a99da8c013973993a5f29f542b72c78079c13114d2ce87b5965a17c16"
+    },
+    {
+      "path": "results/evaluation/pair_specialists/en_ru/promotion_gate.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "d78967fc1f27cdf2bfd2ffcf34ee573bd6f27c9e5cf6b6a99e64e5b77dc45a64"
+    },
+    {
+      "path": "results/evaluation/pair_specialists/en_uz/exp1.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "aa311d88eb5dbacc790a3f27ff49a6bb674566561aad17b291d7d68699a8f1ca"
+    },
+    {
+      "path": "results/evaluation/pair_specialists/en_uz/exp2.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "b9a8209adb0a6aa39f442149d04d979a43f91e08e7c8b31022a5e6622814616f"
+    },
+    {
+      "path": "results/evaluation/pair_specialists/en_uz/promotion_gate.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "906ce8cf8ca4be3028326e4493b1773f4c2283390eb2a5227f8c4fabbf8596e7"
+    },
+    {
+      "path": "results/evaluation/pair_specialists/en_zh/exp1.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "82d7db5308a5994db6490da3c526c9f41c0bb9371623e692cb7f5b6112f2116c"
+    },
+    {
+      "path": "results/evaluation/pair_specialists/en_zh/exp2.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "cbcaaecb9bd351cf0bca3e74536f833db23654b0bb98e6e8d3fffb65f7b4fade"
+    },
+    {
+      "path": "results/evaluation/pair_specialists/en_zh/promotion_gate.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "a1cc788b9f3ad4389a260fd60963e104539a3efdf95d6daacd28165dd71f2703"
+    },
+    {
+      "path": "results/evaluation/pair_specialists/uz_ru/exp1.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "3cfed4395946ac7fb692eadd402c520b87a3afac06473c88ca24763b042feb84"
+    },
+    {
+      "path": "results/evaluation/pair_specialists/uz_ru/exp2.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "25c4099078bfa33bed815f3d6d3393adb9e628e3db897f3a09a45b7553e30dba"
+    },
+    {
+      "path": "results/evaluation/pair_specialists/uz_ru/promotion_gate.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "452946534774ecb72c7024ed792b4557b66ba12ebc0b66f0a7d81e6e862e789e"
+    },
+    {
+      "path": "results/evaluation/pair_specialists/zh_ru/exp1.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "ac85b50a89a9fd92c813a1b277c453d2180b609413b256f84b37d8bc29de227e"
+    },
+    {
+      "path": "results/evaluation/pair_specialists/zh_ru/exp2.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "98c7f7631c0850a2439ab58f51ce7eedbb29dd4f417f989c088492fbf08a30b6"
+    },
+    {
+      "path": "results/evaluation/pair_specialists/zh_ru/promotion_gate.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "dd20bb8e77e100160b40897ac91945dd917221dcbb5fddd066f4e1f6b4b23748"
+    },
+    {
+      "path": "results/evaluation/pair_specialists/zh_uz/exp1.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "664fb32ccb516a5c0586c8fc267b41b9d1d1eab2275795a133dc295da7dd0e14"
+    },
+    {
+      "path": "results/evaluation/pair_specialists/zh_uz/exp2.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "8a053c93227cef3521e5a78a5f43afa71f4d6c9b7326794581fda5f4d88cd18b"
+    },
+    {
+      "path": "results/evaluation/pair_specialists/zh_uz/promotion_gate.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "8f70569d4ca7bd3f476ba5ccaabc510eece6ef15f9d483adfba355a3f1974122"
+    },
+    {
+      "path": "results/evaluation/weak_pair_ablation/zh_uz/baseline_exp1.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "651b42b47825bb9af73e778211893bbb42789a5db099ce9f8c537a289331f29e"
+    },
+    {
+      "path": "results/evaluation/weak_pair_ablation/zh_uz/baseline_exp2.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "4f5dd82dec2e249e166464878c6aad19c86dae200f31a12748028b85943e00ae"
+    },
+    {
+      "path": "results/evaluation/weak_pair_ablation/zh_uz/bidir_full.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "da1b4ab4767e3deda69559feb0aea3571f538a8cd05278bb79996b704d151f49"
+    },
+    {
+      "path": "results/evaluation/weak_pair_ablation/zh_uz/comparison.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "205177e62f35bfeb42399082954e715944bf3f3d6011f61c0013b237929ef1ad"
+    },
+    {
+      "path": "results/evaluation/weak_pair_ablation/zh_uz/directional_full__uz_zh.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "5cb11486276c77784613615d08e3c796ecc37dcc6deec7742e81cc4165dae092"
+    },
+    {
+      "path": "results/evaluation/weak_pair_ablation/zh_uz/directional_full__zh_uz.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "78809b9d71b2b766b175ff699a7afa2c1fbcfa23e061975bd81f5956650a019e"
+    },
+    {
+      "path": "results/evaluation/weak_pair_ablation/zh_uz/final_devtest.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "fc6374985bfdcb96951f99d11953ac5ecb40b4d0d4786f3ac2c526a3627a26df"
+    },
+    {
+      "path": "results/evaluation/weak_pair_ablation/zh_uz/flores_relaxed_8k.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "fcf27ea3382d0076c933d0d49e37afd12e27dab220b783cebe66e340b14d84d2"
+    },
+    {
+      "path": "results/evaluation/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "7b2a67dbb0098991afbc89aadb55a6ad45bf67d7f94b35542645cb6fe1016135"
+    },
+    {
+      "path": "results/evaluation/weak_pair_ablation/zh_uz/full_native_lr2e6.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "c9a617219656cda4c1fe4adb40a1309e2c35332bc5c3fcb23fb12a43f5ad8130"
+    },
+    {
+      "path": "results/evaluation/weak_pair_ablation/zh_uz/full_weighted_60_40.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "0b8a800daa6d9f274b7827ed29fad7bc9d90259cc6826b527a24a00a72932907"
+    },
+    {
+      "path": "results/experiments/weak_pair_ablation/zh_uz/bidir_full/train_report.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "684fe4f3c94e7f37502cc2f72537f6cdff1d8809ed11cd7495e57f1aba60d40f"
+    },
+    {
+      "path": "results/experiments/weak_pair_ablation/zh_uz/directional_full__uz_zh/train_report.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "f0756ef057c5e8015a26c0dba955cbbd4641a47fecb1b97792b598da992903f5"
+    },
+    {
+      "path": "results/experiments/weak_pair_ablation/zh_uz/directional_full__zh_uz/train_report.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "a6148309531e412358fb88e1a96522157329df4aa4ebb0e9a2ce5089371f1485"
+    },
+    {
+      "path": "results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/train_report.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "6a8f80019884dcec6c0d52100418f480c1230bf5633390d63b046b27822fe88b"
+    },
+    {
+      "path": "results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/train_report.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "100c4134576fd35de719f976500e615658b526f4192435e1b53b24d5e5ee6b1e"
+    },
+    {
+      "path": "results/experiments/weak_pair_ablation/zh_uz/full_native_lr2e6/train_report.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "e2ccec97f95207eadd980551e118070f38f12aba6331c3075a8f42d03f1f4f27"
+    },
+    {
+      "path": "results/experiments/weak_pair_ablation/zh_uz/full_weighted_60_40/train_report.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "2e7b40ba58140d7b9f2d3ee78208e7818f077fea5c19dc4325b69e7dec23d540"
+    },
+    {
+      "path": "results/student/en_ru/exp1/train_report.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "404650e071d87650c96388a7af2cb1e425c7491eefea92e337a523e9a847f86e"
+    },
+    {
+      "path": "results/student/pair_specialists/en_ru/exp2/train_report.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "e0c97382b756e3444fe043bb501b6e69a86e77c28a4a1467702734d6c8982d60"
+    },
+    {
+      "path": "results/student/pair_specialists/en_zh/exp1/train_report.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "ec8a0d896ad1b64c1434b8616ccbeecd4386d499de95b81a11eeca0ceab3c81f"
+    },
+    {
+      "path": "results/student/pair_specialists/en_zh/exp2/train_report.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "e3c6f73df6beee2927effe4ebfc3e754031a3f916ae41f55fd695b9e978361d1"
+    },
+    {
+      "path": "results/student/pair_specialists/uz_ru/exp1/train_report.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "f1e4023a6762f759d702464b6dfd40eb5f11f1fcbe4bb4988ad147be95346fb6"
+    },
+    {
+      "path": "results/student/pair_specialists/uz_ru/exp2/train_report.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "50d6209957d307bef6730a5268457ea77354fc5e18e2a8e868c36b8a31fb46fe"
+    },
+    {
+      "path": "results/student/pair_specialists/zh_ru/exp1/train_report.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "b34b2bd170799728bd38fce4f2274e872fe1cf05501743dffb50eee29b30116a"
+    },
+    {
+      "path": "results/student/pair_specialists/zh_ru/exp2/train_report.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "003c4c822493604c3d7c865dc9c0e89f7bdca0a0dbacac70791b70fcd2935617"
+    },
+    {
+      "path": "results/student/pair_specialists/zh_uz/exp1/train_report.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "729988bece8b04d87f577b3ee9f5fa154ac2451a5e7fb0c1ecbd0fa6c5ca3d3c"
+    },
+    {
+      "path": "results/student/pair_specialists/zh_uz/exp2/train_report.json",
+      "present_now": true,
+      "archive_matches_record": true,
+      "current_matches_record": true,
+      "archive_sha256": "4f13f7fb489a1601106286d1a2d60da09144e6ee743a98f2207f0feb64d1d873"
+    }
+  ],
+  "archived_files_absent_at_original_path": [
+    {
+      "path": "configs/experiments/en_ru_v1.toml",
+      "archived_bytes": 1003
+    },
+    {
+      "path": "configs/review/zh_uz_manual_review_decisions_v1.json",
+      "archived_bytes": 7440
+    },
+    {
+      "path": "data/experiments/weak_pair_ablation/zh_uz/bidir_full/prepare_report.json",
+      "archived_bytes": 1981
+    },
+    {
+      "path": "data/experiments/weak_pair_ablation/zh_uz/bidir_full/train.jsonl",
+      "archived_bytes": 12128462
+    },
+    {
+      "path": "data/experiments/weak_pair_ablation/zh_uz/bidir_full/validation.jsonl",
+      "archived_bytes": 403272
+    },
+    {
+      "path": "data/experiments/weak_pair_ablation/zh_uz/directional_full__uz_zh/prepare_report.json",
+      "archived_bytes": 1904
+    },
+    {
+      "path": "data/experiments/weak_pair_ablation/zh_uz/directional_full__uz_zh/train.jsonl",
+      "archived_bytes": 5912168
+    },
+    {
+      "path": "data/experiments/weak_pair_ablation/zh_uz/directional_full__uz_zh/validation.jsonl",
+      "archived_bytes": 201636
+    },
+    {
+      "path": "data/experiments/weak_pair_ablation/zh_uz/directional_full__zh_uz/prepare_report.json",
+      "archived_bytes": 1904
+    },
+    {
+      "path": "data/experiments/weak_pair_ablation/zh_uz/directional_full__zh_uz/train.jsonl",
+      "archived_bytes": 6216294
+    },
+    {
+      "path": "data/experiments/weak_pair_ablation/zh_uz/directional_full__zh_uz/validation.jsonl",
+      "archived_bytes": 201636
+    },
+    {
+      "path": "data/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/prepare_report.json",
+      "archived_bytes": 2450
+    },
+    {
+      "path": "data/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/train.jsonl",
+      "archived_bytes": 20825220
+    },
+    {
+      "path": "data/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/validation.jsonl",
+      "archived_bytes": 403272
+    },
+    {
+      "path": "data/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/prepare_report.json",
+      "archived_bytes": 2466
+    },
+    {
+      "path": "data/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/train.jsonl",
+      "archived_bytes": 20825220
+    },
+    {
+      "path": "data/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/validation.jsonl",
+      "archived_bytes": 403272
+    },
+    {
+      "path": "data/experiments/weak_pair_ablation/zh_uz/full_native_lr2e6/prepare_report.json",
+      "archived_bytes": 2030
+    },
+    {
+      "path": "data/experiments/weak_pair_ablation/zh_uz/full_native_lr2e6/train.jsonl",
+      "archived_bytes": 12128462
+    },
+    {
+      "path": "data/experiments/weak_pair_ablation/zh_uz/full_native_lr2e6/validation.jsonl",
+      "archived_bytes": 403272
+    },
+    {
+      "path": "data/experiments/weak_pair_ablation/zh_uz/full_weighted_60_40/prepare_report.json",
+      "archived_bytes": 2700
+    },
+    {
+      "path": "data/experiments/weak_pair_ablation/zh_uz/full_weighted_60_40/train.jsonl",
+      "archived_bytes": 12446849
+    },
+    {
+      "path": "data/experiments/weak_pair_ablation/zh_uz/full_weighted_60_40/validation.jsonl",
+      "archived_bytes": 403272
+    },
+    {
+      "path": "data/specialists/en_ru/exp2/train.jsonl",
+      "archived_bytes": 12034189
+    },
+    {
+      "path": "data/specialists/en_ru/exp2/validation.jsonl",
+      "archived_bytes": 3517896
+    },
+    {
+      "path": "data/specialists/en_zh/exp1/train.jsonl",
+      "archived_bytes": 6526733
+    },
+    {
+      "path": "data/specialists/en_zh/exp1/validation.jsonl",
+      "archived_bytes": 2082414
+    },
+    {
+      "path": "data/specialists/en_zh/exp2/train.jsonl",
+      "archived_bytes": 7141455
+    },
+    {
+      "path": "data/specialists/en_zh/exp2/validation.jsonl",
+      "archived_bytes": 2082414
+    },
+    {
+      "path": "data/specialists/uz_ru/exp1/train.jsonl",
+      "archived_bytes": 6402899
+    },
+    {
+      "path": "data/specialists/uz_ru/exp1/validation.jsonl",
+      "archived_bytes": 915238
+    },
+    {
+      "path": "data/specialists/uz_ru/exp2/train.jsonl",
+      "archived_bytes": 6376216
+    },
+    {
+      "path": "data/specialists/uz_ru/exp2/validation.jsonl",
+      "archived_bytes": 915238
+    },
+    {
+      "path": "data/specialists/zh_ru/exp1/train.jsonl",
+      "archived_bytes": 18290046
+    },
+    {
+      "path": "data/specialists/zh_ru/exp1/validation.jsonl",
+      "archived_bytes": 3566190
+    },
+    {
+      "path": "data/specialists/zh_ru/exp2/train.jsonl",
+      "archived_bytes": 16285835
+    },
+    {
+      "path": "data/specialists/zh_ru/exp2/validation.jsonl",
+      "archived_bytes": 3566190
+    },
+    {
+      "path": "data/specialists/zh_uz/exp1/train.jsonl",
+      "archived_bytes": 8804274
+    },
+    {
+      "path": "data/specialists/zh_uz/exp1/validation.jsonl",
+      "archived_bytes": 403272
+    },
+    {
+      "path": "data/specialists/zh_uz/exp2/train.jsonl",
+      "archived_bytes": 8707237
+    },
+    {
+      "path": "data/specialists/zh_uz/exp2/validation.jsonl",
+      "archived_bytes": 403272
+    },
+    {
+      "path": "docs/SIX_PAIR_SPECIALISTS.md",
+      "archived_bytes": 3531
+    },
+    {
+      "path": "logs/14e2_calibration_audit.txt",
+      "archived_bytes": 149237
+    },
+    {
+      "path": "logs/14e2_fail_audit.txt",
+      "archived_bytes": 0
+    },
+    {
+      "path": "logs/14e2_judge_v1_vs_v2_audit.txt",
+      "archived_bytes": 26792
+    },
+    {
+      "path": "reports/diagnostics/fourlang/acceptance_v3_freeze/summary.json",
+      "archived_bytes": 6242
+    },
+    {
+      "path": "reports/diagnostics/fourlang/acceptance_v3_source_preview/candidate_sources_preview.jsonl",
+      "archived_bytes": 162202
+    },
+    {
+      "path": "reports/diagnostics/fourlang/acceptance_v3_source_preview/summary.json",
+      "archived_bytes": 7065
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_direct_exp2_v1/automatic_metrics.json",
+      "archived_bytes": 263
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_direct_exp2_v1/predictions.jsonl",
+      "archived_bytes": 44518
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_direct_exp2_v1/summary.json",
+      "archived_bytes": 479
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/auto_judgments.jsonl",
+      "archived_bytes": 19539259
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/blind_teacher_candidates.jsonl",
+      "archived_bytes": 3428266
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_000000.json",
+      "archived_bytes": 31199
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_000032.json",
+      "archived_bytes": 31091
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_000064.json",
+      "archived_bytes": 32486
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_000096.json",
+      "archived_bytes": 31632
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_000128.json",
+      "archived_bytes": 32204
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_000160.json",
+      "archived_bytes": 31289
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_000192.json",
+      "archived_bytes": 31759
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_000224.json",
+      "archived_bytes": 32299
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_000256.json",
+      "archived_bytes": 31719
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_000288.json",
+      "archived_bytes": 34064
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_000320.json",
+      "archived_bytes": 31670
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_000352.json",
+      "archived_bytes": 32238
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_000384.json",
+      "archived_bytes": 32050
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_000416.json",
+      "archived_bytes": 30766
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_000448.json",
+      "archived_bytes": 30876
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_000480.json",
+      "archived_bytes": 32498
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_000512.json",
+      "archived_bytes": 32547
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_000544.json",
+      "archived_bytes": 32606
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_000576.json",
+      "archived_bytes": 31893
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_000608.json",
+      "archived_bytes": 32608
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_000640.json",
+      "archived_bytes": 31326
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_000672.json",
+      "archived_bytes": 31730
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_000704.json",
+      "archived_bytes": 31969
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_000736.json",
+      "archived_bytes": 31184
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_000768.json",
+      "archived_bytes": 32203
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_000800.json",
+      "archived_bytes": 31491
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_000832.json",
+      "archived_bytes": 32325
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_000864.json",
+      "archived_bytes": 32465
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_000896.json",
+      "archived_bytes": 31332
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_000928.json",
+      "archived_bytes": 31969
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_000960.json",
+      "archived_bytes": 32602
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_000992.json",
+      "archived_bytes": 30487
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_001024.json",
+      "archived_bytes": 33402
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_001056.json",
+      "archived_bytes": 32227
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_001088.json",
+      "archived_bytes": 31717
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_001120.json",
+      "archived_bytes": 32016
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_001152.json",
+      "archived_bytes": 31658
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_001184.json",
+      "archived_bytes": 32057
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_001216.json",
+      "archived_bytes": 31452
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_001248.json",
+      "archived_bytes": 31631
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_001280.json",
+      "archived_bytes": 32248
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_001312.json",
+      "archived_bytes": 32019
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_001344.json",
+      "archived_bytes": 31897
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_001376.json",
+      "archived_bytes": 31633
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_001408.json",
+      "archived_bytes": 31427
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_001440.json",
+      "archived_bytes": 31873
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_001472.json",
+      "archived_bytes": 31871
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_001504.json",
+      "archived_bytes": 33352
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_001536.json",
+      "archived_bytes": 32335
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_001568.json",
+      "archived_bytes": 31710
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_001600.json",
+      "archived_bytes": 32729
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_001632.json",
+      "archived_bytes": 33221
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_001664.json",
+      "archived_bytes": 33011
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_001696.json",
+      "archived_bytes": 30581
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_001728.json",
+      "archived_bytes": 33643
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_001760.json",
+      "archived_bytes": 31673
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_001792.json",
+      "archived_bytes": 32247
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_001824.json",
+      "archived_bytes": 31874
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_001856.json",
+      "archived_bytes": 30554
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_001888.json",
+      "archived_bytes": 33061
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_001920.json",
+      "archived_bytes": 33246
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_001952.json",
+      "archived_bytes": 30997
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_001984.json",
+      "archived_bytes": 31244
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_002016.json",
+      "archived_bytes": 32247
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_002048.json",
+      "archived_bytes": 31461
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_002080.json",
+      "archived_bytes": 32283
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_002112.json",
+      "archived_bytes": 31711
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_002144.json",
+      "archived_bytes": 31734
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_002176.json",
+      "archived_bytes": 31365
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_002208.json",
+      "archived_bytes": 31569
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_002240.json",
+      "archived_bytes": 31839
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_002272.json",
+      "archived_bytes": 31537
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_002304.json",
+      "archived_bytes": 33510
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_002336.json",
+      "archived_bytes": 32051
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_002368.json",
+      "archived_bytes": 34337
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_002400.json",
+      "archived_bytes": 32193
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_002432.json",
+      "archived_bytes": 31730
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_002464.json",
+      "archived_bytes": 33403
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_002496.json",
+      "archived_bytes": 32553
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_002528.json",
+      "archived_bytes": 32096
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_002560.json",
+      "archived_bytes": 31553
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_002592.json",
+      "archived_bytes": 30539
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_002624.json",
+      "archived_bytes": 32067
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_002656.json",
+      "archived_bytes": 32023
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_002688.json",
+      "archived_bytes": 32260
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_002720.json",
+      "archived_bytes": 31880
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_002752.json",
+      "archived_bytes": 32526
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_002784.json",
+      "archived_bytes": 32189
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_002816.json",
+      "archived_bytes": 31097
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_002848.json",
+      "archived_bytes": 31832
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_002880.json",
+      "archived_bytes": 32927
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_002912.json",
+      "archived_bytes": 31643
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_002944.json",
+      "archived_bytes": 31933
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_002976.json",
+      "archived_bytes": 32799
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_003008.json",
+      "archived_bytes": 32623
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_003040.json",
+      "archived_bytes": 32729
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_003072.json",
+      "archived_bytes": 31617
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_003104.json",
+      "archived_bytes": 31925
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_003136.json",
+      "archived_bytes": 32581
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_003168.json",
+      "archived_bytes": 32230
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_003200.json",
+      "archived_bytes": 33338
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_003232.json",
+      "archived_bytes": 31699
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_003264.json",
+      "archived_bytes": 32985
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_003296.json",
+      "archived_bytes": 31901
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_003328.json",
+      "archived_bytes": 31766
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_003360.json",
+      "archived_bytes": 32273
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_003392.json",
+      "archived_bytes": 32229
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_003424.json",
+      "archived_bytes": 32625
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_003456.json",
+      "archived_bytes": 31546
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_003488.json",
+      "archived_bytes": 32194
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_003520.json",
+      "archived_bytes": 31794
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_003552.json",
+      "archived_bytes": 32754
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_003584.json",
+      "archived_bytes": 32844
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_003616.json",
+      "archived_bytes": 31184
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_003648.json",
+      "archived_bytes": 32169
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_003680.json",
+      "archived_bytes": 31770
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_003712.json",
+      "archived_bytes": 31805
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_003744.json",
+      "archived_bytes": 32764
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_003776.json",
+      "archived_bytes": 32752
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_003808.json",
+      "archived_bytes": 32848
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_003840.json",
+      "archived_bytes": 32091
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_003872.json",
+      "archived_bytes": 32866
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_003904.json",
+      "archived_bytes": 32632
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_003936.json",
+      "archived_bytes": 33246
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_003968.json",
+      "archived_bytes": 32339
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_004000.json",
+      "archived_bytes": 30537
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_004032.json",
+      "archived_bytes": 32161
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_004064.json",
+      "archived_bytes": 32168
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_004096.json",
+      "archived_bytes": 31978
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_004128.json",
+      "archived_bytes": 31708
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_004160.json",
+      "archived_bytes": 31344
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_004192.json",
+      "archived_bytes": 31952
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_004224.json",
+      "archived_bytes": 31040
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_004256.json",
+      "archived_bytes": 32779
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_004288.json",
+      "archived_bytes": 32691
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_004320.json",
+      "archived_bytes": 32166
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_004352.json",
+      "archived_bytes": 31551
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_004384.json",
+      "archived_bytes": 33354
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_004416.json",
+      "archived_bytes": 31221
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_004448.json",
+      "archived_bytes": 31377
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_004480.json",
+      "archived_bytes": 31835
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_004512.json",
+      "archived_bytes": 32831
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_004544.json",
+      "archived_bytes": 31910
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_004576.json",
+      "archived_bytes": 32395
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_004608.json",
+      "archived_bytes": 31738
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_004640.json",
+      "archived_bytes": 33052
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_004672.json",
+      "archived_bytes": 33395
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_004704.json",
+      "archived_bytes": 32029
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_004736.json",
+      "archived_bytes": 32694
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_004768.json",
+      "archived_bytes": 32250
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_004800.json",
+      "archived_bytes": 32679
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_004832.json",
+      "archived_bytes": 32783
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_004864.json",
+      "archived_bytes": 32303
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_004896.json",
+      "archived_bytes": 31571
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_004928.json",
+      "archived_bytes": 30929
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_004960.json",
+      "archived_bytes": 32784
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_004992.json",
+      "archived_bytes": 32459
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_005024.json",
+      "archived_bytes": 31041
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_005056.json",
+      "archived_bytes": 30153
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_005088.json",
+      "archived_bytes": 32199
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_005120.json",
+      "archived_bytes": 31557
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_005152.json",
+      "archived_bytes": 32216
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_005184.json",
+      "archived_bytes": 31145
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_005216.json",
+      "archived_bytes": 32230
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_005248.json",
+      "archived_bytes": 31318
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_005280.json",
+      "archived_bytes": 32841
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_005312.json",
+      "archived_bytes": 32336
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_005344.json",
+      "archived_bytes": 31190
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_005376.json",
+      "archived_bytes": 31355
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_005408.json",
+      "archived_bytes": 33030
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_005440.json",
+      "archived_bytes": 31215
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_005472.json",
+      "archived_bytes": 31337
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_005504.json",
+      "archived_bytes": 31789
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_005536.json",
+      "archived_bytes": 32342
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_005568.json",
+      "archived_bytes": 31964
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_005600.json",
+      "archived_bytes": 32617
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_005632.json",
+      "archived_bytes": 31790
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_005664.json",
+      "archived_bytes": 31617
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_005696.json",
+      "archived_bytes": 32136
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_005728.json",
+      "archived_bytes": 31518
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_005760.json",
+      "archived_bytes": 32309
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_005792.json",
+      "archived_bytes": 32450
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_005824.json",
+      "archived_bytes": 32162
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_005856.json",
+      "archived_bytes": 32154
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_005888.json",
+      "archived_bytes": 30794
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_005920.json",
+      "archived_bytes": 32802
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_005952.json",
+      "archived_bytes": 32784
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass1/chunk_005984.json",
+      "archived_bytes": 15129
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_000000.json",
+      "archived_bytes": 33036
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_000032.json",
+      "archived_bytes": 32009
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_000064.json",
+      "archived_bytes": 33124
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_000096.json",
+      "archived_bytes": 31691
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_000128.json",
+      "archived_bytes": 32531
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_000160.json",
+      "archived_bytes": 31834
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_000192.json",
+      "archived_bytes": 33134
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_000224.json",
+      "archived_bytes": 32286
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_000256.json",
+      "archived_bytes": 31771
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_000288.json",
+      "archived_bytes": 32880
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_000320.json",
+      "archived_bytes": 32150
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_000352.json",
+      "archived_bytes": 32905
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_000384.json",
+      "archived_bytes": 32645
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_000416.json",
+      "archived_bytes": 31508
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_000448.json",
+      "archived_bytes": 31664
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_000480.json",
+      "archived_bytes": 30957
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_000512.json",
+      "archived_bytes": 32396
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_000544.json",
+      "archived_bytes": 30935
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_000576.json",
+      "archived_bytes": 32875
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_000608.json",
+      "archived_bytes": 32046
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_000640.json",
+      "archived_bytes": 30665
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_000672.json",
+      "archived_bytes": 32433
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_000704.json",
+      "archived_bytes": 31413
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_000736.json",
+      "archived_bytes": 31920
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_000768.json",
+      "archived_bytes": 31296
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_000800.json",
+      "archived_bytes": 31980
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_000832.json",
+      "archived_bytes": 33257
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_000864.json",
+      "archived_bytes": 31270
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_000896.json",
+      "archived_bytes": 31874
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_000928.json",
+      "archived_bytes": 30844
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_000960.json",
+      "archived_bytes": 31907
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_000992.json",
+      "archived_bytes": 31381
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_001024.json",
+      "archived_bytes": 32435
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_001056.json",
+      "archived_bytes": 32615
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_001088.json",
+      "archived_bytes": 32770
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_001120.json",
+      "archived_bytes": 32898
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_001152.json",
+      "archived_bytes": 33006
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_001184.json",
+      "archived_bytes": 33196
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_001216.json",
+      "archived_bytes": 32115
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_001248.json",
+      "archived_bytes": 31241
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_001280.json",
+      "archived_bytes": 32186
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_001312.json",
+      "archived_bytes": 32633
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_001344.json",
+      "archived_bytes": 30658
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_001376.json",
+      "archived_bytes": 31088
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_001408.json",
+      "archived_bytes": 31979
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_001440.json",
+      "archived_bytes": 32355
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_001472.json",
+      "archived_bytes": 32107
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_001504.json",
+      "archived_bytes": 32972
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_001536.json",
+      "archived_bytes": 31926
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_001568.json",
+      "archived_bytes": 31874
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_001600.json",
+      "archived_bytes": 31937
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_001632.json",
+      "archived_bytes": 34034
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_001664.json",
+      "archived_bytes": 33965
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_001696.json",
+      "archived_bytes": 31295
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_001728.json",
+      "archived_bytes": 32562
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_001760.json",
+      "archived_bytes": 32184
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_001792.json",
+      "archived_bytes": 33013
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_001824.json",
+      "archived_bytes": 32041
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_001856.json",
+      "archived_bytes": 31765
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_001888.json",
+      "archived_bytes": 31535
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_001920.json",
+      "archived_bytes": 32809
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_001952.json",
+      "archived_bytes": 31639
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_001984.json",
+      "archived_bytes": 31427
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_002016.json",
+      "archived_bytes": 30758
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_002048.json",
+      "archived_bytes": 31641
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_002080.json",
+      "archived_bytes": 32090
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_002112.json",
+      "archived_bytes": 32263
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_002144.json",
+      "archived_bytes": 32818
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_002176.json",
+      "archived_bytes": 31185
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_002208.json",
+      "archived_bytes": 32421
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_002240.json",
+      "archived_bytes": 31124
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_002272.json",
+      "archived_bytes": 31646
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_002304.json",
+      "archived_bytes": 32637
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_002336.json",
+      "archived_bytes": 32649
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_002368.json",
+      "archived_bytes": 32818
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_002400.json",
+      "archived_bytes": 30784
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_002432.json",
+      "archived_bytes": 31619
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_002464.json",
+      "archived_bytes": 31621
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_002496.json",
+      "archived_bytes": 31531
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_002528.json",
+      "archived_bytes": 31974
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_002560.json",
+      "archived_bytes": 31482
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_002592.json",
+      "archived_bytes": 31525
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_002624.json",
+      "archived_bytes": 30795
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_002656.json",
+      "archived_bytes": 33993
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_002688.json",
+      "archived_bytes": 32817
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_002720.json",
+      "archived_bytes": 32014
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_002752.json",
+      "archived_bytes": 31947
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_002784.json",
+      "archived_bytes": 31762
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_002816.json",
+      "archived_bytes": 31011
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_002848.json",
+      "archived_bytes": 32516
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_002880.json",
+      "archived_bytes": 33181
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_002912.json",
+      "archived_bytes": 31738
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_002944.json",
+      "archived_bytes": 33057
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_002976.json",
+      "archived_bytes": 34498
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_003008.json",
+      "archived_bytes": 33121
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_003040.json",
+      "archived_bytes": 32190
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_003072.json",
+      "archived_bytes": 32951
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_003104.json",
+      "archived_bytes": 32707
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_003136.json",
+      "archived_bytes": 33055
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_003168.json",
+      "archived_bytes": 31849
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_003200.json",
+      "archived_bytes": 32230
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_003232.json",
+      "archived_bytes": 31657
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_003264.json",
+      "archived_bytes": 32402
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_003296.json",
+      "archived_bytes": 31929
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_003328.json",
+      "archived_bytes": 32639
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_003360.json",
+      "archived_bytes": 32885
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_003392.json",
+      "archived_bytes": 31248
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_003424.json",
+      "archived_bytes": 32243
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_003456.json",
+      "archived_bytes": 31568
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_003488.json",
+      "archived_bytes": 32229
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_003520.json",
+      "archived_bytes": 30675
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_003552.json",
+      "archived_bytes": 31951
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_003584.json",
+      "archived_bytes": 31714
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_003616.json",
+      "archived_bytes": 32759
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_003648.json",
+      "archived_bytes": 31615
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_003680.json",
+      "archived_bytes": 31057
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_003712.json",
+      "archived_bytes": 32729
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_003744.json",
+      "archived_bytes": 32566
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_003776.json",
+      "archived_bytes": 32607
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_003808.json",
+      "archived_bytes": 32485
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_003840.json",
+      "archived_bytes": 30616
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_003872.json",
+      "archived_bytes": 32851
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_003904.json",
+      "archived_bytes": 32682
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_003936.json",
+      "archived_bytes": 31645
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_003968.json",
+      "archived_bytes": 31686
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_004000.json",
+      "archived_bytes": 31528
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_004032.json",
+      "archived_bytes": 31987
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_004064.json",
+      "archived_bytes": 32619
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_004096.json",
+      "archived_bytes": 31938
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_004128.json",
+      "archived_bytes": 32850
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_004160.json",
+      "archived_bytes": 32843
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_004192.json",
+      "archived_bytes": 31783
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_004224.json",
+      "archived_bytes": 31174
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_004256.json",
+      "archived_bytes": 31474
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_004288.json",
+      "archived_bytes": 32544
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_004320.json",
+      "archived_bytes": 31454
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_004352.json",
+      "archived_bytes": 31142
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_004384.json",
+      "archived_bytes": 32975
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_004416.json",
+      "archived_bytes": 32513
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_004448.json",
+      "archived_bytes": 32646
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_004480.json",
+      "archived_bytes": 32718
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_004512.json",
+      "archived_bytes": 32275
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_004544.json",
+      "archived_bytes": 31320
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_004576.json",
+      "archived_bytes": 32603
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_004608.json",
+      "archived_bytes": 32328
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_004640.json",
+      "archived_bytes": 32964
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_004672.json",
+      "archived_bytes": 32025
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_004704.json",
+      "archived_bytes": 31994
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_004736.json",
+      "archived_bytes": 30851
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_004768.json",
+      "archived_bytes": 31302
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_004800.json",
+      "archived_bytes": 31543
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_004832.json",
+      "archived_bytes": 32329
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_004864.json",
+      "archived_bytes": 33508
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_004896.json",
+      "archived_bytes": 30850
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_004928.json",
+      "archived_bytes": 33459
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_004960.json",
+      "archived_bytes": 32791
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_004992.json",
+      "archived_bytes": 32453
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_005024.json",
+      "archived_bytes": 32369
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_005056.json",
+      "archived_bytes": 31481
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_005088.json",
+      "archived_bytes": 32427
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_005120.json",
+      "archived_bytes": 31628
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_005152.json",
+      "archived_bytes": 32888
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_005184.json",
+      "archived_bytes": 31896
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_005216.json",
+      "archived_bytes": 31735
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_005248.json",
+      "archived_bytes": 31086
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_005280.json",
+      "archived_bytes": 32064
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_005312.json",
+      "archived_bytes": 31819
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_005344.json",
+      "archived_bytes": 33643
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_005376.json",
+      "archived_bytes": 31399
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_005408.json",
+      "archived_bytes": 31864
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_005440.json",
+      "archived_bytes": 31875
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_005472.json",
+      "archived_bytes": 32143
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_005504.json",
+      "archived_bytes": 32094
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_005536.json",
+      "archived_bytes": 32000
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_005568.json",
+      "archived_bytes": 32511
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_005600.json",
+      "archived_bytes": 33046
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_005632.json",
+      "archived_bytes": 31315
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_005664.json",
+      "archived_bytes": 32770
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_005696.json",
+      "archived_bytes": 32591
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_005728.json",
+      "archived_bytes": 31628
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_005760.json",
+      "archived_bytes": 32680
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_005792.json",
+      "archived_bytes": 31541
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_005824.json",
+      "archived_bytes": 32494
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_005856.json",
+      "archived_bytes": 31514
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_005888.json",
+      "archived_bytes": 32025
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_005920.json",
+      "archived_bytes": 31768
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_005952.json",
+      "archived_bytes": 32051
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/chunks/pass2/chunk_005984.json",
+      "archived_bytes": 16019
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/manifest.json",
+      "archived_bytes": 2755
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/model_manifest.json",
+      "archived_bytes": 1305
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_judge_v1/summary.json",
+      "archived_bytes": 651
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_000000.json",
+      "archived_bytes": 27540
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_000128.json",
+      "archived_bytes": 30166
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_000256.json",
+      "archived_bytes": 30201
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_000384.json",
+      "archived_bytes": 31660
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_000512.json",
+      "archived_bytes": 30501
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_000640.json",
+      "archived_bytes": 31740
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_000768.json",
+      "archived_bytes": 31704
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_000896.json",
+      "archived_bytes": 30856
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_001024.json",
+      "archived_bytes": 29088
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_001152.json",
+      "archived_bytes": 29422
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_001280.json",
+      "archived_bytes": 28730
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_001408.json",
+      "archived_bytes": 29154
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_001536.json",
+      "archived_bytes": 29062
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_001664.json",
+      "archived_bytes": 28555
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_001792.json",
+      "archived_bytes": 27960
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_001920.json",
+      "archived_bytes": 25676
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_002048.json",
+      "archived_bytes": 26093
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_002176.json",
+      "archived_bytes": 24872
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_002304.json",
+      "archived_bytes": 24580
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_002432.json",
+      "archived_bytes": 23180
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_002560.json",
+      "archived_bytes": 24226
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_002688.json",
+      "archived_bytes": 22951
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_002816.json",
+      "archived_bytes": 23234
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_002944.json",
+      "archived_bytes": 23124
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_003072.json",
+      "archived_bytes": 23469
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_003200.json",
+      "archived_bytes": 23373
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_003328.json",
+      "archived_bytes": 22860
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_003456.json",
+      "archived_bytes": 22486
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_003584.json",
+      "archived_bytes": 21065
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_003712.json",
+      "archived_bytes": 21873
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_003840.json",
+      "archived_bytes": 22179
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_003968.json",
+      "archived_bytes": 30345
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_004096.json",
+      "archived_bytes": 33892
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_004224.json",
+      "archived_bytes": 35965
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_004352.json",
+      "archived_bytes": 35793
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_004480.json",
+      "archived_bytes": 36409
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_004608.json",
+      "archived_bytes": 35286
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_004736.json",
+      "archived_bytes": 36897
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_004864.json",
+      "archived_bytes": 35481
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_004992.json",
+      "archived_bytes": 34991
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_005120.json",
+      "archived_bytes": 34635
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_005248.json",
+      "archived_bytes": 34671
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_005376.json",
+      "archived_bytes": 34173
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_005504.json",
+      "archived_bytes": 34626
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_005632.json",
+      "archived_bytes": 34468
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_005760.json",
+      "archived_bytes": 33810
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/chunks/chunk_005888.json",
+      "archived_bytes": 31035
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/manifest.json",
+      "archived_bytes": 1738
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/summary.json",
+      "archived_bytes": 234
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_m2m100/teacher_candidates.jsonl",
+      "archived_bytes": 3911394
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_000000.json",
+      "archived_bytes": 25263
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_000128.json",
+      "archived_bytes": 24888
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_000256.json",
+      "archived_bytes": 24321
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_000384.json",
+      "archived_bytes": 22453
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_000512.json",
+      "archived_bytes": 24079
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_000640.json",
+      "archived_bytes": 25031
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_000768.json",
+      "archived_bytes": 28484
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_000896.json",
+      "archived_bytes": 25021
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_001024.json",
+      "archived_bytes": 27362
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_001152.json",
+      "archived_bytes": 25407
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_001280.json",
+      "archived_bytes": 24752
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_001408.json",
+      "archived_bytes": 26040
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_001536.json",
+      "archived_bytes": 26368
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_001664.json",
+      "archived_bytes": 25273
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_001792.json",
+      "archived_bytes": 26488
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_001920.json",
+      "archived_bytes": 23452
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_002048.json",
+      "archived_bytes": 19867
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_002176.json",
+      "archived_bytes": 19361
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_002304.json",
+      "archived_bytes": 21670
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_002432.json",
+      "archived_bytes": 16243
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_002560.json",
+      "archived_bytes": 19885
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_002688.json",
+      "archived_bytes": 21882
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_002816.json",
+      "archived_bytes": 16685
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_002944.json",
+      "archived_bytes": 17659
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_003072.json",
+      "archived_bytes": 20166
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_003200.json",
+      "archived_bytes": 19393
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_003328.json",
+      "archived_bytes": 18495
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_003456.json",
+      "archived_bytes": 19435
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_003584.json",
+      "archived_bytes": 20669
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_003712.json",
+      "archived_bytes": 19322
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_003840.json",
+      "archived_bytes": 18822
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_003968.json",
+      "archived_bytes": 24358
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_004096.json",
+      "archived_bytes": 26316
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_004224.json",
+      "archived_bytes": 25669
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_004352.json",
+      "archived_bytes": 25321
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_004480.json",
+      "archived_bytes": 26805
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_004608.json",
+      "archived_bytes": 26365
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_004736.json",
+      "archived_bytes": 25285
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_004864.json",
+      "archived_bytes": 25593
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_004992.json",
+      "archived_bytes": 28867
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_005120.json",
+      "archived_bytes": 28369
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_005248.json",
+      "archived_bytes": 30100
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_005376.json",
+      "archived_bytes": 31053
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_005504.json",
+      "archived_bytes": 29311
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_005632.json",
+      "archived_bytes": 31008
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_005760.json",
+      "archived_bytes": 32560
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/chunks/chunk_005888.json",
+      "archived_bytes": 28827
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/manifest.json",
+      "archived_bytes": 1834
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/summary.json",
+      "archived_bytes": 237
+    },
+    {
+      "path": "reports/diagnostics/fourlang/zh_uz_targeted_v1_madlad/teacher_candidates.jsonl",
+      "archived_bytes": 3701380
+    },
+    {
+      "path": "reports/diagnostics/zh_uz_deepseek_teacher_pilot_audit_100.jsonl",
+      "archived_bytes": 43485
+    },
+    {
+      "path": "reports/diagnostics/zh_uz_exp1_direct_v1/predictions.jsonl",
+      "archived_bytes": 44782
+    },
+    {
+      "path": "reports/diagnostics/zh_uz_exp1_direct_v1/summary.json",
+      "archived_bytes": 816
+    },
+    {
+      "path": "reports/diagnostics/zh_uz_flores_relaxed_8k_ep3_direct_v1/predictions.jsonl",
+      "archived_bytes": 44559
+    },
+    {
+      "path": "reports/diagnostics/zh_uz_flores_relaxed_8k_ep3_direct_v1/summary.json",
+      "archived_bytes": 858
+    },
+    {
+      "path": "reports/experiments/six_pair_baseline_v1/summary.json",
+      "archived_bytes": 6445
+    },
+    {
+      "path": "reports/experiments/six_pair_baseline_v1/summary.md",
+      "archived_bytes": 915
+    },
+    {
+      "path": "reports/experiments/zh_uz_flores_like_v1/flores_profile.json",
+      "archived_bytes": 1903
+    },
+    {
+      "path": "reports/experiments/zh_uz_flores_like_v1/source_calibration_capacity.json",
+      "archived_bytes": 3074
+    },
+    {
+      "path": "reports/experiments/zh_uz_flores_like_v1/source_selection.json",
+      "archived_bytes": 3788
+    },
+    {
+      "path": "reports/experiments/zh_uz_flores_like_v1/source_staging.json",
+      "archived_bytes": 3916
+    },
+    {
+      "path": "reports/experiments/zh_uz_flores_like_v1/validation.json",
+      "archived_bytes": 61
+    },
+    {
+      "path": "reports/experiments/zh_uz_flores_like_v1/wikipedia_extension.json",
+      "archived_bytes": 1099
+    },
+    {
+      "path": "reports/experiments/zh_uz_flores_like_v2/clean_minor_manual_audit_100.jsonl",
+      "archived_bytes": 97289
+    },
+    {
+      "path": "reports/experiments/zh_uz_flores_like_v2/flores_profile.json",
+      "archived_bytes": 1903
+    },
+    {
+      "path": "reports/experiments/zh_uz_flores_like_v2/source_selection.json",
+      "archived_bytes": 3791
+    },
+    {
+      "path": "reports/experiments/zh_uz_flores_like_v2/source_staging.json",
+      "archived_bytes": 3916
+    },
+    {
+      "path": "reports/experiments/zh_uz_flores_like_v2/teacher_calibration_capacity.json",
+      "archived_bytes": 1021
+    },
+    {
+      "path": "reports/experiments/zh_uz_flores_like_v2/teacher_calibration_diagnostics.json",
+      "archived_bytes": 8979
+    },
+    {
+      "path": "reports/experiments/zh_uz_flores_like_v2/validation.json",
+      "archived_bytes": 61
+    },
+    {
+      "path": "reports/experiments/zh_uz_flores_relaxed_8k/assembly.json",
+      "archived_bytes": 1640
+    },
+    {
+      "path": "reports/experiments/zh_uz_flores_relaxed_8k/validation.json",
+      "archived_bytes": 61
+    },
+    {
+      "path": "scripts/model_management/freeze_lora_specialist.py",
+      "archived_bytes": 4048
+    },
+    {
+      "path": "scripts/pipeline_v3/build_clean_zh_uz_v4.py",
+      "archived_bytes": 9341
+    },
+    {
+      "path": "scripts/pipeline_v3/freeze_acceptance_v3.py",
+      "archived_bytes": 10587
+    },
+    {
+      "path": "scripts/pipeline_v3/preview_acceptance_v3_sources.py",
+      "archived_bytes": 9757
+    },
+    {
+      "path": "scripts/pipeline_v3/preview_manual_zh_uz_isolation.py",
+      "archived_bytes": 11828
+    }
+  ],
+  "source_project_modified": false,
+  "note": "Absent paths may have been moved; not proof of permanent deletion. Weight files were not included in old evidence archive."
+}

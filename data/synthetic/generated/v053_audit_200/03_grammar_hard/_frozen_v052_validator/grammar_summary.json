@@ -1,0 +1,19 @@
+{
+  "validator_version": "0.5.2",
+  "frozen_parent_validator": "0.5.1",
+  "total": 100,
+  "frozen_rows": 70,
+  "new_rows": 30,
+  "accepted": 100,
+  "rejected": 0,
+  "accept_rate": 1.0,
+  "new_accepted": 30,
+  "new_rejected": 0,
+  "new_frame_distribution": {
+    "WAIT_AT_PLACE": 10,
+    "WAIT_PERSON": 10,
+    "CALL_PERSON": 10
+  },
+  "reject_reasons": {},
+  "rejected_by_language": {}
+}

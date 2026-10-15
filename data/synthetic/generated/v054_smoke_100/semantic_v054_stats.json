@@ -1,0 +1,38 @@
+{
+  "generator_version": "0.5.4",
+  "frozen_parent": "0.5.3",
+  "samples": 100,
+  "seed": 2059,
+  "frozen_parent_rows": 70,
+  "new_rows": 30,
+  "new_ratio": 0.3,
+  "new_generation_attempts": 32,
+  "contract_errors": 0,
+  "new_frame_distribution": {
+    "NEED_OBJECT": 15,
+    "LOSE_OBJECT": 15
+  },
+  "new_verb_distribution": {
+    "NEED": 15,
+    "LOSE": 15
+  },
+  "new_feature_distribution": {
+    "NEED_OBJECT|future|pos": 4,
+    "LOSE_OBJECT|future|pos": 7,
+    "LOSE_OBJECT|future|neg": 8,
+    "NEED_OBJECT|present|neg": 3,
+    "NEED_OBJECT|future|neg": 4,
+    "NEED_OBJECT|present|pos": 4
+  },
+  "tense_policy": {
+    "NEED_OBJECT": [
+      "present",
+      "future"
+    ],
+    "LOSE_OBJECT": [
+      "future"
+    ]
+  },
+  "past_generation_allowed": false,
+  "lose_present_generation_allowed": false
+}

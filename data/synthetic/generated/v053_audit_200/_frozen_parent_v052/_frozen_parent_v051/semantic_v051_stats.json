@@ -1,0 +1,57 @@
+{
+  "generator_version": "0.5.1",
+  "renderer_version": "0.5.1",
+  "frozen_core_version": "0.4.4.1",
+  "seed": 2057,
+  "samples": 70,
+  "base_rows": 56,
+  "new_rows": 14,
+  "new_ratio": 0.2,
+  "counts": {
+    "frame": {
+      "TRANSITIVE_CLOCK": 8,
+      "MOTION_TIME": 8,
+      "TRANSITIVE": 8,
+      "SEE_OBJECT": 7,
+      "TAKE_OBJECT": 7,
+      "MOTION_DESTINATION": 7,
+      "MOTION_CLOCK": 7,
+      "WANT_OBJECT": 6,
+      "TRANSITIVE_TIME": 6,
+      "INTRANSITIVE_TIME": 3,
+      "INTRANSITIVE": 2,
+      "WHERE_PLACE": 1
+    },
+    "verb": {
+      "GO": 11,
+      "COME": 9,
+      "SEE": 7,
+      "TAKE": 7,
+      "ARRIVE": 7,
+      "WANT": 6,
+      "READ": 5,
+      "DRINK": 5,
+      "EAT": 5,
+      "FIND": 4,
+      "BUY": 3,
+      "__NONE__": 1
+    },
+    "new_frame": {
+      "SEE_OBJECT": 7,
+      "TAKE_OBJECT": 7
+    },
+    "new_verb": {
+      "SEE": 7,
+      "TAKE": 7
+    },
+    "tense": {
+      "future": 50,
+      "present": 19,
+      "__NONE__": 1
+    },
+    "polarity": {
+      "pos": 44,
+      "neg": 26
+    }
+  }
+}

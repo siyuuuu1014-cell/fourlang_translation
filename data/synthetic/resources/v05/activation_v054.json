@@ -1,0 +1,56 @@
+{
+  "activation_version": "0.5.4",
+  "frozen_parent": "0.5.3",
+  "status": "validated",
+  "enabled_verbs": [
+    "LOSE",
+    "NEED"
+  ],
+  "enabled_frames": [
+    "LOSE_OBJECT",
+    "NEED_OBJECT"
+  ],
+  "blocked_verbs": [
+    "LEAVE",
+    "RETURN"
+  ],
+  "blocked_frames": [
+    "LEAVE_PLACE",
+    "RETURN_PLACE"
+  ],
+  "constraints": {
+    "NEED_OBJECT": [
+      "language_specific_need_construction",
+      "ru_experiencer_dative",
+      "ru_object_nominative",
+      "ru_predicative_agreement",
+      "uz_experiencer_dative",
+      "uz_object_bare"
+    ],
+    "LOSE_OBJECT": [
+      "future_only_generation",
+      "present_generation_not_allowed",
+      "past_not_yet_enabled",
+      "ru_object_accusative",
+      "uz_object_accusative"
+    ]
+  },
+  "tense_policy": {
+    "NEED_OBJECT": [
+      "present",
+      "future"
+    ],
+    "LOSE_OBJECT": [
+      "future"
+    ]
+  },
+  "generation_policy": {
+    "v054_generation_allowed": true,
+    "only_enabled_frames": true,
+    "past_generation_allowed": false,
+    "lose_present_generation_allowed": false,
+    "lose_future_generation_allowed": true
+  },
+  "warnings": [],
+  "errors": []
+}

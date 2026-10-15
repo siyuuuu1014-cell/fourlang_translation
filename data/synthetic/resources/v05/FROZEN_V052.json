@@ -1,0 +1,32 @@
+{
+  "version": "0.5.2",
+  "status": "frozen",
+  "frozen_parent": "0.5.1",
+  "enabled_verbs": [
+    "CALL",
+    "WAIT"
+  ],
+  "enabled_frames": [
+    "CALL_PERSON",
+    "WAIT_PERSON",
+    "WAIT_AT_PLACE"
+  ],
+  "deterministic_validation": {
+    "compatibility": "200/200",
+    "hard_semantic": "200/200",
+    "grammar_hard": "200/200"
+  },
+  "qwen_targeted_audit": {
+    "samples": 40,
+    "raw_accepted": 39,
+    "raw_rejected": 1,
+    "parse_errors": 0,
+    "confirmed_real_errors": 0,
+    "judge_false_rejects": 1,
+    "confirmed_accepted": 40
+  },
+  "known_judge_behavior": [
+    "Uzbek present-future morphology may be misclassified",
+    "Qwen may occasionally reverse semantic participant roles"
+  ]
+}

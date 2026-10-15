@@ -112,6 +112,10 @@ data/benchmark/
 reports/pipeline/
 results/
 
+# Isolated external-data cleaning outputs (not part of active pipelines)
+data/supplemental_staging/
+reports/supplemental_staging/
+
 # HuggingFace cache
 data/.hf_datasets_cache/
 .hf_datasets_cache/

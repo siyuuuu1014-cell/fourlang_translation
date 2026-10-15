@@ -164,7 +164,11 @@ def infer(tasks, output, signature, config, models, batch_size):
                         diag.log(f"Loading {role}: {path}")
                         diag.flow.set_seed(2026)
                         tokenizer, model = diag.flow.load_model(
-                            {"family": "nllb", "path": str(path)},
+                            {
+                                "family": "nllb",
+                                "path": str(path),
+                                "require_local_artifact": True,
+                            },
                             src,
                             tgt,
                             training=True,
@@ -214,6 +218,16 @@ def run(args):
     config = diag.load_config(args.config)
     paths = [diag.project_path(p) for p in DEFAULT_CORPORA + args.extra_corpus]
     scan = overlap(sources, paths)
+    pilot_manifest = diag.read_json(directory / "manifest.json")
+    frozen_near_check = pilot_manifest.get("lexical_near_duplicate_check")
+    if frozen_near_check:
+        if (
+            frozen_near_check.get("protected_overlap_after") != 0
+            or frozen_near_check.get("within_selection_overlap_after") != 0
+        ):
+            raise ValueError("Frozen pilot near-duplicate contract is not clean.")
+        scan["lexical_near_duplicate_check"] = frozen_near_check
+        scan["semantic_near_duplicate_check"] = "NOT_CLAIMED"
     models = {role: diag.project_path(getattr(args, role)) for role in ("exp1", "exp2")}
     output.mkdir(parents=True, exist_ok=True)
     with FileLock(str(output / ".lock"), timeout=0):
@@ -289,7 +303,9 @@ def run(args):
                 "human_scores": "PENDING",
                 "training_started": False,
                 "source_language_review": "NOT_CERTIFIED",
-                "near_duplicate_check": "NOT_PERFORMED",
+                "near_duplicate_check": (
+                    frozen_near_check or "NOT_PERFORMED"
+                ),
                 "direction_counts": dict(
                     Counter(f"{r['src_lang']}-{r['tgt_lang']}" for r in tasks)
                 ),

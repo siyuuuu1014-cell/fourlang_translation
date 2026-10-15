@@ -1,0 +1,59 @@
+﻿{
+  "version": "0.5.3",
+  "status": "frozen",
+  "frozen_parent": "0.5.2",
+  "enabled_verbs": [
+    "BRING",
+    "GIVE"
+  ],
+  "enabled_frames": [
+    "BRING_OBJECT_DESTINATION",
+    "GIVE_OBJECT_PERSON"
+  ],
+  "deterministic_validation": {
+    "formal_samples": 200,
+    "compatibility": {
+      "accepted": 200,
+      "rejected": 0
+    },
+    "hard_semantic": {
+      "accepted": 200,
+      "rejected": 0
+    },
+    "grammar_hard": {
+      "accepted": 200,
+      "rejected": 0
+    }
+  },
+  "qwen_targeted_audit": {
+    "samples": 40,
+    "language_calls": 160,
+    "raw_accepted": 38,
+    "raw_rejected": 2,
+    "parse_errors": 0,
+    "confirmed_real_errors": 0,
+    "judge_false_rejects": 2,
+    "confirmed_accepted": 40
+  },
+  "new_capability_constraints": {
+    "GIVE_OBJECT_PERSON": [
+      "subject_must_not_equal_person",
+      "speaker_group_overlap_not_allowed",
+      "object_person_roles_must_not_swap",
+      "ru_object_accusative",
+      "ru_person_dative",
+      "uz_object_accusative",
+      "uz_person_dative"
+    ],
+    "BRING_OBJECT_DESTINATION": [
+      "object_destination_roles_must_not_swap",
+      "destination_must_be_directional",
+      "ru_object_accusative",
+      "uz_object_accusative"
+    ]
+  },
+  "known_judge_behavior": [
+    "Qwen may incorrectly classify Uzbek present-future negative morphology as present-only.",
+    "Qwen corrections must not be treated as ground truth when they change the original semantic frame."
+  ]
+}

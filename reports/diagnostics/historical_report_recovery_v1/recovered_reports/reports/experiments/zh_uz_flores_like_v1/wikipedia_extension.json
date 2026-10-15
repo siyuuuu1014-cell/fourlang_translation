@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "output": "/root/autodl-tmp/fourlang_translation/data/pipeline_v2/zh_uz_flores_like_v1/wikipedia_extension.parquet",
+  "rows": 23000,
+  "by_language": {
+    "uz": 8000,
+    "zh": 15000
+  },
+  "targets": {
+    "zh": 15000,
+    "uz": 8000
+  },
+  "shortages": {},
+  "source_state": {
+    "wikipedia_flores_like_zh": {
+      "status": "completed",
+      "documents_seen": 92,
+      "accepted": 15000
+    },
+    "wikipedia_flores_like_uz": {
+      "status": "completed",
+      "documents_seen": 100,
+      "accepted": 8000
+    }
+  },
+  "rejections": {
+    "wikipedia_flores_like_uz:CITATION_DEBRIS": 1,
+    "wikipedia_flores_like_uz:DUPLICATE_OR_PREVIOUS_SOURCE": 95,
+    "wikipedia_flores_like_uz:TOO_LONG": 39,
+    "wikipedia_flores_like_uz:TOO_MANY_DIGITS": 24,
+    "wikipedia_flores_like_uz:TOO_SHORT": 1168,
+    "wikipedia_flores_like_uz:URL_EMAIL_OR_MARKUP": 8,
+    "wikipedia_flores_like_uz:UZ_LANGUAGE_SIGNAL": 1445
+  },
+  "output_sha256": "edff7ac1becb991ee10d7f5ed759d18363234a5def23860c0d30d2c200e95a02",
+  "base_candidate_pool_modified": false
+}

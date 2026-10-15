@@ -1,0 +1,216 @@
+{
+  "direction": "uz-ru",
+  "token_matches": 30,
+  "rows": [
+    {
+      "id": 1,
+      "source": "Uchrashuv soat to'qqizda boshlanadi.",
+      "reference": "Встреча начинается в девять часов.",
+      "evaluation_call": "Выбор начинается в полном порядке.",
+      "direct_call": "Выбор начинается в полном порядке."
+    },
+    {
+      "id": 2,
+      "source": "Men bugun maktabga bormayman.",
+      "reference": "Я сегодня не пойду в школу.",
+      "evaluation_call": "Я сейчас не хожу в школу.",
+      "direct_call": "Я сейчас не хожу в школу."
+    },
+    {
+      "id": 3,
+      "source": "Iltimos, menga bir stakan suv bering.",
+      "reference": "Пожалуйста, дайте мне стакан воды.",
+      "evaluation_call": "Пожалуйста, попробуйте немного воды.",
+      "direct_call": "Пожалуйста, попробуйте немного воды."
+    },
+    {
+      "id": 4,
+      "source": "Bu kitob qancha turadi?",
+      "reference": "Сколько стоит эта книга?",
+      "evaluation_call": "Сколько стоит эта книга?",
+      "direct_call": "Сколько стоит эта книга?"
+    },
+    {
+      "id": 5,
+      "source": "Men uchta olma sotib oldim.",
+      "reference": "Я купил три яблока.",
+      "evaluation_call": "Мне удалось стать тремя.",
+      "direct_call": "Мне удалось стать тремя."
+    },
+    {
+      "id": 6,
+      "source": "U kecha menga telefon qildi.",
+      "reference": "Он вчера мне позвонил.",
+      "evaluation_call": "Он позвонил мне.",
+      "direct_call": "Он позвонил мне."
+    },
+    {
+      "id": 7,
+      "source": "Biz ertaga ertalab yo'lga chiqamiz.",
+      "reference": "Мы отправимся завтра утром.",
+      "evaluation_call": "Мы хотим быстро откладывать.",
+      "direct_call": "Мы хотим быстро откладывать."
+    },
+    {
+      "id": 8,
+      "source": "Iltimos, derazani ochmang.",
+      "reference": "Пожалуйста, не открывайте окно.",
+      "evaluation_call": "Итак, я хочу открыть дверь.",
+      "direct_call": "Итак, я хочу открыть дверь."
+    },
+    {
+      "id": 9,
+      "source": "Shifoxona bank yonida joylashgan.",
+      "reference": "Больница находится рядом с банком.",
+      "evaluation_call": "Шифкосона существует в банке.",
+      "direct_call": "Шифкосона существует в банке."
+    },
+    {
+      "id": 10,
+      "source": "Men kalitni uyda unutib qoldirdim.",
+      "reference": "Я забыл ключ дома.",
+      "evaluation_call": "Я забыл о ней в ночь.",
+      "direct_call": "Я забыл о ней в ночь."
+    },
+    {
+      "id": 11,
+      "source": "Agar yomg'ir yog'sa, biz bog'ga bormaymiz.",
+      "reference": "Если пойдёт дождь, мы не пойдём в парк.",
+      "evaluation_call": "Если это правда, то мы не боимся.",
+      "direct_call": "Если это правда, то мы не боимся."
+    },
+    {
+      "id": 12,
+      "source": "Men Toshkentga chipta sotib olmoqchiman.",
+      "reference": "Я хочу купить билет до Ташкента.",
+      "evaluation_call": "Мне нужен чип.",
+      "direct_call": "Мне нужен чип."
+    },
+    {
+      "id": 13,
+      "source": "Poyezd tushdan keyin soat 3 da yetib keladi.",
+      "reference": "Поезд прибудет в 3 часа дня.",
+      "evaluation_call": "После запуска завершится 3 часа.",
+      "direct_call": "После запуска завершится 3 часа."
+    },
+    {
+      "id": 14,
+      "source": "Bu xonada issiq suv yo'q.",
+      "reference": "В этой комнате нет горячей воды.",
+      "evaluation_call": "В мире нет горячей воды.",
+      "direct_call": "В мире нет горячей воды."
+    },
+    {
+      "id": 15,
+      "source": "Iltimos, manzilni menga yuboring.",
+      "reference": "Пожалуйста, отправьте мне адрес.",
+      "evaluation_call": "Отправьте мне адрес.",
+      "direct_call": "Отправьте мне адрес."
+    },
+    {
+      "id": 16,
+      "source": "Men allaqachon nonushta qildim.",
+      "reference": "Я уже позавтракал.",
+      "evaluation_call": "Я только что проснулся.",
+      "direct_call": "Я только что проснулся."
+    },
+    {
+      "id": 17,
+      "source": "U hali qaytib kelmadi.",
+      "reference": "Он ещё не вернулся.",
+      "evaluation_call": "Он не вернулся.",
+      "direct_call": "Он не вернулся."
+    },
+    {
+      "id": 18,
+      "source": "Bu mening telefonim emas.",
+      "reference": "Это не мой телефон.",
+      "evaluation_call": "Это не мой телефон.",
+      "direct_call": "Это не мой телефон."
+    },
+    {
+      "id": 19,
+      "source": "Iltimos, sekinroq gapiring.",
+      "reference": "Пожалуйста, говорите медленнее.",
+      "evaluation_call": "Давайте поговорим немного раньше.",
+      "direct_call": "Давайте поговорим немного раньше."
+    },
+    {
+      "id": 20,
+      "source": "Men bu gapni tushunmayapman.",
+      "reference": "Я не понимаю это предложение.",
+      "evaluation_call": "Я не понимаю этого вопроса.",
+      "direct_call": "Я не понимаю этого вопроса."
+    },
+    {
+      "id": 21,
+      "source": "Biz o'n daqiqa kutishimiz kerak.",
+      "reference": "Нам нужно подождать десять минут.",
+      "evaluation_call": "Нам нужно немного расслабиться.",
+      "direct_call": "Нам нужно немного расслабиться."
+    },
+    {
+      "id": 22,
+      "source": "Do'kon kechqurun soat sakkizda yopiladi.",
+      "reference": "Магазин закрывается в восемь часов вечера.",
+      "evaluation_call": "Закрывается восемь часов.",
+      "direct_call": "Закрывается восемь часов."
+    },
+    {
+      "id": 23,
+      "source": "Iltimos, chapga buriling, keyin to'g'ri yuring.",
+      "reference": "Пожалуйста, поверните налево, затем идите прямо.",
+      "evaluation_call": "Сначала перемещайтесь, затем вернитесь.",
+      "direct_call": "Сначала перемещайтесь, затем вернитесь."
+    },
+    {
+      "id": 24,
+      "source": "Bola uxlayapti.",
+      "reference": "Ребёнок спит.",
+      "evaluation_call": "Она спит.",
+      "direct_call": "Она спит."
+    },
+    {
+      "id": 25,
+      "source": "Men har kuni ishga avtobusda boraman.",
+      "reference": "Я каждый день езжу на работу на автобусе.",
+      "evaluation_call": "Я каждый день ежу на автобусе.",
+      "direct_call": "Я каждый день ежу на автобусе."
+    },
+    {
+      "id": 26,
+      "source": "Bu kiyim juda katta.",
+      "reference": "Эта одежда слишком большая.",
+      "evaluation_call": "Это огромное дерево.",
+      "direct_call": "Это огромное дерево."
+    },
+    {
+      "id": 27,
+      "source": "Menga faqat ikkita chipta kerak.",
+      "reference": "Мне нужны только два билета.",
+      "evaluation_call": "Мне нужны только два чипа.",
+      "direct_call": "Мне нужны только два чипа."
+    },
+    {
+      "id": 28,
+      "source": "Iltimos, avval qo'lingizni yuving, keyin ovqatlaning.",
+      "reference": "Пожалуйста, сначала вымойте руки, потом ешьте.",
+      "evaluation_call": "Давайте похвалим руки, потом похвалим.",
+      "direct_call": "Давайте похвалим руки, потом похвалим."
+    },
+    {
+      "id": 29,
+      "source": "Yo'l yopilgani uchun avtobus kechikdi.",
+      "reference": "Автобус опоздал, потому что дорога была закрыта.",
+      "evaluation_call": "Автобус был закрыт.",
+      "direct_call": "Автобус был закрыт."
+    },
+    {
+      "id": 30,
+      "source": "Bu do'kon yakshanba kuni ochilmaydi.",
+      "reference": "Этот магазин не работает по воскресеньям.",
+      "evaluation_call": "Этот ключ не открывается до начала.",
+      "direct_call": "Этот ключ не открывается до начала."
+    }
+  ]
+}

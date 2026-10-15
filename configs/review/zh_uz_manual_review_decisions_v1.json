@@ -1,0 +1,121 @@
+{
+  "schema_version": 1,
+  "status": "MANUAL_REVIEW_DECISIONS_NOT_APPLIED",
+  "scope": {
+    "final_review_packet": "zh_uz_semantic_adjudication_v2/final_review_packet.json",
+    "supplement_results": "zh_uz_semantic_adjudication_v2/supplement_results.jsonl",
+    "unique_review_ids": 114
+  },
+  "summary": {
+    "isolate": 76,
+    "protect_from_automatic_isolation": 5,
+    "leave_unchanged_pending_native_or_domain_review": 33
+  },
+  "safety": {
+    "training_started": false,
+    "training_data_written": false,
+    "decisions_applied": false,
+    "basis": "Conservative manual semantic review of directly observable omissions, additions, wrong-language output, number/unit/entity errors, reversals, and severe terminology errors. This is not native-speaker certification."
+  },
+  "isolate_review_ids": [
+    "0057f5f64be77e38c0e8201e5cb3cc2de8d565efff87b5f97c934294a7b86fa7",
+    "0168f8afc19e9882a96ddd956143b489b0d75753a315c11b5210d6c7fa23091b",
+    "017a00d90d532a0ffd5f0f28bc5ea33bd900ca403727b1704aaef00e7e50bffd",
+    "023622dadc007bd6352412f0641420af91d0ebe8d35d64f41dd87e8b19400697",
+    "0322e02113170764fad282ff2c2d25774d9355a5979e086d772b303d5d7e758e",
+    "03fdf4599fa733e2cf03a3fca29712d90399b83a6ac70ff9f11a37d7abad472d",
+    "03fe3e22e2f3914bf59616bb3f22a5028c6e9d548720aa660396633b615099b3",
+    "045007fc835f44bde8dec996a3476b2ae2960f116d66543d60f93529551a86bf",
+    "051e1d7727a22eb6d4c51a056f634c776b477351efa0e05de5a0322bc47c36a1",
+    "0523f40c524f9e5dbad1a08952a832eb45784776e3093076fef6410717fedf2c",
+    "0550ab52efdef7f1e6af8efd39b6fd6982385057a60eeb9ee041a9f668b86795",
+    "0c090fcb9515b6a26c6fd46eb26cd56868cb08f2d1246cf0021ef3b851829e2d",
+    "0f24defb2d63c0c00bb07d966d06d0a08fc380395a23f4c0730b50d9bd6ef094",
+    "11b751389be5cc3a6e61bd0296c587840293eb53e881b82f6cfbc9d96a14bf50",
+    "120fed8086b66b90098cbc06490af4fa64e733354c95955a602220391a6dac87",
+    "1e5a6d6a82f9bce0fa877d761d7293798a151ad8f0471666a31d4107c36826ed",
+    "20cc263797ccb5b764287a9eccf94a404994414e862d5684a70a8b488406033c",
+    "25164b1d963d13755ea1f9ad65af83d744f5f342a34fe44a600a526cb58f6ff2",
+    "2558c41216816bf36e996da1998692be74c66479ba0f1da39b53315f53d88f04",
+    "2649d5de88588ca519fe0c8a65323984d66c1ba5bee07488f668c5fb7e79d93a",
+    "30adb7d7a9f72f8e4d3a518bb4ecd78c65fcc66ed05b8558e6e378534aa9fef5",
+    "348de904f418e7a5839d5e2cf2a9170f17cdc2ba115ae1d788ef44823dd9db48",
+    "35da8554207e0ac5e0ffa46c83514a7db22d9b9a00b79b43afe2e66c50e3626f",
+    "37704279c863e6275b42e2681a0c1034e0b5b6d9fe344857ecbdcf25d5e1fd0e",
+    "464aeb8cb8064246fb660a13b80f3de97a0f0a0418567e409f8bf5c7a749fbef",
+    "502844e07f6163f27606bbef6c522797cdf97552bb5689b3dac1794786ec8efb",
+    "510adab825b8e155ef61748faed028bb1c4140096f62f601d4df220543431156",
+    "57cc73a541a2ee3deb4797a6f08524b62d79c90042f45b2ba7818f950b51841e",
+    "58a7ea75ff13447a2f02b453820e42d31f27a0bc96c6858adedec068ab107ec3",
+    "59e86840db683f0eb2551ea7f511f23e75af8fe7760d22f893cb9f3b4c7e4852",
+    "5dfe0265bd31e711a0cc385fab42f3ec5cfd90f7457120333828b9ad7f9f1564",
+    "5ff207a9a3079f3dad02a18693e5e1d50bd20191aeee9d30048955c40d752c22",
+    "6141e519d1e1012bcca36d3772023c467c8f4886f5b34d1ae3560fd96b585746",
+    "63da7c5776931bc7d55f98ace7518b77bc7841bad0d2b1500968ab657dd240eb",
+    "6425bfeee2127378ec9f766a504eaf8952a25356ff0efb894caaea09cfe035c6",
+    "6533e02f0dd5daa34d0477e66c250d16c71309f62210de1ad7823ac48a3a6753",
+    "6634ed82e84e1f1fe1346709ced083a56e5d7e07e4c3bd6d833f4093db51b873",
+    "6f9f8c70b6b23441e10dd31aba11257a0657b7a864b3aa4ab2dc90e5d6ee7a58",
+    "7264585121ca7f2094856e2de6aa3f7579f321e0ad31ea0f42659f19a0a6daa8",
+    "760385e97a7f3cc88b87a776e624891dbef19ef56a582132d00192ed48d7afb6",
+    "7b6bb3d936927cd21e7c877d9613277d42f34159df34b371208cd7b3646771e2",
+    "82064fbde904a6285d8517bf20e0952613771c95c831ee9e938261d4adc43909",
+    "8258c75a8a8f5d06e5a30bf739f01731d656da48131f4dc40a5572e5afc1d47c",
+    "84ea1ae67d28190c9a69d96bdff553e9fea6fab05a9561c6b33641103a018878",
+    "87954508dd691411fe26b98fc0bedb47ef02230c79ca75d79f95b7a73c763678",
+    "8e29ec1a93c855f793a49228897368973788a4a7bacaecd3b0a4203484ed4f58",
+    "9062b37f06ec1fd9c7f36134546685dd149a7ea50dedf3146b5442ee8c03aa33",
+    "955f85c4720d8665c130af7ded9e70204c3d1b2a8955cae4bf72f0ef435ad440",
+    "961641276cac9b97511037ead9a84e76a95331e420f2694b63c50c34d0b9721a",
+    "968528cb85c56bea3384e1c733dfbfeadf7b7ae063f60314578eb96128ba8b75",
+    "9890658808931d6a81eafd5fea28dc6fe59111be6fa962bb69369a81cf046527",
+    "9b46252a1dbb1220b41d066be6a76d9345e9bae2f5119a200a828def71adf9b1",
+    "9d5aece713f11613b6c6b8f0bca21ded66d671e96ab62f7b9c5f8c83f37b648c",
+    "a462796e9ce7ae3b2f9d516eff721ee65aa211d04f4d1776757433f07236e7f0",
+    "a8f068e10ba3eb627e5b73a03f0e9f487089d1ed20e6eb2ed5db0f42d3a6312f",
+    "aaca803b5a5c2c8f6dd4dcfe90a58a6e5a12aca8d55532ab01158cfc4a16c05d",
+    "b208c5438d45595e084d2fd61df84a6886d9a5b82e7a078ec04f7d59d7c7007f",
+    "b42eea6b49293919db49d83dafeb882a9118292288f5f815196ddc395badd007",
+    "b991f1025a1a79c7fd5909379c2f0c1f041748fdc6bf9a0db47c7a1bb9c1ec8b",
+    "bbb42d0a3dc0c33d276c3d3f1b9fd94ec234ae9765cc7482950d04a67d3f5e2e",
+    "bc86033b70df394b3bd3404dcff1447c60a818951048d3bbf6f8a9fda2e1cd59",
+    "bdc5b71c704dc91ee86c6c121b73dc53853cdfd4890343d5583448c7c47fec42",
+    "bffbdf00d9a8baf7511f364f23e2ae751274c121b7d0e012ac7fcb37a98718cd",
+    "c4a6dc368831a541d8a9f263fb47cfac50d6f87ef560e7da7a00765693f712fc",
+    "caae47f154c8f9e6c9a0dd18582cc1dc10ed6fc515f6bda2c8a31912f9050bde",
+    "cc0dde573bcd1d7f52edcf01045bc35cd04119a5a1c3597c581689049304426c",
+    "cfe391bf952c71b1b227e775532f09be980ac1a81b0866e7bf34f682e5fceb50",
+    "d07bcb1ece0dd8abe6bddb58009eb54cbcee9ed6deb9d9dfdb26368073f98282",
+    "d0a9ce357243db1f92586e835c8d39169fa7a525e44d6f72ee6744364edb2d85",
+    "e6000e0d3e94e851f68ef57bb5b835a1be148353a36b12e2204c9bb6e2f74389",
+    "e6b0b055f26a6c74087f4fc11e61a5aaad1a43519dc353f9c620e03153882b9a",
+    "e7b5d54fe97a3e9458ed431704c78c5dd3f897b382b1adf202cfe46640c82fbd",
+    "fa21da757698a80d245a2ffb1bbfbae647016b426e897e5e463ea6055adad880",
+    "fcd6bdfc153dd7cd084ca36e4c0aff6c5e99dc00a0ab75dd8d68d9d180733097",
+    "fecf389bbd797ff17821de9715bfd5dad91fe27c3f8deaca41edaf46d7d565f3",
+    "fe8d40ed6457097d3c3bf9d40961466c9f2d0c6b5c8fed71c33042d2c788c60d"
+  ],
+  "protect_from_automatic_isolation": [
+    {
+      "review_id": "6842a4b96e8a6d0e84429f44997bddae2d2e7682452fe059223fcccbe5e34f41",
+      "reason": "IPA vowel symbols are legitimate linguistic notation."
+    },
+    {
+      "review_id": "970166a3b652d3a6604035c8beff49a567b2e4e78ee4aedf07615fa1163bf168",
+      "reason": "Head/head-tube angle terminology requires a domain expert."
+    },
+    {
+      "review_id": "ddc748220c7e31fb817fc134c5b5e9c7bbf58f89df80eb17dc25504d1d58a822",
+      "reason": "A bilingual glossary can legitimately repeat equivalent terms."
+    },
+    {
+      "review_id": "ab955e74bdaa5930654fc8d2b8d8d95cfb8572d7f022c02279895517d92d5949",
+      "reason": "The apparent repetition reflects the source meaning: survival appears in both the will-to-survive phrase and the predicate."
+    },
+    {
+      "review_id": "ac9b739f6d9814fd13835321fb5723a0f0fa5db6ee6253b50c1ede21b3ddf5b0",
+      "reason": "Evidence supports at most awkward fluency; no demonstrated substantive semantic error."
+    }
+  ],
+  "application_policy": "Only isolate_review_ids may be used by a future dry-run. Protected and pending rows must remain unchanged."
+}

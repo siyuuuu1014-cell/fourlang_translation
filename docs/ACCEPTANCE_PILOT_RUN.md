@@ -10,6 +10,7 @@
 cd /root/autodl-tmp/fourlang_translation
 git pull --ff-only origin main
 nohup env PYTHONUNBUFFERED=1 HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
+  FOURLANG_MODEL_ROOT=/root/autodl-tmp/models \
   /root/autodl-tmp/venvs/small100_student/bin/python \
   scripts/pipeline_v3/run_acceptance_pilot.py \
   >> fourlang_acceptance_pilot_v1.log 2>&1 &

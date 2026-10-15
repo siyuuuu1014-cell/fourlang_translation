@@ -1,0 +1,1947 @@
+{
+  "status": "COMPLETE",
+  "review_sha256": "d8ede00738a1bfb9614c3e1ebeeb00b41e7011e099fbc5e6858e86c86cdd96a7",
+  "targets": [
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints",
+      "files": [
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-1423/amp_scaler.pt",
+          "bytes": 1004,
+          "mtime_ns": 1789268370752329402
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-1423/complete.json",
+          "bytes": 571,
+          "mtime_ns": 1789268370756329416
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-1423/config.json",
+          "bytes": 822,
+          "mtime_ns": 1789268364504306911
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-1423/generation_config.json",
+          "bytes": 202,
+          "mtime_ns": 1789268364508306926
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-1423/model.safetensors",
+          "bytes": 1330973768,
+          "mtime_ns": 1789268366312313419
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-1423/optimizer.pt",
+          "bytes": 2662117626,
+          "mtime_ns": 1789268370752329402
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-1423/rng_state.pth",
+          "bytes": 14244,
+          "mtime_ns": 1789268370752329402
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-1423/scaler.pt",
+          "bytes": 988,
+          "mtime_ns": 1789268370752329402
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-1423/scheduler.pt",
+          "bytes": 1064,
+          "mtime_ns": 1789268370752329402
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-1423/sentencepiece.bpe.model",
+          "bytes": 2423393,
+          "mtime_ns": 1789268366840315320
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-1423/special_tokens_map.json",
+          "bytes": 1559,
+          "mtime_ns": 1789268366704314831
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-1423/tokenizer_config.json",
+          "bytes": 19832,
+          "mtime_ns": 1789268366704314831
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-1423/trainer_state.json",
+          "bytes": 2302,
+          "mtime_ns": 1789268370756329416
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-1423/training_args.bin",
+          "bytes": 5816,
+          "mtime_ns": 1789268366844315334
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-1423/vocab.json",
+          "bytes": 3708092,
+          "mtime_ns": 1789268366840315320
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2000/amp_scaler.pt",
+          "bytes": 1004,
+          "mtime_ns": 1789268482908733127
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2000/complete.json",
+          "bytes": 571,
+          "mtime_ns": 1789268482908733127
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2000/config.json",
+          "bytes": 822,
+          "mtime_ns": 1789268476064708490
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2000/generation_config.json",
+          "bytes": 202,
+          "mtime_ns": 1789268476064708490
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2000/model.safetensors",
+          "bytes": 1330973768,
+          "mtime_ns": 1789268477844714898
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2000/optimizer.pt",
+          "bytes": 2662117626,
+          "mtime_ns": 1789268482904733112
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2000/rng_state.pth",
+          "bytes": 14244,
+          "mtime_ns": 1789268482908733127
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2000/scaler.pt",
+          "bytes": 988,
+          "mtime_ns": 1789268482908733127
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2000/scheduler.pt",
+          "bytes": 1064,
+          "mtime_ns": 1789268482904733112
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2000/sentencepiece.bpe.model",
+          "bytes": 2423393,
+          "mtime_ns": 1789268478340716683
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2000/special_tokens_map.json",
+          "bytes": 1559,
+          "mtime_ns": 1789268478188716136
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2000/tokenizer_config.json",
+          "bytes": 19832,
+          "mtime_ns": 1789268478188716136
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2000/trainer_state.json",
+          "bytes": 2666,
+          "mtime_ns": 1789268482908733127
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2000/training_args.bin",
+          "bytes": 5816,
+          "mtime_ns": 1789268478340716683
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2000/vocab.json",
+          "bytes": 3708092,
+          "mtime_ns": 1789268478336716669
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2846/amp_scaler.pt",
+          "bytes": 1004,
+          "mtime_ns": 1789268702449523398
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2846/complete.json",
+          "bytes": 571,
+          "mtime_ns": 1789268702849524838
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2846/config.json",
+          "bytes": 822,
+          "mtime_ns": 1789268694669495393
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2846/generation_config.json",
+          "bytes": 202,
+          "mtime_ns": 1789268694669495393
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2846/model.safetensors",
+          "bytes": 1330973768,
+          "mtime_ns": 1789268696837503197
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2846/optimizer.pt",
+          "bytes": 2662117626,
+          "mtime_ns": 1789268702445523384
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2846/rng_state.pth",
+          "bytes": 14244,
+          "mtime_ns": 1789268702449523398
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2846/scaler.pt",
+          "bytes": 988,
+          "mtime_ns": 1789268702449523398
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2846/scheduler.pt",
+          "bytes": 1064,
+          "mtime_ns": 1789268702445523384
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2846/sentencepiece.bpe.model",
+          "bytes": 2423393,
+          "mtime_ns": 1789268697493505558
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2846/special_tokens_map.json",
+          "bytes": 1559,
+          "mtime_ns": 1789268697353505054
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2846/tokenizer_config.json",
+          "bytes": 19832,
+          "mtime_ns": 1789268697353505054
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2846/trainer_state.json",
+          "bytes": 3644,
+          "mtime_ns": 1789268702449523398
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2846/training_args.bin",
+          "bytes": 5816,
+          "mtime_ns": 1789268697493505558
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2846/vocab.json",
+          "bytes": 3708092,
+          "mtime_ns": 1789268697489505544
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/direction_metrics_step_1423.json",
+          "bytes": 600,
+          "mtime_ns": 1789268364500306897
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/direction_metrics_step_2846.json",
+          "bytes": 603,
+          "mtime_ns": 1789268694665495378
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/finished.json",
+          "bytes": 2536,
+          "mtime_ns": 1789268710109550972
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/initial_validation.json",
+          "bytes": 599,
+          "mtime_ns": 1789268038479133333
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/run_manifest.json",
+          "bytes": 2517,
+          "mtime_ns": 1789267944722795842
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/validation_subset.json",
+          "bytes": 190909,
+          "mtime_ns": 1789267986350945689
+        }
+      ]
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints",
+      "files": [
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-3000/amp_scaler.pt",
+          "bytes": 1004,
+          "mtime_ns": 1789276532488145761
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-3000/complete.json",
+          "bytes": 571,
+          "mtime_ns": 1789276532752146711
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-3000/config.json",
+          "bytes": 822,
+          "mtime_ns": 1789276526300123486
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-3000/generation_config.json",
+          "bytes": 202,
+          "mtime_ns": 1789276526300123486
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-3000/model.safetensors",
+          "bytes": 1330973768,
+          "mtime_ns": 1789276528176130239
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-3000/optimizer.pt",
+          "bytes": 2662117626,
+          "mtime_ns": 1789276532488145761
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-3000/rng_state.pth",
+          "bytes": 14244,
+          "mtime_ns": 1789276532488145761
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-3000/scaler.pt",
+          "bytes": 988,
+          "mtime_ns": 1789276532488145761
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-3000/scheduler.pt",
+          "bytes": 1064,
+          "mtime_ns": 1789276532488145761
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-3000/sentencepiece.bpe.model",
+          "bytes": 2423393,
+          "mtime_ns": 1789276528692132096
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-3000/special_tokens_map.json",
+          "bytes": 1559,
+          "mtime_ns": 1789276528552131593
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-3000/tokenizer_config.json",
+          "bytes": 19832,
+          "mtime_ns": 1789276528552131593
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-3000/trainer_state.json",
+          "bytes": 3827,
+          "mtime_ns": 1789276532492145775
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-3000/training_args.bin",
+          "bytes": 5816,
+          "mtime_ns": 1789276528696132111
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-3000/vocab.json",
+          "bytes": 3708092,
+          "mtime_ns": 1789276528692132096
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4000/amp_scaler.pt",
+          "bytes": 1004,
+          "mtime_ns": 1789276722736830591
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4000/complete.json",
+          "bytes": 571,
+          "mtime_ns": 1789276723128832002
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4000/config.json",
+          "bytes": 822,
+          "mtime_ns": 1789276716456807985
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4000/generation_config.json",
+          "bytes": 202,
+          "mtime_ns": 1789276716456807985
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4000/model.safetensors",
+          "bytes": 1330973768,
+          "mtime_ns": 1789276718128814004
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4000/optimizer.pt",
+          "bytes": 2662117626,
+          "mtime_ns": 1789276722732830576
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4000/rng_state.pth",
+          "bytes": 14244,
+          "mtime_ns": 1789276722736830591
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4000/scaler.pt",
+          "bytes": 988,
+          "mtime_ns": 1789276722736830591
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4000/scheduler.pt",
+          "bytes": 1064,
+          "mtime_ns": 1789276722736830591
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4000/sentencepiece.bpe.model",
+          "bytes": 2423393,
+          "mtime_ns": 1789276718680815991
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4000/special_tokens_map.json",
+          "bytes": 1559,
+          "mtime_ns": 1789276718536815472
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4000/tokenizer_config.json",
+          "bytes": 19832,
+          "mtime_ns": 1789276718536815472
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4000/trainer_state.json",
+          "bytes": 4172,
+          "mtime_ns": 1789276722736830591
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4000/training_args.bin",
+          "bytes": 5816,
+          "mtime_ns": 1789276718680815991
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4000/vocab.json",
+          "bytes": 3708092,
+          "mtime_ns": 1789276718676815976
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4269/amp_scaler.pt",
+          "bytes": 1004,
+          "mtime_ns": 1789276837149242436
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4269/complete.json",
+          "bytes": 571,
+          "mtime_ns": 1789276837505243718
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4269/config.json",
+          "bytes": 822,
+          "mtime_ns": 1789276830897219931
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4269/generation_config.json",
+          "bytes": 202,
+          "mtime_ns": 1789276830897219931
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4269/model.safetensors",
+          "bytes": 1330973768,
+          "mtime_ns": 1789276832821226857
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4269/optimizer.pt",
+          "bytes": 2662117626,
+          "mtime_ns": 1789276837149242436
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4269/rng_state.pth",
+          "bytes": 14244,
+          "mtime_ns": 1789276837149242436
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4269/scaler.pt",
+          "bytes": 988,
+          "mtime_ns": 1789276837149242436
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4269/scheduler.pt",
+          "bytes": 1064,
+          "mtime_ns": 1789276837149242436
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4269/sentencepiece.bpe.model",
+          "bytes": 2423393,
+          "mtime_ns": 1789276833309228614
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4269/special_tokens_map.json",
+          "bytes": 1559,
+          "mtime_ns": 1789276833161228081
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4269/tokenizer_config.json",
+          "bytes": 19832,
+          "mtime_ns": 1789276833161228081
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4269/trainer_state.json",
+          "bytes": 4980,
+          "mtime_ns": 1789276837149242436
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4269/training_args.bin",
+          "bytes": 5816,
+          "mtime_ns": 1789276833313228628
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4269/vocab.json",
+          "bytes": 3708092,
+          "mtime_ns": 1789276833309228614
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/direction_metrics_step_1423.json",
+          "bytes": 601,
+          "mtime_ns": 1789276158358799024
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/direction_metrics_step_2846.json",
+          "bytes": 601,
+          "mtime_ns": 1789276489535991148
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/direction_metrics_step_4269.json",
+          "bytes": 604,
+          "mtime_ns": 1789276830893219917
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/finished.json",
+          "bytes": 2547,
+          "mtime_ns": 1789276844057267303
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/initial_validation.json",
+          "bytes": 599,
+          "mtime_ns": 1789275830557619051
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/run_manifest.json",
+          "bytes": 2517,
+          "mtime_ns": 1789275738645288199
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/validation_subset.json",
+          "bytes": 190909,
+          "mtime_ns": 1789275779349434720
+        }
+      ]
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500",
+      "files": [
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500/amp_scaler.pt",
+          "bytes": 1004,
+          "mtime_ns": 1789270843869231889
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500/complete.json",
+          "bytes": 575,
+          "mtime_ns": 1789270843873231904
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500/config.json",
+          "bytes": 836,
+          "mtime_ns": 1789270831265186519
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500/generation_config.json",
+          "bytes": 184,
+          "mtime_ns": 1789270831265186519
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500/model.safetensors",
+          "bytes": 2460354912,
+          "mtime_ns": 1789270834537198297
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500/optimizer.pt",
+          "bytes": 4921030549,
+          "mtime_ns": 1789270843861231860
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500/rng_state.pth",
+          "bytes": 14244,
+          "mtime_ns": 1789270843869231889
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500/scaler.pt",
+          "bytes": 988,
+          "mtime_ns": 1789270843869231889
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500/scheduler.pt",
+          "bytes": 1064,
+          "mtime_ns": 1789270843861231860
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500/sentencepiece.bpe.model",
+          "bytes": 4852054,
+          "mtime_ns": 1789270835269200932
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500/special_tokens_map.json",
+          "bytes": 4232,
+          "mtime_ns": 1789270835265200918
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500/tokenizer.json",
+          "bytes": 32240389,
+          "mtime_ns": 1789270835757202689
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500/tokenizer_config.json",
+          "bytes": 40088,
+          "mtime_ns": 1789270835261200903
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500/trainer_state.json",
+          "bytes": 1178,
+          "mtime_ns": 1789270843873231904
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500/training_args.bin",
+          "bytes": 5752,
+          "mtime_ns": 1789270835781202775
+        }
+      ]
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000",
+      "files": [
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000/amp_scaler.pt",
+          "bytes": 1004,
+          "mtime_ns": 1789271126662249847
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000/complete.json",
+          "bytes": 576,
+          "mtime_ns": 1789271126666249862
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000/config.json",
+          "bytes": 836,
+          "mtime_ns": 1789271113742203339
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000/generation_config.json",
+          "bytes": 184,
+          "mtime_ns": 1789271113742203339
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000/model.safetensors",
+          "bytes": 2460354912,
+          "mtime_ns": 1789271117038215204
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000/optimizer.pt",
+          "bytes": 4921030549,
+          "mtime_ns": 1789271126662249847
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000/rng_state.pth",
+          "bytes": 14244,
+          "mtime_ns": 1789271126662249847
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000/scaler.pt",
+          "bytes": 988,
+          "mtime_ns": 1789271126662249847
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000/scheduler.pt",
+          "bytes": 1064,
+          "mtime_ns": 1789271126662249847
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000/sentencepiece.bpe.model",
+          "bytes": 4852054,
+          "mtime_ns": 1789271117982218602
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000/special_tokens_map.json",
+          "bytes": 4232,
+          "mtime_ns": 1789271117978218587
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000/tokenizer.json",
+          "bytes": 32240389,
+          "mtime_ns": 1789271118430220214
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000/tokenizer_config.json",
+          "bytes": 40088,
+          "mtime_ns": 1789271117978218587
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000/trainer_state.json",
+          "bytes": 1352,
+          "mtime_ns": 1789271126662249847
+        },
+        {
+          "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000/training_args.bin",
+          "bytes": 5752,
+          "mtime_ns": 1789271118454220301
+        }
+      ]
+    }
+  ],
+  "backups": [
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-1423/amp_scaler.pt",
+      "sha256": "a2113e22ecea9f43fb215659c84f095e1144905467cd571500f5f065e5629b65",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-1423/amp_scaler.pt"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-1423/complete.json",
+      "sha256": "3ce40ddc243c316aa83c1439b6882d36b5a9104ee3cb40554b45457bb02ec039",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-1423/complete.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-1423/config.json",
+      "sha256": "4ba2f8f7c5ec286bdb2088ac3b8d0ca3b8b19eb4f107c7c3a44205ba15873bb2",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-1423/config.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-1423/generation_config.json",
+      "sha256": "c3ce500734da50626346f8b8737bdcbefb8b00eb6cbc69d0973e9b41867c8342",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-1423/generation_config.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-1423/rng_state.pth",
+      "sha256": "91516be55eef51040cde2d753c277176f4ab96a6f048e16bf4b808cc5feca383",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-1423/rng_state.pth"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-1423/scaler.pt",
+      "sha256": "46013ea05292bb5196c4a8bc6924c527f4b8e6e1c106364b5149f56bf5f1a74e",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-1423/scaler.pt"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-1423/scheduler.pt",
+      "sha256": "55ff0196b23d43ab2f169879945def93430572f471bad546be3b325d992697f3",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-1423/scheduler.pt"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-1423/sentencepiece.bpe.model",
+      "sha256": "d8f7c76ed2a5e0822be39f0a4f95a55eb19c78f4593ce609e2edbc2aea4d380a",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-1423/sentencepiece.bpe.model"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-1423/special_tokens_map.json",
+      "sha256": "009ea667e0ca903c10dac22cf7ae3a3a0b173ff33f8c64154fddd8c043805622",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-1423/special_tokens_map.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-1423/tokenizer_config.json",
+      "sha256": "f17fafb8be37acaf2b27b5c1f6b86d2e58b3c8209c01de06a51bbe6694b46ace",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-1423/tokenizer_config.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-1423/trainer_state.json",
+      "sha256": "9dee5d544548609d7ed6ad4defd48b037237e7ba369b5d900d793b1019e5bfc4",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-1423/trainer_state.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-1423/training_args.bin",
+      "sha256": "7e10b5acbc2544a0ba31489c6b61e906adb8997be87462202308dbad830f5d72",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-1423/training_args.bin"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-1423/vocab.json",
+      "sha256": "b6e77e474aeea8f441363aca7614317c06381f3eacfe10fb9856d5081d1074cc",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-1423/vocab.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2000/amp_scaler.pt",
+      "sha256": "5fd1e8580c0af636435873ef355594f0b916ce857eaba304c5f7c84de985e27f",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2000/amp_scaler.pt"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2000/complete.json",
+      "sha256": "aeb5588f23dd8322033ac3ed68565334f0d108dc0fa2d9f178e6c74ad46dc641",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2000/complete.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2000/config.json",
+      "sha256": "4ba2f8f7c5ec286bdb2088ac3b8d0ca3b8b19eb4f107c7c3a44205ba15873bb2",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2000/config.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2000/generation_config.json",
+      "sha256": "c3ce500734da50626346f8b8737bdcbefb8b00eb6cbc69d0973e9b41867c8342",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2000/generation_config.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2000/rng_state.pth",
+      "sha256": "cbe8dd1971e155f3176c73b276366d4a2b44d74108c111d326f02e604b2f671e",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2000/rng_state.pth"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2000/scaler.pt",
+      "sha256": "84218858418839cf65aeeac3afbde84e603e8e5ffa35c4b60dc6b7d915604b22",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2000/scaler.pt"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2000/scheduler.pt",
+      "sha256": "d41f073b541a360b913041d2eb8db5f57b20347e4b7f3301c3f0059ce8495471",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2000/scheduler.pt"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2000/sentencepiece.bpe.model",
+      "sha256": "d8f7c76ed2a5e0822be39f0a4f95a55eb19c78f4593ce609e2edbc2aea4d380a",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2000/sentencepiece.bpe.model"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2000/special_tokens_map.json",
+      "sha256": "009ea667e0ca903c10dac22cf7ae3a3a0b173ff33f8c64154fddd8c043805622",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2000/special_tokens_map.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2000/tokenizer_config.json",
+      "sha256": "f17fafb8be37acaf2b27b5c1f6b86d2e58b3c8209c01de06a51bbe6694b46ace",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2000/tokenizer_config.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2000/trainer_state.json",
+      "sha256": "847fcddb7a33258d99e61a4351e5713bdc11e9e077fac11cd729938ec10e07db",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2000/trainer_state.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2000/training_args.bin",
+      "sha256": "7e10b5acbc2544a0ba31489c6b61e906adb8997be87462202308dbad830f5d72",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2000/training_args.bin"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2000/vocab.json",
+      "sha256": "b6e77e474aeea8f441363aca7614317c06381f3eacfe10fb9856d5081d1074cc",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2000/vocab.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2846/amp_scaler.pt",
+      "sha256": "5137280897e3af6b1131405cae7634c9baf3a9b67332524f953808e39cadae72",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2846/amp_scaler.pt"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2846/complete.json",
+      "sha256": "d7dde6d9ddf6155ba960da48ac3d74d7265c5f73f075dd2f9899f08697b943cd",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2846/complete.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2846/config.json",
+      "sha256": "4ba2f8f7c5ec286bdb2088ac3b8d0ca3b8b19eb4f107c7c3a44205ba15873bb2",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2846/config.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2846/generation_config.json",
+      "sha256": "c3ce500734da50626346f8b8737bdcbefb8b00eb6cbc69d0973e9b41867c8342",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2846/generation_config.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2846/rng_state.pth",
+      "sha256": "8a60ad4e71461a7eb44b9deaddee1d121b06afd4f7772217326fefd17dc02c00",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2846/rng_state.pth"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2846/scaler.pt",
+      "sha256": "5917aa2f3555aa5b4091fab6c40d1d2a8cb91b3d43ae4273eaf800798dcc0afa",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2846/scaler.pt"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2846/scheduler.pt",
+      "sha256": "1c7bbeab4736c9f3b8abb777d4924e0fd50b53754b04e1b81f8e84a648bfd0a3",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2846/scheduler.pt"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2846/sentencepiece.bpe.model",
+      "sha256": "d8f7c76ed2a5e0822be39f0a4f95a55eb19c78f4593ce609e2edbc2aea4d380a",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2846/sentencepiece.bpe.model"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2846/special_tokens_map.json",
+      "sha256": "009ea667e0ca903c10dac22cf7ae3a3a0b173ff33f8c64154fddd8c043805622",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2846/special_tokens_map.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2846/tokenizer_config.json",
+      "sha256": "f17fafb8be37acaf2b27b5c1f6b86d2e58b3c8209c01de06a51bbe6694b46ace",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2846/tokenizer_config.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2846/trainer_state.json",
+      "sha256": "e7b0ebdd0f0304567d35307127607175e2c9c62b501594e1e334fe4b59f62e3c",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2846/trainer_state.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2846/training_args.bin",
+      "sha256": "7e10b5acbc2544a0ba31489c6b61e906adb8997be87462202308dbad830f5d72",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2846/training_args.bin"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2846/vocab.json",
+      "sha256": "b6e77e474aeea8f441363aca7614317c06381f3eacfe10fb9856d5081d1074cc",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/checkpoint-2846/vocab.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/direction_metrics_step_1423.json",
+      "sha256": "0c99c895b6a68b1717f51924268fc02046bb83343a0e2f10c6f15b5c88b8b61c",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/direction_metrics_step_1423.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/direction_metrics_step_2846.json",
+      "sha256": "e2440bd53f9daf8bc17c7f5a782c61b25cd85bd10a63dbddf21fff9bbfb94b7d",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/direction_metrics_step_2846.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/finished.json",
+      "sha256": "2da96e741150d555bef623e23cd9080eabf8ff43df4569f6f3917aaf281d5e9d",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/finished.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/initial_validation.json",
+      "sha256": "a7d074ce553d6e193a633ded1030c40bec48742c3d1710a0e2815d12ff39cd9e",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/initial_validation.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/run_manifest.json",
+      "sha256": "c764072a33ae67fa1ad5351c97442cf71bae266745b4bcfedc34f5df9d891199",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/run_manifest.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/validation_subset.json",
+      "sha256": "66752ff630b26400657a9897f518931daaa2806ef9682ebe1605272276e58be4",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints/shared/validation_subset.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-3000/amp_scaler.pt",
+      "sha256": "edce527821d39d2bafd5cae51f8910a801e623cf7a6696c0f9451bc19cf2c49e",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-3000/amp_scaler.pt"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-3000/complete.json",
+      "sha256": "013fbb80672b965ebf8b1425958c4a72a987ac310c1cac7ceeed4eb30520a4a2",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-3000/complete.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-3000/config.json",
+      "sha256": "4ba2f8f7c5ec286bdb2088ac3b8d0ca3b8b19eb4f107c7c3a44205ba15873bb2",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-3000/config.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-3000/generation_config.json",
+      "sha256": "c3ce500734da50626346f8b8737bdcbefb8b00eb6cbc69d0973e9b41867c8342",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-3000/generation_config.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-3000/rng_state.pth",
+      "sha256": "020c4801b6d48372f36a83b951f8107419ae5f9d4014b2d303ea9f5a6797c542",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-3000/rng_state.pth"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-3000/scaler.pt",
+      "sha256": "938030ef2c60a880619cb6ec2007c1d7391314c8be5fec0e4b7ed667cb1f851b",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-3000/scaler.pt"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-3000/scheduler.pt",
+      "sha256": "524fff73dee8652cb8be99904b3129354bcee71477b7b0dd0a1badfda995b860",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-3000/scheduler.pt"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-3000/sentencepiece.bpe.model",
+      "sha256": "d8f7c76ed2a5e0822be39f0a4f95a55eb19c78f4593ce609e2edbc2aea4d380a",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-3000/sentencepiece.bpe.model"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-3000/special_tokens_map.json",
+      "sha256": "009ea667e0ca903c10dac22cf7ae3a3a0b173ff33f8c64154fddd8c043805622",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-3000/special_tokens_map.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-3000/tokenizer_config.json",
+      "sha256": "f17fafb8be37acaf2b27b5c1f6b86d2e58b3c8209c01de06a51bbe6694b46ace",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-3000/tokenizer_config.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-3000/trainer_state.json",
+      "sha256": "4da5ea31af1c433027265f8c48db010739efb230aa86073f9b31d44d1f986ab4",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-3000/trainer_state.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-3000/training_args.bin",
+      "sha256": "d4074b618c6c5aacab78dd431101cf988435691538df7fab0f592d8316f033c6",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-3000/training_args.bin"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-3000/vocab.json",
+      "sha256": "b6e77e474aeea8f441363aca7614317c06381f3eacfe10fb9856d5081d1074cc",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-3000/vocab.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4000/amp_scaler.pt",
+      "sha256": "e8172e4d7a2b5f88f18eaa25ca3d3bb31c64537ea7e001fa6d29685a213d9c18",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4000/amp_scaler.pt"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4000/complete.json",
+      "sha256": "5ce7502f7fb5b854ac7c66a58d7ad3901edbfe8e9a542b18e8520067d7d014db",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4000/complete.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4000/config.json",
+      "sha256": "4ba2f8f7c5ec286bdb2088ac3b8d0ca3b8b19eb4f107c7c3a44205ba15873bb2",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4000/config.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4000/generation_config.json",
+      "sha256": "c3ce500734da50626346f8b8737bdcbefb8b00eb6cbc69d0973e9b41867c8342",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4000/generation_config.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4000/rng_state.pth",
+      "sha256": "59a54fcd3984d941265eb466f503d080b0cc07cc6cfa7b726f433e576aa33981",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4000/rng_state.pth"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4000/scaler.pt",
+      "sha256": "8f1a27cc2bcd5abc931b837276871e8c887963c4dc70b4c08121b6ef3776ec30",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4000/scaler.pt"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4000/scheduler.pt",
+      "sha256": "367a924afe722852391c83e869b59572f2d0a7570a3e32dba78666984b9b0d65",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4000/scheduler.pt"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4000/sentencepiece.bpe.model",
+      "sha256": "d8f7c76ed2a5e0822be39f0a4f95a55eb19c78f4593ce609e2edbc2aea4d380a",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4000/sentencepiece.bpe.model"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4000/special_tokens_map.json",
+      "sha256": "009ea667e0ca903c10dac22cf7ae3a3a0b173ff33f8c64154fddd8c043805622",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4000/special_tokens_map.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4000/tokenizer_config.json",
+      "sha256": "f17fafb8be37acaf2b27b5c1f6b86d2e58b3c8209c01de06a51bbe6694b46ace",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4000/tokenizer_config.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4000/trainer_state.json",
+      "sha256": "79b716c07844fcd4df622d0ba65a9954c8da704e18462b027ed6ae562439dc89",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4000/trainer_state.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4000/training_args.bin",
+      "sha256": "d4074b618c6c5aacab78dd431101cf988435691538df7fab0f592d8316f033c6",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4000/training_args.bin"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4000/vocab.json",
+      "sha256": "b6e77e474aeea8f441363aca7614317c06381f3eacfe10fb9856d5081d1074cc",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4000/vocab.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4269/amp_scaler.pt",
+      "sha256": "8011e47bef8b1ae285f67a6d1df3efc49dbf1dd6cf96f3d684787fe485366c54",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4269/amp_scaler.pt"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4269/complete.json",
+      "sha256": "aa14209d7a8b718efa8246966a8b047917054666f3bcfd3b5e3ebe513e06fd7f",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4269/complete.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4269/config.json",
+      "sha256": "4ba2f8f7c5ec286bdb2088ac3b8d0ca3b8b19eb4f107c7c3a44205ba15873bb2",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4269/config.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4269/generation_config.json",
+      "sha256": "c3ce500734da50626346f8b8737bdcbefb8b00eb6cbc69d0973e9b41867c8342",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4269/generation_config.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4269/rng_state.pth",
+      "sha256": "b8c5240be13da8a5db83a485b26829f0711e02e97828d1f45a1232fec5b3c6a2",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4269/rng_state.pth"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4269/scaler.pt",
+      "sha256": "b4cc24d6c323d18ee1fb270d879cb7ae42a34cdadfd09d963a3458adff18dd5a",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4269/scaler.pt"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4269/scheduler.pt",
+      "sha256": "3043f06e41e3048edd3d482cf3141ee45bb2a2337340fca9a055dd1e16a8a5b2",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4269/scheduler.pt"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4269/sentencepiece.bpe.model",
+      "sha256": "d8f7c76ed2a5e0822be39f0a4f95a55eb19c78f4593ce609e2edbc2aea4d380a",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4269/sentencepiece.bpe.model"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4269/special_tokens_map.json",
+      "sha256": "009ea667e0ca903c10dac22cf7ae3a3a0b173ff33f8c64154fddd8c043805622",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4269/special_tokens_map.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4269/tokenizer_config.json",
+      "sha256": "f17fafb8be37acaf2b27b5c1f6b86d2e58b3c8209c01de06a51bbe6694b46ace",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4269/tokenizer_config.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4269/trainer_state.json",
+      "sha256": "a1bb18a815facb72bc6adf9b206d4648a37ef50dbee6a5ccb5cf6ff8e00e24c6",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4269/trainer_state.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4269/training_args.bin",
+      "sha256": "d4074b618c6c5aacab78dd431101cf988435691538df7fab0f592d8316f033c6",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4269/training_args.bin"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4269/vocab.json",
+      "sha256": "b6e77e474aeea8f441363aca7614317c06381f3eacfe10fb9856d5081d1074cc",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/checkpoint-4269/vocab.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/direction_metrics_step_1423.json",
+      "sha256": "e4a41ccfdccd50415a99d61065f42074b26672e00ba930010629db37f7672db6",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/direction_metrics_step_1423.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/direction_metrics_step_2846.json",
+      "sha256": "156a9f2e4b85d9399856a523b32284d3930737535ca20eac1f439de2ecdaa0c2",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/direction_metrics_step_2846.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/direction_metrics_step_4269.json",
+      "sha256": "f54a887bbeaf59a0db98259d811aadb15201b6cbbc1bcf9fbdf20057608a1336",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/direction_metrics_step_4269.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/finished.json",
+      "sha256": "4a13450e9ea795bb21e9529484360f0f91983e4567af142b8515ae3b6454ff4c",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/finished.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/initial_validation.json",
+      "sha256": "e327eccdf1c4635aeee56ccb87e413e5f722116121ecfbabd3064e82b90dcfe0",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/initial_validation.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/run_manifest.json",
+      "sha256": "93efcbbc5a645f4bf05e10a89537d842369772cf8f2e80e761bf41ff1b9e1a72",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/run_manifest.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/validation_subset.json",
+      "sha256": "bb763ff5945bb63bea64445f351cae9ad2691074a64a91c0a3f099abda906048",
+      "source": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints/shared/validation_subset.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500/amp_scaler.pt",
+      "sha256": "aaabc002c321330b25d747f933fe9cf06f344f0a35bc050e375c09c385d374f1",
+      "source": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500/amp_scaler.pt"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500/complete.json",
+      "sha256": "9e5f57cc82725849906753ac2ad2cc10b55b3715c9d2a85608de343274e5578f",
+      "source": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500/complete.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500/config.json",
+      "sha256": "fe4a42634b08d96d79f363872049c1f8d201b408a262b22e91ac322246270cb4",
+      "source": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500/config.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500/generation_config.json",
+      "sha256": "e4f07edc03c183a9d5ad87863cee8a4e25b94343bd3c04fef69bc1d3d83a7814",
+      "source": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500/generation_config.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500/rng_state.pth",
+      "sha256": "bbfbc4846d7451141160078367753cef0648cdd8d9f475f4ee7ea71e2de540d3",
+      "source": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500/rng_state.pth"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500/scaler.pt",
+      "sha256": "18b984273ea2d45b7ffb1d047bb359d93111e41fcad70d16a1b453fd38f72636",
+      "source": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500/scaler.pt"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500/scheduler.pt",
+      "sha256": "0db5073a2b44e28cdb56b4f27c4729fd4c5a8c2dcffc483abbdf1c901913862a",
+      "source": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500/scheduler.pt"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500/sentencepiece.bpe.model",
+      "sha256": "14bb8dfb35c0ffdea7bc01e56cea38b9e3d5efcdcb9c251d6b40538e1aab555a",
+      "source": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500/sentencepiece.bpe.model"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500/special_tokens_map.json",
+      "sha256": "bf5b730279971951c64caf9fb09ac88417d06ce49a76907481b18de10a1b0c23",
+      "source": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500/special_tokens_map.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500/tokenizer.json",
+      "sha256": "4cd6a887dce6baba05eee3386dc520e078ee1c332181d5216b67be2f8f269c3a",
+      "source": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500/tokenizer.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500/tokenizer_config.json",
+      "sha256": "9b20535e07c008760059b15d97adc4c2bc8db86afcd83d91471ec9c7062f4b2a",
+      "source": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500/tokenizer_config.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500/trainer_state.json",
+      "sha256": "570fd43a4a6ecceb1a180c8796e21cc401e6496c77cfabf34b182b82efa24f1c",
+      "source": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500/trainer_state.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500/training_args.bin",
+      "sha256": "9d29c844802d161f22eb8ba0c4971a7c55c153a4c8c6ff0d67b9159d22cd18a9",
+      "source": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500/training_args.bin"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000/amp_scaler.pt",
+      "sha256": "8760c9ae574d3bb85ace93496b3dd6e75027f7609538291a3754e2c329a0f1ad",
+      "source": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000/amp_scaler.pt"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000/complete.json",
+      "sha256": "8f28dd80e37f5c6ef6f01f2c23b4b67cfbfd5e310fad634a0e1504aa9295663e",
+      "source": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000/complete.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000/config.json",
+      "sha256": "fe4a42634b08d96d79f363872049c1f8d201b408a262b22e91ac322246270cb4",
+      "source": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000/config.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000/generation_config.json",
+      "sha256": "e4f07edc03c183a9d5ad87863cee8a4e25b94343bd3c04fef69bc1d3d83a7814",
+      "source": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000/generation_config.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000/rng_state.pth",
+      "sha256": "ccaf40e693e7f214ee3b538f4a9c0c35538f98ef3495ff8ab226c46e360c048d",
+      "source": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000/rng_state.pth"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000/scaler.pt",
+      "sha256": "9d8fdcd0311eba9854fff738038ed4c1a269832665b4d88ba4e4e3d02a1a7e0e",
+      "source": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000/scaler.pt"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000/scheduler.pt",
+      "sha256": "39eafa1c7a9eaf4ad691d563271b62d304f2e66df50203fd0014f75914316649",
+      "source": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000/scheduler.pt"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000/sentencepiece.bpe.model",
+      "sha256": "14bb8dfb35c0ffdea7bc01e56cea38b9e3d5efcdcb9c251d6b40538e1aab555a",
+      "source": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000/sentencepiece.bpe.model"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000/special_tokens_map.json",
+      "sha256": "bf5b730279971951c64caf9fb09ac88417d06ce49a76907481b18de10a1b0c23",
+      "source": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000/special_tokens_map.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000/tokenizer.json",
+      "sha256": "4cd6a887dce6baba05eee3386dc520e078ee1c332181d5216b67be2f8f269c3a",
+      "source": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000/tokenizer.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000/tokenizer_config.json",
+      "sha256": "9b20535e07c008760059b15d97adc4c2bc8db86afcd83d91471ec9c7062f4b2a",
+      "source": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000/tokenizer_config.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000/trainer_state.json",
+      "sha256": "356839174a2cc82ac082c7978b0c8a550497cd653f2e505e2ac4e5a2b6cd9057",
+      "source": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000/trainer_state.json"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/checkpoint_metadata/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000/training_args.bin",
+      "sha256": "9d29c844802d161f22eb8ba0c4971a7c55c153a4c8c6ff0d67b9159d22cd18a9",
+      "source": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000/training_args.bin"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/stash_dataset_backup/data/multilingual/fourlang/exp1/train.jsonl",
+      "sha256": "b639a1d00eefeaf218cf299f10e734d78a68220bb60f5c17a5391da686b055cd",
+      "source_blob": "584b5a503c2a5ae450767085f107d2e97fd7e60e"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/stash_dataset_backup/data/multilingual/fourlang/exp1/validation.jsonl",
+      "sha256": "23c2f1d9e89fe37b5962bfed05fdcca30a64ee8a458677e4aa5d0856a8b171cb",
+      "source_blob": "b414d1703fd80a2b2fdacf0ad7b9e91eed0d146f"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/stash_dataset_backup/data/multilingual/fourlang/exp2/train.jsonl",
+      "sha256": "176affa2343581b9d38a9b6e802bedb2ee70bca07e26ffd68335b9fea64d0daf",
+      "source_blob": "078403e9718eccc0d9adb8d70716621063b7e9aa"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/stash_dataset_backup/data/multilingual/fourlang/exp2/validation.jsonl",
+      "sha256": "167c7070190803660cc0aa8abe63c80cdae72178734732c6c7d9da73a4420e91",
+      "source_blob": "abee64ca18e0c4000216a1f2e88a1aea164f6f79"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/stash_dataset_backup/data/multilingual/fourlang/exp3/train.jsonl",
+      "sha256": "2463bf6ce12a41620190527931af2a2ed35896cbaab6a21ec4ad33295e7ce950",
+      "source_blob": "765c752cbae418b989f4489c683522815b996696"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/stash_dataset_backup/data/multilingual/fourlang/exp3/validation.jsonl",
+      "sha256": "23c2f1d9e89fe37b5962bfed05fdcca30a64ee8a458677e4aa5d0856a8b171cb",
+      "source_blob": "b414d1703fd80a2b2fdacf0ad7b9e91eed0d146f"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/stash_dataset_backup/data/multilingual/fourlang/exp3_v2/train.jsonl",
+      "sha256": "88f199b813962dcaff471416a3d25090dd7642b616211d31051d860aaf31b05b",
+      "source_blob": "f2896d3e111a030ae56310eedde7351012fdb783"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_unified_organization/approved_cleanup_20260914T071530Z/stash_dataset_backup/data/multilingual/fourlang/exp3_v2/validation.jsonl",
+      "sha256": "23c2f1d9e89fe37b5962bfed05fdcca30a64ee8a458677e4aa5d0856a8b171cb",
+      "source_blob": "b414d1703fd80a2b2fdacf0ad7b9e91eed0d146f"
+    }
+  ],
+  "preserved": [
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/models/final_pair_specialists/en_ru_v1/__pycache__/tokenization_small100.cpython-312.pyc",
+      "bytes": 19745,
+      "mtime_ns": 1789365027179516908,
+      "sha256": "5d7b9618cfd8c4fbba252d58433c02d4a25d48a5011929394c0f947e5513447a"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/models/final_pair_specialists/en_ru_v1/config.json",
+      "bytes": 822,
+      "mtime_ns": 1788963646247400089,
+      "sha256": "4ba2f8f7c5ec286bdb2088ac3b8d0ca3b8b19eb4f107c7c3a44205ba15873bb2"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/models/final_pair_specialists/en_ru_v1/generation_config.json",
+      "bytes": 202,
+      "mtime_ns": 1788963646247400089,
+      "sha256": "c3ce500734da50626346f8b8737bdcbefb8b00eb6cbc69d0973e9b41867c8342"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/models/final_pair_specialists/en_ru_v1/model.safetensors",
+      "bytes": 1330973768,
+      "mtime_ns": 1788963647623405042,
+      "sha256": "fb2fdc924689e2ef9110209eb9edef9ae3af0fe24a6218c54110571686fc47d5"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/models/final_pair_specialists/en_ru_v1/model_card.json",
+      "bytes": 1055,
+      "mtime_ns": 1788964461242333791,
+      "sha256": "eb10899e135df11e8ba890db97f8e0fe3ed4ebc8849e48498fb2a44c69d718e6"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/models/final_pair_specialists/en_ru_v1/sentencepiece.bpe.model",
+      "bytes": 2423393,
+      "mtime_ns": 1788963648263407346,
+      "sha256": "d8f7c76ed2a5e0822be39f0a4f95a55eb19c78f4593ce609e2edbc2aea4d380a"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/models/final_pair_specialists/en_ru_v1/special_tokens_map.json",
+      "bytes": 1559,
+      "mtime_ns": 1788963648115406813,
+      "sha256": "009ea667e0ca903c10dac22cf7ae3a3a0b173ff33f8c64154fddd8c043805622"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/models/final_pair_specialists/en_ru_v1/tokenization_small100.py",
+      "bytes": 16019,
+      "mtime_ns": 1787657156598157906,
+      "sha256": "73c8d2405e9c588582434c9f91327127faf133b9f915b203ed07ba4cd0ca9c92"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/models/final_pair_specialists/en_ru_v1/tokenizer_config.json",
+      "bytes": 19832,
+      "mtime_ns": 1788963648115406813,
+      "sha256": "02ee697be67559573d1a4d5313a2de0ba9f6af05b11ce8bd4b9fd3259878bbbb"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/models/final_pair_specialists/en_ru_v1/training_args.bin",
+      "bytes": 5752,
+      "mtime_ns": 1788963648111406798,
+      "sha256": "6c96603a15fc1e36adb846ff2fa7645be2abbb9f01fafc0d0cbdf1be1fd8c26b"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/models/final_pair_specialists/en_ru_v1/vocab.json",
+      "bytes": 3708092,
+      "mtime_ns": 1788963648251407302,
+      "sha256": "b6e77e474aeea8f441363aca7614317c06381f3eacfe10fb9856d5081d1074cc"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/models/final_specialists/en_uz_small100_v1/__pycache__/tokenization_small100.cpython-312.pyc",
+      "bytes": 19749,
+      "mtime_ns": 1789352404091344338,
+      "sha256": "4571ce9f8ef9ea561153aa2811452b609c30a4f7119244fbab950ebdf4de9967"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/models/final_specialists/en_uz_small100_v1/best_info.json",
+      "bytes": 96,
+      "mtime_ns": 1787811234223534999,
+      "sha256": "7b6bbbb250715b9df46c71e2a4b3f6e2c94f104b54659ba953be12fcaa848c2b"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/models/final_specialists/en_uz_small100_v1/config.json",
+      "bytes": 823,
+      "mtime_ns": 1787811231783553294,
+      "sha256": "c9e7bd8043bb4ac7a063dd1a5386a089170a28ae08197a8f6aedb2e655eaf690"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/models/final_specialists/en_uz_small100_v1/generation_config.json",
+      "bytes": 202,
+      "mtime_ns": 1787811231787553264,
+      "sha256": "c3ce500734da50626346f8b8737bdcbefb8b00eb6cbc69d0973e9b41867c8342"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/models/final_specialists/en_uz_small100_v1/model.safetensors",
+      "bytes": 1330973768,
+      "mtime_ns": 1787811233619539527,
+      "sha256": "ab2632699357171563e026ef64e7c1711384730c81a66c6eeb274d0fff92e83c"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/models/final_specialists/en_uz_small100_v1/model_card.json",
+      "bytes": 420,
+      "mtime_ns": 1788254088305387668,
+      "sha256": "2fcea557624247fd7acd4e835c9351a224de7f796b2767b35ee72d100ffa1cc3"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/models/final_specialists/en_uz_small100_v1/sentencepiece.bpe.model",
+      "bytes": 2423393,
+      "mtime_ns": 1787657158258163882,
+      "sha256": "d8f7c76ed2a5e0822be39f0a4f95a55eb19c78f4593ce609e2edbc2aea4d380a"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/models/final_specialists/en_uz_small100_v1/special_tokens_map.json",
+      "bytes": 1559,
+      "mtime_ns": 1787657156874158900,
+      "sha256": "009ea667e0ca903c10dac22cf7ae3a3a0b173ff33f8c64154fddd8c043805622"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/models/final_specialists/en_uz_small100_v1/tokenization_small100.py",
+      "bytes": 16019,
+      "mtime_ns": 1787657156598157906,
+      "sha256": "73c8d2405e9c588582434c9f91327127faf133b9f915b203ed07ba4cd0ca9c92"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/models/final_specialists/en_uz_small100_v1/tokenizer_config.json",
+      "bytes": 1867,
+      "mtime_ns": 1787657156914159044,
+      "sha256": "d5a67f279887133e8eb8b9749fd1b6b5831bb1a040fcd6ac820296041f303ba2"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/models/final_specialists/en_uz_small100_v1/vocab.json",
+      "bytes": 3708092,
+      "mtime_ns": 1787657158902166200,
+      "sha256": "b6e77e474aeea8f441363aca7614317c06381f3eacfe10fb9856d5081d1074cc"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/best_model/shared/__pycache__/tokenization_small100.cpython-312.pyc",
+      "bytes": 19791,
+      "mtime_ns": 1789277289010868984,
+      "sha256": "f6a69900dee871844e6c3b8ec5c846526d43cc6620b57fe847d7b5e970a93e99"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/best_model/shared/config.json",
+      "bytes": 822,
+      "mtime_ns": 1789276838009245532,
+      "sha256": "4ba2f8f7c5ec286bdb2088ac3b8d0ca3b8b19eb4f107c7c3a44205ba15873bb2"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/best_model/shared/generation_config.json",
+      "bytes": 202,
+      "mtime_ns": 1789276838009245532,
+      "sha256": "c3ce500734da50626346f8b8737bdcbefb8b00eb6cbc69d0973e9b41867c8342"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/best_model/shared/model.safetensors",
+      "bytes": 1330973768,
+      "mtime_ns": 1789276838877248657,
+      "sha256": "f6c6edbec93b17144cb8a8fc8e612453430c27490e12a0d5bfacbb446ce8263a"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/best_model/shared/sentencepiece.bpe.model",
+      "bytes": 2423393,
+      "mtime_ns": 1789276839489250859,
+      "sha256": "d8f7c76ed2a5e0822be39f0a4f95a55eb19c78f4593ce609e2edbc2aea4d380a"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/best_model/shared/special_tokens_map.json",
+      "bytes": 1559,
+      "mtime_ns": 1789276839341250327,
+      "sha256": "009ea667e0ca903c10dac22cf7ae3a3a0b173ff33f8c64154fddd8c043805622"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/best_model/shared/tokenization_small100.py",
+      "bytes": 16019,
+      "mtime_ns": 1787657156598157906,
+      "sha256": "73c8d2405e9c588582434c9f91327127faf133b9f915b203ed07ba4cd0ca9c92"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/best_model/shared/tokenizer_config.json",
+      "bytes": 19832,
+      "mtime_ns": 1789276839341250327,
+      "sha256": "f17fafb8be37acaf2b27b5c1f6b86d2e58b3c8209c01de06a51bbe6694b46ace"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/best_model/shared/training_args.bin",
+      "bytes": 5816,
+      "mtime_ns": 1789276839341250327,
+      "sha256": "d4074b618c6c5aacab78dd431101cf988435691538df7fab0f592d8316f033c6"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/best_model/shared/vocab.json",
+      "bytes": 3708092,
+      "mtime_ns": 1789276839481250831,
+      "sha256": "b6e77e474aeea8f441363aca7614317c06381f3eacfe10fb9856d5081d1074cc"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp1/best_model/shared/config.json",
+      "bytes": 836,
+      "mtime_ns": 1788777036289481857,
+      "sha256": "fe4a42634b08d96d79f363872049c1f8d201b408a262b22e91ac322246270cb4"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp1/best_model/shared/generation_config.json",
+      "bytes": 184,
+      "mtime_ns": 1788777036289481857,
+      "sha256": "e4f07edc03c183a9d5ad87863cee8a4e25b94343bd3c04fef69bc1d3d83a7814"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp1/best_model/shared/model.safetensors",
+      "bytes": 2460354912,
+      "mtime_ns": 1788777039177492253,
+      "sha256": "8772a16a87ed544bf74fda40d0bdddf905b9698a8b6575a748ad61d2139e2c93"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp1/best_model/shared/sentencepiece.bpe.model",
+      "bytes": 4852054,
+      "mtime_ns": 1788777040597497365,
+      "sha256": "14bb8dfb35c0ffdea7bc01e56cea38b9e3d5efcdcb9c251d6b40538e1aab555a"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp1/best_model/shared/special_tokens_map.json",
+      "bytes": 4232,
+      "mtime_ns": 1788777040557497221,
+      "sha256": "bf5b730279971951c64caf9fb09ac88417d06ce49a76907481b18de10a1b0c23"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp1/best_model/shared/tokenizer.json",
+      "bytes": 32240234,
+      "mtime_ns": 1788777041233499654,
+      "sha256": "c8ab4a2a2fb59f4552308298dae3aa6e4e5ca7c45965ae9e5daa82f59ab651fd"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp1/best_model/shared/tokenizer_config.json",
+      "bytes": 39897,
+      "mtime_ns": 1788777040541497163,
+      "sha256": "4ead90414c4f6fbb1cd3f9e2027a55cd591f1a685cbbdce902e373b391f3bb88"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp1/best_model/shared/training_args.bin",
+      "bytes": 5752,
+      "mtime_ns": 1788777040529497120,
+      "sha256": "bd5649248579a0678894d8b2bc537e30c56b2ccdc90d0c0c1822a28f648d46a9"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp2/best_model/shared/config.json",
+      "bytes": 836,
+      "mtime_ns": 1788798511245857530,
+      "sha256": "fe4a42634b08d96d79f363872049c1f8d201b408a262b22e91ac322246270cb4"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp2/best_model/shared/generation_config.json",
+      "bytes": 184,
+      "mtime_ns": 1788798511245857530,
+      "sha256": "e4f07edc03c183a9d5ad87863cee8a4e25b94343bd3c04fef69bc1d3d83a7814"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp2/best_model/shared/model.safetensors",
+      "bytes": 2460354912,
+      "mtime_ns": 1788798513077864125,
+      "sha256": "e5148be7ff751357aa79da898ab0f82713964000852a18ecd00166677163fe7c"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp2/best_model/shared/sentencepiece.bpe.model",
+      "bytes": 4852054,
+      "mtime_ns": 1788798514541869395,
+      "sha256": "14bb8dfb35c0ffdea7bc01e56cea38b9e3d5efcdcb9c251d6b40538e1aab555a"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp2/best_model/shared/special_tokens_map.json",
+      "bytes": 4232,
+      "mtime_ns": 1788798514501869251,
+      "sha256": "bf5b730279971951c64caf9fb09ac88417d06ce49a76907481b18de10a1b0c23"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp2/best_model/shared/tokenizer.json",
+      "bytes": 32240389,
+      "mtime_ns": 1788798515041871195,
+      "sha256": "4cd6a887dce6baba05eee3386dc520e078ee1c332181d5216b67be2f8f269c3a"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp2/best_model/shared/tokenizer_config.json",
+      "bytes": 40005,
+      "mtime_ns": 1788798514473869150,
+      "sha256": "83a41cd15ada3c6a435794d51394b017208b3e0c237ce5bcc8aeb53723932b38"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp2/best_model/shared/training_args.bin",
+      "bytes": 5752,
+      "mtime_ns": 1788798514457869093,
+      "sha256": "57630e07f86776d6b8ec9b2d0f64ae9edaa9f3c28e61884a794a1d6e9f02870c"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/best_model/shared/config.json",
+      "bytes": 836,
+      "mtime_ns": 1789272081848124982,
+      "sha256": "fe4a42634b08d96d79f363872049c1f8d201b408a262b22e91ac322246270cb4"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/best_model/shared/generation_config.json",
+      "bytes": 184,
+      "mtime_ns": 1789272081848124982,
+      "sha256": "e4f07edc03c183a9d5ad87863cee8a4e25b94343bd3c04fef69bc1d3d83a7814"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/best_model/shared/model.safetensors",
+      "bytes": 2460354912,
+      "mtime_ns": 1789272084748135421,
+      "sha256": "b5b943fbe1dc1dc0883ea655d6bbbb1df0b8550615558801f55e82d4b244af68"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/best_model/shared/sentencepiece.bpe.model",
+      "bytes": 4852054,
+      "mtime_ns": 1789272086420141440,
+      "sha256": "14bb8dfb35c0ffdea7bc01e56cea38b9e3d5efcdcb9c251d6b40538e1aab555a"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/best_model/shared/special_tokens_map.json",
+      "bytes": 4232,
+      "mtime_ns": 1789272086388141324,
+      "sha256": "bf5b730279971951c64caf9fb09ac88417d06ce49a76907481b18de10a1b0c23"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/best_model/shared/tokenizer.json",
+      "bytes": 32240389,
+      "mtime_ns": 1789272086936143297,
+      "sha256": "4cd6a887dce6baba05eee3386dc520e078ee1c332181d5216b67be2f8f269c3a"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/best_model/shared/tokenizer_config.json",
+      "bytes": 40088,
+      "mtime_ns": 1789272086372141267,
+      "sha256": "9b20535e07c008760059b15d97adc4c2bc8db86afcd83d91471ec9c7062f4b2a"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/best_model/shared/training_args.bin",
+      "bytes": 5752,
+      "mtime_ns": 1789272086368141252,
+      "sha256": "9d29c844802d161f22eb8ba0c4971a7c55c153a4c8c6ff0d67b9159d22cd18a9"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1438/amp_scaler.pt",
+      "bytes": 1004,
+      "mtime_ns": 1789272080984121872,
+      "sha256": "b9bef62ba153179eb98bfcca7939a054919ced01a2b813aea1a0077933edb4a1"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1438/complete.json",
+      "bytes": 576,
+      "mtime_ns": 1789272080984121872,
+      "sha256": "0416ec99dc86766315d86619045505268b74977e6595c6c64e679c4064423b23"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1438/config.json",
+      "bytes": 836,
+      "mtime_ns": 1789272067580073622,
+      "sha256": "fe4a42634b08d96d79f363872049c1f8d201b408a262b22e91ac322246270cb4"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1438/generation_config.json",
+      "bytes": 184,
+      "mtime_ns": 1789272067580073622,
+      "sha256": "e4f07edc03c183a9d5ad87863cee8a4e25b94343bd3c04fef69bc1d3d83a7814"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1438/model.safetensors",
+      "bytes": 2460354912,
+      "mtime_ns": 1789272071308087041,
+      "sha256": "b5b943fbe1dc1dc0883ea655d6bbbb1df0b8550615558801f55e82d4b244af68"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1438/optimizer.pt",
+      "bytes": 4921030549,
+      "mtime_ns": 1789272080980121857,
+      "sha256": "11fd6dfe016b32ee724a1956215b63e99e78be2d80dfd785bd1efa084414280c"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1438/rng_state.pth",
+      "bytes": 14244,
+      "mtime_ns": 1789272080984121872,
+      "sha256": "1abc069c1e8ae8f075b69854d1fcdeb29d491a4fceb72ccdbbc35b546f56d88e"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1438/scaler.pt",
+      "bytes": 988,
+      "mtime_ns": 1789272080984121872,
+      "sha256": "a9f1471c689d5ba7e6bdf22b2d5d7bd339b0cd9d1f8da7e5cbe0b4f44b361b4d"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1438/scheduler.pt",
+      "bytes": 1064,
+      "mtime_ns": 1789272080980121857,
+      "sha256": "0f4763f515a6b2cc21c0be712c532c73903c54da15a4ac2f781deb2ca301abec"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1438/sentencepiece.bpe.model",
+      "bytes": 4852054,
+      "mtime_ns": 1789272072236090382,
+      "sha256": "14bb8dfb35c0ffdea7bc01e56cea38b9e3d5efcdcb9c251d6b40538e1aab555a"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1438/special_tokens_map.json",
+      "bytes": 4232,
+      "mtime_ns": 1789272072232090368,
+      "sha256": "bf5b730279971951c64caf9fb09ac88417d06ce49a76907481b18de10a1b0c23"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1438/tokenizer.json",
+      "bytes": 32240389,
+      "mtime_ns": 1789272072700092052,
+      "sha256": "4cd6a887dce6baba05eee3386dc520e078ee1c332181d5216b67be2f8f269c3a"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1438/tokenizer_config.json",
+      "bytes": 40088,
+      "mtime_ns": 1789272072232090368,
+      "sha256": "9b20535e07c008760059b15d97adc4c2bc8db86afcd83d91471ec9c7062f4b2a"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1438/trainer_state.json",
+      "bytes": 4484,
+      "mtime_ns": 1789272080984121872,
+      "sha256": "9d8ed8b36076eccd936831e4536d68e3144d7826a1f7d5b80d258971fba6d854"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1438/training_args.bin",
+      "bytes": 5752,
+      "mtime_ns": 1789272072724092139,
+      "sha256": "9d29c844802d161f22eb8ba0c4971a7c55c153a4c8c6ff0d67b9159d22cd18a9"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/pair_specialists/en_zh/exp2/best_model/shared/__pycache__/tokenization_small100.cpython-312.pyc",
+      "bytes": 19768,
+      "mtime_ns": 1789365017151480810,
+      "sha256": "d064d6f26ed414b58d33ab2bebcfe349563b8cf5098e83a4a63a054b8ea23ebb"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/pair_specialists/en_zh/exp2/best_model/shared/config.json",
+      "bytes": 822,
+      "mtime_ns": 1789017114176924448,
+      "sha256": "4ba2f8f7c5ec286bdb2088ac3b8d0ca3b8b19eb4f107c7c3a44205ba15873bb2"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/pair_specialists/en_zh/exp2/best_model/shared/generation_config.json",
+      "bytes": 202,
+      "mtime_ns": 1789017114176924448,
+      "sha256": "c3ce500734da50626346f8b8737bdcbefb8b00eb6cbc69d0973e9b41867c8342"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/pair_specialists/en_zh/exp2/best_model/shared/model.safetensors",
+      "bytes": 1330973768,
+      "mtime_ns": 1789017115100927774,
+      "sha256": "746850a1b873eb1728b5be22f208dc692e28d6e80014306a655cfbc62e3e18af"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/pair_specialists/en_zh/exp2/best_model/shared/sentencepiece.bpe.model",
+      "bytes": 2423393,
+      "mtime_ns": 1789017115880930581,
+      "sha256": "d8f7c76ed2a5e0822be39f0a4f95a55eb19c78f4593ce609e2edbc2aea4d380a"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/pair_specialists/en_zh/exp2/best_model/shared/special_tokens_map.json",
+      "bytes": 1559,
+      "mtime_ns": 1789017115728930034,
+      "sha256": "009ea667e0ca903c10dac22cf7ae3a3a0b173ff33f8c64154fddd8c043805622"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/pair_specialists/en_zh/exp2/best_model/shared/tokenization_small100.py",
+      "bytes": 16019,
+      "mtime_ns": 1787657156598157906,
+      "sha256": "73c8d2405e9c588582434c9f91327127faf133b9f915b203ed07ba4cd0ca9c92"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/pair_specialists/en_zh/exp2/best_model/shared/tokenizer_config.json",
+      "bytes": 19832,
+      "mtime_ns": 1789017115728930034,
+      "sha256": "02ee697be67559573d1a4d5313a2de0ba9f6af05b11ce8bd4b9fd3259878bbbb"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/pair_specialists/en_zh/exp2/best_model/shared/training_args.bin",
+      "bytes": 5752,
+      "mtime_ns": 1789017115728930034,
+      "sha256": "6e6e22ea094c4e04ae8ef82f98a29f2ed607906fd738314cb6ba6a7b48c46ea2"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/pair_specialists/en_zh/exp2/best_model/shared/vocab.json",
+      "bytes": 3708092,
+      "mtime_ns": 1789017115868930538,
+      "sha256": "b6e77e474aeea8f441363aca7614317c06381f3eacfe10fb9856d5081d1074cc"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/pair_specialists/uz_ru/exp2/best_model/shared/__pycache__/tokenization_small100.cpython-312.pyc",
+      "bytes": 19768,
+      "mtime_ns": 1789361841972051254,
+      "sha256": "d62d9375db7e45899e76a651026faf8b8a076b414ad5b5b35e5bb61bf0739a7c"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/pair_specialists/uz_ru/exp2/best_model/shared/config.json",
+      "bytes": 822,
+      "mtime_ns": 1789019151704258847,
+      "sha256": "4ba2f8f7c5ec286bdb2088ac3b8d0ca3b8b19eb4f107c7c3a44205ba15873bb2"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/pair_specialists/uz_ru/exp2/best_model/shared/generation_config.json",
+      "bytes": 202,
+      "mtime_ns": 1789019151704258847,
+      "sha256": "c3ce500734da50626346f8b8737bdcbefb8b00eb6cbc69d0973e9b41867c8342"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/pair_specialists/uz_ru/exp2/best_model/shared/model.safetensors",
+      "bytes": 1330973768,
+      "mtime_ns": 1789019153632265788,
+      "sha256": "68a2a9193128ab700c5286947d2c60a86907e9e048d221bca4fbb70ca29e5671"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/pair_specialists/uz_ru/exp2/best_model/shared/sentencepiece.bpe.model",
+      "bytes": 2423393,
+      "mtime_ns": 1789019154604269286,
+      "sha256": "d8f7c76ed2a5e0822be39f0a4f95a55eb19c78f4593ce609e2edbc2aea4d380a"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/pair_specialists/uz_ru/exp2/best_model/shared/special_tokens_map.json",
+      "bytes": 1559,
+      "mtime_ns": 1789019154368268437,
+      "sha256": "009ea667e0ca903c10dac22cf7ae3a3a0b173ff33f8c64154fddd8c043805622"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/pair_specialists/uz_ru/exp2/best_model/shared/tokenization_small100.py",
+      "bytes": 16019,
+      "mtime_ns": 1787657156598157906,
+      "sha256": "73c8d2405e9c588582434c9f91327127faf133b9f915b203ed07ba4cd0ca9c92"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/pair_specialists/uz_ru/exp2/best_model/shared/tokenizer_config.json",
+      "bytes": 19832,
+      "mtime_ns": 1789019154344268350,
+      "sha256": "ccba9a41af63c4b8cd925e9061d09ce007cad6975d08cb11b173bffb8fb14f3d"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/pair_specialists/uz_ru/exp2/best_model/shared/training_args.bin",
+      "bytes": 5752,
+      "mtime_ns": 1789019154328268293,
+      "sha256": "0f28e1ddac948b044a20dc27c282c9b68e5e2d1c3e06364b91b762a37988e2a2"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/pair_specialists/uz_ru/exp2/best_model/shared/vocab.json",
+      "bytes": 3708092,
+      "mtime_ns": 1789019154544269070,
+      "sha256": "b6e77e474aeea8f441363aca7614317c06381f3eacfe10fb9856d5081d1074cc"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/pair_specialists/zh_ru/exp2/best_model/shared/__pycache__/tokenization_small100.cpython-312.pyc",
+      "bytes": 19768,
+      "mtime_ns": 1789365030579529147,
+      "sha256": "89afae61e70ceba6b5d009da548892fedd5a78bfd2acb599d245013dc026b92e"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/pair_specialists/zh_ru/exp2/best_model/shared/config.json",
+      "bytes": 822,
+      "mtime_ns": 1788966067632116243,
+      "sha256": "4ba2f8f7c5ec286bdb2088ac3b8d0ca3b8b19eb4f107c7c3a44205ba15873bb2"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/pair_specialists/zh_ru/exp2/best_model/shared/generation_config.json",
+      "bytes": 202,
+      "mtime_ns": 1788966067632116243,
+      "sha256": "c3ce500734da50626346f8b8737bdcbefb8b00eb6cbc69d0973e9b41867c8342"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/pair_specialists/zh_ru/exp2/best_model/shared/model.safetensors",
+      "bytes": 1330973768,
+      "mtime_ns": 1788966070056124969,
+      "sha256": "f7fd0505cfb8ade33638894b0feec942cd0ce21e86f6105455e3fdc5a86e4111"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/pair_specialists/zh_ru/exp2/best_model/shared/sentencepiece.bpe.model",
+      "bytes": 2423393,
+      "mtime_ns": 1788966071160128943,
+      "sha256": "d8f7c76ed2a5e0822be39f0a4f95a55eb19c78f4593ce609e2edbc2aea4d380a"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/pair_specialists/zh_ru/exp2/best_model/shared/special_tokens_map.json",
+      "bytes": 1559,
+      "mtime_ns": 1788966070888127964,
+      "sha256": "009ea667e0ca903c10dac22cf7ae3a3a0b173ff33f8c64154fddd8c043805622"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/pair_specialists/zh_ru/exp2/best_model/shared/tokenization_small100.py",
+      "bytes": 16019,
+      "mtime_ns": 1787657156598157906,
+      "sha256": "73c8d2405e9c588582434c9f91327127faf133b9f915b203ed07ba4cd0ca9c92"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/pair_specialists/zh_ru/exp2/best_model/shared/tokenizer_config.json",
+      "bytes": 19832,
+      "mtime_ns": 1788966070868127892,
+      "sha256": "ccba9a41af63c4b8cd925e9061d09ce007cad6975d08cb11b173bffb8fb14f3d"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/pair_specialists/zh_ru/exp2/best_model/shared/training_args.bin",
+      "bytes": 5752,
+      "mtime_ns": 1788966070848127820,
+      "sha256": "409a931780ade7f56e8c83156a68ec6e3d32a35bac01575ad6dfab7ee4cd2748"
+    },
+    {
+      "path": "/root/autodl-tmp/fourlang_translation/results/student/pair_specialists/zh_ru/exp2/best_model/shared/vocab.json",
+      "bytes": 3708092,
+      "mtime_ns": 1788966071052128554,
+      "sha256": "b6e77e474aeea8f441363aca7614317c06381f3eacfe10fb9856d5081d1074cc"
+    }
+  ],
+  "stash_before": [
+    "6b6fdc53e8c5b2cbe7920bb52779c6e1c971b2c5",
+    "32dc041388f8e7f9a89aaaf6d122212ad7483db0",
+    "46c5308ee774d1dc9dbf1946116feb8207b90536",
+    "4726cecb75f3241dd19e06a6bc0b9748d141c2ef",
+    "87bc9d8e8d181c0e133a6392328a5d54284426b7",
+    "48258d2de17bf64a0862b03abe0f830afa343649"
+  ],
+  "deleted": [
+    "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints",
+    "/root/autodl-tmp/fourlang_translation/results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints",
+    "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-500",
+    "/root/autodl-tmp/fourlang_translation/results/student/fourlang/exp3_v2/checkpoints/shared/checkpoint-1000"
+  ],
+  "authorization": "User explicitly confirmed P1 P2 S1 S2 in current conversation; historical review stays unapproved.",
+  "free_bytes_after_backup": 48507011072,
+  "free_bytes_before_delete": 48506888192,
+  "preserved_hashes_match_after": true,
+  "stash_unchanged": true,
+  "free_bytes_after_delete": 87340400640,
+  "observed_free_increase_bytes": 38833512448
+}

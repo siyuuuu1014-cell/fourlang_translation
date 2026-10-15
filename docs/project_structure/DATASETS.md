@@ -1,0 +1,63 @@
+# 数据文件用途与实测状态
+
+别名≠重命名。行数/列名/哈希只证明当前文件内容，不单独证明它属于某次历史训练。详细字段见catalog.json。
+
+| 所属 | 名称 | 角色 | 状态 | 行数 |
+|---|---|---|---|---|
+| 01_pair_models/en_zh | `03_data/en_zh__human_source.parquet` | 人工源数据池 | PRESENT_FILE | 125984 |
+| 01_pair_models/en_zh | `03_data/en_zh__kd_source.parquet` | 教师/人工混合输入池；不是自动等同实际训练文件 | PRESENT_FILE | 142214 |
+| 01_pair_models/en_zh | `03_data/en_zh__human_validation_source.parquet` | 原始人工验证集 | PRESENT_FILE | 6630 |
+| 01_pair_models/en_zh | `03_data/en_zh__exp1__trainer_input.jsonl` | 训练器当前代码读取路径；与历史该次运行绑定需核对报告/指纹 | PRESENT_FILE | 20000 |
+| 01_pair_models/en_zh | `03_data/en_zh__exp1__trainer_validation.jsonl` | 训练器验证输入；不等同FLORES | PRESENT_FILE | 6630 |
+| 01_pair_models/en_zh | `03_data/en_zh__exp2__trainer_input.jsonl` | 训练器当前代码读取路径；与历史该次运行绑定需核对报告/指纹 | PRESENT_FILE | 20000 |
+| 01_pair_models/en_zh | `03_data/en_zh__exp2__trainer_validation.jsonl` | 训练器验证输入；不等同FLORES | PRESENT_FILE | 6630 |
+| 01_pair_models/en_uz | `03_data/en_uz__human_source.parquet` | 人工源数据池 | PRESENT_FILE | 122432 |
+| 01_pair_models/en_uz | `03_data/en_uz__kd_source.parquet` | 教师/人工混合输入池；不是自动等同实际训练文件 | PRESENT_FILE | 133111 |
+| 01_pair_models/en_uz | `03_data/en_uz__human_validation_source.parquet` | 原始人工验证集 | PRESENT_FILE | 6440 |
+| 01_pair_models/en_uz | `03_data/en_uz__exp2__trainer_input.parquet` | 训练器当前代码读取路径；与历史该次运行绑定需核对报告/指纹 | PRESENT_FILE | 133111 |
+| 01_pair_models/en_uz | `03_data/en_uz__exp2__trainer_validation.parquet` | 训练器验证输入；不等同FLORES | PRESENT_FILE | 6440 |
+| 01_pair_models/en_ru | `03_data/en_ru__human_source.jsonl` | 人工源数据池 | PRESENT_FILE | 122432 |
+| 01_pair_models/en_ru | `03_data/en_ru__kd_source.jsonl` | 教师/人工混合输入池；不是自动等同实际训练文件 | PRESENT_FILE | 137157 |
+| 01_pair_models/en_ru | `03_data/en_ru__human_validation_source.jsonl` | 原始人工验证集 | PRESENT_FILE | 6000 |
+| 01_pair_models/en_ru | `03_data/en_ru__exp1__trainer_input.jsonl` | 训练器当前代码读取路径；与历史该次运行绑定需核对报告/指纹 | MISSING | 未读取/缺失 |
+| 01_pair_models/en_ru | `03_data/en_ru__exp1__trainer_validation.jsonl` | 训练器验证输入；不等同FLORES | MISSING | 未读取/缺失 |
+| 01_pair_models/en_ru | `03_data/en_ru__exp2__trainer_input.jsonl` | 训练器当前代码读取路径；与历史该次运行绑定需核对报告/指纹 | PRESENT_FILE | 20000 |
+| 01_pair_models/en_ru | `03_data/en_ru__exp2__trainer_validation.jsonl` | 训练器验证输入；不等同FLORES | PRESENT_FILE | 6000 |
+| 01_pair_models/zh_uz | `03_data/zh_uz__human_source.jsonl` | 人工源数据池 | PRESENT_FILE | 8554 |
+| 01_pair_models/zh_uz | `03_data/zh_uz__kd_source.jsonl` | 教师/人工混合输入池；不是自动等同实际训练文件 | PRESENT_FILE | 29521 |
+| 01_pair_models/zh_uz | `03_data/zh_uz__human_validation_source.jsonl` | 原始人工验证集 | PRESENT_FILE | 1000 |
+| 01_pair_models/zh_uz | `03_data/zh_uz__relaxed_8k__input_pool.jsonl` | 组装后的输入池，prepare再去重/防泄漏后形成实际训练文件 | PRESENT_FILE | 45521 |
+| 01_pair_models/zh_uz | `03_data/zh_uz__flores_relaxed_8k_ep3__trainer_input.jsonl` | 训练器当前代码读取路径；与历史该次运行绑定需核对报告/指纹 | PRESENT_FILE | 45521 |
+| 01_pair_models/zh_uz | `03_data/zh_uz__flores_relaxed_8k_ep3__trainer_validation.jsonl` | 训练器验证输入；不等同FLORES | PRESENT_FILE | 1000 |
+| 01_pair_models/zh_ru | `03_data/zh_ru__human_source.jsonl` | 人工源数据池 | PRESENT_FILE | 145514 |
+| 01_pair_models/zh_ru | `03_data/zh_ru__kd_source.jsonl` | 教师/人工混合输入池；不是自动等同实际训练文件 | PRESENT_FILE | 152752 |
+| 01_pair_models/zh_ru | `03_data/zh_ru__human_validation_source.jsonl` | 原始人工验证集 | PRESENT_FILE | 4000 |
+| 01_pair_models/zh_ru | `03_data/zh_ru__exp1__trainer_input.jsonl` | 训练器当前代码读取路径；与历史该次运行绑定需核对报告/指纹 | PRESENT_FILE | 20000 |
+| 01_pair_models/zh_ru | `03_data/zh_ru__exp1__trainer_validation.jsonl` | 训练器验证输入；不等同FLORES | PRESENT_FILE | 4000 |
+| 01_pair_models/zh_ru | `03_data/zh_ru__exp2__trainer_input.jsonl` | 训练器当前代码读取路径；与历史该次运行绑定需核对报告/指纹 | PRESENT_FILE | 20000 |
+| 01_pair_models/zh_ru | `03_data/zh_ru__exp2__trainer_validation.jsonl` | 训练器验证输入；不等同FLORES | PRESENT_FILE | 4000 |
+| 01_pair_models/uz_ru | `03_data/uz_ru__human_source.jsonl` | 人工源数据池 | PRESENT_FILE | 34864 |
+| 01_pair_models/uz_ru | `03_data/uz_ru__kd_source.jsonl` | 教师/人工混合输入池；不是自动等同实际训练文件 | PRESENT_FILE | 44754 |
+| 01_pair_models/uz_ru | `03_data/uz_ru__human_validation_source.jsonl` | 原始人工验证集 | PRESENT_FILE | 3000 |
+| 01_pair_models/uz_ru | `03_data/uz_ru__exp1__trainer_input.jsonl` | 训练器当前代码读取路径；与历史该次运行绑定需核对报告/指纹 | PRESENT_FILE | 20000 |
+| 01_pair_models/uz_ru | `03_data/uz_ru__exp1__trainer_validation.jsonl` | 训练器验证输入；不等同FLORES | PRESENT_FILE | 3000 |
+| 01_pair_models/uz_ru | `03_data/uz_ru__exp2__trainer_input.jsonl` | 训练器当前代码读取路径；与历史该次运行绑定需核对报告/指纹 | PRESENT_FILE | 20000 |
+| 01_pair_models/uz_ru | `03_data/uz_ru__exp2__trainer_validation.jsonl` | 训练器验证输入；不等同FLORES | PRESENT_FILE | 3000 |
+| 02_shared_fourlang/exp1 | `03_data/fourlang__exp1__train.jsonl` | 训练器原路径；若缺失，不创建悬空链接或自动恢复 | MISSING | 未读取/缺失 |
+| 02_shared_fourlang/exp1 | `03_data/fourlang__exp1__train__backup_only.jsonl` | 独立备份；不是已恢复原路径；不代表所有历史训练指纹已匹配 | PRESENT_FILE | 120000 |
+| 02_shared_fourlang/exp1 | `03_data/fourlang__exp1__validation.jsonl` | 训练器原路径；若缺失，不创建悬空链接或自动恢复 | MISSING | 未读取/缺失 |
+| 02_shared_fourlang/exp1 | `03_data/fourlang__exp1__validation__backup_only.jsonl` | 独立备份；不是已恢复原路径；不代表所有历史训练指纹已匹配 | PRESENT_FILE | 27070 |
+| 02_shared_fourlang/exp2 | `03_data/fourlang__exp2__train.jsonl` | 训练器原路径；若缺失，不创建悬空链接或自动恢复 | MISSING | 未读取/缺失 |
+| 02_shared_fourlang/exp2 | `03_data/fourlang__exp2__train__backup_only.jsonl` | 独立备份；不是已恢复原路径；不代表所有历史训练指纹已匹配 | PRESENT_FILE | 158000 |
+| 02_shared_fourlang/exp2 | `03_data/fourlang__exp2__validation.jsonl` | 训练器原路径；若缺失，不创建悬空链接或自动恢复 | MISSING | 未读取/缺失 |
+| 02_shared_fourlang/exp2 | `03_data/fourlang__exp2__validation__backup_only.jsonl` | 独立备份；不是已恢复原路径；不代表所有历史训练指纹已匹配 | PRESENT_FILE | 26910 |
+| 02_shared_fourlang/exp3 | `03_data/fourlang__exp3__train.jsonl` | 训练器原路径；若缺失，不创建悬空链接或自动恢复 | MISSING | 未读取/缺失 |
+| 02_shared_fourlang/exp3 | `03_data/fourlang__exp3__train__backup_only.jsonl` | 独立备份；不是已恢复原路径；不代表所有历史训练指纹已匹配 | PRESENT_FILE | 46000 |
+| 02_shared_fourlang/exp3 | `03_data/fourlang__exp3__validation.jsonl` | 训练器原路径；若缺失，不创建悬空链接或自动恢复 | MISSING | 未读取/缺失 |
+| 02_shared_fourlang/exp3 | `03_data/fourlang__exp3__validation__backup_only.jsonl` | 独立备份；不是已恢复原路径；不代表所有历史训练指纹已匹配 | PRESENT_FILE | 27070 |
+| 02_shared_fourlang/exp3_v2 | `03_data/fourlang__exp3_v2__train.jsonl` | 训练器原路径；若缺失，不创建悬空链接或自动恢复 | MISSING | 未读取/缺失 |
+| 02_shared_fourlang/exp3_v2 | `03_data/fourlang__exp3_v2__train__backup_only.jsonl` | 独立备份；不是已恢复原路径；不代表所有历史训练指纹已匹配 | PRESENT_FILE | 46000 |
+| 02_shared_fourlang/exp3_v2 | `03_data/fourlang__exp3_v2__validation.jsonl` | 训练器原路径；若缺失，不创建悬空链接或自动恢复 | MISSING | 未读取/缺失 |
+| 02_shared_fourlang/exp3_v2 | `03_data/fourlang__exp3_v2__validation__backup_only.jsonl` | 独立备份；不是已恢复原路径；不代表所有历史训练指纹已匹配 | PRESENT_FILE | 27070 |
+| 03_common | `flores_dev.parquet` | 保护基准，不可混入训练 | PRESENT_FILE | 997 |
+| 03_common | `flores_devtest.parquet` | 保护基准，不可混入训练 | PRESENT_FILE | 1012 |

@@ -1,0 +1,33 @@
+{
+  "validator_version": "0.5.2",
+  "frozen_parent_validator": "0.5.1",
+  "input": "data\\synthetic\\generated\\v052_overlap_fix_200\\01_compatibility\\compatibility_accepted.jsonl",
+  "total": 200,
+  "frozen_rows": 100,
+  "new_rows": 100,
+  "accepted": 200,
+  "rejected": 0,
+  "accept_rate": 1.0,
+  "new_accepted": 100,
+  "new_rejected": 0,
+  "new_frame_distribution": {
+    "WAIT_PERSON": 33,
+    "WAIT_AT_PLACE": 33,
+    "CALL_PERSON": 34
+  },
+  "reject_reasons": {},
+  "participant_overlap_policy": {
+    "exact_reflexive_allowed": false,
+    "speaker_group_overlap_allowed": false,
+    "blocked_pairs": [
+      [
+        "PERSON_I",
+        "PERSON_WE"
+      ],
+      [
+        "PERSON_WE",
+        "PERSON_I"
+      ]
+    ]
+  }
+}

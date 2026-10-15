@@ -1,0 +1,302 @@
+{
+  "root": "/root/autodl-tmp/fourlang_translation",
+  "mutations_to_project": false,
+  "pairs": [
+    {
+      "id": "en_zh",
+      "references": [
+        {
+          "role": "model_path",
+          "path": "results/student/pair_specialists/en_zh/exp2/best_model/shared",
+          "exists": true
+        },
+        {
+          "role": "training_entrypoint",
+          "path": "scripts/pipeline_v3/pair_specialist_flow.py",
+          "exists": true
+        },
+        {
+          "role": "training_config",
+          "path": "configs/specialists/six_pair.toml",
+          "exists": true
+        },
+        {
+          "role": "training_data",
+          "path": "data/splits/zh_en/v1/train_bidirectional_v1.parquet",
+          "exists": true
+        },
+        {
+          "role": "training_data",
+          "path": "data/distillation/zh_en/v1/18h_exp2_training/exp2_train_combined_v1.parquet",
+          "exists": true
+        },
+        {
+          "role": "validation_data",
+          "path": "data/splits/zh_en/v1/validation_bidirectional_v1.parquet",
+          "exists": true
+        },
+        {
+          "role": "evaluation_evidence",
+          "path": "results/evaluation/pair_specialists/en_zh/exp2.json",
+          "exists": true
+        },
+        {
+          "role": "evaluation_evidence",
+          "path": "results/evaluation/pair_specialists/en_zh/promotion_gate.json",
+          "exists": true
+        }
+      ]
+    },
+    {
+      "id": "en_uz",
+      "references": [
+        {
+          "role": "model_path",
+          "path": "models/final_specialists/en_uz_small100_v1",
+          "exists": true
+        },
+        {
+          "role": "training_entrypoint",
+          "path": "scripts/pipeline/11b_train_student_exp2.py",
+          "exists": true
+        },
+        {
+          "role": "training_config",
+          "path": "configs/specialists/six_pair.toml",
+          "exists": true
+        },
+        {
+          "role": "training_data",
+          "path": "data/splits/en_uz/v1/train_exp1_bidirectional_v1.parquet",
+          "exists": true
+        },
+        {
+          "role": "training_data",
+          "path": "data/distillation/en_uz/v1/11a_exp2_training/exp2_train_combined_v1.parquet",
+          "exists": true
+        },
+        {
+          "role": "validation_data",
+          "path": "data/splits/en_uz/v1/validation_exp1_bidirectional_v1.parquet",
+          "exists": true
+        },
+        {
+          "role": "evaluation_evidence",
+          "path": "results/evaluation/pair_specialists/en_uz/exp2.json",
+          "exists": true
+        },
+        {
+          "role": "evaluation_evidence",
+          "path": "results/evaluation/pair_specialists/en_uz/promotion_gate.json",
+          "exists": true
+        }
+      ]
+    },
+    {
+      "id": "en_ru",
+      "references": [
+        {
+          "role": "model_path",
+          "path": "models/final_pair_specialists/en_ru_v1",
+          "exists": true
+        },
+        {
+          "role": "training_entrypoint",
+          "path": "scripts/pipeline_v3/pair_specialist_flow.py",
+          "exists": true
+        },
+        {
+          "role": "training_config",
+          "path": "configs/specialists/six_pair.toml",
+          "exists": true
+        },
+        {
+          "role": "training_data",
+          "path": "data/splits/en_ru/v1/train.jsonl",
+          "exists": true
+        },
+        {
+          "role": "training_data",
+          "path": "data/distillation/en_ru/v1/train.jsonl",
+          "exists": true
+        },
+        {
+          "role": "validation_data",
+          "path": "data/splits/en_ru/v1/validation.jsonl",
+          "exists": true
+        },
+        {
+          "role": "evaluation_evidence",
+          "path": "results/evaluation/pair_specialists/en_ru/exp2.json",
+          "exists": true
+        },
+        {
+          "role": "evaluation_evidence",
+          "path": "results/evaluation/pair_specialists/en_ru/promotion_gate.json",
+          "exists": true
+        }
+      ]
+    },
+    {
+      "id": "zh_uz",
+      "references": [
+        {
+          "role": "model_path",
+          "path": "results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/best_model/shared",
+          "exists": true
+        },
+        {
+          "role": "training_entrypoint",
+          "path": "scripts/pipeline_v3/weak_pair_ablation.py",
+          "exists": true
+        },
+        {
+          "role": "training_config",
+          "path": "configs/specialists/weak_pair_ablation.toml",
+          "exists": true
+        },
+        {
+          "role": "training_data",
+          "path": "data/distillation/zh_uz/flores_relaxed_8k/train.jsonl",
+          "exists": true
+        },
+        {
+          "role": "validation_data",
+          "path": "data/distillation/zh_uz/flores_relaxed_8k/validation.jsonl",
+          "exists": true
+        },
+        {
+          "role": "evaluation_evidence",
+          "path": "results/evaluation/weak_pair_ablation/zh_uz/comparison.json",
+          "exists": true
+        },
+        {
+          "role": "evaluation_evidence",
+          "path": "results/evaluation/weak_pair_ablation/zh_uz/final_devtest.json",
+          "exists": true
+        },
+        {
+          "role": "evaluation_evidence",
+          "path": "results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/train_report.json",
+          "exists": true
+        },
+        {
+          "role": "source_data_to_preserve",
+          "path": "data/splits/zh_uz/v2/train.jsonl",
+          "exists": true
+        },
+        {
+          "role": "source_data_to_preserve",
+          "path": "data/distillation/zh_uz/v4/train.jsonl",
+          "exists": true
+        }
+      ]
+    },
+    {
+      "id": "zh_ru",
+      "references": [
+        {
+          "role": "model_path",
+          "path": "results/student/pair_specialists/zh_ru/exp2/best_model/shared",
+          "exists": true
+        },
+        {
+          "role": "training_entrypoint",
+          "path": "scripts/pipeline_v3/pair_specialist_flow.py",
+          "exists": true
+        },
+        {
+          "role": "training_config",
+          "path": "configs/specialists/six_pair.toml",
+          "exists": true
+        },
+        {
+          "role": "training_data",
+          "path": "data/splits/zh_ru/v1/train.jsonl",
+          "exists": true
+        },
+        {
+          "role": "training_data",
+          "path": "data/distillation/zh_ru/v1/train.jsonl",
+          "exists": true
+        },
+        {
+          "role": "validation_data",
+          "path": "data/splits/zh_ru/v1/validation.jsonl",
+          "exists": true
+        },
+        {
+          "role": "evaluation_evidence",
+          "path": "results/evaluation/pair_specialists/zh_ru/exp2.json",
+          "exists": true
+        },
+        {
+          "role": "evaluation_evidence",
+          "path": "results/evaluation/pair_specialists/zh_ru/promotion_gate.json",
+          "exists": true
+        }
+      ]
+    },
+    {
+      "id": "uz_ru",
+      "references": [
+        {
+          "role": "model_path",
+          "path": "results/student/pair_specialists/uz_ru/exp2/best_model/shared",
+          "exists": true
+        },
+        {
+          "role": "training_entrypoint",
+          "path": "scripts/pipeline_v3/pair_specialist_flow.py",
+          "exists": true
+        },
+        {
+          "role": "training_config",
+          "path": "configs/specialists/six_pair.toml",
+          "exists": true
+        },
+        {
+          "role": "training_data",
+          "path": "data/splits/uz_ru/v1/train.jsonl",
+          "exists": true
+        },
+        {
+          "role": "training_data",
+          "path": "data/distillation/uz_ru/v1/train.jsonl",
+          "exists": true
+        },
+        {
+          "role": "validation_data",
+          "path": "data/splits/uz_ru/v1/validation.jsonl",
+          "exists": true
+        },
+        {
+          "role": "evaluation_evidence",
+          "path": "results/evaluation/pair_specialists/uz_ru/exp2.json",
+          "exists": true
+        },
+        {
+          "role": "evaluation_evidence",
+          "path": "results/evaluation/pair_specialists/uz_ru/promotion_gate.json",
+          "exists": true
+        }
+      ]
+    }
+  ],
+  "historical_inventory_available": false,
+  "missing_since_snapshot": [],
+  "snapshot_files": 0,
+  "checkpoint_candidates": [
+    {
+      "path": "results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k/checkpoints",
+      "exists": true,
+      "logical_bytes": 11998013319
+    },
+    {
+      "path": "results/experiments/weak_pair_ablation/zh_uz/flores_relaxed_8k_ep3/checkpoints",
+      "exists": true,
+      "logical_bytes": 11998018300
+    }
+  ],
+  "caveat": "Missing means absent at original path; may have been moved elsewhere. Evidence-copy presence is not a fresh checksum verification."
+}

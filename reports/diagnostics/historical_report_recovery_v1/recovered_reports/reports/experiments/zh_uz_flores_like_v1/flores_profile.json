@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "source": "/root/autodl-tmp/fourlang_translation/data/benchmark/fourlang/flores_dev.parquet",
+  "rows": 997,
+  "languages": {
+    "zh": {
+      "length_boundaries_characters": {
+        "short_max": 33,
+        "medium_max": 46
+      },
+      "feature_distribution": {
+        "long|question|no_digit|multi": 1,
+        "long|statement|digit|multi": 82,
+        "long|statement|digit|simple": 41,
+        "long|statement|no_digit|multi": 137,
+        "long|statement|no_digit|simple": 68,
+        "medium|question|no_digit|simple": 2,
+        "medium|statement|digit|multi": 24,
+        "medium|statement|digit|simple": 39,
+        "medium|statement|no_digit|multi": 120,
+        "medium|statement|no_digit|simple": 140,
+        "short|statement|digit|multi": 3,
+        "short|statement|digit|simple": 36,
+        "short|statement|no_digit|multi": 36,
+        "short|statement|no_digit|simple": 268
+      }
+    },
+    "uz": {
+      "length_boundaries_characters": {
+        "short_max": 117,
+        "medium_max": 157
+      },
+      "feature_distribution": {
+        "long|question|no_digit|simple": 1,
+        "long|statement|digit|multi": 25,
+        "long|statement|digit|simple": 53,
+        "long|statement|no_digit|multi": 94,
+        "long|statement|no_digit|simple": 150,
+        "medium|question|no_digit|simple": 2,
+        "medium|statement|digit|multi": 10,
+        "medium|statement|digit|simple": 66,
+        "medium|statement|no_digit|multi": 52,
+        "medium|statement|no_digit|simple": 209,
+        "short|question|no_digit|simple": 1,
+        "short|statement|digit|multi": 4,
+        "short|statement|digit|simple": 62,
+        "short|statement|no_digit|multi": 25,
+        "short|statement|no_digit|simple": 243
+      }
+    }
+  },
+  "flores_used_as_training_data": false,
+  "sha256": "e5d9565440682c8ad1fab045df0fd7f752fc8912642bf834ddfadad39cf937a4"
+}
